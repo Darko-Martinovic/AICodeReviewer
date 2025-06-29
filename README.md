@@ -32,9 +32,16 @@ AICodeReviewer/
 
 ### 🔒 **Environment Variables Setup**
 
-This application requires several environment variables to function properly. **NEVER commit real API keys to version control.**
+This application requires several environment variables to function properly. The security model works as follows:
+
+1. **For Development**: Keep your real API keys in `.env` (protected by `.gitignore`)
+2. **For New Contributors**: Copy `.env.example` to `.env` and add their own keys
+3. **For Public Repository**: Only `.env.example` is committed (contains safe template values)
+
+#### Setup Steps:
 
 1. **Copy the template file:**
+
    ```bash
    cp .env.example .env
    ```
@@ -43,19 +50,18 @@ This application requires several environment variables to function properly. **
    - Replace all placeholder values with your real API keys and configuration
    - The `.env` file is already included in `.gitignore` to prevent accidental commits
 
-### 🛡️ **Security Best Practices**
+### 🛡️ **Security Model**
 
-- ✅ **Environment Variables**: All sensitive data is accessed via environment variables
-- ✅ **Git Protection**: `.env` file is excluded from version control
-- ✅ **No Hardcoded Secrets**: Source code contains no embedded API keys
-- ✅ **Graceful Degradation**: Application works with missing optional credentials
+- ✅ **Your `.env`**: Contains real keys, protected by `.gitignore`, never committed
+- ✅ **`.env.example`**: Contains templates, safe to commit, helps new contributors
+- ✅ **Source Code**: No hardcoded secrets, only environment variable references
+- ✅ **Git Protection**: `.env` excluded from version control since project inception
 
-### ⚠️ **Before Contributing**
+### 📋 **Key Points**
 
-- Never commit real API keys or personal information
-- Use the `.env.example` template for documentation
-- Test with placeholder values when possible
-- Review commits for sensitive data before pushing
+- **Keep working**: Your `.env` with real keys stays local and functional
+- **Stay secure**: `.gitignore` prevents any accidental commits of sensitive data
+- **Help others**: `.env.example` provides a clear template for new contributors
 
 ## Features
 
@@ -71,13 +77,14 @@ This application requires several environment variables to function properly. **
 ## Setup
 
 1. **Environment Variables**
-   
-   **First, copy the example template:**
+
+   **For new contributors, copy the example template:**
+
    ```bash
    cp .env.example .env
    ```
-   
-   **Then edit `.env` with your actual values:**
+
+   **Then edit `.env` with your actual values. Example structure:**
 
    ```env
    # Required
