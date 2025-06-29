@@ -119,5 +119,22 @@ namespace AICodeReviewer.Services
                 return "";
             }
         }
+
+        /// <summary>
+        /// Posts a comment to a pull request
+        /// </summary>
+        public async Task<bool> PostPullRequestCommentAsync(int prNumber, string comment)
+        {
+            try
+            {
+                await _gitHubClient.Issue.Comment.Create(_repoOwner, _repoName, prNumber, comment);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   ❌ Failed to post PR comment: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

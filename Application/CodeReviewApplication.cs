@@ -94,29 +94,48 @@ namespace AICodeReviewer.Application
                     return;
                 }
 
-                Console.WriteLine("\nOpen Pull Requests:");
+                // Auto-select if only one PR
+                if (pullRequests.Count == 1)
+                {
+                    var singlePr = pullRequests[0];
+                    Console.WriteLine($"\n✅ Found 1 Pull Request:");
+                    Console.WriteLine($"   PR #{singlePr.Number}: {singlePr.Title}");
+                    Console.WriteLine("   Auto-selecting for review...\n");
+                    await ReviewSpecificPullRequestAsync(singlePr);
+                    return;
+                }
+
+                // Show menu for multiple PRs
+                Console.WriteLine($"\nOpen Pull Requests ({pullRequests.Count} found):");
                 for (int i = 0; i < pullRequests.Count; i++)
                 {
                     var pr = pullRequests[i];
                     Console.WriteLine($"{i + 1}. PR #{pr.Number}: {pr.Title}");
+                    Console.WriteLine($"   👤 {pr.User.Login} | 🌿 {pr.Head.Ref} → {pr.Base.Ref}");
                 }
 
-                Console.Write("\nEnter PR number to review (or 0 to cancel): ");
-                if (int.TryParse(Console.ReadLine(), out int prNumber) && prNumber > 0)
+                Console.Write($"\nEnter selection (1-{pullRequests.Count}) or 0 to cancel: ");
+                if (int.TryParse(Console.ReadLine(), out int selection))
                 {
-                    var selectedPr = pullRequests.FirstOrDefault(pr => pr.Number == prNumber);
-                    if (selectedPr != null)
+                    if (selection == 0)
                     {
+                        Console.WriteLine("Cancelled.\n");
+                        return;
+                    }
+
+                    if (selection >= 1 && selection <= pullRequests.Count)
+                    {
+                        var selectedPr = pullRequests[selection - 1]; // Convert to 0-based index
                         await ReviewSpecificPullRequestAsync(selectedPr);
                     }
                     else
                     {
-                        Console.WriteLine("❌ PR not found.\n");
+                        Console.WriteLine($"❌ Invalid selection. Please enter a number between 1 and {pullRequests.Count}.\n");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Cancelled.\n");
+                    Console.WriteLine("❌ Invalid input. Please enter a number.\n");
                 }
             }
             catch (Exception ex)
@@ -139,6 +158,10 @@ namespace AICodeReviewer.Application
             if (jiraTickets.Any())
             {
                 Console.WriteLine($"🎫 Detected Jira tickets: {string.Join(", ", jiraTickets)}");
+            }
+            else
+            {
+                Console.WriteLine($"🎫 No Jira tickets detected in PR title: \"{pr.Title}\"");
             }
 
             // Get PR files
@@ -164,6 +187,7 @@ namespace AICodeReviewer.Application
             );
 
             // Update Jira tickets with review results
+            Console.WriteLine("\n" + new string('=', 70));
             await _jiraService.UpdateTicketsWithReviewResultsAsync(
                 jiraTickets,
                 pr.Number.ToString(),
@@ -173,8 +197,117 @@ namespace AICodeReviewer.Application
                 reviewResult.AllIssues.Take(5).ToList()
             );
 
-            Console.WriteLine("💬 PR comment: [Not implemented yet]");
+            // Add PR comment simulation
+            Console.WriteLine("\n" + new string('=', 70));
+            await SimulatePRCommentAsync(pr.Number, reviewResult);
+
             Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Simulates posting a PR comment with review results
+        /// </summary>
+        private async Task SimulatePRCommentAsync(int prNumber, Models.CodeReviewResult reviewResult)
+        {
+            Console.WriteLine("\n💬 GitHub PR Comment:");
+            Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+            // Create the comment content
+            var comment = CreatePRComment(reviewResult);
+            
+            // Try to post real comment first
+            var success = await _gitHubService.PostPullRequestCommentAsync(prNumber, comment);
+            
+            if (success)
+            {
+                Console.WriteLine("   ✅ Successfully posted comment to GitHub PR");
+            }
+            else
+            {
+                Console.WriteLine("   ⚠️  Failed to post to GitHub - showing simulated comment:");
+            }
+
+            // Always show the comment content for visibility
+            Console.WriteLine("📝 Comment Content:");
+            Console.WriteLine(comment);
+            Console.WriteLine("──────────────────────────────────────────────────────────────");
+        }
+
+        /// <summary>
+        /// Creates a formatted PR comment
+        /// </summary>
+        private string CreatePRComment(Models.CodeReviewResult reviewResult)
+        {
+            var comment = "## 🤖 AI Code Review Summary\n\n";
+            
+            // Review summary
+            comment += $"📊 **Files Reviewed:** {reviewResult.ReviewedFiles.Count}\n";
+            comment += $"🔍 **Issues Found:** {reviewResult.IssueCount}\n";
+            
+            string severity = reviewResult.IssueCount switch
+            {
+                0 => "✅ Clean",
+                <= 2 => "⚠️ Low",
+                <= 5 => "🔶 Medium",
+                _ => "🚨 High"
+            };
+            comment += $"📈 **Severity:** {severity}\n\n";
+
+            // List files reviewed
+            if (reviewResult.ReviewedFiles.Any())
+            {
+                comment += "📁 **Files Analyzed:**\n";
+                foreach (var file in reviewResult.ReviewedFiles.Take(10)) // Limit to first 10 files
+                {
+                    comment += $"• `{file}`\n";
+                }
+                if (reviewResult.ReviewedFiles.Count > 10)
+                {
+                    comment += $"• *...and {reviewResult.ReviewedFiles.Count - 10} more files*\n";
+                }
+                comment += "\n";
+            }
+
+            // Show top issues
+            if (reviewResult.AllIssues.Any())
+            {
+                comment += "🔍 **Key Issues Identified:**\n";
+                var topIssues = reviewResult.AllIssues.Take(5);
+                int issueNumber = 1;
+                foreach (var issue in topIssues)
+                {
+                    comment += $"{issueNumber}. {issue}\n";
+                    issueNumber++;
+                }
+                
+                if (reviewResult.AllIssues.Count > 5)
+                {
+                    comment += $"*...and {reviewResult.AllIssues.Count - 5} more issues*\n";
+                }
+                comment += "\n";
+            }
+
+            // Recommendations
+            comment += "🎯 **Recommendations:**\n";
+            if (reviewResult.IssueCount == 0)
+            {
+                comment += "✅ Code looks good! Ready to merge.\n";
+            }
+            else if (reviewResult.IssueCount <= 2)
+            {
+                comment += "⚠️ Minor issues found. Consider reviewing before merge.\n";
+            }
+            else if (reviewResult.IssueCount <= 5)
+            {
+                comment += "🔶 Several issues identified. Please review and address.\n";
+            }
+            else
+            {
+                comment += "🚨 Multiple issues found. Recommend fixes before merge.\n";
+            }
+
+            comment += "\n---\n*Generated by AI Code Reviewer* 🤖";
+            return comment;
         }
 
         /// <summary>

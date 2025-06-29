@@ -1,22 +1,35 @@
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Text.Json;
 
 namespace AICodeReviewer.Services
 {
     /// <summary>
     /// Service for handling Jira integration and ticket operations
     /// </summary>
-    public class JiraService
+    public class JiraService : IDisposable
     {
         private readonly string? _jiraBaseUrl;
         private readonly string? _jiraApiToken;
         private readonly string? _jiraUserEmail;
+        private readonly HttpClient _httpClient;
 
         public JiraService()
         {
-            // Load Jira configuration from environment variables (optional)
-            _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_BASE_URL");
+            // Load Jira configuration from environment variables
+            _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_URL");
             _jiraApiToken = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
-            _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_USER_EMAIL");
+            _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_EMAIL");
+            
+            _httpClient = new HttpClient();
+            
+            // Configure HttpClient for Jira API if credentials are available
+            if (IsJiraConfigured())
+            {
+                var authString = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_jiraUserEmail}:{_jiraApiToken}"));
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
+                _httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            }
         }
 
         /// <summary>
@@ -29,11 +42,12 @@ namespace AICodeReviewer.Services
                 return new List<string>();
 
             // Pattern to match Jira ticket keys (e.g., OPS-123, PROJ-456)
-            var pattern = @"\b([A-Z]{2,10}-\d+)\b";
+            // Updated to handle cases like "#OPS-8" or "OPS-8" 
+            var pattern = @"(?:^|[^A-Z])([A-Z]{2,10}-\d+)(?=[^A-Z0-9]|$)";
             var matches = Regex.Matches(prTitle, pattern, RegexOptions.IgnoreCase);
 
             return matches.Cast<Match>()
-                         .Select(m => m.Value.ToUpper())
+                         .Select(m => m.Groups[1].Value.ToUpper()) // Use Groups[1] to get the captured group
                          .Distinct()
                          .ToList();
         }
@@ -102,25 +116,62 @@ namespace AICodeReviewer.Services
         {
             try
             {
-                // This would contain the actual Jira API implementation
-                // For now, we'll simulate it
-                await Task.Delay(200);
-
                 string severity = GetIssueSeverity(issueCount);
-
-                Console.WriteLine($"   📝 Added comment to {ticketKey}");
-                Console.WriteLine($"   🔗 Linked PR #{prNumber}");
-                Console.WriteLine($"   📊 Review status: {issueCount} issues ({severity})");
-
-                // If there are critical issues, we might want to update the ticket status
-                if (issueCount > 5)
+                
+                // Create comment content
+                var comment = CreateJiraComment(prNumber, author, issueCount, reviewedFiles, topIssues);
+                
+                // Create comment payload for Jira API
+                var commentPayload = new
                 {
-                    Console.WriteLine($"   ⚠️  High issue count - consider blocking merge");
+                    body = new
+                    {
+                        type = "doc",
+                        version = 1,
+                        content = new[]
+                        {
+                            new
+                            {
+                                type = "paragraph",
+                                content = new[]
+                                {
+                                    new
+                                    {
+                                        type = "text",
+                                        text = comment
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(commentPayload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // Make API call to add comment
+                var url = $"{_jiraBaseUrl}/rest/api/3/issue/{ticketKey}/comment";
+                var response = await _httpClient.PostAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"   ✅ Successfully added comment to {ticketKey}");
+                    Console.WriteLine($"   🔗 Linked PR #{prNumber}");
+                    Console.WriteLine($"   📊 Review status: {issueCount} issues ({severity})");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"   ❌ Failed to update {ticketKey}: {response.StatusCode}");
+                    Console.WriteLine($"   📝 Falling back to simulated update");
+                    await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"   ❌ Failed to update {ticketKey}: {ex.Message}");
+                Console.WriteLine($"   ❌ Error updating {ticketKey}: {ex.Message}");
+                Console.WriteLine($"   📝 Falling back to simulated update");
+                await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
             }
         }
 
@@ -215,6 +266,14 @@ namespace AICodeReviewer.Services
             }
 
             return comment;
+        }
+
+        /// <summary>
+        /// Disposes of the HttpClient resources
+        /// </summary>
+        public void Dispose()
+        {
+            _httpClient?.Dispose();
         }
     }
 }
