@@ -28,6 +28,35 @@ AICodeReviewer/
 └── Program.cs          # Entry point and dependency injection
 ```
 
+## Security and Configuration
+
+### 🔒 **Environment Variables Setup**
+
+This application requires several environment variables to function properly. **NEVER commit real API keys to version control.**
+
+1. **Copy the template file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env` with your actual values:**
+   - Replace all placeholder values with your real API keys and configuration
+   - The `.env` file is already included in `.gitignore` to prevent accidental commits
+
+### 🛡️ **Security Best Practices**
+
+- ✅ **Environment Variables**: All sensitive data is accessed via environment variables
+- ✅ **Git Protection**: `.env` file is excluded from version control
+- ✅ **No Hardcoded Secrets**: Source code contains no embedded API keys
+- ✅ **Graceful Degradation**: Application works with missing optional credentials
+
+### ⚠️ **Before Contributing**
+
+- Never commit real API keys or personal information
+- Use the `.env.example` template for documentation
+- Test with placeholder values when possible
+- Review commits for sensitive data before pushing
+
 ## Features
 
 - ✅ **GitHub Integration**: Connect to GitHub repositories and analyze commits/PRs
@@ -42,7 +71,13 @@ AICodeReviewer/
 ## Setup
 
 1. **Environment Variables**
-   Create a `.env` file in the project root:
+   
+   **First, copy the example template:**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   **Then edit `.env` with your actual values:**
 
    ```env
    # Required
