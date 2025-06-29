@@ -1,65 +1,85 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using DotNetEnv;
-using Octokit;
+using AICodeReviewer.Services;
+using AICodeReviewer.Application;
 
 namespace AICodeReviewer
 {
+    /// <summary>
+    /// Main entry point for the AI Code Reviewer application
+    /// </summary>
     class Program
     {
-        private static GitHubClient gitHubClient;
-        private static string repoOwner;
-        private static string repoName;
+        private static CodeReviewApplication _application = null!;
 
         static async Task Main(string[] args)
         {
-            // Load environment variables
-            Env.Load();
-
-            Console.WriteLine("=== AI Code Reviewer ===\n");
-
-            // Initialize GitHub client
-            await InitializeGitHubClient();
-
-            // Show menu
-            await ShowMainMenu();
-        }
-
-        static async Task InitializeGitHubClient()
-        {
-            string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
-                ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
-
-            repoOwner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
-                ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
-
-            repoName = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
-                ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
-
-            // Initialize GitHub client
-            gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
-            gitHubClient.Credentials = new Credentials(githubToken);
-
-            // Test connection
             try
             {
-                var user = await gitHubClient.User.Current();
-                Console.WriteLine($"✅ Connected to GitHub as: {user.Login}");
+                // Load environment variables
+                Env.Load();
 
-                var repo = await gitHubClient.Repository.Get(repoOwner, repoName);
-                Console.WriteLine($"✅ Repository access: {repo.FullName}");
-                Console.WriteLine();
+                Console.WriteLine("=== AI Code Reviewer ===\n");
+
+                // Initialize services
+                await InitializeServicesAsync();
+
+                // Show menu
+                await ShowMainMenuAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ GitHub connection failed: {ex.Message}");
+                Console.WriteLine($"❌ Application startup failed: {ex.Message}");
                 Environment.Exit(1);
             }
         }
 
-        static async Task ShowMainMenu()
+        /// <summary>
+        /// Initializes all required services and dependencies
+        /// </summary>
+        static async Task InitializeServicesAsync()
+        {
+            // Get configuration from environment variables
+            string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+                ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
+
+            string repoOwner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
+                ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
+
+            string repoName = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
+                ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
+
+            string aoaiEndpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
+                ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
+
+            string aoaiApiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
+                ?? throw new InvalidOperationException("AOAI_APIKEY not set");
+
+            string chatDeployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
+                ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
+
+            // Initialize services
+            var httpClient = new System.Net.Http.HttpClient();
+            var azureOpenAIService = new AzureOpenAIService(httpClient, aoaiEndpoint, aoaiApiKey, chatDeployment);
+            var gitHubService = new GitHubService(githubToken, repoOwner, repoName);
+            var codeReviewService = new CodeReviewService(azureOpenAIService, gitHubService);
+            var notificationService = new NotificationService();
+
+            // Initialize GitHub connection
+            await gitHubService.InitializeAsync();
+
+            // Initialize application
+            _application = new CodeReviewApplication(gitHubService, codeReviewService, notificationService);
+
+            Console.WriteLine("✅ Azure OpenAI configured");
+            Console.WriteLine("✅ All services initialized successfully\n");
+        }
+
+        /// <summary>
+        /// Shows the main application menu and handles user interaction
+        /// </summary>
+        static async Task ShowMainMenuAsync()
         {
             while (true)
             {
@@ -71,22 +91,22 @@ namespace AICodeReviewer
                 Console.WriteLine("5. Exit");
                 Console.Write("\nEnter your choice (1-5): ");
 
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
                 Console.WriteLine();
 
                 switch (choice)
                 {
                     case "1":
-                        await ReviewLatestCommit();
+                        await _application.ReviewLatestCommitAsync();
                         break;
                     case "2":
-                        await ReviewPullRequest();
+                        await _application.ReviewPullRequestAsync();
                         break;
                     case "3":
-                        await ListRecentCommits();
+                        await _application.ListRecentCommitsAsync();
                         break;
                     case "4":
-                        await ListOpenPullRequests();
+                        await _application.ListOpenPullRequestsAsync();
                         break;
                     case "5":
                         Console.WriteLine("Goodbye!");
@@ -95,170 +115,6 @@ namespace AICodeReviewer
                         Console.WriteLine("Invalid choice. Please try again.\n");
                         break;
                 }
-            }
-        }
-
-        static async Task ReviewLatestCommit()
-        {
-            try
-            {
-                Console.WriteLine("🔍 Fetching latest commit...");
-
-                // Get latest commit from main branch
-                var commits = await gitHubClient.Repository.Commit.GetAll(repoOwner, repoName, new CommitRequest
-                {
-                    Sha = "main"
-                });
-
-                if (!commits.Any())
-                {
-                    Console.WriteLine("No commits found.\n");
-                    return;
-                }
-
-                var latestCommit = commits.First();
-                Console.WriteLine($"📝 Latest commit: {latestCommit.Sha[..8]} - {latestCommit.Commit.Message}");
-                Console.WriteLine($"👤 Author: {latestCommit.Commit.Author.Name}");
-                Console.WriteLine($"📅 Date: {latestCommit.Commit.Author.Date:yyyy-MM-dd HH:mm}");
-
-                // Get commit details with file changes
-                var commitDetail = await gitHubClient.Repository.Commit.Get(repoOwner, repoName, latestCommit.Sha);
-
-                Console.WriteLine($"\n📁 Files changed: {commitDetail.Files.Count}");
-                foreach (var file in commitDetail.Files)
-                {
-                    Console.WriteLine($"  - {file.Status}: {file.Filename} (+{file.Additions}/-{file.Deletions})");
-                }
-
-                // TODO: Send to AI for review
-                Console.WriteLine("\n🤖 AI Code Review: [Not implemented yet]");
-                Console.WriteLine("📤 Teams notification: [Not implemented yet]");
-                Console.WriteLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error reviewing commit: {ex.Message}\n");
-            }
-        }
-
-        static async Task ReviewPullRequest()
-        {
-            try
-            {
-                Console.WriteLine("🔍 Fetching open Pull Requests...");
-
-                var pullRequests = await gitHubClient.PullRequest.GetAllForRepository(repoOwner, repoName,
-                    new PullRequestRequest { State = ItemStateFilter.Open });
-
-                if (!pullRequests.Any())
-                {
-                    Console.WriteLine("No open Pull Requests found.\n");
-                    return;
-                }
-
-                Console.WriteLine("\nOpen Pull Requests:");
-                for (int i = 0; i < pullRequests.Count; i++)
-                {
-                    var pr = pullRequests[i];
-                    Console.WriteLine($"{i + 1}. PR #{pr.Number}: {pr.Title}");
-                }
-
-                Console.Write("\nEnter PR number to review (or 0 to cancel): ");
-                if (int.TryParse(Console.ReadLine(), out int prNumber) && prNumber > 0)
-                {
-                    var selectedPr = pullRequests.FirstOrDefault(pr => pr.Number == prNumber);
-                    if (selectedPr != null)
-                    {
-                        await ReviewSpecificPullRequest(selectedPr);
-                    }
-                    else
-                    {
-                        Console.WriteLine("❌ PR not found.\n");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Cancelled.\n");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error reviewing PR: {ex.Message}\n");
-            }
-        }
-
-        static async Task ReviewSpecificPullRequest(PullRequest pr)
-        {
-            Console.WriteLine($"\n📋 Reviewing PR #{pr.Number}: {pr.Title}");
-            Console.WriteLine($"👤 Author: {pr.User.Login}");
-            Console.WriteLine($"🌿 Branch: {pr.Head.Ref} → {pr.Base.Ref}");
-
-            // Get PR files
-            var prFiles = await gitHubClient.PullRequest.Files(repoOwner, repoName, pr.Number);
-
-            Console.WriteLine($"\n📁 Files changed: {prFiles.Count}");
-            foreach (var file in prFiles)
-            {
-                Console.WriteLine($"  - {file.Status}: {file.Filename} (+{file.Additions}/-{file.Deletions})");
-            }
-
-            // TODO: Send to AI for review
-            Console.WriteLine("\n🤖 AI Code Review: [Not implemented yet]");
-            Console.WriteLine("🎫 Jira update: [Not implemented yet]");
-            Console.WriteLine("💬 PR comment: [Not implemented yet]");
-            Console.WriteLine();
-        }
-
-        static async Task ListRecentCommits()
-        {
-            try
-            {
-                Console.WriteLine("📝 Recent commits:");
-
-                var commits = await gitHubClient.Repository.Commit.GetAll(repoOwner, repoName, new CommitRequest
-                {
-                    Sha = "main"
-                });
-
-                var recentCommits = commits.Take(5);
-
-                foreach (var commit in recentCommits)
-                {
-                    Console.WriteLine($"  {commit.Sha[..8]} - {commit.Commit.Message} ({commit.Commit.Author.Name})");
-                }
-                Console.WriteLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error fetching commits: {ex.Message}\n");
-            }
-        }
-
-        static async Task ListOpenPullRequests()
-        {
-            try
-            {
-                Console.WriteLine("🔀 Open Pull Requests:");
-
-                var pullRequests = await gitHubClient.PullRequest.GetAllForRepository(repoOwner, repoName,
-                    new PullRequestRequest { State = ItemStateFilter.Open });
-
-                if (pullRequests.Any())
-                {
-                    foreach (var pr in pullRequests)
-                    {
-                        Console.WriteLine($"  PR #{pr.Number}: {pr.Title} ({pr.User.Login})");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("  No open Pull Requests");
-                }
-                Console.WriteLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error fetching PRs: {ex.Message}\n");
             }
         }
     }
