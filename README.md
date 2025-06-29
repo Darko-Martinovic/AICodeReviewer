@@ -19,7 +19,8 @@ AICodeReviewer/
 │   ├── AzureOpenAIService.cs    # Azure OpenAI API interactions
 │   ├── GitHubService.cs         # GitHub API interactions
 │   ├── CodeReviewService.cs     # Core code review logic
-│   └── NotificationService.cs   # Teams notification logic
+│   ├── NotificationService.cs   # Teams notification logic
+│   └── JiraService.cs          # Jira integration for ticket updates
 ├── Application/         # Application orchestration layer
 │   └── CodeReviewApplication.cs # Main application workflows
 ├── Utils/              # Utility classes and helpers
@@ -31,6 +32,7 @@ AICodeReviewer/
 
 - ✅ **GitHub Integration**: Connect to GitHub repositories and analyze commits/PRs
 - ✅ **AI Code Review**: Leverage Azure OpenAI for intelligent code analysis
+- ✅ **Jira Integration**: Auto-detect and update Jira tickets based on PR titles
 - ✅ **Visual Progress**: Real-time progress indicators during review process
 - ✅ **Teams Notifications**: Formatted notification output (simulated)
 - ✅ **Multiple File Support**: Analyze multiple code files in a single review
@@ -40,16 +42,24 @@ AICodeReviewer/
 
 1. **Environment Variables**
    Create a `.env` file in the project root:
+
    ```env
+   # Required
    GITHUB_TOKEN=your_github_personal_access_token
    GITHUB_REPO_OWNER=repository_owner
    GITHUB_REPO_NAME=repository_name
    AOAI_ENDPOINT=https://your-azure-openai-endpoint.openai.azure.com
    AOAI_APIKEY=your_azure_openai_api_key
    CHATCOMPLETION_DEPLOYMENTNAME=your_chat_completion_deployment_name
+
+   # Optional - Jira Integration
+   JIRA_BASE_URL=https://your-company.atlassian.net
+   JIRA_USER_EMAIL=your.email@company.com
+   JIRA_API_TOKEN=your_jira_api_token
    ```
 
 2. **Dependencies**
+
    ```bash
    dotnet add package Octokit
    dotnet add package DotNetEnv
@@ -70,25 +80,64 @@ The application provides an interactive menu with the following options:
 3. **List recent commits** - Shows the 5 most recent commits
 4. **List open Pull Requests** - Shows all open pull requests
 
+## Jira Integration
+
+The application can automatically detect and update Jira tickets mentioned in pull request titles.
+
+### Features
+
+- **Auto-detection**: Extracts Jira ticket keys (e.g., `OPS-123`, `PROJ-456`) from PR titles
+- **Review Summary**: Updates tickets with code review results and issue counts
+- **Severity Assessment**: Categorizes issues as Clean, Low, Medium, or High severity
+- **Configurable**: Works with or without Jira API credentials
+
+### Supported Patterns
+
+The following ticket patterns are automatically detected in PR titles:
+
+- `OPS-123` - Standard project keys (2-10 letters, dash, numbers)
+- `PROJECT-456` - Longer project names
+- `BUG-789` - Any valid Jira ticket format
+
+### Example Output
+
+```
+🎫 Detected Jira tickets: OPS-123, PROJ-456
+🎫 Jira Ticket Update:
+──────────────────────────────────────────────────────────────
+📋 Updating ticket: OPS-123
+   ⚠️  Jira not configured - showing simulated update:
+   📝 Comment added to OPS-123:
+      "AI Code Review completed for PR #42"
+      "Author: john.doe"
+      "Files reviewed: 3"
+      "Issues found: 2 (Low)"
+   ⚠️  Status: Review recommended
+```
+
 ## Architecture Benefits
 
 ### 🎯 **Separation of Concerns**
+
 - **Models**: Pure data structures with no business logic
 - **Services**: Focused on specific external integrations or business operations
 - **Application**: Orchestrates workflows using services
 - **Utils**: Shared utility functions
 
 ### 🔧 **Maintainability**
+
 - **Single Responsibility**: Each class has one clear purpose
 - **Dependency Injection**: Services are injected, making testing easier
 - **Modular Design**: Easy to modify or extend individual components
 
 ### 🧪 **Testability**
+
 - **Service Isolation**: Each service can be unit tested independently
 - **Interface-ready**: Easy to add interfaces for mocking
 - **Clear Dependencies**: Dependencies are explicit and injected
 
 ### 📈 **Scalability**
+
 - **Layer Separation**: Easy to add new features without affecting existing code
 - **Service Abstraction**: Can easily swap implementations (e.g., different AI providers)
 - **Configuration Management**: Centralized configuration through environment variables
@@ -96,16 +145,19 @@ The application provides an interactive menu with the following options:
 ## Code Quality Features
 
 ### 🛡️ **Error Handling**
+
 - Comprehensive try-catch blocks with meaningful error messages
 - Graceful degradation when services are unavailable
 - User-friendly error reporting
 
 ### 📊 **Progress Tracking**
+
 - Real-time progress indicators during file analysis
 - Timing information for AI analysis operations
 - Visual separators and status indicators
 
 ### 🎨 **User Experience**
+
 - Intuitive menu system
 - Rich console output with emojis and formatting
 - Clear feedback on all operations
@@ -128,7 +180,7 @@ The application provides an interactive menu with the following options:
 ## Future Enhancements
 
 - [ ] Add actual Teams webhook integration
-- [ ] Implement Jira ticket creation
+- [ ] Implement real Jira API calls (currently simulated)
 - [ ] Add PR comment posting
 - [ ] Support for more file types
 - [ ] Configuration file support

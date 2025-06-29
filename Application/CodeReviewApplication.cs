@@ -10,15 +10,18 @@ namespace AICodeReviewer.Application
         private readonly GitHubService _gitHubService;
         private readonly CodeReviewService _codeReviewService;
         private readonly NotificationService _notificationService;
+        private readonly JiraService _jiraService;
 
         public CodeReviewApplication(
             GitHubService gitHubService,
             CodeReviewService codeReviewService,
-            NotificationService notificationService)
+            NotificationService notificationService,
+            JiraService jiraService)
         {
             _gitHubService = gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
             _codeReviewService = codeReviewService ?? throw new ArgumentNullException(nameof(codeReviewService));
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _jiraService = jiraService ?? throw new ArgumentNullException(nameof(jiraService));
         }
 
         /// <summary>
@@ -131,6 +134,13 @@ namespace AICodeReviewer.Application
             Console.WriteLine($"👤 Author: {pr.User.Login}");
             Console.WriteLine($"🌿 Branch: {pr.Head.Ref} → {pr.Base.Ref}");
 
+            // Extract Jira ticket keys from PR title
+            var jiraTickets = _jiraService.ExtractTicketKeysFromTitle(pr.Title);
+            if (jiraTickets.Any())
+            {
+                Console.WriteLine($"🎫 Detected Jira tickets: {string.Join(", ", jiraTickets)}");
+            }
+
             // Get PR files
             var prFiles = await _gitHubService.GetPullRequestFilesAsync(pr.Number);
 
@@ -153,7 +163,16 @@ namespace AICodeReviewer.Application
                 reviewResult.AllIssues
             );
 
-            Console.WriteLine("🎫 Jira update: [Not implemented yet]");
+            // Update Jira tickets with review results
+            await _jiraService.UpdateTicketsWithReviewResultsAsync(
+                jiraTickets,
+                pr.Number.ToString(),
+                pr.User.Login,
+                reviewResult.IssueCount,
+                reviewResult.ReviewedFiles,
+                reviewResult.AllIssues.Take(5).ToList()
+            );
+
             Console.WriteLine("💬 PR comment: [Not implemented yet]");
             Console.WriteLine();
         }

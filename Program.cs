@@ -65,12 +65,13 @@ namespace AICodeReviewer
             var gitHubService = new GitHubService(githubToken, repoOwner, repoName);
             var codeReviewService = new CodeReviewService(azureOpenAIService, gitHubService);
             var notificationService = new NotificationService();
+            var jiraService = new JiraService();
 
             // Initialize GitHub connection
             await gitHubService.InitializeAsync();
 
             // Initialize application
-            _application = new CodeReviewApplication(gitHubService, codeReviewService, notificationService);
+            _application = new CodeReviewApplication(gitHubService, codeReviewService, notificationService, jiraService);
 
             Console.WriteLine("✅ Azure OpenAI configured");
             Console.WriteLine("✅ All services initialized successfully\n");
