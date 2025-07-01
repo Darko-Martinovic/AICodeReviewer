@@ -235,6 +235,21 @@ namespace AICodeReviewer.Services
                     Console.WriteLine($"   🔗 Linked PR #{prNumber}");
                     Console.WriteLine($"   📊 Review status: {issueCount} issues ({severity})");
                     Console.WriteLine($"   🎯 Recommendation: {GetRecommendation(issueCount)}");
+                    
+                    // Add labels based on review results
+                    var labels = new List<string> { "ai-code-review", $"pr-{prNumber}" };
+                    labels.Add($"severity-{severity.ToLower()}");
+                    
+                    if (issueCount == 0)
+                        labels.Add("ready-for-merge");
+                    else if (issueCount <= 2)
+                        labels.Add("minor-issues");
+                    else if (issueCount <= 5)
+                        labels.Add("review-required");
+                    else
+                        labels.Add("critical-issues");
+                    
+                    await AddLabelsToTicketAsync(ticketKey, labels);
                 }
                 else
                 {
@@ -330,7 +345,49 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Creates a formatted comment for Jira tickets using Atlassian Document Format (ADF)
+        /// Gets the status color for Jira panels based on issue count
+        /// </summary>
+        private static string GetStatusColor(int issueCount)
+        {
+            return issueCount switch
+            {
+                0 => "success",
+                <= 2 => "note",
+                <= 5 => "warning",
+                _ => "error"
+            };
+        }
+
+        /// <summary>
+        /// Gets the status text based on issue count
+        /// </summary>
+        private static string GetStatusText(int issueCount)
+        {
+            return issueCount switch
+            {
+                0 => "✅ Ready for Merge",
+                <= 2 => "⚠️ Minor Issues Found",
+                <= 5 => "🔶 Review Required",
+                _ => "🚨 Critical Issues"
+            };
+        }
+
+        /// <summary>
+        /// Gets the severity color for text formatting
+        /// </summary>
+        private static string GetSeverityColor(int issueCount)
+        {
+            return issueCount switch
+            {
+                0 => "#006644",       // Green for clean
+                <= 2 => "#FFA500",    // Orange for low
+                <= 5 => "#FF4500",    // Red-orange for medium
+                _ => "#DC143C"        // Dark red for high
+            };
+        }
+
+        /// <summary>
+        /// Creates a beautifully formatted comment for Jira tickets using Atlassian Document Format (ADF)
         /// </summary>
         public object CreateJiraCommentAdf(
             string prNumber,
@@ -341,110 +398,188 @@ namespace AICodeReviewer.Services
         {
             var severity = GetIssueSeverity(issueCount);
             var recommendation = GetRecommendation(issueCount);
+            var statusColor = GetStatusColor(issueCount);
+            var statusText = GetStatusText(issueCount);
 
             // Create ADF document structure
             var content = new List<object>();
 
-            // Header with emoji and title
+            // Header with status panel
             content.Add(new
             {
-                type = "paragraph",
+                type = "panel",
+                attrs = new { panelType = "info" },
                 content = new object[]
                 {
-                    new { type = "emoji", attrs = new { shortName = "robot", id = "1f916", text = "🤖" } },
-                    new { type = "text", text = " ", marks = new object[] { } },
-                    new { type = "text", text = "AI Code Review Completed", marks = new object[] { new { type = "strong" } } }
+                    new
+                    {
+                        type = "paragraph",
+                        content = new object[]
+                        {
+                            new { type = "emoji", attrs = new { shortName = "robot", id = "1f916", text = "🤖" } },
+                            new { type = "text", text = " ", marks = new object[] { } },
+                            new { type = "text", text = "AI Code Review Report", marks = new object[] { new { type = "strong" } } }
+                        }
+                    }
                 }
             });
 
-            // Summary table
+            // Status panel with color coding
+            content.Add(new
+            {
+                type = "panel",
+                attrs = new { panelType = statusColor },
+                content = new object[]
+                {
+                    new
+                    {
+                        type = "paragraph",
+                        content = new object[]
+                        {
+                            new { type = "text", text = $"Status: {statusText}", marks = new object[] { new { type = "strong" } } },
+                            new { type = "text", text = $" • {issueCount} issues found ({severity} severity)", marks = new object[] { } }
+                        }
+                    }
+                }
+            });
+
+            // Enhanced summary table with better styling
             content.Add(new
             {
                 type = "table",
                 attrs = new { isNumberColumnEnabled = false, layout = "default" },
-                content = new[]
+                content = new object[]
                 {
                     new
                     {
                         type = "tableRow",
-                        content = new[]
+                        content = new object[]
                         {
-                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Pull Request", marks = new object[] { new { type = "strong" } } } } } } },
-                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Author", marks = new object[] { new { type = "strong" } } } } } } },
-                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Files Reviewed", marks = new object[] { new { type = "strong" } } } } } } },
-                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Issues Found", marks = new object[] { new { type = "strong" } } } } } } }
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = "📝 Pull Request", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = "👤 Author", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = "📁 Files", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = "🔍 Issues", marks = new object[] { new { type = "strong" } } } } } } }
                         }
                     },
                     new
                     {
                         type = "tableRow",
-                        content = new[]
+                        content = new object[]
                         {
-                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = $"#{prNumber}", marks = new object[] { new { type = "code" } } } } } } },
-                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = author } } } } },
-                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = reviewedFiles.Count.ToString() } } } } },
-                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = $"{issueCount} ({severity})", marks = new object[] { new { type = "strong" } } } } } } }
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = $"#{prNumber}", marks = new object[] { new { type = "code" } } } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = author, marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = reviewedFiles.Count.ToString() } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = $"{issueCount} ({severity})", marks = new object[] { new { type = "strong" }, new { type = "textColor", attrs = new { color = GetSeverityColor(issueCount) } } } } } } } }
                         }
                     }
                 }
             });
 
-            // Recommendation section
+            // Recommendation with enhanced styling
             content.Add(new
             {
-                type = "paragraph",
+                type = "panel",
+                attrs = new { panelType = "note" },
                 content = new object[]
                 {
-                    new { type = "text", text = "🎯 ", marks = new object[] { } },
-                    new { type = "text", text = "Recommendation: ", marks = new object[] { new { type = "strong" } } },
-                    new { type = "text", text = recommendation, marks = new object[] { } }
+                    new
+                    {
+                        type = "paragraph",
+                        content = new object[]
+                        {
+                            new { type = "emoji", attrs = new { shortName = "dart", id = "1f3af", text = "🎯" } },
+                            new { type = "text", text = " ", marks = new object[] { } },
+                            new { type = "text", text = "Recommendation: ", marks = new object[] { new { type = "strong" } } },
+                            new { type = "text", text = recommendation, marks = new object[] { new { type = "em" } } }
+                        }
+                    }
                 }
             });
 
-            // Top issues section
+            // Enhanced Top issues section with better formatting
             if (topIssues.Any())
             {
                 content.Add(new
                 {
-                    type = "paragraph",
+                    type = "panel",
+                    attrs = new { panelType = "warning" },
                     content = new object[]
                     {
-                        new { type = "text", text = "🔍 ", marks = new object[] { } },
-                        new { type = "text", text = "Top Issues:", marks = new object[] { new { type = "strong" } } }
+                        new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "emoji", attrs = new { shortName = "mag", id = "1f50d", text = "🔍" } },
+                                new { type = "text", text = " ", marks = new object[] { } },
+                                new { type = "text", text = "Key Issues Found:", marks = new object[] { new { type = "strong" } } }
+                            }
+                        }
                     }
                 });
 
+                // Create a numbered list for issues
+                var issueList = new List<object>();
+                var issueNumber = 1;
+                
                 foreach (var issue in topIssues.Take(3))
                 {
-                    content.Add(new
+                    issueList.Add(new
                     {
-                        type = "bulletList",
-                        content = new[]
+                        type = "listItem",
+                        content = new object[]
                         {
                             new
                             {
-                                type = "listItem",
-                                content = new[]
+                                type = "paragraph",
+                                content = new object[]
                                 {
-                                    new { type = "paragraph", content = new[] { new { type = "text", text = issue } } }
+                                    new { type = "text", text = $"{issueNumber}. ", marks = new object[] { new { type = "strong" } } },
+                                    new { type = "text", text = issue, marks = new object[] { } }
                                 }
                             }
                         }
                     });
+                    issueNumber++;
                 }
+
+                content.Add(new
+                {
+                    type = "orderedList",
+                    content = issueList.ToArray()
+                });
 
                 if (topIssues.Count > 3)
                 {
                     content.Add(new
                     {
                         type = "paragraph",
-                        content = new[]
+                        content = new object[]
                         {
-                            new { type = "text", text = $"... and {topIssues.Count - 3} more issue(s)", marks = new object[] { new { type = "em" } } }
+                            new { type = "text", text = $"... and {topIssues.Count - 3} more issue(s)", marks = new object[] { new { type = "em" }, new { type = "textColor", attrs = new { color = "#6B7280" } } } }
                         }
                     });
                 }
             }
+
+            // Add timestamp and footer
+            content.Add(new
+            {
+                type = "rule"
+            });
+
+            content.Add(new
+            {
+                type = "paragraph",
+                content = new object[]
+                {
+                    new { type = "emoji", attrs = new { shortName = "clock", id = "1f551", text = "🕑" } },
+                    new { type = "text", text = " ", marks = new object[] { } },
+                    new { type = "text", text = "Generated on: ", marks = new object[] { new { type = "em" } } },
+                    new { type = "text", text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss UTC"), marks = new object[] { new { type = "code" } } },
+                    new { type = "text", text = " by AI Code Reviewer", marks = new object[] { new { type = "em" } } }
+                }
+            });
 
             return new
             {
