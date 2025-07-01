@@ -17,9 +17,14 @@ namespace AICodeReviewer.Services
         public JiraService()
         {
             // Load Jira configuration from environment variables
-            _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_URL");
+            _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_BASE_URL");
             _jiraApiToken = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
-            _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_EMAIL");
+            _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_USER_EMAIL");
+
+            // Debug: Check what environment variables are loaded
+            Console.WriteLine($"🔍 Debug: JIRA_BASE_URL = {(_jiraBaseUrl != null ? "SET" : "NOT SET")}");
+            Console.WriteLine($"🔍 Debug: JIRA_API_TOKEN = {(_jiraApiToken != null ? "SET" : "NOT SET")}");
+            Console.WriteLine($"🔍 Debug: JIRA_USER_EMAIL = {(_jiraUserEmail != null ? "SET" : "NOT SET")}");
 
             _httpClient = new HttpClient();
 
@@ -29,6 +34,11 @@ namespace AICodeReviewer.Services
                 var authString = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_jiraUserEmail}:{_jiraApiToken}"));
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
                 _httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                Console.WriteLine($"🔍 Debug: JIRA API configured successfully");
+            }
+            else
+            {
+                Console.WriteLine($"🔍 Debug: JIRA API not configured - missing environment variables");
             }
         }
 
@@ -42,14 +52,20 @@ namespace AICodeReviewer.Services
                 return new List<string>();
 
             // Pattern to match Jira ticket keys (e.g., OPS-123, PROJ-456)
-            // Updated to handle cases like "#OPS-8" or "OPS-8" 
-            var pattern = @"(?:^|[^A-Z])([A-Z]{2,10}-\d+)(?=[^A-Z0-9]|$)";
+            // Updated to handle cases like "#OPS-8", "OPS-8", "OPS-123: description", etc.
+            var pattern = @"(?:^|[^A-Z0-9])([A-Z]{2,10}-\d+)(?=[^A-Z0-9]|$)";
             var matches = Regex.Matches(prTitle, pattern, RegexOptions.IgnoreCase);
 
-            return matches.Cast<Match>()
+            var tickets = matches.Cast<Match>()
                          .Select(m => m.Groups[1].Value.ToUpper()) // Use Groups[1] to get the captured group
                          .Distinct()
                          .ToList();
+
+            // Debug output to show what was extracted
+            Console.WriteLine($"🔍 Debug: Extracting tickets from PR title: \"{prTitle}\"");
+            Console.WriteLine($"🔍 Debug: Found {tickets.Count} ticket(s): {string.Join(", ", tickets)}");
+
+            return tickets;
         }
 
         /// <summary>
@@ -72,7 +88,7 @@ namespace AICodeReviewer.Services
 
             await Task.Delay(100); // Simulate API call
 
-            Console.WriteLine($"🎫 Processing {ticketKeys.Count} JIRA ticket(s)...");
+            Console.WriteLine($"🎫 Processing {ticketKeys.Count} JIRA ticket(s): {string.Join(", ", ticketKeys)}");
 
             foreach (var ticketKey in ticketKeys)
             {
@@ -91,7 +107,7 @@ namespace AICodeReviewer.Services
                 }
             }
 
-            Console.WriteLine($"\n✅ JIRA ticket update process completed for {ticketKeys.Count} ticket(s)");
+            Console.WriteLine($"\n✅ JIRA ticket update process completed for {ticketKeys.Count} ticket(s): {string.Join(", ", ticketKeys)}");
         }
 
         /// <summary>
@@ -122,24 +138,36 @@ namespace AICodeReviewer.Services
                 // Create comment content
                 var comment = CreateJiraComment(prNumber, author, issueCount, reviewedFiles, topIssues);
 
-                // Create comment payload for Jira API
+                // Create comment payload for Jira API using the working format
                 var commentPayload = new
                 {
-                    body = new
+                    update = new
                     {
-                        type = "doc",
-                        version = 1,
-                        content = new[]
+                        comment = new[]
                         {
                             new
                             {
-                                type = "paragraph",
-                                content = new[]
+                                add = new
                                 {
-                                    new
+                                    body = new
                                     {
-                                        type = "text",
-                                        text = comment
+                                        type = "doc",
+                                        version = 1,
+                                        content = new[]
+                                        {
+                                            new
+                                            {
+                                                type = "paragraph",
+                                                content = new[]
+                                                {
+                                                    new
+                                                    {
+                                                        type = "text",
+                                                        text = comment
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -150,9 +178,38 @@ namespace AICodeReviewer.Services
                 var json = JsonSerializer.Serialize(commentPayload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                // Make API call to add comment
-                var url = $"{_jiraBaseUrl}/rest/api/3/issue/{ticketKey}/comment";
-                var response = await _httpClient.PostAsync(url, content);
+                // Make API call to update issue (PUT method)
+                var url = $"{_jiraBaseUrl}/rest/api/3/issue/{ticketKey}";
+
+                // Maximum debug output
+                Console.WriteLine($"   🔍 Debug: Making PUT request to {url}");
+                Console.WriteLine($"   🔍 Debug: HTTP Method: PUT");
+                Console.WriteLine($"   🔍 Debug: Request Headers:");
+                foreach (var header in _httpClient.DefaultRequestHeaders)
+                {
+                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                }
+                Console.WriteLine($"   🔍 Debug: Content Headers:");
+                foreach (var header in content.Headers)
+                {
+                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                }
+                Console.WriteLine($"   🔍 Debug: Payload: {json}");
+
+                var response = await _httpClient.PutAsync(url, content);
+
+                Console.WriteLine($"   🔍 Debug: Response Status Code: {response.StatusCode}");
+                Console.WriteLine($"   🔍 Debug: Response Headers:");
+                foreach (var header in response.Headers)
+                {
+                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                }
+                foreach (var header in response.Content.Headers)
+                {
+                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                }
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"   🔍 Debug: Response Body: {responseBody}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -163,9 +220,8 @@ namespace AICodeReviewer.Services
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"   ❌ Failed to update {ticketKey}: {response.StatusCode}");
-                    Console.WriteLine($"   📝 Error details: {errorContent}");
+                    Console.WriteLine($"   📝 Error details: {responseBody}");
                     Console.WriteLine($"   🔄 Falling back to simulated update");
                     await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
                 }
@@ -173,6 +229,7 @@ namespace AICodeReviewer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"   ❌ Error updating {ticketKey}: {ex.Message}");
+                Console.WriteLine($"   ❌ Stack Trace: {ex.StackTrace}");
                 Console.WriteLine($"   📝 Falling back to simulated update");
                 await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
             }

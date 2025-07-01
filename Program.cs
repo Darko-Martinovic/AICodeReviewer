@@ -18,7 +18,9 @@ namespace AICodeReviewer
             try
             {
                 // Load environment variables
+                Console.WriteLine("🔍 Debug: Loading environment variables from .env file...");
                 Env.Load();
+                Console.WriteLine("🔍 Debug: Environment variables loaded");
 
                 Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
                 Console.WriteLine("║                    🤖 AI Code Reviewer                       ║");
