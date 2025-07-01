@@ -22,10 +22,9 @@ namespace AICodeReviewer
                 Env.Load();
                 Console.WriteLine("🔍 Debug: Environment variables loaded");
 
-                Console.WriteLine("═══════════════════════════════════════════════════════════════");
-                Console.WriteLine("                    🤖 AI Code Reviewer");
-                Console.WriteLine("                      Starting up...");
-                Console.WriteLine("═══════════════════════════════════════════════════════════════\n");
+                Console.WriteLine("🤖 AI Code Reviewer");
+                Console.WriteLine("Starting up...");
+                Console.WriteLine();
 
                 // Initialize services
                 await InitializeServicesAsync();
@@ -90,9 +89,7 @@ namespace AICodeReviewer
         {
             while (true)
             {
-                Console.WriteLine("═══════════════════════════════════════════════════════════════");
-                Console.WriteLine("                    🤖 AI Code Reviewer");
-                Console.WriteLine("═══════════════════════════════════════════════════════════════");
+                Console.WriteLine("🤖 AI Code Reviewer");
                 Console.WriteLine();
                 Console.WriteLine("Choose an option:");
                 Console.WriteLine();
@@ -102,7 +99,6 @@ namespace AICodeReviewer
                 Console.WriteLine("  4. 📋 List open Pull Requests");
                 Console.WriteLine("  5. 🚪 Exit");
                 Console.WriteLine();
-                Console.WriteLine("═══════════════════════════════════════════════════════════════");
                 Console.Write("Enter your choice (1-5): ");
 
                 string? choice = Console.ReadLine();
