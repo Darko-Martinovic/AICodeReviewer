@@ -13,10 +13,10 @@ namespace AICodeReviewer.Services
             // Simulate webhook preparation and sending
             Console.WriteLine("📡 Preparing Teams notification...");
             await Task.Delay(500); // Simulate network delay
-            
+
             Console.WriteLine("🔗 Connecting to Teams webhook...");
             await Task.Delay(300);
-            
+
             Console.WriteLine("📤 Sending notification to Teams channel...");
             await Task.Delay(400);
 
@@ -37,7 +37,7 @@ namespace AICodeReviewer.Services
             Console.WriteLine($"**👤 Author:** {author}");
             Console.WriteLine($"**📁 Files Reviewed:** {reviewedFiles.Count} code files");
             Console.WriteLine($"**🔍 Issues Found:** {issueCount} ({severity})");
-            
+
             // Add severity-based emoji and color indication
             string statusEmoji = issueCount switch
             {
@@ -46,7 +46,7 @@ namespace AICodeReviewer.Services
                 <= 5 => "🔶",
                 _ => "🚨"
             };
-            
+
             Console.WriteLine($"**📊 Review Status:** {statusEmoji} {severity}");
 
             if (topIssues.Any())
@@ -88,7 +88,7 @@ namespace AICodeReviewer.Services
             Console.WriteLine();
             Console.WriteLine("💬 [View Full Report] 🔗 [Open PR] 📋 [View in Jira]");
             Console.WriteLine("════════════════════════════════════════════════════════════════════════");
-            
+
             // Simulate delivery confirmation and team interactions
             await SimulateTeamsInteractionsAsync(issueCount, author);
         }
@@ -110,40 +110,40 @@ namespace AICodeReviewer.Services
         private async Task SimulateTeamsInteractionsAsync(int issueCount, string author)
         {
             Console.WriteLine();
-            
+
             // Simulate delivery confirmation
             await Task.Delay(200);
             Console.WriteLine("✅ Message delivered to Teams channel");
-            
+
             // Simulate some realistic delays for user interactions
             await Task.Delay(800);
-            
+
             // Simulate reactions based on severity
             var reactions = GetReactionsBasedOnSeverity(issueCount);
             Console.WriteLine($"👥 Team reactions: {string.Join(" ", reactions)}");
-            
+
             await Task.Delay(600);
-            
+
             // Simulate team member responses
             var teamMembers = new[] { "Alice Johnson", "Bob Chen", "Carol Smith", "Dave Wilson" };
             var responseCount = new Random().Next(1, 3); // 1-2 responses
-            
+
             for (int i = 0; i < responseCount; i++)
             {
                 var member = teamMembers[new Random().Next(teamMembers.Length)];
                 var response = GetRandomTeamResponse(issueCount, author, member);
-                
+
                 await Task.Delay(new Random().Next(500, 1200));
                 Console.WriteLine($"💬 {member}: {response}");
             }
-            
+
             // Simulate mention notifications
             await Task.Delay(400);
             if (issueCount > 5)
             {
                 Console.WriteLine($"🔔 @{author} has been mentioned in this conversation");
             }
-            
+
             // Simulate webhook delivery status
             await Task.Delay(300);
             Console.WriteLine("📊 Teams notification metrics: Delivered ✅ | Read by 4 team members 👀");
