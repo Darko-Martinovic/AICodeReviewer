@@ -158,8 +158,12 @@ namespace AICodeReviewer.Services
                     _ => 0
                 };
 
+                // Get content limit from environment or use default
+                var contentLimit = int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var limit) ? limit : 15000;
+                var maxFileSize = contentLimit / 3; // Allow files up to 1/3 of content limit in changes
+
                 // For reasonably sized files, we can get content directly
-                if (changes < 5000) // Increased limit for better analysis
+                if (changes < maxFileSize)
                 {
                     return await _gitHubService.GetFileContentAsync(fileName);
                 }

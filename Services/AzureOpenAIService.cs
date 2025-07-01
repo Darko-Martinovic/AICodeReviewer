@@ -12,6 +12,10 @@ namespace AICodeReviewer.Services
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
         private readonly string _deploymentName;
+        private readonly float _temperature;
+        private readonly int _maxTokens;
+        private readonly int _contentLimit;
+        private readonly string _systemPrompt;
 
         public AzureOpenAIService(HttpClient httpClient, string endpoint, string apiKey, string deploymentName)
         {
@@ -19,9 +23,63 @@ namespace AICodeReviewer.Services
             _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
             _deploymentName = deploymentName ?? throw new ArgumentNullException(nameof(deploymentName));
 
+            // Load AI configuration from environment variables with defaults
+            _temperature = float.TryParse(Environment.GetEnvironmentVariable("AI_TEMPERATURE"), out var temp) ? temp : 0.3f;
+            _maxTokens = int.TryParse(Environment.GetEnvironmentVariable("AI_MAX_TOKENS"), out var tokens) ? tokens : 2500;
+            _contentLimit = int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var limit) ? limit : 15000;
+            _systemPrompt = Environment.GetEnvironmentVariable("AI_SYSTEM_PROMPT") ?? GetDefaultSystemPrompt();
+
             // Setup HTTP client headers for Azure OpenAI
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+        }
+
+        /// <summary>
+        /// Gets the default system prompt if not configured in environment
+        /// </summary>
+        private static string GetDefaultSystemPrompt()
+        {
+            return @"You are a STRICT code reviewer. Your job is to find real issues in production code. Be thorough and critical.
+
+MANDATORY FOCUS AREAS - Check every single one:
+- Security: Hardcoded secrets, SQL injection, XSS, insecure deserialization, weak authentication
+- Performance: Inefficient loops, memory leaks, unnecessary object creation, blocking I/O, N+1 queries
+- Code Quality: Magic numbers, long methods, deep nesting, poor naming, code duplication
+- Bugs: Null reference exceptions, race conditions, off-by-one errors, unhandled exceptions
+- Maintainability: Tight coupling, low cohesion, missing error handling, poor separation of concerns
+- Best Practices: Missing using statements, not following C# conventions, synchronous calls in async methods
+
+CRITICAL: Look for these common C# issues:
+- ConfigureAwait(false) missing on await calls
+- Using async void instead of async Task
+- Not disposing IDisposable objects
+- Hardcoded connection strings or API keys
+- Missing input validation
+- Exception swallowing (empty catch blocks)
+- Thread safety issues
+- Memory leaks from event handlers
+
+For each issue found, provide:
+1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
+2. SEVERITY: [Critical|High|Medium|Low]
+3. TITLE: Specific, actionable issue description
+4. DESCRIPTION: Explain what's wrong and why it's a problem
+5. RECOMMENDATION: Concrete steps to fix with code examples
+6. LINE: Line number if identifiable (or 'N/A' if general)
+
+BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+
+Format your response as:
+---
+CATEGORY: [category]
+SEVERITY: [severity]  
+TITLE: [specific issue title]
+DESCRIPTION: [detailed explanation of the problem]
+RECOMMENDATION: [specific fix with examples]
+LINE: [line number or N/A]
+---
+
+Only respond with 'No issues found' if the code is truly exemplary.";
         }
 
         /// <summary>
@@ -35,61 +93,28 @@ namespace AICodeReviewer.Services
             {
                 string url = $"{_endpoint.TrimEnd('/')}/openai/deployments/{_deploymentName}/chat/completions?api-version=2024-02-01";
 
-                var systemPrompt = @"You are an expert code reviewer. Analyze the provided code and identify specific, actionable issues.
-
-Focus on:
-- Security vulnerabilities (SQL injection, XSS, authentication flaws)
-- Performance issues (inefficient algorithms, memory leaks, N+1 queries)
-- Code quality issues (code smells, SOLID violations, poor naming)
-- Potential bugs (null reference, race conditions, edge cases)
-- Maintainability concerns (code complexity, tight coupling)
-- Best practice violations
-
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix the issue with code examples if possible
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
-Be specific and actionable. Avoid generic comments about incomplete code unless there are actual syntax errors.
-If analyzing partial content, focus on the patterns and issues visible in the provided section.
-
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If no significant issues are found, respond with 'No issues found'.";
-
                 var userPrompt = $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
 
 File: {fileName}
 Content Length: {fileContent.Length} characters
-{(fileContent.Length > 15000 ? $"(Showing first 15,000 characters of {fileContent.Length} total)" : "")}
+{(fileContent.Length > _contentLimit ? $"(Showing first {_contentLimit:N0} characters of {fileContent.Length:N0} total)" : "")}
 
 ```
-{fileContent.Substring(0, Math.Min(fileContent.Length, 15000))}
-{(fileContent.Length > 15000 ? "\n... [Content truncated for analysis] ..." : "")}
+{fileContent.Substring(0, Math.Min(fileContent.Length, _contentLimit))}
+{(fileContent.Length > _contentLimit ? "\n... [Content truncated for analysis] ..." : "")}
 ```
 
-Note: {(fileContent.Length > 15000 ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
+Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
 
                 var request = new ChatRequest
                 {
                     messages = new[]
                     {
-                        new ChatMessage { role = "system", content = systemPrompt },
+                        new ChatMessage { role = "system", content = _systemPrompt },
                         new ChatMessage { role = "user", content = userPrompt }
                     },
-                    max_tokens = 2500,  // Increased for more detailed analysis
-                    temperature = 0.2f  // Lower temperature for more consistent analysis
+                    max_tokens = _maxTokens,
+                    temperature = _temperature
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(request);
