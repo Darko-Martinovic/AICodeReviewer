@@ -25,9 +25,9 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Analyzes code using Azure OpenAI and returns a list of issues found
+        /// Analyzes code using Azure OpenAI and returns detailed analysis results
         /// </summary>
-        public async Task<List<string>> AnalyzeCodeAsync(string fileName, string fileContent)
+        public async Task<(List<string> issues, List<DetailedIssue> detailedIssues)> AnalyzeCodeAsync(string fileName, string fileContent)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -39,19 +39,37 @@ namespace AICodeReviewer.Services
 
 Focus on:
 - Security vulnerabilities
-- Performance issues
+- Performance issues  
 - Code quality and best practices
 - Potential bugs
 - Maintainability concerns
+- Design patterns and architecture
 
-Provide a concise list of specific issues found. If no significant issues are found, respond with 'No issues found'.
-Keep each issue to one line and be specific about the problem.";
+For each issue found, provide:
+1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
+2. SEVERITY: [Critical|High|Medium|Low]
+3. TITLE: Brief description of the issue
+4. DESCRIPTION: Detailed explanation of what's wrong
+5. RECOMMENDATION: Specific steps to fix the issue
+6. LINE: Line number if applicable (or 'N/A')
 
-                var userPrompt = $@"Please review this {GetFileType(fileName)} file:
+Format your response as:
+---
+CATEGORY: [category]
+SEVERITY: [severity]  
+TITLE: [title]
+DESCRIPTION: [detailed description]
+RECOMMENDATION: [how to fix]
+LINE: [line number or N/A]
+---
+
+If no significant issues are found, respond with 'No issues found'.";
+
+                var userPrompt = $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
 
 File: {fileName}
 ```
-{fileContent.Substring(0, Math.Min(fileContent.Length, 3000))}
+{fileContent.Substring(0, Math.Min(fileContent.Length, 5000))}
 ```";
 
                 var request = new ChatRequest
@@ -61,7 +79,7 @@ File: {fileName}
                         new ChatMessage { role = "system", content = systemPrompt },
                         new ChatMessage { role = "user", content = userPrompt }
                     },
-                    max_tokens = 800,
+                    max_tokens = 1500,  // Increased for detailed responses
                     temperature = 0.3f
                 };
 
@@ -72,7 +90,7 @@ File: {fileName}
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new List<string> { "AI analysis failed" };
+                    return (new List<string> { "AI analysis failed" }, new List<DetailedIssue>());
                 }
 
                 string jsonResponse = await response.Content.ReadAsStringAsync();
@@ -80,32 +98,97 @@ File: {fileName}
 
                 var aiResponse = chatResponse?.choices?[0]?.message?.content ?? "No response";
 
-                // Parse AI response into individual issues
+                // Parse AI response
                 if (aiResponse.Contains("No issues found") || aiResponse.Contains("no issues found"))
                 {
-                    return new List<string>();
+                    return (new List<string>(), new List<DetailedIssue>());
                 }
 
-                // Split response into lines and clean up
-                var issues = aiResponse
-                    .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                    .Where(line => !string.IsNullOrWhiteSpace(line))
-                    .Select(line => line.Trim().TrimStart('-', '*', '•').Trim())
-                    .Where(line => !string.IsNullOrWhiteSpace(line) && line.Length > 10)
-                    .Take(5) // Limit to top 5 issues
-                    .ToList();
-
-                return issues;
+                return ParseDetailedResponse(fileName, aiResponse);
             }
             catch (Exception ex)
             {
-                return new List<string> { $"Analysis error: {ex.Message}" };
+                return (new List<string> { $"Analysis error: {ex.Message}" }, new List<DetailedIssue>());
             }
             finally
             {
                 stopwatch.Stop();
                 Console.Write($" ({stopwatch.ElapsedMilliseconds}ms)");
             }
+        }
+
+        /// <summary>
+        /// Parses the detailed AI response into structured issue objects
+        /// </summary>
+        private (List<string> issues, List<DetailedIssue> detailedIssues) ParseDetailedResponse(string fileName, string aiResponse)
+        {
+            var issues = new List<string>();
+            var detailedIssues = new List<DetailedIssue>();
+
+            var issueBlocks = aiResponse.Split("---", StringSplitOptions.RemoveEmptyEntries)
+                                      .Where(block => block.Trim().Length > 0)
+                                      .ToList();
+
+            foreach (var block in issueBlocks)
+            {
+                var lines = block.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                               .Select(line => line.Trim())
+                               .Where(line => !string.IsNullOrEmpty(line))
+                               .ToList();
+
+                if (lines.Count < 3) continue; // Skip incomplete blocks
+
+                var detailedIssue = new DetailedIssue { FileName = fileName };
+
+                foreach (var line in lines)
+                {
+                    if (line.StartsWith("CATEGORY:", StringComparison.OrdinalIgnoreCase))
+                        detailedIssue.Category = line.Substring(9).Trim();
+                    else if (line.StartsWith("SEVERITY:", StringComparison.OrdinalIgnoreCase))
+                        detailedIssue.Severity = line.Substring(9).Trim();
+                    else if (line.StartsWith("TITLE:", StringComparison.OrdinalIgnoreCase))
+                        detailedIssue.Title = line.Substring(6).Trim();
+                    else if (line.StartsWith("DESCRIPTION:", StringComparison.OrdinalIgnoreCase))
+                        detailedIssue.Description = line.Substring(12).Trim();
+                    else if (line.StartsWith("RECOMMENDATION:", StringComparison.OrdinalIgnoreCase))
+                        detailedIssue.Recommendation = line.Substring(15).Trim();
+                    else if (line.StartsWith("LINE:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var lineStr = line.Substring(5).Trim();
+                        if (int.TryParse(lineStr, out var lineNum))
+                            detailedIssue.LineNumber = lineNum;
+                    }
+                }
+
+                // Only add if we have essential fields
+                if (!string.IsNullOrEmpty(detailedIssue.Title) && !string.IsNullOrEmpty(detailedIssue.Description))
+                {
+                    detailedIssues.Add(detailedIssue);
+
+                    // Create simple issue summary for backward compatibility
+                    var summary = $"{detailedIssue.Title}";
+                    if (!string.IsNullOrEmpty(detailedIssue.Severity))
+                        summary = $"[{detailedIssue.Severity}] {summary}";
+
+                    issues.Add(summary);
+                }
+            }
+
+            // Fallback: if structured parsing failed, try simple parsing
+            if (!detailedIssues.Any())
+            {
+                var simpleIssues = aiResponse
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                    .Select(line => line.Trim().TrimStart('-', '*', '•').Trim())
+                    .Where(line => !string.IsNullOrWhiteSpace(line) && line.Length > 10)
+                    .Take(8) // Increased limit
+                    .ToList();
+
+                issues.AddRange(simpleIssues);
+            }
+
+            return (issues, detailedIssues);
         }
 
         private static string GetFileType(string fileName)

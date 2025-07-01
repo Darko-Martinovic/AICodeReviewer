@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Text.Json;
+using AICodeReviewer.Models;
 
 namespace AICodeReviewer.Services
 {
@@ -69,7 +70,7 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Updates Jira tickets with code review results (simulated)
+        /// Updates Jira tickets with detailed code review results
         /// </summary>
         public async Task UpdateTicketsWithReviewResultsAsync(
             List<string> ticketKeys,
@@ -77,7 +78,8 @@ namespace AICodeReviewer.Services
             string author,
             int issueCount,
             List<string> reviewedFiles,
-            List<string> topIssues)
+            List<string> topIssues,
+            List<DetailedIssue>? detailedIssues = null)
         {
             if (!ticketKeys.Any())
             {
@@ -97,7 +99,7 @@ namespace AICodeReviewer.Services
                 if (IsJiraConfigured())
                 {
                     Console.WriteLine("   ✅ Connected to Jira API");
-                    await UpdateJiraTicketAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
+                    await UpdateJiraTicketAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues, detailedIssues);
                 }
                 else
                 {
@@ -166,14 +168,15 @@ namespace AICodeReviewer.Services
             string author,
             int issueCount,
             List<string> reviewedFiles,
-            List<string> topIssues)
+            List<string> topIssues,
+            List<DetailedIssue>? detailedIssues = null)
         {
             try
             {
                 string severity = GetIssueSeverity(issueCount);
 
                 // Create comment content using ADF format
-                var commentBody = CreateJiraCommentAdf(prNumber, author, issueCount, reviewedFiles, topIssues);
+                var commentBody = CreateJiraCommentAdf(prNumber, author, issueCount, reviewedFiles, topIssues, detailedIssues);
 
                 // Create comment payload for Jira API using the working format
                 var commentPayload = new
@@ -235,11 +238,11 @@ namespace AICodeReviewer.Services
                     Console.WriteLine($"   🔗 Linked PR #{prNumber}");
                     Console.WriteLine($"   📊 Review status: {issueCount} issues ({severity})");
                     Console.WriteLine($"   🎯 Recommendation: {GetRecommendation(issueCount)}");
-                    
+
                     // Add labels based on review results
                     var labels = new List<string> { "ai-code-review", $"pr-{prNumber}" };
                     labels.Add($"severity-{severity.ToLower()}");
-                    
+
                     if (issueCount == 0)
                         labels.Add("ready-for-merge");
                     else if (issueCount <= 2)
@@ -248,7 +251,7 @@ namespace AICodeReviewer.Services
                         labels.Add("review-required");
                     else
                         labels.Add("critical-issues");
-                    
+
                     await AddLabelsToTicketAsync(ticketKey, labels);
                 }
                 else
@@ -394,7 +397,8 @@ namespace AICodeReviewer.Services
             string author,
             int issueCount,
             List<string> reviewedFiles,
-            List<string> topIssues)
+            List<string> topIssues,
+            List<DetailedIssue>? detailedIssues = null)
         {
             var severity = GetIssueSeverity(issueCount);
             var recommendation = GetRecommendation(issueCount);
@@ -496,9 +500,144 @@ namespace AICodeReviewer.Services
                 }
             });
 
-            // Enhanced Top issues section with better formatting
-            if (topIssues.Any())
+            // Enhanced Top issues section with detailed formatting
+            if (detailedIssues?.Any() == true)
             {
+                content.Add(new
+                {
+                    type = "panel",
+                    attrs = new { panelType = "warning" },
+                    content = new object[]
+                    {
+                        new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "emoji", attrs = new { shortName = "mag", id = "1f50d", text = "🔍" } },
+                                new { type = "text", text = " ", marks = new object[] { } },
+                                new { type = "text", text = "Detailed Issues Found:", marks = new object[] { new { type = "strong" } } }
+                            }
+                        }
+                    }
+                });
+
+                var issueNumber = 1;
+                foreach (var issue in detailedIssues.Take(5)) // Show up to 5 detailed issues
+                {
+                    // Issue header with severity color
+                    var severityColor = issue.Severity?.ToLower() switch
+                    {
+                        "critical" => "#DC143C",
+                        "high" => "#FF4500",
+                        "medium" => "#FFA500",
+                        "low" => "#32CD32",
+                        _ => "#6B7280"
+                    };
+
+                    content.Add(new
+                    {
+                        type = "panel",
+                        attrs = new { panelType = "note" },
+                        content = new object[]
+                        {
+                            new
+                            {
+                                type = "paragraph",
+                                content = new object[]
+                                {
+                                    new { type = "text", text = $"{issueNumber}. ", marks = new object[] { new { type = "strong" } } },
+                                    new { type = "text", text = issue.Title, marks = new object[] { new { type = "strong" } } },
+                                    new { type = "text", text = " | ", marks = new object[] { } },
+                                    new { type = "text", text = $"[{issue.Severity}]", marks = new object[] { new { type = "textColor", attrs = new { color = severityColor } } } },
+                                    new { type = "text", text = $" | {issue.Category}", marks = new object[] { new { type = "em" } } }
+                                }
+                            }
+                        }
+                    });
+
+                    // Issue description
+                    if (!string.IsNullOrEmpty(issue.Description))
+                    {
+                        content.Add(new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "text", text = "📋 Description: ", marks = new object[] { new { type = "strong" } } },
+                                new { type = "text", text = issue.Description, marks = new object[] { } }
+                            }
+                        });
+                    }
+
+                    // Recommendation
+                    if (!string.IsNullOrEmpty(issue.Recommendation))
+                    {
+                        content.Add(new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "text", text = "💡 Fix: ", marks = new object[] { new { type = "strong" } } },
+                                new { type = "text", text = issue.Recommendation, marks = new object[] { new { type = "em" } } }
+                            }
+                        });
+                    }
+
+                    // File and line info
+                    if (issue.LineNumber.HasValue)
+                    {
+                        content.Add(new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "text", text = "📍 Location: ", marks = new object[] { new { type = "strong" } } },
+                                new { type = "text", text = $"{issue.FileName} (Line {issue.LineNumber})", marks = new object[] { new { type = "code" } } }
+                            }
+                        });
+                    }
+                    else if (!string.IsNullOrEmpty(issue.FileName))
+                    {
+                        content.Add(new
+                        {
+                            type = "paragraph",
+                            content = new object[]
+                            {
+                                new { type = "text", text = "📍 File: ", marks = new object[] { new { type = "strong" } } },
+                                new { type = "text", text = issue.FileName, marks = new object[] { new { type = "code" } } }
+                            }
+                        });
+                    }
+
+                    // Add separator between issues except for the last one
+                    if (issueNumber < Math.Min(detailedIssues.Count, 5))
+                    {
+                        content.Add(new
+                        {
+                            type = "rule"
+                        });
+                    }
+
+                    issueNumber++;
+                }
+
+                // Summary if more issues exist
+                if (detailedIssues.Count > 5)
+                {
+                    content.Add(new
+                    {
+                        type = "paragraph",
+                        content = new object[]
+                        {
+                            new { type = "text", text = $"... and {detailedIssues.Count - 5} more detailed issue(s) found", marks = new object[] { new { type = "em" }, new { type = "textColor", attrs = new { color = "#6B7280" } } } }
+                        }
+                    });
+                }
+            }
+            else if (topIssues.Any())
+            {
+                // Fallback to simple issues if detailed issues not available
                 content.Add(new
                 {
                     type = "panel",
@@ -521,7 +660,7 @@ namespace AICodeReviewer.Services
                 // Create a numbered list for issues
                 var issueList = new List<object>();
                 var issueNumber = 1;
-                
+
                 foreach (var issue in topIssues.Take(3))
                 {
                     issueList.Add(new

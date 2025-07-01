@@ -53,6 +53,7 @@ namespace AICodeReviewer.Services
 
                 var allIssues = new List<string>();
                 var reviewedFiles = new List<string>();
+                var result = new CodeReviewResult();
                 int currentFile = 0;
                 int totalFiles = Math.Min(codeFiles.Count, 3);
 
@@ -86,7 +87,7 @@ namespace AICodeReviewer.Services
                         Console.Write($"    🤖 Sending to AI for analysis...");
 
                         // Send to AI for review
-                        var issues = await _aiService.AnalyzeCodeAsync(fileName, fileContent);
+                        var (issues, detailedIssues) = await _aiService.AnalyzeCodeAsync(fileName, fileContent);
 
                         Console.WriteLine($" ✅ Complete");
 
@@ -97,6 +98,12 @@ namespace AICodeReviewer.Services
                             {
                                 Console.WriteLine($"      • {issue}");
                                 allIssues.Add($"{fileName}: {issue}");
+                            }
+
+                            // Add detailed issues to result
+                            foreach (var detailedIssue in detailedIssues)
+                            {
+                                result.DetailedIssues.Add(detailedIssue);
                             }
                         }
                         else
@@ -128,11 +135,9 @@ namespace AICodeReviewer.Services
                 }
 
                 // Return the results
-                return new CodeReviewResult
-                {
-                    ReviewedFiles = reviewedFiles,
-                    AllIssues = allIssues
-                };
+                result.ReviewedFiles = reviewedFiles;
+                result.AllIssues = allIssues;
+                return result;
             }
             catch (Exception ex)
             {

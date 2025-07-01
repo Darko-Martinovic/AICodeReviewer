@@ -212,7 +212,8 @@ namespace AICodeReviewer.Application
                 pr.User.Login,
                 reviewResult.IssueCount,
                 reviewResult.ReviewedFiles,
-                reviewResult.AllIssues.Take(5).ToList()
+                reviewResult.AllIssues.Take(5).ToList(),
+                reviewResult.DetailedIssues
             );
 
             // Add PR comment simulation
