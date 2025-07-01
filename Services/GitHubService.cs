@@ -136,5 +136,13 @@ namespace AICodeReviewer.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// Gets repository details
+        /// </summary>
+        public async Task<Repository> GetRepositoryDetailsAsync()
+        {
+            return await _gitHubClient.Repository.Get(_repoOwner, _repoName);
+        }
     }
 }

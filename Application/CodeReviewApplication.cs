@@ -32,13 +32,20 @@ namespace AICodeReviewer.Application
             try
             {
                 Console.WriteLine("🔍 Fetching latest commit...");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
+                Console.WriteLine($"🌿 Branch: main");
+                Console.WriteLine();
 
                 // Get latest commit from main branch
                 var commits = await _gitHubService.GetCommitsAsync();
 
                 if (!commits.Any())
                 {
-                    Console.WriteLine("No commits found.\n");
+                    Console.WriteLine("❌ No commits found.\n");
                     return;
                 }
 
@@ -69,7 +76,7 @@ namespace AICodeReviewer.Application
                     reviewResult.AllIssues
                 );
 
-                Console.WriteLine();
+                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
             }
             catch (Exception ex)
             {
@@ -85,12 +92,17 @@ namespace AICodeReviewer.Application
             try
             {
                 Console.WriteLine("🔍 Fetching open Pull Requests...");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
 
                 var pullRequests = await _gitHubService.GetOpenPullRequestsAsync();
 
                 if (!pullRequests.Any())
                 {
-                    Console.WriteLine("No open Pull Requests found.\n");
+                    Console.WriteLine("❌ No open Pull Requests found.\n");
                     return;
                 }
 
@@ -100,13 +112,14 @@ namespace AICodeReviewer.Application
                     var singlePr = pullRequests[0];
                     Console.WriteLine($"\n✅ Found 1 Pull Request:");
                     Console.WriteLine($"   PR #{singlePr.Number}: {singlePr.Title}");
+                    Console.WriteLine($"   🌿 {singlePr.Head.Ref} → {singlePr.Base.Ref}");
                     Console.WriteLine("   Auto-selecting for review...\n");
                     await ReviewSpecificPullRequestAsync(singlePr);
                     return;
                 }
 
                 // Show menu for multiple PRs
-                Console.WriteLine($"\nOpen Pull Requests ({pullRequests.Count} found):");
+                Console.WriteLine($"\n📋 Open Pull Requests ({pullRequests.Count} found):");
                 for (int i = 0; i < pullRequests.Count; i++)
                 {
                     var pr = pullRequests[i];
@@ -119,7 +132,7 @@ namespace AICodeReviewer.Application
                 {
                     if (selection == 0)
                     {
-                        Console.WriteLine("Cancelled.\n");
+                        Console.WriteLine("❌ Cancelled.\n");
                         return;
                     }
 
@@ -150,6 +163,10 @@ namespace AICodeReviewer.Application
         private async Task ReviewSpecificPullRequestAsync(Octokit.PullRequest pr)
         {
             Console.WriteLine($"\n📋 Reviewing PR #{pr.Number}: {pr.Title}");
+
+            // Get repository info
+            var repoInfo = await GetRepositoryInfoAsync();
+            Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
             Console.WriteLine($"👤 Author: {pr.User.Login}");
             Console.WriteLine($"🌿 Branch: {pr.Head.Ref} → {pr.Base.Ref}");
 
@@ -187,7 +204,8 @@ namespace AICodeReviewer.Application
             );
 
             // Update Jira tickets with review results
-            Console.WriteLine("\n" + new string('=', 70));
+            Console.WriteLine("\n🎫 JIRA Ticket Updates:");
+            Console.WriteLine("──────────────────────────────────────────────────────────────");
             await _jiraService.UpdateTicketsWithReviewResultsAsync(
                 jiraTickets,
                 pr.Number.ToString(),
@@ -198,10 +216,11 @@ namespace AICodeReviewer.Application
             );
 
             // Add PR comment simulation
-            Console.WriteLine("\n" + new string('=', 70));
+            Console.WriteLine("\n💬 GitHub PR Comment:");
+            Console.WriteLine("──────────────────────────────────────────────────────────────");
             await SimulatePRCommentAsync(pr.Number, reviewResult);
 
-            Console.WriteLine();
+            Console.WriteLine("──────────────────────────────────────────────────────────────\n");
         }
 
         /// <summary>
@@ -214,10 +233,10 @@ namespace AICodeReviewer.Application
 
             // Create the comment content
             var comment = CreatePRComment(reviewResult);
-            
+
             // Try to post real comment first
             var success = await _gitHubService.PostPullRequestCommentAsync(prNumber, comment);
-            
+
             if (success)
             {
                 Console.WriteLine("   ✅ Successfully posted comment to GitHub PR");
@@ -239,11 +258,11 @@ namespace AICodeReviewer.Application
         private string CreatePRComment(Models.CodeReviewResult reviewResult)
         {
             var comment = "## 🤖 AI Code Review Summary\n\n";
-            
+
             // Review summary
             comment += $"📊 **Files Reviewed:** {reviewResult.ReviewedFiles.Count}\n";
             comment += $"🔍 **Issues Found:** {reviewResult.IssueCount}\n";
-            
+
             string severity = reviewResult.IssueCount switch
             {
                 0 => "✅ Clean",
@@ -279,7 +298,7 @@ namespace AICodeReviewer.Application
                     comment += $"{issueNumber}. {issue}\n";
                     issueNumber++;
                 }
-                
+
                 if (reviewResult.AllIssues.Count > 5)
                 {
                     comment += $"*...and {reviewResult.AllIssues.Count - 5} more issues*\n";
@@ -318,15 +337,44 @@ namespace AICodeReviewer.Application
             try
             {
                 Console.WriteLine("📝 Recent commits:");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
 
                 var commits = await _gitHubService.GetCommitsAsync();
                 var recentCommits = commits.Take(5);
 
+                if (!recentCommits.Any())
+                {
+                    Console.WriteLine("  No commits found.");
+                    Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                    return;
+                }
+
+                // Get repository info from GitHubService (we'll need to add a method for this)
+                var repoInfo = await GetRepositoryInfoAsync();
+
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
+                Console.WriteLine($"🌿 Branch: main");
+                Console.WriteLine($"📊 Total commits: {commits.Count}");
+                Console.WriteLine();
+
+                int commitNumber = 1;
                 foreach (var commit in recentCommits)
                 {
-                    Console.WriteLine($"  {commit.Sha[..8]} - {commit.Commit.Message} ({commit.Commit.Author.Name})");
+                    var date = commit.Commit.Author.Date.ToString("yyyy-MM-dd HH:mm");
+                    var shortSha = commit.Sha[..8];
+                    var message = commit.Commit.Message.Length > 60
+                        ? commit.Commit.Message[..57] + "..."
+                        : commit.Commit.Message;
+
+                    Console.WriteLine($"  {commitNumber}. 🔗 {shortSha}");
+                    Console.WriteLine($"     📝 {message}");
+                    Console.WriteLine($"     👤 {commit.Commit.Author.Name}");
+                    Console.WriteLine($"     📅 {date}");
+                    Console.WriteLine();
+                    commitNumber++;
                 }
-                Console.WriteLine();
+
+                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
             }
             catch (Exception ex)
             {
@@ -342,26 +390,72 @@ namespace AICodeReviewer.Application
             try
             {
                 Console.WriteLine("🔀 Open Pull Requests:");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
 
                 var pullRequests = await _gitHubService.GetOpenPullRequestsAsync();
 
-                if (pullRequests.Any())
+                if (!pullRequests.Any())
                 {
-                    foreach (var pr in pullRequests)
-                    {
-                        Console.WriteLine($"  PR #{pr.Number}: {pr.Title} ({pr.User.Login})");
-                    }
+                    Console.WriteLine("  No open Pull Requests found.");
+                    Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                    return;
                 }
-                else
-                {
-                    Console.WriteLine("  No open Pull Requests");
-                }
+
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
+                Console.WriteLine($"📊 Total open PRs: {pullRequests.Count}");
                 Console.WriteLine();
+
+                int prNumber = 1;
+                foreach (var pr in pullRequests)
+                {
+                    var title = pr.Title.Length > 50
+                        ? pr.Title[..47] + "..."
+                        : pr.Title;
+                    var createdAt = pr.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+                    var updatedAt = pr.UpdatedAt.ToString("yyyy-MM-dd HH:mm");
+
+                    Console.WriteLine($"  {prNumber}. 🔀 PR #{pr.Number}");
+                    Console.WriteLine($"     📝 {title}");
+                    Console.WriteLine($"     👤 {pr.User.Login}");
+                    Console.WriteLine($"     🌿 {pr.Head.Ref} → {pr.Base.Ref}");
+                    Console.WriteLine($"     📅 Created: {createdAt}");
+                    Console.WriteLine($"     🔄 Updated: {updatedAt}");
+
+                    // Show PR status indicators
+                    var statusIndicators = new List<string>();
+                    if (pr.Draft) statusIndicators.Add("📋 Draft");
+                    if (pr.Merged) statusIndicators.Add("✅ Merged");
+                    if (pr.ClosedAt.HasValue) statusIndicators.Add("❌ Closed");
+
+                    if (statusIndicators.Any())
+                    {
+                        Console.WriteLine($"     🏷️  {string.Join(" | ", statusIndicators)}");
+                    }
+
+                    Console.WriteLine();
+                    prNumber++;
+                }
+
+                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Error fetching PRs: {ex.Message}\n");
             }
+        }
+
+        /// <summary>
+        /// Gets repository information
+        /// </summary>
+        private async Task<(string Owner, string Name)> GetRepositoryInfoAsync()
+        {
+            // For now, we'll get this from the GitHubService
+            // In a more robust implementation, we could add a method to GitHubService to get repo details
+            var repoDetails = await _gitHubService.GetRepositoryDetailsAsync();
+            return (repoDetails.Owner.Login, repoDetails.Name);
         }
     }
 }

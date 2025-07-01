@@ -20,7 +20,10 @@ namespace AICodeReviewer
                 // Load environment variables
                 Env.Load();
 
-                Console.WriteLine("=== AI Code Reviewer ===\n");
+                Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                    🤖 AI Code Reviewer                       ║");
+                Console.WriteLine("║                    Starting up...                            ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════════════╝\n");
 
                 // Initialize services
                 await InitializeServicesAsync();
@@ -74,7 +77,8 @@ namespace AICodeReviewer
             _application = new CodeReviewApplication(gitHubService, codeReviewService, notificationService, jiraService);
 
             Console.WriteLine("✅ Azure OpenAI configured");
-            Console.WriteLine("✅ All services initialized successfully\n");
+            Console.WriteLine("✅ All services initialized successfully");
+            Console.WriteLine("🚀 Ready to review code!\n");
         }
 
         /// <summary>
@@ -84,12 +88,18 @@ namespace AICodeReviewer
         {
             while (true)
             {
-                Console.WriteLine("Choose an option:");
-                Console.WriteLine("1. Review latest commit (Push Event)");
-                Console.WriteLine("2. Review Pull Request");
-                Console.WriteLine("3. List recent commits");
-                Console.WriteLine("4. List open Pull Requests");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("╔══════════════════════════════════════════════════════════════╗");
+                Console.WriteLine("║                    🤖 AI Code Reviewer                       ║");
+                Console.WriteLine("╠══════════════════════════════════════════════════════════════╣");
+                Console.WriteLine("║ Choose an option:                                            ║");
+                Console.WriteLine("║                                                              ║");
+                Console.WriteLine("║  1. 🔍 Review latest commit (Push Event)                     ║");
+                Console.WriteLine("║  2. 🔀 Review Pull Request                                   ║");
+                Console.WriteLine("║  3. 📝 List recent commits                                   ║");
+                Console.WriteLine("║  4. 📋 List open Pull Requests                               ║");
+                Console.WriteLine("║  5. 🚪 Exit                                                  ║");
+                Console.WriteLine("║                                                              ║");
+                Console.WriteLine("╚══════════════════════════════════════════════════════════════╝");
                 Console.Write("\nEnter your choice (1-5): ");
 
                 string? choice = Console.ReadLine();
@@ -110,10 +120,10 @@ namespace AICodeReviewer
                         await _application.ListOpenPullRequestsAsync();
                         break;
                     case "5":
-                        Console.WriteLine("Goodbye!");
+                        Console.WriteLine("👋 Goodbye! Thanks for using AI Code Reviewer!");
                         return;
                     default:
-                        Console.WriteLine("Invalid choice. Please try again.\n");
+                        Console.WriteLine("❌ Invalid choice. Please try again.\n");
                         break;
                 }
             }

@@ -20,9 +20,9 @@ namespace AICodeReviewer.Services
             _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_URL");
             _jiraApiToken = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
             _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_EMAIL");
-            
+
             _httpClient = new HttpClient();
-            
+
             // Configure HttpClient for Jira API if credentials are available
             if (IsJiraConfigured())
             {
@@ -66,31 +66,32 @@ namespace AICodeReviewer.Services
             if (!ticketKeys.Any())
             {
                 Console.WriteLine("🎫 No Jira tickets found in PR title");
+                Console.WriteLine("💡 Tip: Include JIRA ticket keys in PR title (e.g., 'OPS-123: Add new feature')");
                 return;
             }
 
             await Task.Delay(100); // Simulate API call
 
-            Console.WriteLine("🎫 Jira Ticket Update:");
-            Console.WriteLine("──────────────────────────────────────────────────────────────");
+            Console.WriteLine($"🎫 Processing {ticketKeys.Count} JIRA ticket(s)...");
 
             foreach (var ticketKey in ticketKeys)
             {
-                Console.WriteLine($"📋 Updating ticket: {ticketKey}");
+                Console.WriteLine($"\n📋 Updating ticket: {ticketKey}");
 
                 if (IsJiraConfigured())
                 {
-                    Console.WriteLine("   ✅ Connected to Jira");
+                    Console.WriteLine("   ✅ Connected to Jira API");
                     await UpdateJiraTicketAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
                 }
                 else
                 {
                     Console.WriteLine("   ⚠️  Jira not configured - showing simulated update:");
+                    Console.WriteLine("   💡 Set JIRA_URL, JIRA_API_TOKEN, and JIRA_EMAIL environment variables");
                     await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
                 }
             }
 
-            Console.WriteLine("──────────────────────────────────────────────────────────────");
+            Console.WriteLine($"\n✅ JIRA ticket update process completed for {ticketKeys.Count} ticket(s)");
         }
 
         /// <summary>
@@ -117,10 +118,10 @@ namespace AICodeReviewer.Services
             try
             {
                 string severity = GetIssueSeverity(issueCount);
-                
+
                 // Create comment content
                 var comment = CreateJiraComment(prNumber, author, issueCount, reviewedFiles, topIssues);
-                
+
                 // Create comment payload for Jira API
                 var commentPayload = new
                 {
@@ -158,12 +159,14 @@ namespace AICodeReviewer.Services
                     Console.WriteLine($"   ✅ Successfully added comment to {ticketKey}");
                     Console.WriteLine($"   🔗 Linked PR #{prNumber}");
                     Console.WriteLine($"   📊 Review status: {issueCount} issues ({severity})");
+                    Console.WriteLine($"   🎯 Recommendation: {GetRecommendation(issueCount)}");
                 }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"   ❌ Failed to update {ticketKey}: {response.StatusCode}");
-                    Console.WriteLine($"   📝 Falling back to simulated update");
+                    Console.WriteLine($"   📝 Error details: {errorContent}");
+                    Console.WriteLine($"   🔄 Falling back to simulated update");
                     await SimulateJiraUpdateAsync(ticketKey, prNumber, author, issueCount, reviewedFiles, topIssues);
                 }
             }
@@ -191,14 +194,14 @@ namespace AICodeReviewer.Services
             string severity = GetIssueSeverity(issueCount);
 
             Console.WriteLine($"   📝 Comment added to {ticketKey}:");
-            Console.WriteLine($"      \"AI Code Review completed for PR #{prNumber}\"");
-            Console.WriteLine($"      \"Author: {author}\"");
-            Console.WriteLine($"      \"Files reviewed: {reviewedFiles.Count}\"");
-            Console.WriteLine($"      \"Issues found: {issueCount} ({severity})\"");
+            Console.WriteLine($"      \"🤖 AI Code Review completed for PR #{prNumber}\"");
+            Console.WriteLine($"      \"👤 Author: {author}\"");
+            Console.WriteLine($"      \"📁 Files reviewed: {reviewedFiles.Count}\"");
+            Console.WriteLine($"      \"🔍 Issues found: {issueCount} ({severity} severity)\"");
 
             if (topIssues.Any())
             {
-                Console.WriteLine($"      \"Top issues:\"");
+                Console.WriteLine($"      \"🔍 Top issues:\"");
                 foreach (var issue in topIssues.Take(2))
                 {
                     Console.WriteLine($"      \"  • {issue}\"");
@@ -209,14 +212,17 @@ namespace AICodeReviewer.Services
             if (issueCount == 0)
             {
                 Console.WriteLine($"   ✅ Status: Ready for merge");
+                Console.WriteLine($"   🎯 Recommendation: Approve and merge");
             }
             else if (issueCount <= 2)
             {
                 Console.WriteLine($"   ⚠️  Status: Review recommended");
+                Console.WriteLine($"   🎯 Recommendation: Review minor issues before merge");
             }
             else
             {
                 Console.WriteLine($"   🚫 Status: Fixes required before merge");
+                Console.WriteLine($"   🎯 Recommendation: Address issues before approval");
             }
         }
 
@@ -231,6 +237,20 @@ namespace AICodeReviewer.Services
                 <= 2 => "Low",
                 <= 5 => "Medium",
                 _ => "High"
+            };
+        }
+
+        /// <summary>
+        /// Gets a recommendation based on issue count
+        /// </summary>
+        private static string GetRecommendation(int issueCount)
+        {
+            return issueCount switch
+            {
+                0 => "Approve and merge",
+                <= 2 => "Review minor issues before merge",
+                <= 5 => "Address issues before approval",
+                _ => "Fix critical issues before merge"
             };
         }
 
