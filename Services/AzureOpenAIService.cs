@@ -35,31 +35,34 @@ namespace AICodeReviewer.Services
             {
                 string url = $"{_endpoint.TrimEnd('/')}/openai/deployments/{_deploymentName}/chat/completions?api-version=2024-02-01";
 
-                var systemPrompt = @"You are an expert code reviewer. Analyze the provided code and identify potential issues, bugs, or improvements. 
+                var systemPrompt = @"You are an expert code reviewer. Analyze the provided code and identify specific, actionable issues.
 
 Focus on:
-- Security vulnerabilities
-- Performance issues  
-- Code quality and best practices
-- Potential bugs
-- Maintainability concerns
-- Design patterns and architecture
+- Security vulnerabilities (SQL injection, XSS, authentication flaws)
+- Performance issues (inefficient algorithms, memory leaks, N+1 queries)
+- Code quality issues (code smells, SOLID violations, poor naming)
+- Potential bugs (null reference, race conditions, edge cases)
+- Maintainability concerns (code complexity, tight coupling)
+- Best practice violations
 
 For each issue found, provide:
 1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
 2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Brief description of the issue
-4. DESCRIPTION: Detailed explanation of what's wrong
-5. RECOMMENDATION: Specific steps to fix the issue
-6. LINE: Line number if applicable (or 'N/A')
+3. TITLE: Specific, actionable issue description
+4. DESCRIPTION: Explain what's wrong and why it's a problem
+5. RECOMMENDATION: Concrete steps to fix the issue with code examples if possible
+6. LINE: Line number if identifiable (or 'N/A' if general)
+
+Be specific and actionable. Avoid generic comments about incomplete code unless there are actual syntax errors.
+If analyzing partial content, focus on the patterns and issues visible in the provided section.
 
 Format your response as:
 ---
 CATEGORY: [category]
 SEVERITY: [severity]  
-TITLE: [title]
-DESCRIPTION: [detailed description]
-RECOMMENDATION: [how to fix]
+TITLE: [specific issue title]
+DESCRIPTION: [detailed explanation of the problem]
+RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
@@ -68,9 +71,15 @@ If no significant issues are found, respond with 'No issues found'.";
                 var userPrompt = $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
 
 File: {fileName}
+Content Length: {fileContent.Length} characters
+{(fileContent.Length > 15000 ? $"(Showing first 15,000 characters of {fileContent.Length} total)" : "")}
+
 ```
-{fileContent.Substring(0, Math.Min(fileContent.Length, 5000))}
-```";
+{fileContent.Substring(0, Math.Min(fileContent.Length, 15000))}
+{(fileContent.Length > 15000 ? "\n... [Content truncated for analysis] ..." : "")}
+```
+
+Note: {(fileContent.Length > 15000 ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
 
                 var request = new ChatRequest
                 {
@@ -79,8 +88,8 @@ File: {fileName}
                         new ChatMessage { role = "system", content = systemPrompt },
                         new ChatMessage { role = "user", content = userPrompt }
                     },
-                    max_tokens = 1500,  // Increased for detailed responses
-                    temperature = 0.3f
+                    max_tokens = 2500,  // Increased for more detailed analysis
+                    temperature = 0.2f  // Lower temperature for more consistent analysis
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(request);

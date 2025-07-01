@@ -158,8 +158,8 @@ namespace AICodeReviewer.Services
                     _ => 0
                 };
 
-                // For small files, we can get content directly
-                if (changes < 1000) // Avoid very large files
+                // For reasonably sized files, we can get content directly
+                if (changes < 5000) // Increased limit for better analysis
                 {
                     return await _gitHubService.GetFileContentAsync(fileName);
                 }
