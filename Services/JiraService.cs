@@ -111,6 +111,43 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Adds labels to a JIRA ticket
+        /// </summary>
+        private async Task AddLabelsToTicketAsync(string ticketKey, List<string> labels)
+        {
+            try
+            {
+                var labelPayload = new
+                {
+                    update = new
+                    {
+                        labels = labels.Select(label => new { add = label }).ToArray<object>()
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(labelPayload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var url = $"{_jiraBaseUrl}/rest/api/3/issue/{ticketKey}";
+                var response = await _httpClient.PutAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"   🏷️  Added labels to {ticketKey}: {string.Join(", ", labels)}");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"   ⚠️  Failed to add labels to {ticketKey}: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   ⚠️  Error adding labels to {ticketKey}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Checks if Jira is properly configured
         /// </summary>
         private bool IsJiraConfigured()
@@ -135,8 +172,8 @@ namespace AICodeReviewer.Services
             {
                 string severity = GetIssueSeverity(issueCount);
 
-                // Create comment content
-                var comment = CreateJiraComment(prNumber, author, issueCount, reviewedFiles, topIssues);
+                // Create comment content using ADF format
+                var commentBody = CreateJiraCommentAdf(prNumber, author, issueCount, reviewedFiles, topIssues);
 
                 // Create comment payload for Jira API using the working format
                 var commentPayload = new
@@ -149,26 +186,7 @@ namespace AICodeReviewer.Services
                             {
                                 add = new
                                 {
-                                    body = new
-                                    {
-                                        type = "doc",
-                                        version = 1,
-                                        content = new[]
-                                        {
-                                            new
-                                            {
-                                                type = "paragraph",
-                                                content = new[]
-                                                {
-                                                    new
-                                                    {
-                                                        type = "text",
-                                                        text = comment
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    body = commentBody
                                 }
                             }
                         }
@@ -312,7 +330,132 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Creates a formatted comment for Jira tickets
+        /// Creates a formatted comment for Jira tickets using Atlassian Document Format (ADF)
+        /// </summary>
+        public object CreateJiraCommentAdf(
+            string prNumber,
+            string author,
+            int issueCount,
+            List<string> reviewedFiles,
+            List<string> topIssues)
+        {
+            var severity = GetIssueSeverity(issueCount);
+            var recommendation = GetRecommendation(issueCount);
+
+            // Create ADF document structure
+            var content = new List<object>();
+
+            // Header with emoji and title
+            content.Add(new
+            {
+                type = "paragraph",
+                content = new object[]
+                {
+                    new { type = "emoji", attrs = new { shortName = "robot", id = "1f916", text = "🤖" } },
+                    new { type = "text", text = " ", marks = new object[] { } },
+                    new { type = "text", text = "AI Code Review Completed", marks = new object[] { new { type = "strong" } } }
+                }
+            });
+
+            // Summary table
+            content.Add(new
+            {
+                type = "table",
+                attrs = new { isNumberColumnEnabled = false, layout = "default" },
+                content = new[]
+                {
+                    new
+                    {
+                        type = "tableRow",
+                        content = new[]
+                        {
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Pull Request", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Author", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Files Reviewed", marks = new object[] { new { type = "strong" } } } } } } },
+                            new { type = "tableHeader", attrs = new { background = "#f4f5f7" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = "Issues Found", marks = new object[] { new { type = "strong" } } } } } } }
+                        }
+                    },
+                    new
+                    {
+                        type = "tableRow",
+                        content = new[]
+                        {
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = $"#{prNumber}", marks = new object[] { new { type = "code" } } } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = author } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = reviewedFiles.Count.ToString() } } } } },
+                            new { type = "tableCell", attrs = new { background = "#ffffff" }, content = new object[] { new { type = "paragraph", content = new[] { new { type = "text", text = $"{issueCount} ({severity})", marks = new object[] { new { type = "strong" } } } } } } }
+                        }
+                    }
+                }
+            });
+
+            // Recommendation section
+            content.Add(new
+            {
+                type = "paragraph",
+                content = new object[]
+                {
+                    new { type = "text", text = "🎯 ", marks = new object[] { } },
+                    new { type = "text", text = "Recommendation: ", marks = new object[] { new { type = "strong" } } },
+                    new { type = "text", text = recommendation, marks = new object[] { } }
+                }
+            });
+
+            // Top issues section
+            if (topIssues.Any())
+            {
+                content.Add(new
+                {
+                    type = "paragraph",
+                    content = new object[]
+                    {
+                        new { type = "text", text = "🔍 ", marks = new object[] { } },
+                        new { type = "text", text = "Top Issues:", marks = new object[] { new { type = "strong" } } }
+                    }
+                });
+
+                foreach (var issue in topIssues.Take(3))
+                {
+                    content.Add(new
+                    {
+                        type = "bulletList",
+                        content = new[]
+                        {
+                            new
+                            {
+                                type = "listItem",
+                                content = new[]
+                                {
+                                    new { type = "paragraph", content = new[] { new { type = "text", text = issue } } }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                if (topIssues.Count > 3)
+                {
+                    content.Add(new
+                    {
+                        type = "paragraph",
+                        content = new[]
+                        {
+                            new { type = "text", text = $"... and {topIssues.Count - 3} more issue(s)", marks = new object[] { new { type = "em" } } }
+                        }
+                    });
+                }
+            }
+
+            return new
+            {
+                type = "doc",
+                version = 1,
+                content = content.ToArray()
+            };
+        }
+
+        /// <summary>
+        /// Creates a formatted comment for Jira tickets (legacy method for backward compatibility)
         /// </summary>
         public string CreateJiraComment(
             string prNumber,
