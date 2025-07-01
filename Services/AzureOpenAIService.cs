@@ -24,14 +24,14 @@ namespace AICodeReviewer.Services
             _deploymentName = deploymentName ?? throw new ArgumentNullException(nameof(deploymentName));
 
             // Load AI configuration from environment variables with defaults
-            _temperature = float.TryParse(Environment.GetEnvironmentVariable("AI_TEMPERATURE"), out var temp) ? temp : 0.3f;
+            _temperature = float.TryParse(Environment.GetEnvironmentVariable("AI_TEMPERATURE"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var temp) ? temp : 0.3f;
             _maxTokens = int.TryParse(Environment.GetEnvironmentVariable("AI_MAX_TOKENS"), out var tokens) ? tokens : 2500;
             _contentLimit = int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var limit) ? limit : 15000;
             _systemPrompt = Environment.GetEnvironmentVariable("AI_SYSTEM_PROMPT") ?? GetDefaultSystemPrompt();
 
             // Setup HTTP client headers for Azure OpenAI
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+            _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
         }
 
         /// <summary>
@@ -124,7 +124,10 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return (new List<string> { "AI analysis failed" }, new List<DetailedIssue>());
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ AI API Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    Console.WriteLine($"❌ Error details: {errorContent}");
+                    return (new List<string> { $"AI analysis failed: {response.StatusCode} - {response.ReasonPhrase}" }, new List<DetailedIssue>());
                 }
 
                 string jsonResponse = await response.Content.ReadAsStringAsync();
@@ -142,6 +145,11 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ AI Service Exception: {ex.GetType().Name}: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"❌ Inner Exception: {ex.InnerException.Message}");
+                }
                 return (new List<string> { $"Analysis error: {ex.Message}" }, new List<DetailedIssue>());
             }
             finally
