@@ -16,11 +16,15 @@ namespace AICodeReviewer.Application
             GitHubService gitHubService,
             CodeReviewService codeReviewService,
             NotificationService notificationService,
-            JiraService jiraService)
+            JiraService jiraService
+        )
         {
-            _gitHubService = gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
-            _codeReviewService = codeReviewService ?? throw new ArgumentNullException(nameof(codeReviewService));
-            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _gitHubService =
+                gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
+            _codeReviewService =
+                codeReviewService ?? throw new ArgumentNullException(nameof(codeReviewService));
+            _notificationService =
+                notificationService ?? throw new ArgumentNullException(nameof(notificationService));
             _jiraService = jiraService ?? throw new ArgumentNullException(nameof(jiraService));
         }
 
@@ -50,7 +54,9 @@ namespace AICodeReviewer.Application
                 }
 
                 var latestCommit = commits.First();
-                Console.WriteLine($"📝 Latest commit: {latestCommit.Sha[..8]} - {latestCommit.Commit.Message}");
+                Console.WriteLine(
+                    $"📝 Latest commit: {latestCommit.Sha[..8]} - {latestCommit.Commit.Message}"
+                );
                 Console.WriteLine($"👤 Author: {latestCommit.Commit.Author.Name}");
                 Console.WriteLine($"📅 Date: {latestCommit.Commit.Author.Date:yyyy-MM-dd HH:mm}");
 
@@ -60,7 +66,9 @@ namespace AICodeReviewer.Application
                 Console.WriteLine($"\n📁 Files changed: {commitDetail.Files.Count}");
                 foreach (var file in commitDetail.Files)
                 {
-                    Console.WriteLine($"  - {file.Status}: {file.Filename} (+{file.Additions}/-{file.Deletions})");
+                    Console.WriteLine(
+                        $"  - {file.Status}: {file.Filename} (+{file.Additions}/-{file.Deletions})"
+                    );
                 }
 
                 // AI Code Review
@@ -76,7 +84,9 @@ namespace AICodeReviewer.Application
                     reviewResult.AllIssues
                 );
 
-                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                Console.WriteLine(
+                    "──────────────────────────────────────────────────────────────\n"
+                );
             }
             catch (Exception ex)
             {
@@ -143,7 +153,9 @@ namespace AICodeReviewer.Application
                     }
                     else
                     {
-                        Console.WriteLine($"❌ Invalid selection. Please enter a number between 1 and {pullRequests.Count}.\n");
+                        Console.WriteLine(
+                            $"❌ Invalid selection. Please enter a number between 1 and {pullRequests.Count}.\n"
+                        );
                     }
                 }
                 else
@@ -187,7 +199,9 @@ namespace AICodeReviewer.Application
             Console.WriteLine($"\n📁 Files changed: {prFiles.Count}");
             foreach (var file in prFiles)
             {
-                Console.WriteLine($"  - {file.Status}: {file.FileName} (+{file.Additions}/-{file.Deletions})");
+                Console.WriteLine(
+                    $"  - {file.Status}: {file.FileName} (+{file.Additions}/-{file.Deletions})"
+                );
             }
 
             // AI Code Review
@@ -227,7 +241,10 @@ namespace AICodeReviewer.Application
         /// <summary>
         /// Simulates posting a PR comment with review results
         /// </summary>
-        private async Task SimulatePRCommentAsync(int prNumber, Models.CodeReviewResult reviewResult)
+        private async Task SimulatePRCommentAsync(
+            int prNumber,
+            Models.CodeReviewResult reviewResult
+        )
         {
             Console.WriteLine("\n💬 GitHub PR Comment:");
             Console.WriteLine("──────────────────────────────────────────────────────────────");
@@ -346,7 +363,9 @@ namespace AICodeReviewer.Application
                 if (!recentCommits.Any())
                 {
                     Console.WriteLine("  No commits found.");
-                    Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                    Console.WriteLine(
+                        "──────────────────────────────────────────────────────────────\n"
+                    );
                     return;
                 }
 
@@ -363,9 +382,10 @@ namespace AICodeReviewer.Application
                 {
                     var date = commit.Commit.Author.Date.ToString("yyyy-MM-dd HH:mm");
                     var shortSha = commit.Sha[..8];
-                    var message = commit.Commit.Message.Length > 60
-                        ? commit.Commit.Message[..57] + "..."
-                        : commit.Commit.Message;
+                    var message =
+                        commit.Commit.Message.Length > 60
+                            ? commit.Commit.Message[..57] + "..."
+                            : commit.Commit.Message;
 
                     Console.WriteLine($"  {commitNumber}. 🔗 {shortSha}");
                     Console.WriteLine($"     📝 {message}");
@@ -375,7 +395,9 @@ namespace AICodeReviewer.Application
                     commitNumber++;
                 }
 
-                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                Console.WriteLine(
+                    "──────────────────────────────────────────────────────────────\n"
+                );
             }
             catch (Exception ex)
             {
@@ -398,7 +420,9 @@ namespace AICodeReviewer.Application
                 if (!pullRequests.Any())
                 {
                     Console.WriteLine("  No open Pull Requests found.");
-                    Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                    Console.WriteLine(
+                        "──────────────────────────────────────────────────────────────\n"
+                    );
                     return;
                 }
 
@@ -412,9 +436,7 @@ namespace AICodeReviewer.Application
                 int prNumber = 1;
                 foreach (var pr in pullRequests)
                 {
-                    var title = pr.Title.Length > 50
-                        ? pr.Title[..47] + "..."
-                        : pr.Title;
+                    var title = pr.Title.Length > 50 ? pr.Title[..47] + "..." : pr.Title;
                     var createdAt = pr.CreatedAt.ToString("yyyy-MM-dd HH:mm");
                     var updatedAt = pr.UpdatedAt.ToString("yyyy-MM-dd HH:mm");
 
@@ -427,9 +449,12 @@ namespace AICodeReviewer.Application
 
                     // Show PR status indicators
                     var statusIndicators = new List<string>();
-                    if (pr.Draft) statusIndicators.Add("📋 Draft");
-                    if (pr.Merged) statusIndicators.Add("✅ Merged");
-                    if (pr.ClosedAt.HasValue) statusIndicators.Add("❌ Closed");
+                    if (pr.Draft)
+                        statusIndicators.Add("📋 Draft");
+                    if (pr.Merged)
+                        statusIndicators.Add("✅ Merged");
+                    if (pr.ClosedAt.HasValue)
+                        statusIndicators.Add("❌ Closed");
 
                     if (statusIndicators.Any())
                     {
@@ -440,7 +465,9 @@ namespace AICodeReviewer.Application
                     prNumber++;
                 }
 
-                Console.WriteLine("──────────────────────────────────────────────────────────────\n");
+                Console.WriteLine(
+                    "──────────────────────────────────────────────────────────────\n"
+                );
             }
             catch (Exception ex)
             {

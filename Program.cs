@@ -49,29 +49,45 @@ namespace AICodeReviewer
             configurationService.DisplayConfigurationSummary();
 
             // Get configuration from environment variables
-            string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+            string githubToken =
+                Environment.GetEnvironmentVariable("GITHUB_TOKEN")
                 ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
 
-            string repoOwner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
+            string repoOwner =
+                Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
                 ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
 
-            string repoName = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
+            string repoName =
+                Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
                 ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
 
-            string aoaiEndpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
+            string aoaiEndpoint =
+                Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
                 ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
 
-            string aoaiApiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
+            string aoaiApiKey =
+                Environment.GetEnvironmentVariable("AOAI_APIKEY")
                 ?? throw new InvalidOperationException("AOAI_APIKEY not set");
 
-            string chatDeployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
+            string chatDeployment =
+                Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
                 ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
 
             // Initialize services with configuration injection
             var httpClient = new System.Net.Http.HttpClient();
-            var azureOpenAIService = new AzureOpenAIService(httpClient, aoaiEndpoint, aoaiApiKey, chatDeployment, configurationService);
+            var azureOpenAIService = new AzureOpenAIService(
+                httpClient,
+                aoaiEndpoint,
+                aoaiApiKey,
+                chatDeployment,
+                configurationService
+            );
             var gitHubService = new GitHubService(githubToken, repoOwner, repoName);
-            var codeReviewService = new CodeReviewService(azureOpenAIService, gitHubService, configurationService);
+            var codeReviewService = new CodeReviewService(
+                azureOpenAIService,
+                gitHubService,
+                configurationService
+            );
             var notificationService = new NotificationService(configurationService);
             var jiraService = new JiraService();
 
@@ -79,7 +95,12 @@ namespace AICodeReviewer
             await gitHubService.InitializeAsync();
 
             // Initialize application
-            _application = new CodeReviewApplication(gitHubService, codeReviewService, notificationService, jiraService);
+            _application = new CodeReviewApplication(
+                gitHubService,
+                codeReviewService,
+                notificationService,
+                jiraService
+            );
 
             Console.WriteLine("✅ Azure OpenAI configured");
             Console.WriteLine("✅ All services initialized successfully");

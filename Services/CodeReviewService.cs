@@ -14,12 +14,18 @@ namespace AICodeReviewer.Services
         private readonly GitHubService _gitHubService;
         private readonly ConfigurationService _configurationService;
 
-        public CodeReviewService(AzureOpenAIService aiService, GitHubService gitHubService, ConfigurationService configurationService)
+        public CodeReviewService(
+            AzureOpenAIService aiService,
+            GitHubService gitHubService,
+            ConfigurationService configurationService
+        )
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
             _gitHubService =
                 gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
-            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _configurationService =
+                configurationService
+                ?? throw new ArgumentNullException(nameof(configurationService));
         }
 
         /// <summary>
