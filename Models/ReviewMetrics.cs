@@ -28,22 +28,20 @@ namespace AICodeReviewer.Models
         {
             return $@"
 📊 REVIEW PERFORMANCE METRICS
-┌─────────────────────────────────────────┐
-│ Duration: {Duration:mm\:ss}                     │
-│ Files Reviewed: {FilesReviewed}                      │
-│ Issues Found: {IssuesFound}                        │
-│ Lines of Code: {TotalLinesOfCode:N0}                 │
-│ Total Tokens: {TokensUsed:N0}                   │
-│ Input Tokens: {InputTokens:N0}                  │
-│ Output Tokens: {OutputTokens:N0}                │
-│ Estimated Cost: ${EstimatedCost:F4}             │
-├─────────────────────────────────────────┤
-│ EFFICIENCY METRICS                      │
-│ Issues/File: {IssuesPerFile:F1}                    │
-│ Lines/Minute: {LinesPerMinute:F0}                │
-│ Cost/Issue: ${CostPerIssue:F4}                  │
-│ Cost/File: ${(FilesReviewed > 0 ? EstimatedCost / FilesReviewed : 0):F4}                │
-└─────────────────────────────────────────┘";
+Duration: {Duration:mm\:ss}
+Files Reviewed: {FilesReviewed}
+Issues Found: {IssuesFound}
+Lines of Code: {TotalLinesOfCode:N0}
+Total Tokens: {TokensUsed:N0}
+Input Tokens: {InputTokens:N0}
+Output Tokens: {OutputTokens:N0}
+Estimated Cost: ${EstimatedCost:F4}
+────────────────────────────────────────
+EFFICIENCY METRICS
+Issues/File: {IssuesPerFile:F1}
+Lines/Minute: {LinesPerMinute:F0}
+Cost/Issue: ${CostPerIssue:F4}
+Cost/File: ${(FilesReviewed > 0 ? EstimatedCost / FilesReviewed : 0):F4}";
         }
 
         /// <summary>
