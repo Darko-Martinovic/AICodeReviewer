@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetEnv;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using AICodeReviewer.Services;
 using AICodeReviewer.Application;
 
@@ -11,8 +13,6 @@ namespace AICodeReviewer
     /// </summary>
     class Program
     {
-        private static CodeReviewApplication _application = null!;
-
         static async Task Main(string[] args)
         {
             try
@@ -26,11 +26,16 @@ namespace AICodeReviewer
                 Console.WriteLine("Starting up...");
                 Console.WriteLine();
 
-                // Initialize services
-                await InitializeServicesAsync();
+                // Build service provider
+                var serviceProvider = BuildServiceProvider();
 
-                // Show menu
-                await ShowMainMenuAsync();
+                // Run the application
+                using (serviceProvider)
+                {
+                    var application = serviceProvider.GetRequiredService<CodeReviewApplication>();
+                    await InitializeServicesAsync(serviceProvider);
+                    await ShowMainMenuAsync(application);
+                }
             }
             catch (Exception ex)
             {
@@ -40,67 +45,74 @@ namespace AICodeReviewer
         }
 
         /// <summary>
-        /// Initializes all required services and dependencies
+        /// Builds and configures the dependency injection service provider
         /// </summary>
-        static async Task InitializeServicesAsync()
+        private static ServiceProvider BuildServiceProvider()
         {
-            // Initialize configuration service first
-            var configurationService = new ConfigurationService();
-            configurationService.DisplayConfigurationSummary();
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            return services.BuildServiceProvider();
+        }
 
-            // Get configuration from environment variables
-            string githubToken =
-                Environment.GetEnvironmentVariable("GITHUB_TOKEN")
-                ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
+        /// <summary>
+        /// Configures all services for dependency injection
+        /// </summary>
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            // Configuration service (singleton)
+            services.AddSingleton<IConfigurationService, ConfigurationService>();
 
-            string repoOwner =
-                Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
-                ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
+            // HTTP client (singleton for performance)
+            services.AddSingleton<HttpClient>();
 
-            string repoName =
-                Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
-                ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
+            // Core services (singletons for this console app)
+            services.AddSingleton<IAzureOpenAIService>(provider =>
+            {
+                var httpClient = provider.GetRequiredService<HttpClient>();
+                var configService = provider.GetRequiredService<IConfigurationService>();
+                
+                var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
+                    ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
+                var apiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
+                    ?? throw new InvalidOperationException("AOAI_APIKEY not set");
+                var deployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
+                    ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
 
-            string aoaiEndpoint =
-                Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
-                ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
+                return new AzureOpenAIService(httpClient, endpoint, apiKey, deployment, configService);
+            });
 
-            string aoaiApiKey =
-                Environment.GetEnvironmentVariable("AOAI_APIKEY")
-                ?? throw new InvalidOperationException("AOAI_APIKEY not set");
+            services.AddSingleton<IGitHubService>(provider =>
+            {
+                var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+                    ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
+                var owner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
+                    ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
+                var name = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
+                    ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
 
-            string chatDeployment =
-                Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
-                ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
+                return new GitHubService(token, owner, name);
+            });
 
-            // Initialize services with configuration injection
-            var httpClient = new System.Net.Http.HttpClient();
-            var azureOpenAIService = new AzureOpenAIService(
-                httpClient,
-                aoaiEndpoint,
-                aoaiApiKey,
-                chatDeployment,
-                configurationService
-            );
-            var gitHubService = new GitHubService(githubToken, repoOwner, repoName);
-            var codeReviewService = new CodeReviewService(
-                azureOpenAIService,
-                gitHubService,
-                configurationService
-            );
-            var notificationService = new NotificationService(configurationService);
-            var jiraService = new JiraService();
+            services.AddSingleton<ICodeReviewService, CodeReviewService>();
+            services.AddSingleton<INotificationService, NotificationService>();
+            services.AddSingleton<IJiraService, JiraService>();
+
+            // Application layer
+            services.AddSingleton<CodeReviewApplication>();
+        }
+
+        /// <summary>
+        /// Initializes services that require async setup
+        /// </summary>
+        private static async Task InitializeServicesAsync(ServiceProvider serviceProvider)
+        {
+            // Display configuration summary
+            var configService = serviceProvider.GetRequiredService<IConfigurationService>();
+            configService.DisplayConfigurationSummary();
 
             // Initialize GitHub connection
+            var gitHubService = serviceProvider.GetRequiredService<IGitHubService>();
             await gitHubService.InitializeAsync();
-
-            // Initialize application
-            _application = new CodeReviewApplication(
-                gitHubService,
-                codeReviewService,
-                notificationService,
-                jiraService
-            );
 
             Console.WriteLine("✅ Azure OpenAI configured");
             Console.WriteLine("✅ All services initialized successfully");
@@ -110,7 +122,7 @@ namespace AICodeReviewer
         /// <summary>
         /// Shows the main application menu and handles user interaction
         /// </summary>
-        static async Task ShowMainMenuAsync()
+        private static async Task ShowMainMenuAsync(CodeReviewApplication application)
         {
             while (true)
             {
@@ -132,16 +144,16 @@ namespace AICodeReviewer
                 switch (choice)
                 {
                     case "1":
-                        await _application.ReviewLatestCommitAsync();
+                        await application.ReviewLatestCommitAsync();
                         break;
                     case "2":
-                        await _application.ReviewPullRequestAsync();
+                        await application.ReviewPullRequestAsync();
                         break;
                     case "3":
-                        await _application.ListRecentCommitsAsync();
+                        await application.ListRecentCommitsAsync();
                         break;
                     case "4":
-                        await _application.ListOpenPullRequestsAsync();
+                        await application.ListOpenPullRequestsAsync();
                         break;
                     case "5":
                         Console.WriteLine("👋 Goodbye! Thanks for using AI Code Reviewer!");

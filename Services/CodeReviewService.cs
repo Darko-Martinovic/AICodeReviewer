@@ -8,16 +8,16 @@ namespace AICodeReviewer.Services
     /// <summary>
     /// Service for performing AI-powered code reviews
     /// </summary>
-    public class CodeReviewService
+    public class CodeReviewService : ICodeReviewService
     {
-        private readonly AzureOpenAIService _aiService;
-        private readonly GitHubService _gitHubService;
-        private readonly ConfigurationService _configurationService;
+        private readonly IAzureOpenAIService _aiService;
+        private readonly IGitHubService _gitHubService;
+        private readonly IConfigurationService _configurationService;
 
         public CodeReviewService(
-            AzureOpenAIService aiService,
-            GitHubService gitHubService,
-            ConfigurationService configurationService
+            IAzureOpenAIService aiService,
+            IGitHubService gitHubService,
+            IConfigurationService configurationService
         )
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));

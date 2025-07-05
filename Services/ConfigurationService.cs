@@ -7,7 +7,7 @@ namespace AICodeReviewer.Services
     /// Service for loading and managing application configuration from multiple sources
     /// Priority: appsettings.json > Environment Variables > Defaults
     /// </summary>
-    public class ConfigurationService
+    public class ConfigurationService : IConfigurationService
     {
         private readonly AppSettings _appSettings;
 

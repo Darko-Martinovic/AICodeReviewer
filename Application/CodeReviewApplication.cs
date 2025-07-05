@@ -7,16 +7,16 @@ namespace AICodeReviewer.Application
     /// </summary>
     public class CodeReviewApplication
     {
-        private readonly GitHubService _gitHubService;
-        private readonly CodeReviewService _codeReviewService;
-        private readonly NotificationService _notificationService;
-        private readonly JiraService _jiraService;
+        private readonly IGitHubService _gitHubService;
+        private readonly ICodeReviewService _codeReviewService;
+        private readonly INotificationService _notificationService;
+        private readonly IJiraService _jiraService;
 
         public CodeReviewApplication(
-            GitHubService gitHubService,
-            CodeReviewService codeReviewService,
-            NotificationService notificationService,
-            JiraService jiraService
+            IGitHubService gitHubService,
+            ICodeReviewService codeReviewService,
+            INotificationService notificationService,
+            IJiraService jiraService
         )
         {
             _gitHubService =

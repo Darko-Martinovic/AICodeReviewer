@@ -8,7 +8,7 @@ namespace AICodeReviewer.Services
     /// <summary>
     /// Service for handling Jira integration and ticket operations
     /// </summary>
-    public class JiraService : IDisposable
+    public class JiraService : IJiraService, IDisposable
     {
         private readonly string? _jiraBaseUrl;
         private readonly string? _jiraApiToken;

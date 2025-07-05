@@ -5,7 +5,7 @@ namespace AICodeReviewer.Services
     /// <summary>
     /// Service for handling GitHub API interactions
     /// </summary>
-    public class GitHubService
+    public class GitHubService : IGitHubService
     {
         private readonly GitHubClient _gitHubClient;
         private readonly string _repoOwner;
@@ -155,6 +155,26 @@ namespace AICodeReviewer.Services
         public async Task<Repository> GetRepositoryDetailsAsync()
         {
             return await _gitHubClient.Repository.Get(_repoOwner, _repoName);
+        }
+
+        /// <summary>
+        /// Gets repository info as tuple
+        /// </summary>
+        public Task<(string Owner, string Name)> GetRepositoryInfoAsync()
+        {
+            return Task.FromResult((_repoOwner, _repoName));
+        }
+
+        /// <summary>
+        /// Gets open pull requests
+        /// </summary>
+        public async Task<IReadOnlyList<PullRequest>> GetPullRequestsAsync()
+        {
+            var request = new PullRequestRequest()
+            {
+                State = ItemStateFilter.Open
+            };
+            return await _gitHubClient.PullRequest.GetAllForRepository(_repoOwner, _repoName, request);
         }
     }
 }

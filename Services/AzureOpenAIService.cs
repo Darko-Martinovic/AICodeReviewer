@@ -8,7 +8,7 @@ namespace AICodeReviewer.Services
     /// <summary>
     /// Service for handling Azure OpenAI API interactions
     /// </summary>
-    public class AzureOpenAIService
+    public class AzureOpenAIService : IAzureOpenAIService
     {
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
@@ -20,7 +20,7 @@ namespace AICodeReviewer.Services
             string endpoint,
             string apiKey,
             string deploymentName,
-            ConfigurationService configurationService
+            IConfigurationService configurationService
         )
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));

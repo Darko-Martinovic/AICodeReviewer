@@ -5,11 +5,11 @@ namespace AICodeReviewer.Services
     /// <summary>
     /// Service for sending notifications (simulated Teams notifications)
     /// </summary>
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
         private readonly TeamsSettings _teamsSettings;
 
-        public NotificationService(ConfigurationService configurationService)
+        public NotificationService(IConfigurationService configurationService)
         {
             var configService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _teamsSettings = configService.Settings.Teams;
