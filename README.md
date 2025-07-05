@@ -451,22 +451,68 @@ public async Task ReviewLatestCommit_WithIssues_ReturnsDetailedResults()
 - Swift (.swift)
 - SQL (.sql)
 
-## Future Enhancements
+## 🚀 Future Enhancements
 
-- [ ] Add actual Teams webhook integration
-- [x] ~~Implement real Jira API calls~~ ✅ **Completed**
-- [x] ~~Add PR comment posting~~ ✅ **Completed**
-- [ ] Support for more file types
-- [ ] Configuration file support
-- [ ] Logging framework integration
-- [ ] Unit tests coverage
-- [ ] Docker containerization
-- [ ] Webhook endpoints for CI/CD integration
-- [ ] Custom review rules and templates
+### 🎯 **Planned Features**
+- [ ] **Docker Support**: Containerized deployment with multi-stage builds
+- [ ] **CI/CD Integration**: GitHub Actions workflows for automated reviews
+- [ ] **Webhook Endpoints**: Real-time integration with GitHub/Jira webhooks
+- [ ] **Custom Rule Engine**: User-defined code quality rules and templates
+- [ ] **Multi-Repository Support**: Batch analysis across multiple repositories
+- [ ] **Review History**: Database storage of historical review results
+- [ ] **Reporting Dashboard**: Web UI for review analytics and trends
+- [ ] **Performance Optimization**: Caching and parallel processing for large PRs
 
-## Contributing
+### ✅ **Recently Completed**
+- [x] ~~Microsoft.Extensions.DependencyInjection implementation~~ ✅ **v2.0**
+- [x] ~~Structured configuration management with appsettings.json~~ ✅ **v2.0**
+- [x] ~~Interface-based architecture for all services~~ ✅ **v2.0**
+- [x] ~~Detailed AI issue reporting with severity and recommendations~~ ✅ **v1.5**
+- [x] ~~Real Jira API integration with rich ADF comments~~ ✅ **v1.4**
+- [x] ~~GitHub PR comment posting~~ ✅ **v1.3**
+- [x] ~~Configurable AI parameters (temperature, tokens, prompts)~~ ✅ **v1.2**
 
-1. Follow the established architecture patterns
-2. Add XML documentation to public methods
-3. Include error handling in new services
-4. Update this README when adding new features
+### 🔄 **In Progress**
+- [ ] **Teams Webhook Integration**: Replace simulation with real webhook calls
+- [ ] **Unit Test Coverage**: Comprehensive test suite using the new DI architecture
+- [ ] **Logging Framework**: Structured logging with different levels and outputs
+
+## 🤝 Contributing
+
+### **Development Guidelines**
+
+1. **Follow SOLID Principles**: Use the established DI patterns and interface-based design
+2. **Add Comprehensive Tests**: Leverage the DI container for easy mocking and testing
+3. **Document Public APIs**: Include XML documentation for all public methods and interfaces
+4. **Handle Errors Gracefully**: Implement proper error handling with meaningful messages
+5. **Update Configuration**: Add new settings to `appsettings.json` and document in `.env.example`
+
+### **Adding New Services**
+
+1. **Create Interface**: Define contract in `Services/I{ServiceName}.cs`
+2. **Implement Service**: Create implementation in `Services/{ServiceName}.cs`
+3. **Register in DI**: Add to `ConfigureServices()` in `Program.cs`
+4. **Inject Dependencies**: Use constructor injection in consuming classes
+5. **Add Tests**: Create unit tests with mocked dependencies
+
+### **Pull Request Process**
+
+1. Fork the repository and create a feature branch
+2. Follow the existing code style and architecture patterns
+3. Add or update tests for new functionality
+4. Update documentation (README, XML docs) as needed
+5. Ensure all tests pass and code builds successfully
+6. Submit PR with clear description of changes and reasoning
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Azure OpenAI**: Powers the intelligent code analysis
+- **Octokit.NET**: Excellent GitHub API integration
+- **Microsoft.Extensions**: Enterprise-grade dependency injection and configuration
+- **Atlassian**: Jira API for seamless ticket integration
