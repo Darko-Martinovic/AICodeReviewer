@@ -73,9 +73,10 @@ namespace AICodeReviewer.Services
                 var reviewedFiles = new List<string>();
                 var result = new CodeReviewResult();
                 int currentFile = 0;
-                int totalFiles = Math.Min(codeFiles.Count, 3);
+                var maxFilesToReview = _configurationService.Settings.CodeReview.MaxFilesToReview;
+                int totalFiles = Math.Min(codeFiles.Count, maxFilesToReview);
 
-                foreach (var file in codeFiles.Take(3)) // Limit to 3 files to avoid token limits
+                foreach (var file in codeFiles.Take(maxFilesToReview)) // Configurable limit from appsettings
                 {
                     currentFile++;
                     var fileName = FileUtils.GetFileName(file);

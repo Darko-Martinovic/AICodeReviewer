@@ -8,13 +8,14 @@ namespace AICodeReviewer.Services
     public class NotificationService : INotificationService
     {
         private readonly TeamsSettings _teamsSettings;
+        private readonly IConfigurationService _configurationService;
 
         public NotificationService(IConfigurationService configurationService)
         {
-            var configService =
+            _configurationService =
                 configurationService
                 ?? throw new ArgumentNullException(nameof(configurationService));
-            _teamsSettings = configService.Settings.Teams;
+            _teamsSettings = configurationService.Settings.Teams;
         }
 
         /// <summary>
@@ -75,15 +76,16 @@ namespace AICodeReviewer.Services
             {
                 Console.WriteLine();
                 Console.WriteLine("**📋 Key Issues Identified:**");
-                var issuesToShow = topIssues.Take(3);
+                var maxIssuesInSummary = _configurationService.Settings.CodeReview.MaxIssuesInSummary;
+                var issuesToShow = topIssues.Take(maxIssuesInSummary);
                 foreach (var issue in issuesToShow)
                 {
                     Console.WriteLine($"• {issue}");
                 }
 
-                if (topIssues.Count > 3)
+                if (topIssues.Count > maxIssuesInSummary)
                 {
-                    Console.WriteLine($"• *...and {topIssues.Count - 3} more issue(s)*");
+                    Console.WriteLine($"• *...and {topIssues.Count - maxIssuesInSummary} more issue(s)*");
                 }
             }
 

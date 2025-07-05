@@ -127,6 +127,17 @@ namespace AICodeReviewer.Services
                 settings.AzureOpenAI.ApiVersion = apiVersion;
             }
 
+            // Code Review settings
+            if (int.TryParse(Environment.GetEnvironmentVariable("MAX_FILES_TO_REVIEW"), out var maxFiles))
+            {
+                settings.CodeReview.MaxFilesToReview = maxFiles;
+            }
+
+            if (int.TryParse(Environment.GetEnvironmentVariable("MAX_ISSUES_IN_SUMMARY"), out var maxIssues))
+            {
+                settings.CodeReview.MaxIssuesInSummary = maxIssues;
+            }
+
             Console.WriteLine("✅ Environment variable overrides applied");
         }
 
