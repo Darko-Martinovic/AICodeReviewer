@@ -1,6 +1,8 @@
 // Deliberately buggy code for demonstration purposes
 // This file contains common issues that AI Code Reviewer should detect
 
+//Check the full response.
+
 using System;
 using System.Threading.Tasks;
 
