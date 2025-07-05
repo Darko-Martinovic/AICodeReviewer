@@ -5,6 +5,6 @@ namespace AICodeReviewer.Services
     /// </summary>
     public interface IAzureOpenAIService
     {
-        Task<(List<string> issues, List<Models.DetailedIssue> detailedIssues)> AnalyzeCodeAsync(string fileName, string fileContent);
+        Task<(List<string> issues, List<Models.DetailedIssue> detailedIssues, Models.Usage usage)> AnalyzeCodeAsync(string fileName, string fileContent);
     }
 }

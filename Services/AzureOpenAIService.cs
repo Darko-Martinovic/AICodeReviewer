@@ -91,11 +91,12 @@ Only respond with 'No issues found' if the code is truly exemplary.";
         }
 
         /// <summary>
-        /// Analyzes code using Azure OpenAI and returns detailed analysis results
+        /// Analyzes code using Azure OpenAI and returns detailed analysis results with token usage
         /// </summary>
         public async Task<(
             List<string> issues,
-            List<DetailedIssue> detailedIssues
+            List<DetailedIssue> detailedIssues,
+            Usage usage
         )> AnalyzeCodeAsync(string fileName, string fileContent)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -147,7 +148,8 @@ Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of
                         {
                             $"AI analysis failed: {response.StatusCode} - {response.ReasonPhrase}"
                         },
-                        new List<DetailedIssue>()
+                        new List<DetailedIssue>(),
+                        new Usage()
                     );
                 }
 
@@ -155,16 +157,18 @@ Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of
                 var chatResponse = JsonSerializer.Deserialize<ChatResponse>(jsonResponse);
 
                 var aiResponse = chatResponse?.choices?[0]?.message?.content ?? "No response";
+                var usage = chatResponse?.usage ?? new Usage();
 
                 // Parse AI response
                 if (
                     aiResponse.Contains("No issues found") || aiResponse.Contains("no issues found")
                 )
                 {
-                    return (new List<string>(), new List<DetailedIssue>());
+                    return (new List<string>(), new List<DetailedIssue>(), usage);
                 }
 
-                return ParseDetailedResponse(fileName, aiResponse);
+                var (issues, detailedIssues) = ParseDetailedResponse(fileName, aiResponse);
+                return (issues, detailedIssues, usage);
             }
             catch (Exception ex)
             {
@@ -175,7 +179,8 @@ Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of
                 }
                 return (
                     new List<string> { $"Analysis error: {ex.Message}" },
-                    new List<DetailedIssue>()
+                    new List<DetailedIssue>(),
+                    new Usage()
                 );
             }
             finally

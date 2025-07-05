@@ -48,6 +48,16 @@ namespace AICodeReviewer.Services
 
         private async Task<CodeReviewResult> ReviewFilesInternalAsync(List<object> files)
         {
+            // Initialize metrics tracking
+            var reviewType = files.FirstOrDefault() switch
+            {
+                GitHubCommitFile => "Commit Review",
+                PullRequestFile => "Pull Request Review",
+                _ => "Unknown Review"
+            };
+
+            var metrics = ReviewMetrics.StartReview(reviewType);
+
             try
             {
                 Console.WriteLine("🚀 Initializing AI Code Review Process...");
@@ -63,7 +73,10 @@ namespace AICodeReviewer.Services
                 if (!codeFiles.Any())
                 {
                     Console.WriteLine("⚠️  No code files to review");
-                    return new CodeReviewResult();
+                    var emptyResult = new CodeReviewResult();
+                    metrics.FinishReview();
+                    emptyResult.Metrics = metrics;
+                    return emptyResult;
                 }
 
                 Console.WriteLine($"🔍 Reviewing {codeFiles.Count} code file(s)...");
@@ -99,19 +112,25 @@ namespace AICodeReviewer.Services
 
                         Console.WriteLine($" ✅ ({fileContent.Length} characters)");
 
-                        // Add to reviewed files list
+                        // Add to reviewed files list and track lines of code
                         reviewedFiles.Add(fileName);
+                        metrics.FilesReviewed++;
+                        metrics.TotalLinesOfCode += fileContent.Split('\n').Length;
 
                         // Show progress for AI analysis
                         Console.Write($"    🤖 Sending to AI for analysis...");
 
-                        // Send to AI for review
-                        var (issues, detailedIssues) = await _aiService.AnalyzeCodeAsync(
+                        // Send to AI for review with usage tracking
+                        var (issues, detailedIssues, usage) = await _aiService.AnalyzeCodeAsync(
                             fileName,
                             fileContent
                         );
 
+                        // Track token usage and cost
+                        metrics.AddUsage(usage);
+
                         Console.WriteLine($" ✅ Complete");
+                        Console.WriteLine($"    📊 Tokens: {usage.total_tokens} (In: {usage.prompt_tokens}, Out: {usage.completion_tokens})");
 
                         if (issues.Any())
                         {
@@ -127,6 +146,8 @@ namespace AICodeReviewer.Services
                             {
                                 result.DetailedIssues.Add(detailedIssue);
                             }
+
+                            metrics.IssuesFound += issues.Count;
                         }
                         else
                         {
@@ -146,6 +167,10 @@ namespace AICodeReviewer.Services
                 }
 
                 Console.WriteLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+                // Finish metrics tracking
+                metrics.FinishReview();
+
                 // Summary
                 Console.WriteLine($"📊 Review Summary:");
                 Console.WriteLine($"   Files reviewed: {currentFile}");
@@ -158,15 +183,23 @@ namespace AICodeReviewer.Services
                     );
                 }
 
+                // Display performance metrics
+                Console.WriteLine();
+                Console.WriteLine(metrics.ToString());
+
                 // Return the results
                 result.ReviewedFiles = reviewedFiles;
                 result.AllIssues = allIssues;
+                result.Metrics = metrics;
                 return result;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ AI review failed: {ex.Message}");
-                return new CodeReviewResult(); // Return empty result on error
+                metrics.FinishReview();
+                var errorResult = new CodeReviewResult();
+                errorResult.Metrics = metrics;
+                return errorResult; // Return empty result with metrics on error
             }
         }
 

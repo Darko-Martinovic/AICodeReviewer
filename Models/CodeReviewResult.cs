@@ -8,6 +8,7 @@ namespace AICodeReviewer.Models
         public List<string> ReviewedFiles { get; set; } = new();
         public List<string> AllIssues { get; set; } = new();
         public List<DetailedIssue> DetailedIssues { get; set; } = new();
+        public ReviewMetrics Metrics { get; set; } = new();
         public int IssueCount => AllIssues.Count;
         public bool HasIssues => AllIssues.Any();
     }
