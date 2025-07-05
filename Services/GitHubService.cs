@@ -34,7 +34,9 @@ namespace AICodeReviewer.Services
 
                 var repo = await _gitHubClient.Repository.Get(_repoOwner, _repoName);
                 Console.WriteLine($"✅ Repository access: {repo.FullName}");
-                Console.WriteLine($"📝 Repository description: {repo.Description ?? "No description"}");
+                Console.WriteLine(
+                    $"📝 Repository description: {repo.Description ?? "No description"}"
+                );
                 Console.WriteLine($"🔒 Private repository: {repo.Private}");
                 Console.WriteLine();
             }
@@ -54,7 +56,9 @@ namespace AICodeReviewer.Services
                         Console.WriteLine($"  - {r.Name} ({(r.Private ? "private" : "public")})");
                     }
 
-                    Console.WriteLine($"\n💡 Make sure your .env file has the correct repository name:");
+                    Console.WriteLine(
+                        $"\n💡 Make sure your .env file has the correct repository name:"
+                    );
                     Console.WriteLine($"   GITHUB_REPO_OWNER={currentUser.Login}");
                     Console.WriteLine($"   GITHUB_REPO_NAME=<exact-repository-name>");
                     Console.WriteLine();
@@ -73,10 +77,11 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<IReadOnlyList<GitHubCommit>> GetCommitsAsync()
         {
-            return await _gitHubClient.Repository.Commit.GetAll(_repoOwner, _repoName, new CommitRequest
-            {
-                Sha = "main"
-            });
+            return await _gitHubClient.Repository.Commit.GetAll(
+                _repoOwner,
+                _repoName,
+                new CommitRequest { Sha = "main" }
+            );
         }
 
         /// <summary>
@@ -92,8 +97,11 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<IReadOnlyList<PullRequest>> GetOpenPullRequestsAsync()
         {
-            return await _gitHubClient.PullRequest.GetAllForRepository(_repoOwner, _repoName,
-                new PullRequestRequest { State = ItemStateFilter.Open });
+            return await _gitHubClient.PullRequest.GetAllForRepository(
+                _repoOwner,
+                _repoName,
+                new PullRequestRequest { State = ItemStateFilter.Open }
+            );
         }
 
         /// <summary>
@@ -111,7 +119,11 @@ namespace AICodeReviewer.Services
         {
             try
             {
-                var fileContent = await _gitHubClient.Repository.Content.GetAllContents(_repoOwner, _repoName, fileName);
+                var fileContent = await _gitHubClient.Repository.Content.GetAllContents(
+                    _repoOwner,
+                    _repoName,
+                    fileName
+                );
                 return fileContent.Any() ? fileContent[0].Content : "";
             }
             catch

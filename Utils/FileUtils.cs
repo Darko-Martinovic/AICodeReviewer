@@ -40,12 +40,25 @@ namespace AICodeReviewer.Utils
         {
             var codeExtensions = new[]
             {
-                ".cs", ".vb", ".js", ".ts", ".py", ".java",
-                ".cpp", ".c", ".h", ".php", ".rb", ".kt",
-                ".swift", ".sql"
+                ".cs",
+                ".vb",
+                ".js",
+                ".ts",
+                ".py",
+                ".java",
+                ".cpp",
+                ".c",
+                ".h",
+                ".php",
+                ".rb",
+                ".kt",
+                ".swift",
+                ".sql"
             };
 
-            return codeExtensions.Any(ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase));
+            return codeExtensions.Any(
+                ext => fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
         /// <summary>

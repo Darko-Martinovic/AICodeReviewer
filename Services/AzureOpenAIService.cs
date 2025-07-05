@@ -1,4 +1,5 @@
 using AICodeReviewer.Models;
+using AICodeReviewer.Models.Configuration;
 using System.Text;
 using System.Text.Json;
 
@@ -12,22 +13,29 @@ namespace AICodeReviewer.Services
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
         private readonly string _deploymentName;
-        private readonly float _temperature;
-        private readonly int _maxTokens;
-        private readonly int _contentLimit;
-        private readonly string _systemPrompt;
+        private readonly AzureOpenAISettings _settings;
 
-        public AzureOpenAIService(HttpClient httpClient, string endpoint, string apiKey, string deploymentName)
+        public AzureOpenAIService(
+            HttpClient httpClient,
+            string endpoint,
+            string apiKey,
+            string deploymentName,
+            ConfigurationService configurationService
+        )
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-            _deploymentName = deploymentName ?? throw new ArgumentNullException(nameof(deploymentName));
+            _deploymentName =
+                deploymentName ?? throw new ArgumentNullException(nameof(deploymentName));
 
-            // Load AI configuration from environment variables with defaults
-            _temperature = float.TryParse(Environment.GetEnvironmentVariable("AI_TEMPERATURE"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var temp) ? temp : 0.3f;
-            _maxTokens = int.TryParse(Environment.GetEnvironmentVariable("AI_MAX_TOKENS"), out var tokens) ? tokens : 2500;
-            _contentLimit = int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var limit) ? limit : 15000;
-            _systemPrompt = Environment.GetEnvironmentVariable("AI_SYSTEM_PROMPT") ?? GetDefaultSystemPrompt();
+            var configService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _settings = configService.Settings.AzureOpenAI;
+
+            // Ensure we have a system prompt
+            if (string.IsNullOrEmpty(_settings.SystemPrompt))
+            {
+                _settings.SystemPrompt = GetDefaultSystemPrompt();
+            }
 
             // Setup HTTP client headers for Azure OpenAI
             _httpClient.DefaultRequestHeaders.Clear();
@@ -85,36 +93,41 @@ Only respond with 'No issues found' if the code is truly exemplary.";
         /// <summary>
         /// Analyzes code using Azure OpenAI and returns detailed analysis results
         /// </summary>
-        public async Task<(List<string> issues, List<DetailedIssue> detailedIssues)> AnalyzeCodeAsync(string fileName, string fileContent)
+        public async Task<(
+            List<string> issues,
+            List<DetailedIssue> detailedIssues
+        )> AnalyzeCodeAsync(string fileName, string fileContent)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
-                string url = $"{_endpoint.TrimEnd('/')}/openai/deployments/{_deploymentName}/chat/completions?api-version=2024-02-01";
+                string url =
+                    $"{_endpoint.TrimEnd('/')}/openai/deployments/{_deploymentName}/chat/completions?api-version={_settings.ApiVersion}";
 
-                var userPrompt = $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
+                var userPrompt =
+                    $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
 
 File: {fileName}
 Content Length: {fileContent.Length} characters
-{(fileContent.Length > _contentLimit ? $"(Showing first {_contentLimit:N0} characters of {fileContent.Length:N0} total)" : "")}
+{(fileContent.Length > _settings.ContentLimit ? $"(Showing first {_settings.ContentLimit:N0} characters of {fileContent.Length:N0} total)" : "")}
 
 ```
-{fileContent.Substring(0, Math.Min(fileContent.Length, _contentLimit))}
-{(fileContent.Length > _contentLimit ? "\n... [Content truncated for analysis] ..." : "")}
+{fileContent.Substring(0, Math.Min(fileContent.Length, _settings.ContentLimit))}
+{(fileContent.Length > _settings.ContentLimit ? "\n... [Content truncated for analysis] ..." : "")}
 ```
 
-Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
+Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
 
                 var request = new ChatRequest
                 {
                     messages = new[]
                     {
-                        new ChatMessage { role = "system", content = _systemPrompt },
+                        new ChatMessage { role = "system", content = _settings.SystemPrompt },
                         new ChatMessage { role = "user", content = userPrompt }
                     },
-                    max_tokens = _maxTokens,
-                    temperature = _temperature
+                    max_tokens = _settings.MaxTokens,
+                    temperature = _settings.Temperature
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(request);
@@ -125,9 +138,17 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ AI API Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    Console.WriteLine(
+                        $"❌ AI API Error: {response.StatusCode} - {response.ReasonPhrase}"
+                    );
                     Console.WriteLine($"❌ Error details: {errorContent}");
-                    return (new List<string> { $"AI analysis failed: {response.StatusCode} - {response.ReasonPhrase}" }, new List<DetailedIssue>());
+                    return (
+                        new List<string>
+                        {
+                            $"AI analysis failed: {response.StatusCode} - {response.ReasonPhrase}"
+                        },
+                        new List<DetailedIssue>()
+                    );
                 }
 
                 string jsonResponse = await response.Content.ReadAsStringAsync();
@@ -136,7 +157,9 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
                 var aiResponse = chatResponse?.choices?[0]?.message?.content ?? "No response";
 
                 // Parse AI response
-                if (aiResponse.Contains("No issues found") || aiResponse.Contains("no issues found"))
+                if (
+                    aiResponse.Contains("No issues found") || aiResponse.Contains("no issues found")
+                )
                 {
                     return (new List<string>(), new List<DetailedIssue>());
                 }
@@ -150,7 +173,10 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
                 {
                     Console.WriteLine($"❌ Inner Exception: {ex.InnerException.Message}");
                 }
-                return (new List<string> { $"Analysis error: {ex.Message}" }, new List<DetailedIssue>());
+                return (
+                    new List<string> { $"Analysis error: {ex.Message}" },
+                    new List<DetailedIssue>()
+                );
             }
             finally
             {
@@ -162,23 +188,29 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
         /// <summary>
         /// Parses the detailed AI response into structured issue objects
         /// </summary>
-        private (List<string> issues, List<DetailedIssue> detailedIssues) ParseDetailedResponse(string fileName, string aiResponse)
+        private (List<string> issues, List<DetailedIssue> detailedIssues) ParseDetailedResponse(
+            string fileName,
+            string aiResponse
+        )
         {
             var issues = new List<string>();
             var detailedIssues = new List<DetailedIssue>();
 
-            var issueBlocks = aiResponse.Split("---", StringSplitOptions.RemoveEmptyEntries)
-                                      .Where(block => block.Trim().Length > 0)
-                                      .ToList();
+            var issueBlocks = aiResponse
+                .Split("---", StringSplitOptions.RemoveEmptyEntries)
+                .Where(block => block.Trim().Length > 0)
+                .ToList();
 
             foreach (var block in issueBlocks)
             {
-                var lines = block.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                               .Select(line => line.Trim())
-                               .Where(line => !string.IsNullOrEmpty(line))
-                               .ToList();
+                var lines = block
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(line => line.Trim())
+                    .Where(line => !string.IsNullOrEmpty(line))
+                    .ToList();
 
-                if (lines.Count < 3) continue; // Skip incomplete blocks
+                if (lines.Count < 3)
+                    continue; // Skip incomplete blocks
 
                 var detailedIssue = new DetailedIssue { FileName = fileName };
 
@@ -203,7 +235,10 @@ Note: {(fileContent.Length > _contentLimit ? "This is a partial view of a larger
                 }
 
                 // Only add if we have essential fields
-                if (!string.IsNullOrEmpty(detailedIssue.Title) && !string.IsNullOrEmpty(detailedIssue.Description))
+                if (
+                    !string.IsNullOrEmpty(detailedIssue.Title)
+                    && !string.IsNullOrEmpty(detailedIssue.Description)
+                )
                 {
                     detailedIssues.Add(detailedIssue);
 

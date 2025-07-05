@@ -1,4 +1,5 @@
 using AICodeReviewer.Models;
+using AICodeReviewer.Models.Configuration;
 using AICodeReviewer.Utils;
 using Octokit;
 
@@ -11,11 +12,14 @@ namespace AICodeReviewer.Services
     {
         private readonly AzureOpenAIService _aiService;
         private readonly GitHubService _gitHubService;
+        private readonly ConfigurationService _configurationService;
 
-        public CodeReviewService(AzureOpenAIService aiService, GitHubService gitHubService)
+        public CodeReviewService(AzureOpenAIService aiService, GitHubService gitHubService, ConfigurationService configurationService)
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
-            _gitHubService = gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
+            _gitHubService =
+                gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
+            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
         }
 
         /// <summary>
@@ -29,7 +33,9 @@ namespace AICodeReviewer.Services
         /// <summary>
         /// Performs AI code review on pull request files
         /// </summary>
-        public async Task<CodeReviewResult> ReviewPullRequestAsync(IReadOnlyList<PullRequestFile> files)
+        public async Task<CodeReviewResult> ReviewPullRequestAsync(
+            IReadOnlyList<PullRequestFile> files
+        )
         {
             return await ReviewFilesInternalAsync(files.Cast<object>().ToList());
         }
@@ -40,7 +46,13 @@ namespace AICodeReviewer.Services
             {
                 Console.WriteLine("🚀 Initializing AI Code Review Process...");
 
-                var codeFiles = files.Where(f => FileUtils.IsCodeFile(FileUtils.GetFileName(f)) && FileUtils.GetFileStatus(f) != "removed").ToList();
+                var codeFiles = files
+                    .Where(
+                        f =>
+                            FileUtils.IsCodeFile(FileUtils.GetFileName(f))
+                            && FileUtils.GetFileStatus(f) != "removed"
+                    )
+                    .ToList();
 
                 if (!codeFiles.Any())
                 {
@@ -87,7 +99,10 @@ namespace AICodeReviewer.Services
                         Console.Write($"    🤖 Sending to AI for analysis...");
 
                         // Send to AI for review
-                        var (issues, detailedIssues) = await _aiService.AnalyzeCodeAsync(fileName, fileContent);
+                        var (issues, detailedIssues) = await _aiService.AnalyzeCodeAsync(
+                            fileName,
+                            fileContent
+                        );
 
                         Console.WriteLine($" ✅ Complete");
 
@@ -131,7 +146,9 @@ namespace AICodeReviewer.Services
 
                 if (allIssues.Any())
                 {
-                    Console.WriteLine($"   Severity: {(allIssues.Count > 5 ? "High" : allIssues.Count > 2 ? "Medium" : "Low")}");
+                    Console.WriteLine(
+                        $"   Severity: {(allIssues.Count > 5 ? "High" : allIssues.Count > 2 ? "Medium" : "Low")}"
+                    );
                 }
 
                 // Return the results
@@ -158,8 +175,8 @@ namespace AICodeReviewer.Services
                     _ => 0
                 };
 
-                // Get content limit from environment or use default
-                var contentLimit = int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var limit) ? limit : 15000;
+                // Get content limit from configuration
+                var contentLimit = _configurationService.Settings.AzureOpenAI.ContentLimit;
                 var maxFileSize = contentLimit / 3; // Allow files up to 1/3 of content limit in changes
 
                 // For reasonably sized files, we can get content directly

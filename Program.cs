@@ -44,6 +44,10 @@ namespace AICodeReviewer
         /// </summary>
         static async Task InitializeServicesAsync()
         {
+            // Initialize configuration service first
+            var configurationService = new ConfigurationService();
+            configurationService.DisplayConfigurationSummary();
+
             // Get configuration from environment variables
             string githubToken = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
                 ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
@@ -63,12 +67,12 @@ namespace AICodeReviewer
             string chatDeployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
                 ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
 
-            // Initialize services
+            // Initialize services with configuration injection
             var httpClient = new System.Net.Http.HttpClient();
-            var azureOpenAIService = new AzureOpenAIService(httpClient, aoaiEndpoint, aoaiApiKey, chatDeployment);
+            var azureOpenAIService = new AzureOpenAIService(httpClient, aoaiEndpoint, aoaiApiKey, chatDeployment, configurationService);
             var gitHubService = new GitHubService(githubToken, repoOwner, repoName);
-            var codeReviewService = new CodeReviewService(azureOpenAIService, gitHubService);
-            var notificationService = new NotificationService();
+            var codeReviewService = new CodeReviewService(azureOpenAIService, gitHubService, configurationService);
+            var notificationService = new NotificationService(configurationService);
             var jiraService = new JiraService();
 
             // Initialize GitHub connection
