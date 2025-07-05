@@ -70,7 +70,7 @@ namespace AICodeReviewer
             {
                 var httpClient = provider.GetRequiredService<HttpClient>();
                 var configService = provider.GetRequiredService<IConfigurationService>();
-                
+
                 var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
                     ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
                 var apiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")

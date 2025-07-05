@@ -43,6 +43,7 @@ AICodeReviewer/
 ## ⚡ Key Technical Features
 
 ### 🏭 **Enterprise-Grade Dependency Injection**
+
 - ✅ **Microsoft.Extensions.DependencyInjection** implementation
 - ✅ Interface-based service contracts for all components
 - ✅ Proper service lifetime management (Singleton for console app)
@@ -50,6 +51,7 @@ AICodeReviewer/
 - ✅ Clean separation of service registration and application logic
 
 ### 🎛️ **Advanced Configuration Management**
+
 - ✅ **Hierarchical configuration**: `appsettings.json` → Environment Variables → Defaults
 - ✅ **Structured settings** with strongly-typed configuration models
 - ✅ **Runtime configuration summary** displayed at startup
@@ -57,6 +59,7 @@ AICodeReviewer/
 - ✅ **Externally configurable** without code changes
 
 ### 🔍 **Detailed AI Code Analysis**
+
 - ✅ **Structured issue reporting** with severity, category, recommendations
 - ✅ **Line-by-line feedback** with specific file locations
 - ✅ **Actionable recommendations** with code examples
@@ -101,6 +104,7 @@ This application requires several environment variables to function properly. Th
 ## 📋 Features
 
 ### 🔍 **Code Analysis & Review**
+
 - ✅ **AI-Powered Analysis**: Leverage Azure OpenAI for intelligent, context-aware code review
 - ✅ **Multi-Language Support**: Analyze C#, JavaScript, TypeScript, Python, Java, and more
 - ✅ **Detailed Issue Reporting**: Structured feedback with severity, category, description, and recommendations
@@ -108,12 +112,14 @@ This application requires several environment variables to function properly. Th
 - ✅ **Performance Metrics**: Real-time timing and progress indicators
 
 ### 🔗 **GitHub Integration**
+
 - ✅ **Repository Analysis**: Connect to GitHub repositories and analyze commits/PRs
 - ✅ **Commit Review**: Analyze latest commits with file change detection
 - ✅ **Pull Request Review**: Comprehensive PR analysis with automatic comment posting
 - ✅ **File Content Retrieval**: Direct integration with GitHub API for source code access
 
 ### 🎫 **Jira Integration**
+
 - ✅ **Auto-Detection**: Extract Jira ticket keys from PR titles (e.g., `OPS-123`, `PROJ-456`)
 - ✅ **Rich Comments**: Post detailed, visually formatted comments using Atlassian Document Format (ADF)
 - ✅ **Ticket Updates**: Real-time updates with review results and issue summaries
@@ -121,12 +127,14 @@ This application requires several environment variables to function properly. Th
 - ✅ **Smart Fallback**: Graceful degradation when API is unavailable
 
 ### 📢 **Teams Notifications**
+
 - ✅ **Formatted Notifications**: Rich, interactive Teams-style message simulation
 - ✅ **Severity-Based Reactions**: Context-aware team member responses
 - ✅ **Delivery Tracking**: Simulated webhook delivery and read confirmations
 - ✅ **Configurable Behavior**: Customizable team member names and response patterns
 
 ### ⚙️ **Configuration Management**
+
 - ✅ **Hierarchical Config**: JSON file → Environment variables → Defaults
 - ✅ **Hot-Swappable**: Change AI parameters without code modification
 - ✅ **Secure Storage**: Environment variables for sensitive data
@@ -135,6 +143,7 @@ This application requires several environment variables to function properly. Th
 ## 🚀 Setup & Installation
 
 ### 1. **Prerequisites**
+
 - .NET 9.0 or later
 - GitHub Personal Access Token
 - Azure OpenAI service endpoint and API key
@@ -149,6 +158,7 @@ dotnet restore
 ```
 
 **Included NuGet Packages:**
+
 - `Microsoft.Extensions.DependencyInjection` (v9.0.0) - Enterprise DI container
 - `Microsoft.Extensions.Hosting` (v9.0.0) - Service lifetime management
 - `Octokit` (v14.0.0) - GitHub API integration
@@ -228,6 +238,7 @@ dotnet run
 ## 📊 Sample Output
 
 ### **Latest Commit Review**
+
 ```
 🔍 Fetching latest commit...
 🏠 Repository: YourOrg/YourRepo
@@ -261,6 +272,7 @@ dotnet run
 ```
 
 ### **Detailed Issue Example**
+
 ```
 CATEGORY: Security
 SEVERITY: Critical
@@ -271,6 +283,7 @@ LINE: 42
 ```
 
 ### **Teams Notification Simulation**
+
 ```
 💬 Microsoft Teams - Code Review Channel
 ════════════════════════════════════════════════════════════════════════
@@ -358,6 +371,7 @@ _Note: If Jira/GitHub APIs are not configured or fail, the application shows sim
 ### 🎯 **Enterprise-Grade Dependency Injection**
 
 **Before (Manual DI):**
+
 ```csharp
 // Tightly coupled, hard to test
 var httpClient = new HttpClient();
@@ -367,6 +381,7 @@ var app = new CodeReviewApplication(githubService, aiService, /* ... */);
 ```
 
 **After (Microsoft.Extensions.DI):**
+
 ```csharp
 // Loosely coupled, easily testable
 services.AddSingleton<HttpClient>();
@@ -380,14 +395,14 @@ var app = serviceProvider.GetRequiredService<CodeReviewApplication>();
 
 ### 🔧 **Benefits Achieved**
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| **Dependency Management** | Manual instantiation | DI container with interfaces |
-| **Testability** | Hard to mock dependencies | Easy to inject mocks via interfaces |
-| **Code Organization** | Tightly coupled services | Loosely coupled with clear contracts |
-| **Resource Management** | Manual disposal | Automatic disposal via DI container |
-| **Adding New Services** | Modify Program.cs | Register in ConfigureServices() |
-| **Maintenance** | Unclear dependency graph | Explicit, documented dependencies |
+| Aspect                    | Before                    | After                                |
+| ------------------------- | ------------------------- | ------------------------------------ |
+| **Dependency Management** | Manual instantiation      | DI container with interfaces         |
+| **Testability**           | Hard to mock dependencies | Easy to inject mocks via interfaces  |
+| **Code Organization**     | Tightly coupled services  | Loosely coupled with clear contracts |
+| **Resource Management**   | Manual disposal           | Automatic disposal via DI container  |
+| **Adding New Services**   | Modify Program.cs         | Register in ConfigureServices()      |
+| **Maintenance**           | Unclear dependency graph  | Explicit, documented dependencies    |
 
 ### 🧪 **Enhanced Testability**
 
@@ -400,7 +415,7 @@ public async Task ReviewLatestCommit_WithIssues_ReturnsDetailedResults()
     var mockAI = new Mock<IAzureOpenAIService>();
     var mockGitHub = new Mock<IGitHubService>();
     var reviewService = new CodeReviewService(mockAI.Object, mockGitHub.Object, config);
-    
+
     // Act & Assert
     var result = await reviewService.ReviewCommitAsync(files);
     Assert.That(result.IssueCount, Is.GreaterThan(0));
@@ -454,6 +469,7 @@ public async Task ReviewLatestCommit_WithIssues_ReturnsDetailedResults()
 ## 🚀 Future Enhancements
 
 ### 🎯 **Planned Features**
+
 - [ ] **Docker Support**: Containerized deployment with multi-stage builds
 - [ ] **CI/CD Integration**: GitHub Actions workflows for automated reviews
 - [ ] **Webhook Endpoints**: Real-time integration with GitHub/Jira webhooks
@@ -464,6 +480,7 @@ public async Task ReviewLatestCommit_WithIssues_ReturnsDetailedResults()
 - [ ] **Performance Optimization**: Caching and parallel processing for large PRs
 
 ### ✅ **Recently Completed**
+
 - [x] ~~Microsoft.Extensions.DependencyInjection implementation~~ ✅ **v2.0**
 - [x] ~~Structured configuration management with appsettings.json~~ ✅ **v2.0**
 - [x] ~~Interface-based architecture for all services~~ ✅ **v2.0**
@@ -473,6 +490,7 @@ public async Task ReviewLatestCommit_WithIssues_ReturnsDetailedResults()
 - [x] ~~Configurable AI parameters (temperature, tokens, prompts)~~ ✅ **v1.2**
 
 ### 🔄 **In Progress**
+
 - [ ] **Teams Webhook Integration**: Replace simulation with real webhook calls
 - [ ] **Unit Test Coverage**: Comprehensive test suite using the new DI architecture
 - [ ] **Logging Framework**: Structured logging with different levels and outputs
