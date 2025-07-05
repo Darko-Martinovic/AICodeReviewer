@@ -11,9 +11,12 @@ namespace AICodeReviewer.Services
 
         public NotificationService(IConfigurationService configurationService)
         {
-            var configService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            var configService =
+                configurationService
+                ?? throw new ArgumentNullException(nameof(configurationService));
             _teamsSettings = configService.Settings.Teams;
         }
+
         /// <summary>
         /// Sends a Teams notification with code review results
         /// </summary>
@@ -146,14 +149,24 @@ namespace AICodeReviewer.Services
             await Task.Delay(_teamsSettings.SimulationDelays.BetweenResponses);
 
             // Simulate team member responses
-            var responseCount = new Random().Next(_teamsSettings.ResponseRange.MinResponses, _teamsSettings.ResponseRange.MaxResponses + 1);
+            var responseCount = new Random().Next(
+                _teamsSettings.ResponseRange.MinResponses,
+                _teamsSettings.ResponseRange.MaxResponses + 1
+            );
 
             for (int i = 0; i < responseCount; i++)
             {
-                var member = _teamsSettings.TeamMembers[new Random().Next(_teamsSettings.TeamMembers.Count)];
+                var member = _teamsSettings.TeamMembers[
+                    new Random().Next(_teamsSettings.TeamMembers.Count)
+                ];
                 var response = GetRandomTeamResponse(issueCount, author, member);
 
-                await Task.Delay(new Random().Next(_teamsSettings.RandomDelayRange.MinMs, _teamsSettings.RandomDelayRange.MaxMs));
+                await Task.Delay(
+                    new Random().Next(
+                        _teamsSettings.RandomDelayRange.MinMs,
+                        _teamsSettings.RandomDelayRange.MaxMs
+                    )
+                );
                 Console.WriteLine($"💬 {member}: {response}");
             }
 

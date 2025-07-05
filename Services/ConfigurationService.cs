@@ -46,19 +46,24 @@ namespace AICodeReviewer.Services
 
             if (!File.Exists(configFile))
             {
-                Console.WriteLine($"⚠️  Configuration file '{configFile}' not found, using defaults");
+                Console.WriteLine(
+                    $"⚠️  Configuration file '{configFile}' not found, using defaults"
+                );
                 return;
             }
 
             try
             {
                 var jsonContent = File.ReadAllText(configFile);
-                var jsonSettings = JsonSerializer.Deserialize<AppSettings>(jsonContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    AllowTrailingCommas = true,
-                    ReadCommentHandling = JsonCommentHandling.Skip
-                });
+                var jsonSettings = JsonSerializer.Deserialize<AppSettings>(
+                    jsonContent,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip
+                    }
+                );
 
                 if (jsonSettings != null)
                 {
@@ -80,19 +85,31 @@ namespace AICodeReviewer.Services
         private static void LoadFromEnvironmentVariables(AppSettings settings)
         {
             // Azure OpenAI settings (keep existing environment variable support)
-            if (float.TryParse(Environment.GetEnvironmentVariable("AI_TEMPERATURE"),
-                System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture, out var temp))
+            if (
+                float.TryParse(
+                    Environment.GetEnvironmentVariable("AI_TEMPERATURE"),
+                    System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out var temp
+                )
+            )
             {
                 settings.AzureOpenAI.Temperature = temp;
             }
 
-            if (int.TryParse(Environment.GetEnvironmentVariable("AI_MAX_TOKENS"), out var maxTokens))
+            if (
+                int.TryParse(Environment.GetEnvironmentVariable("AI_MAX_TOKENS"), out var maxTokens)
+            )
             {
                 settings.AzureOpenAI.MaxTokens = maxTokens;
             }
 
-            if (int.TryParse(Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"), out var contentLimit))
+            if (
+                int.TryParse(
+                    Environment.GetEnvironmentVariable("AI_CONTENT_LIMIT"),
+                    out var contentLimit
+                )
+            )
             {
                 settings.AzureOpenAI.ContentLimit = contentLimit;
             }
@@ -172,7 +189,9 @@ namespace AICodeReviewer.Services
                 }
                 if (source.Jira.SeverityLabels?.Any() == true)
                 {
-                    destination.Jira.SeverityLabels = new Dictionary<string, string>(source.Jira.SeverityLabels);
+                    destination.Jira.SeverityLabels = new Dictionary<string, string>(
+                        source.Jira.SeverityLabels
+                    );
                 }
             }
         }
@@ -186,7 +205,9 @@ namespace AICodeReviewer.Services
             Console.WriteLine($"  🤖 AI Temperature: {_appSettings.AzureOpenAI.Temperature}");
             Console.WriteLine($"  🔢 Max Tokens: {_appSettings.AzureOpenAI.MaxTokens}");
             Console.WriteLine($"  📏 Content Limit: {_appSettings.AzureOpenAI.ContentLimit}");
-            Console.WriteLine($"  📝 Max Files to Review: {_appSettings.CodeReview.MaxFilesToReview}");
+            Console.WriteLine(
+                $"  📝 Max Files to Review: {_appSettings.CodeReview.MaxFilesToReview}"
+            );
             Console.WriteLine($"  👥 Team Members: {_appSettings.Teams.TeamMembers.Count}");
             Console.WriteLine($"  🔗 API Version: {_appSettings.AzureOpenAI.ApiVersion}");
         }
