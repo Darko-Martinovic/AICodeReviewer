@@ -135,13 +135,14 @@ namespace AICodeReviewer
                 Console.WriteLine();
                 Console.WriteLine("Choose an option:");
                 Console.WriteLine();
-                Console.WriteLine("  1. 🔍 Review latest commit (Push Event)");
-                Console.WriteLine("  2. 🔀 Review Pull Request");
-                Console.WriteLine("  3. 📝 List recent commits");
+                Console.WriteLine("  1. 📝 List recent commits");
+                Console.WriteLine("  2. 🔍 Review latest commit (Push Event)");
+                Console.WriteLine("  3. 🔍 Review commit by hash");
                 Console.WriteLine("  4. 📋 List open Pull Requests");
-                Console.WriteLine("  5. 🚪 Exit");
+                Console.WriteLine("  5. 🔀 Review Pull Request");
+                Console.WriteLine("  6. 🚪 Exit");
                 Console.WriteLine();
-                Console.Write("Enter your choice (1-5): ");
+                Console.Write("Enter your choice (1-6): ");
 
                 string? choice = Console.ReadLine();
                 Console.WriteLine();
@@ -149,18 +150,21 @@ namespace AICodeReviewer
                 switch (choice)
                 {
                     case "1":
-                        await application.ReviewLatestCommitAsync();
+                        await application.ListRecentCommitsAsync();
                         break;
                     case "2":
-                        await application.ReviewPullRequestAsync();
+                        await application.ReviewLatestCommitAsync();
                         break;
                     case "3":
-                        await application.ListRecentCommitsAsync();
+                        await application.ReviewCommitByHashAsync();
                         break;
                     case "4":
                         await application.ListOpenPullRequestsAsync();
                         break;
                     case "5":
+                        await application.ReviewPullRequestAsync();
+                        break;
+                    case "6":
                         Console.WriteLine("👋 Goodbye! Thanks for using AI Code Reviewer!");
                         return;
                     default:

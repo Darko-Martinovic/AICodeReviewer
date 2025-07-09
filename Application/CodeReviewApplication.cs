@@ -95,6 +95,75 @@ namespace AICodeReviewer.Application
         }
 
         /// <summary>
+        /// Reviews a specific commit by hash
+        /// </summary>
+        public async Task ReviewCommitByHashAsync()
+        {
+            try
+            {
+                Console.WriteLine("🔍 Review Commit by Hash");
+                Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
+
+                Console.Write("Enter commit hash (full or short): ");
+                var commitHash = Console.ReadLine()?.Trim();
+
+                if (string.IsNullOrEmpty(commitHash))
+                {
+                    Console.WriteLine("❌ No commit hash provided.\n");
+                    return;
+                }
+
+                Console.WriteLine($"\n🔍 Fetching commit details for: {commitHash}");
+
+                // Get commit details with file changes
+                var commitDetail = await _gitHubService.GetCommitDetailAsync(commitHash);
+
+                if (commitDetail == null)
+                {
+                    Console.WriteLine("❌ Commit not found. Please check the hash and try again.\n");
+                    return;
+                }
+
+                Console.WriteLine($"📝 Commit: {commitDetail.Sha[..8]} - {commitDetail.Commit.Message}");
+                Console.WriteLine($"👤 Author: {commitDetail.Commit.Author.Name}");
+                Console.WriteLine($"📅 Date: {commitDetail.Commit.Author.Date:yyyy-MM-dd HH:mm}");
+
+                Console.WriteLine($"\n📁 Files changed: {commitDetail.Files.Count}");
+                foreach (var file in commitDetail.Files)
+                {
+                    Console.WriteLine(
+                        $"  - {file.Status}: {file.Filename} (+{file.Additions}/-{file.Deletions})"
+                    );
+                }
+
+                // AI Code Review
+                Console.WriteLine("\n🤖 Starting AI Code Review...");
+                var reviewResult = await _codeReviewService.ReviewCommitAsync(commitDetail.Files);
+
+                // Send Teams notification
+                await _notificationService.SendTeamsNotificationAsync(
+                    commitDetail.Sha,
+                    commitDetail.Commit.Author.Name,
+                    reviewResult.ReviewedFiles,
+                    reviewResult.IssueCount,
+                    reviewResult.AllIssues
+                );
+
+                Console.WriteLine(
+                    "──────────────────────────────────────────────────────────────\n"
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error reviewing commit: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
         /// Shows the pull request review menu and handles user selection
         /// </summary>
         public async Task ReviewPullRequestAsync()
