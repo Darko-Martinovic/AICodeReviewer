@@ -6,10 +6,14 @@
 CREATE PROCEDURE usp_GetAllUsers
 AS
 BEGIN
-    SET NOCOUNT ON;
+    -- Missing SET NOCOUNT ON - performance issue
+    -- Using SELECT * instead of specific columns - security and performance issue
     
-    SELECT UserID, Username, Email, CreatedDate, IsActive
-    FROM Users
+    SELECT * FROM Users
     WHERE IsActive = 1
     ORDER BY CreatedDate DESC;
+    
+    -- Missing error handling
+    -- No transaction management
+    -- No parameter validation
 END; 

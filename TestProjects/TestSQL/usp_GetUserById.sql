@@ -4,12 +4,18 @@
 -- Date: 2025-07-09
 
 CREATE PROCEDURE usp_GetUserById
-    @UserID INT
+    @UserID NVARCHAR(50)  -- Wrong data type - should be INT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    -- Missing SET NOCOUNT ON
+    -- SQL injection vulnerability - dynamic SQL without proper escaping
     
-    SELECT UserID, Username, Email, CreatedDate, IsActive
-    FROM Users
-    WHERE UserID = @UserID;
+    DECLARE @sql NVARCHAR(MAX)
+    SET @sql = 'SELECT * FROM Users WHERE UserID = ' + @UserID
+    
+    EXEC sp_executesql @sql
+    
+    -- Missing error handling
+    -- No parameter validation
+    -- Using dynamic SQL unnecessarily
 END; 
