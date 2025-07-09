@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCSharp", "TestProjects\
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TestVBNet", "TestProjects\TestVBNet\TestVBNet.vbproj", "{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDatabase", "TestProjects\TestDatabase\TestDatabase.csproj", "{BAE98104-B881-4638-BB56-2F920EE176CB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,18 +57,6 @@ Global
 		{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60}.Release|x64.Build.0 = Release|Any CPU
 		{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60}.Release|x86.ActiveCfg = Release|Any CPU
 		{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60}.Release|x86.Build.0 = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|x64.Build.0 = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Debug|x86.Build.0 = Debug|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|x64.ActiveCfg = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|x64.Build.0 = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|x86.ActiveCfg = Release|Any CPU
-		{BAE98104-B881-4638-BB56-2F920EE176CB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,7 +64,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D206E547-11EF-469B-955A-2A9A5B4CF90F} = {66854BFA-EAEA-B2BE-FC64-F7442E819120}
 		{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60} = {66854BFA-EAEA-B2BE-FC64-F7442E819120}
-		{BAE98104-B881-4638-BB56-2F920EE176CB} = {66854BFA-EAEA-B2BE-FC64-F7442E819120}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {60DD172B-711C-4BE2-B3E4-E796588DF028}
