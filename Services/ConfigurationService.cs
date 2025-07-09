@@ -120,6 +120,9 @@ namespace AICodeReviewer.Services
                 settings.AzureOpenAI.SystemPrompt = systemPrompt;
             }
 
+            // Language-specific prompt overrides
+            LoadLanguageSpecificPromptsFromEnvironment(settings);
+
             // Additional environment overrides can be added here
             var apiVersion = Environment.GetEnvironmentVariable("AI_API_VERSION");
             if (!string.IsNullOrEmpty(apiVersion))
@@ -142,6 +145,90 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Loads language-specific prompts from environment variables
+        /// </summary>
+        private static void LoadLanguageSpecificPromptsFromEnvironment(AppSettings settings)
+        {
+            // C# prompts
+            var csharpSystemPrompt = Environment.GetEnvironmentVariable("AI_CSharp_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(csharpSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.CSharp.SystemPrompt = csharpSystemPrompt;
+            }
+
+            var csharpUserPrompt = Environment.GetEnvironmentVariable("AI_CSharp_USER_PROMPT");
+            if (!string.IsNullOrEmpty(csharpUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.CSharp.UserPromptTemplate = csharpUserPrompt;
+            }
+
+            // VB.NET prompts
+            var vbNetSystemPrompt = Environment.GetEnvironmentVariable("AI_VbNet_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(vbNetSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.VbNet.SystemPrompt = vbNetSystemPrompt;
+            }
+
+            var vbNetUserPrompt = Environment.GetEnvironmentVariable("AI_VbNet_USER_PROMPT");
+            if (!string.IsNullOrEmpty(vbNetUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.VbNet.UserPromptTemplate = vbNetUserPrompt;
+            }
+
+            // SQL prompts
+            var sqlSystemPrompt = Environment.GetEnvironmentVariable("AI_Sql_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(sqlSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.Sql.SystemPrompt = sqlSystemPrompt;
+            }
+
+            var sqlUserPrompt = Environment.GetEnvironmentVariable("AI_Sql_USER_PROMPT");
+            if (!string.IsNullOrEmpty(sqlUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.Sql.UserPromptTemplate = sqlUserPrompt;
+            }
+
+            // JavaScript prompts
+            var jsSystemPrompt = Environment.GetEnvironmentVariable("AI_JavaScript_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(jsSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.JavaScript.SystemPrompt = jsSystemPrompt;
+            }
+
+            var jsUserPrompt = Environment.GetEnvironmentVariable("AI_JavaScript_USER_PROMPT");
+            if (!string.IsNullOrEmpty(jsUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.JavaScript.UserPromptTemplate = jsUserPrompt;
+            }
+
+            // TypeScript prompts
+            var tsSystemPrompt = Environment.GetEnvironmentVariable("AI_TypeScript_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(tsSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.TypeScript.SystemPrompt = tsSystemPrompt;
+            }
+
+            var tsUserPrompt = Environment.GetEnvironmentVariable("AI_TypeScript_USER_PROMPT");
+            if (!string.IsNullOrEmpty(tsUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.TypeScript.UserPromptTemplate = tsUserPrompt;
+            }
+
+            // React prompts
+            var reactSystemPrompt = Environment.GetEnvironmentVariable("AI_React_SYSTEM_PROMPT");
+            if (!string.IsNullOrEmpty(reactSystemPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.React.SystemPrompt = reactSystemPrompt;
+            }
+
+            var reactUserPrompt = Environment.GetEnvironmentVariable("AI_React_USER_PROMPT");
+            if (!string.IsNullOrEmpty(reactUserPrompt))
+            {
+                settings.AzureOpenAI.LanguagePrompts.React.UserPromptTemplate = reactUserPrompt;
+            }
+        }
+
+        /// <summary>
         /// Copies settings from source to destination
         /// </summary>
         private static void CopySettings(AppSettings source, AppSettings destination)
@@ -154,6 +241,12 @@ namespace AICodeReviewer.Services
                 destination.AzureOpenAI.MaxTokens = source.AzureOpenAI.MaxTokens;
                 destination.AzureOpenAI.ContentLimit = source.AzureOpenAI.ContentLimit;
                 destination.AzureOpenAI.SystemPrompt = source.AzureOpenAI.SystemPrompt;
+
+                // Copy language-specific prompts
+                if (source.AzureOpenAI.LanguagePrompts != null)
+                {
+                    destination.AzureOpenAI.LanguagePrompts = source.AzureOpenAI.LanguagePrompts;
+                }
             }
 
             // Code Review
@@ -221,6 +314,25 @@ namespace AICodeReviewer.Services
             );
             Console.WriteLine($"  👥 Team Members: {_appSettings.Teams.TeamMembers.Count}");
             Console.WriteLine($"  🔗 API Version: {_appSettings.AzureOpenAI.ApiVersion}");
+
+            // Display language-specific prompt information
+            Console.WriteLine("  🌐 Language-Specific Prompts:");
+            var supportedLanguages = new[] { "CSharp", "VbNet", "Sql", "JavaScript", "TypeScript", "React" };
+            foreach (var language in supportedLanguages)
+            {
+                var hasCustomPrompt = language switch
+                {
+                    "CSharp" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.CSharp.SystemPrompt),
+                    "VbNet" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.VbNet.SystemPrompt),
+                    "Sql" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.Sql.SystemPrompt),
+                    "JavaScript" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.JavaScript.SystemPrompt),
+                    "TypeScript" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.TypeScript.SystemPrompt),
+                    "React" => !string.IsNullOrEmpty(_appSettings.AzureOpenAI.LanguagePrompts.React.SystemPrompt),
+                    _ => false
+                };
+
+                Console.WriteLine($"    {language}: {(hasCustomPrompt ? "✅ Custom" : "⚠️  Default")}");
+            }
         }
     }
 }

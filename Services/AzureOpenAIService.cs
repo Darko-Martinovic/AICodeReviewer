@@ -14,13 +14,15 @@ namespace AICodeReviewer.Services
         private readonly string _endpoint;
         private readonly string _deploymentName;
         private readonly AzureOpenAISettings _settings;
+        private readonly IPromptManagementService _promptManagementService;
 
         public AzureOpenAIService(
             HttpClient httpClient,
             string endpoint,
             string apiKey,
             string deploymentName,
-            IConfigurationService configurationService
+            IConfigurationService configurationService,
+            IPromptManagementService promptManagementService
         )
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
@@ -30,6 +32,7 @@ namespace AICodeReviewer.Services
 
             var configService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _settings = configService.Settings.AzureOpenAI;
+            _promptManagementService = promptManagementService ?? throw new ArgumentNullException(nameof(promptManagementService));
 
             // Ensure we have a system prompt
             if (string.IsNullOrEmpty(_settings.SystemPrompt))
@@ -106,25 +109,20 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                 string url =
                     $"{_endpoint.TrimEnd('/')}/openai/deployments/{_deploymentName}/chat/completions?api-version={_settings.ApiVersion}";
 
-                var userPrompt =
-                    $@"Please review this {GetFileType(fileName)} file and provide detailed analysis:
+                // Get language-specific prompts
+                var systemPrompt = _promptManagementService.GetSystemPrompt(fileName);
+                var userPrompt = _promptManagementService.FormatUserPrompt(fileName, fileContent, _settings.ContentLimit);
 
-File: {fileName}
-Content Length: {fileContent.Length} characters
-{(fileContent.Length > _settings.ContentLimit ? $"(Showing first {_settings.ContentLimit:N0} characters of {fileContent.Length:N0} total)" : "")}
-
-```
-{fileContent.Substring(0, Math.Min(fileContent.Length, _settings.ContentLimit))}
-{(fileContent.Length > _settings.ContentLimit ? "\n... [Content truncated for analysis] ..." : "")}
-```
-
-Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." : "This is the complete file content.")}";
+                // Log which prompt type is being used
+                var hasLanguageSpecificPrompts = _promptManagementService.HasLanguageSpecificPrompts(fileName);
+                var language = _promptManagementService.GetType().Assembly.GetName().Name; // This will be the service name
+                Console.Write($"    🤖 Using {(hasLanguageSpecificPrompts ? "language-specific" : "default")} prompts for {fileName}...");
 
                 var request = new ChatRequest
                 {
                     messages = new[]
                     {
-                        new ChatMessage { role = "system", content = _settings.SystemPrompt },
+                        new ChatMessage { role = "system", content = systemPrompt },
                         new ChatMessage { role = "user", content = userPrompt }
                     },
                     max_tokens = _settings.MaxTokens,
@@ -273,25 +271,6 @@ Note: {(fileContent.Length > _settings.ContentLimit ? "This is a partial view of
             return (issues, detailedIssues);
         }
 
-        private static string GetFileType(string fileName)
-        {
-            var extension = Path.GetExtension(fileName).ToLower();
-            return extension switch
-            {
-                ".cs" => "C#",
-                ".vb" => "VB.NET",
-                ".js" => "JavaScript",
-                ".ts" => "TypeScript",
-                ".py" => "Python",
-                ".java" => "Java",
-                ".cpp" or ".c" => "C/C++",
-                ".php" => "PHP",
-                ".rb" => "Ruby",
-                ".kt" => "Kotlin",
-                ".swift" => "Swift",
-                ".sql" => "T-SQL",
-                _ => "code"
-            };
-        }
+
     }
 }

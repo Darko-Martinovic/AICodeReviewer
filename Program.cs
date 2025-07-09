@@ -65,11 +65,16 @@ namespace AICodeReviewer
             // HTTP client (singleton for performance)
             services.AddSingleton<HttpClient>();
 
+            // Language detection and prompt management services
+            services.AddSingleton<ILanguageDetectionService, LanguageDetectionService>();
+            services.AddSingleton<IPromptManagementService, PromptManagementService>();
+
             // Core services (singletons for this console app)
             services.AddSingleton<IAzureOpenAIService>(provider =>
             {
                 var httpClient = provider.GetRequiredService<HttpClient>();
                 var configService = provider.GetRequiredService<IConfigurationService>();
+                var promptManagementService = provider.GetRequiredService<IPromptManagementService>();
 
                 var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
                     ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
@@ -78,7 +83,7 @@ namespace AICodeReviewer
                 var deployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
                     ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
 
-                return new AzureOpenAIService(httpClient, endpoint, apiKey, deployment, configService);
+                return new AzureOpenAIService(httpClient, endpoint, apiKey, deployment, configService, promptManagementService);
             });
 
             services.AddSingleton<IGitHubService>(provider =>
