@@ -6,11 +6,13 @@ A .NET console application that performs AI-powered code reviews on GitHub repos
 
 - **🔍 Automated Code Analysis**: AI-powered review of commits and pull requests
 - **🎯 Multi-Language Support**: C#, JavaScript, TypeScript, Python, Java, and more
+- **🧠 Dynamic Language-Specific Prompts**: Intelligent prompt selection for C#, VB.NET, JavaScript, TypeScript, React, and T-SQL
 - **🔗 Jira Integration**: Automatic ticket updates with review results
 - **📢 Teams Notifications**: Real-time notifications with review summaries
 - **⚙️ Highly Configurable**: Customizable prompts, limits, and settings
 - **🏗️ Enterprise Architecture**: Dependency injection, interfaces, and clean code principles
 - **📊 Performance Metrics**: Detailed tracking of review efficiency and costs
+- **🧪 Comprehensive Test Projects**: Built-in test projects for C#, VB.NET, and T-SQL with intentional issues for AI testing
 
 ## 📊 Review Metrics
 
@@ -96,17 +98,25 @@ AICodeReviewer/
 │   │   ├── ICodeReviewService.cs     # Code review interface
 │   │   ├── INotificationService.cs   # Notification interface
 │   │   ├── IJiraService.cs           # Jira service interface
-│   │   └── IConfigurationService.cs  # Configuration interface
+│   │   ├── IConfigurationService.cs  # Configuration interface
+│   │   ├── ILanguageDetectionService.cs # Language detection interface
+│   │   └── IPromptManagementService.cs   # Prompt management interface
 │   ├── AzureOpenAIService.cs         # Azure OpenAI API interactions
 │   ├── GitHubService.cs              # GitHub API interactions
 │   ├── CodeReviewService.cs          # Core code review logic
 │   ├── NotificationService.cs        # Teams notification logic
 │   ├── JiraService.cs               # Jira integration for ticket updates
-│   └── ConfigurationService.cs      # Structured configuration management
+│   ├── ConfigurationService.cs      # Structured configuration management
+│   ├── LanguageDetectionService.cs  # Language detection by file extension
+│   └── PromptManagementService.cs   # Dynamic prompt selection and formatting
 ├── Application/               # Application orchestration layer
 │   └── CodeReviewApplication.cs     # Main application workflows
 ├── DemoCode/                  # Demo files for presentations
 │   └── BuggyCodeExample.cs          # Intentional issues for testing
+├── TestProjects/              # Test projects for AI validation
+│   ├── TestCSharp/           # C# test project with intentional issues
+│   ├── TestVBNet/            # VB.NET test project with intentional issues
+│   └── TestSQL/              # T-SQL test files with database issues
 ├── Utils/                     # Utility classes and helpers
 │   └── FileUtils.cs                 # File-related utility methods
 ├── Program.cs                 # Entry point with DI container setup
@@ -139,6 +149,9 @@ AICodeReviewer/
 - ✅ **Actionable recommendations** with code examples
 - ✅ **Configurable AI behavior** (temperature, max tokens, system prompts)
 - ✅ **Support for 12+ programming languages**
+- ✅ **Dynamic language-specific prompts** for C#, VB.NET, JavaScript, TypeScript, React, and T-SQL
+- ✅ **Intelligent language detection** by file extension
+- ✅ **Language-optimized issue detection** with specialized prompts for each language
 
 ### 📊 **Performance & Cost Tracking**
 
@@ -251,12 +264,38 @@ The system performs comprehensive analysis focusing on:
 {
   "AzureOpenAI": {
     "Temperature": 0.3,
-    "MaxTokens": 2500,
+    "MaxTokens": 8000,
     "ContentLimit": 15000,
-    "SystemPrompt": "Custom AI review prompt..."
+    "SystemPrompt": "Custom AI review prompt...",
+    "LanguagePrompts": {
+      "CSharp": {
+        "SystemPrompt": "C#-specific review prompt...",
+        "UserPromptTemplate": "C# file review template..."
+      },
+      "VbNet": {
+        "SystemPrompt": "VB.NET-specific review prompt...",
+        "UserPromptTemplate": "VB.NET file review template..."
+      },
+      "Sql": {
+        "SystemPrompt": "T-SQL-specific review prompt...",
+        "UserPromptTemplate": "T-SQL file review template..."
+      },
+      "JavaScript": {
+        "SystemPrompt": "JavaScript-specific review prompt...",
+        "UserPromptTemplate": "JavaScript file review template..."
+      },
+      "TypeScript": {
+        "SystemPrompt": "TypeScript-specific review prompt...",
+        "UserPromptTemplate": "TypeScript file review template..."
+      },
+      "React": {
+        "SystemPrompt": "React-specific review prompt...",
+        "UserPromptTemplate": "React file review template..."
+      }
+    }
   },
   "CodeReview": {
-    "MaxFilesToReview": 3,
+    "MaxFilesToReview": 5,
     "MaxIssuesInSummary": 3
   },
   "Teams": {
@@ -388,6 +427,39 @@ The project includes `DemoCode/BuggyCodeExample.cs` with intentional issues for 
 - Potential bugs (null reference exceptions)
 - Maintainability concerns (exception swallowing, inefficient loops)
 
+### Comprehensive Test Projects
+
+The solution includes dedicated test projects for validating AI capabilities across different languages:
+
+#### **TestCSharp Project** (`TestProjects/TestCSharp/`)
+- **Purpose**: C# code review testing
+- **Issues**: Poor naming conventions, missing error handling, hardcoded values
+- **Features**: Intentional code quality issues for AI detection
+
+#### **TestVBNet Project** (`TestProjects/TestVBNet/`)
+- **Purpose**: VB.NET code review testing
+- **Issues**: SQL injection vulnerabilities, poor exception handling, inefficient loops
+- **Features**: VB.NET-specific issues with database access patterns
+
+#### **TestSQL Project** (`TestProjects/TestSQL/`)
+- **Purpose**: T-SQL code review testing
+- **Files**:
+  - `CreateUsersTable.sql` - Table creation with missing constraints
+  - `CreateOrdersTable.sql` - Foreign key relationships
+  - `CreateProductsTable.sql` - Data type and constraint issues
+  - `usp_GetAllUsers.sql` - Stored procedure with performance issues
+  - `usp_GetUserById.sql` - SQL injection vulnerability
+  - `usp_GetUserOrderSummary.sql` - Complex query with missing indexes
+- **Issues**: Missing SET NOCOUNT ON, SQL injection, missing indexes, poor error handling
+
+### Language-Specific Testing
+
+Each test project demonstrates the AI's ability to:
+- **Detect language-specific issues** (C# async patterns, VB.NET exception handling, T-SQL performance)
+- **Apply appropriate severity levels** based on language context
+- **Provide language-optimized recommendations** with specific syntax examples
+- **Use dynamic prompts** that adapt to the detected programming language
+
 ### Performance Benchmarks
 
 Typical performance metrics from production usage:
@@ -415,6 +487,13 @@ Typical performance metrics from production usage:
 3. **Register in DI**: Add to `ConfigureServices()` in `Program.cs`
 4. **Inject Dependencies**: Use constructor injection in consuming classes
 5. **Add Tests**: Create unit tests with mocked dependencies
+
+### **Adding New Language Support**
+
+1. **Add Language Detection**: Update `LanguageDetectionService.cs` with new file extensions
+2. **Create Language Prompts**: Add language-specific prompts to `appsettings.json`
+3. **Test with Sample Files**: Create test files with intentional issues
+4. **Validate AI Detection**: Run reviews to ensure proper language-specific analysis
 
 ## 📄 License
 
