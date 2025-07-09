@@ -7,7 +7,8 @@ CREATE PROCEDURE usp_GetUserOrderSummary
     @UserID INT = NULL
 AS
 BEGIN
-    SET NOCOUNT ON;
+    -- Missing SET NOCOUNT ON
+    -- Inefficient query with potential performance issues
     
     SELECT 
         u.UserID,
@@ -21,4 +22,10 @@ BEGIN
     WHERE (@UserID IS NULL OR u.UserID = @UserID)
     GROUP BY u.UserID, u.Username, u.Email
     ORDER BY TotalSpent DESC;
+    
+    -- Missing error handling
+    -- No transaction management
+    -- Potential for blocking with large datasets
+    -- Missing indexes on join columns
+    -- No parameter validation
 END; 
