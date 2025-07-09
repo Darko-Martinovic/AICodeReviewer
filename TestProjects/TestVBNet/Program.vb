@@ -1,7 +1,9 @@
 Imports System
 
-Module Program
-    Sub Main(args As String())
-        Console.WriteLine("Hello World!")
-    End Sub
-End Module
+Namespace TestVBNet
+    Public Class TestClass
+        Public Shared Sub TestMethod()
+            Console.WriteLine("Hello World!")
+        End Sub
+    End Class
+End Namespace
