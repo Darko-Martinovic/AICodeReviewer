@@ -5,6 +5,7 @@ A .NET console application that performs AI-powered code reviews on GitHub repos
 ## ✨ Features
 
 - **🔍 Automated Code Analysis**: AI-powered review of commits and pull requests
+- **🏠 Multi-Repository Support**: Dynamic repository switching and management with history tracking
 - **🎯 Multi-Language Support**: C#, JavaScript, TypeScript, Python, Java, and more
 - **🧠 Dynamic Language-Specific Prompts**: Intelligent prompt selection for C#, VB.NET, JavaScript, TypeScript, React, and T-SQL
 - **🔗 Jira Integration**: Automatic ticket updates with review results
@@ -100,7 +101,8 @@ AICodeReviewer/
 │   │   ├── IJiraService.cs           # Jira service interface
 │   │   ├── IConfigurationService.cs  # Configuration interface
 │   │   ├── ILanguageDetectionService.cs # Language detection interface
-│   │   └── IPromptManagementService.cs   # Prompt management interface
+│   │   ├── IPromptManagementService.cs   # Prompt management interface
+│   │   └── IRepositoryManagementService.cs # Repository management interface
 │   ├── AzureOpenAIService.cs         # Azure OpenAI API interactions
 │   ├── GitHubService.cs              # GitHub API interactions
 │   ├── CodeReviewService.cs          # Core code review logic
@@ -108,7 +110,8 @@ AICodeReviewer/
 │   ├── JiraService.cs               # Jira integration for ticket updates
 │   ├── ConfigurationService.cs      # Structured configuration management
 │   ├── LanguageDetectionService.cs  # Language detection by file extension
-│   └── PromptManagementService.cs   # Dynamic prompt selection and formatting
+│   ├── PromptManagementService.cs   # Dynamic prompt selection and formatting
+│   └── RepositoryManagementService.cs # Multi-repository management and switching
 ├── Application/               # Application orchestration layer
 │   └── CodeReviewApplication.cs     # Main application workflows
 ├── DemoCode/                  # Demo files for presentations
@@ -237,7 +240,23 @@ The system performs comprehensive analysis focusing on:
 - **🐛 Bug Detection**: Null reference exceptions, race conditions, error handling
 - **📐 Best Practices**: SOLID principles, design patterns, C# conventions
 
-### 3. Integration Features
+### 3. Repository Management
+
+**Multi-Repository Support:**
+- **Dynamic Repository Switching**: Seamlessly switch between multiple GitHub repositories
+- **Repository History**: Track recently used repositories for quick access
+- **Validation & Error Handling**: Automatic validation of repository access and permissions
+- **Default Repository**: Configurable default repository from environment variables
+- **Repository Selection**: Interactive menu for selecting repositories before operations
+
+**Repository Management Features:**
+- **List Available Repositories**: View all repositories accessible with your GitHub token
+- **Add New Repository**: Dynamically add repositories to your working set
+- **Repository Validation**: Verify repository access and permissions before operations
+- **History Tracking**: Maintain a list of recently used repositories
+- **Seamless Integration**: All operations (commits, PRs, reviews) work with any selected repository
+
+### 4. Integration Features
 
 **Jira Integration:**
 - Automatically detects related tickets from commit messages
@@ -312,13 +331,69 @@ The system performs comprehensive analysis focusing on:
 
 All sensitive data and environment-specific settings can be configured via environment variables:
 
+**Azure OpenAI Configuration:**
+- `AOAI_ENDPOINT`: Your Azure OpenAI service endpoint
+- `AOAI_APIKEY`: Your Azure OpenAI API key
+- `CHATCOMPLETION_DEPLOYMENTNAME`: Your GPT deployment name
+
+**GitHub Configuration:**
+- `GITHUB_TOKEN`: Your GitHub personal access token
+- `GITHUB_REPO_OWNER`: Default repository owner (e.g., "YourOrg")
+- `GITHUB_REPO_NAME`: Default repository name (e.g., "YourRepo")
+
+**AI Review Settings:**
 - `AI_TEMPERATURE`: AI creativity level (0.1-1.0)
 - `AI_MAX_TOKENS`: Maximum response length
 - `AI_CONTENT_LIMIT`: Maximum file size to analyze
 - `MAX_FILES_TO_REVIEW`: Maximum files per review session
 - `MAX_ISSUES_IN_SUMMARY`: Maximum issues in notifications
 
+**Repository Management:**
+- The application automatically uses the default repository from `GITHUB_REPO_OWNER` and `GITHUB_REPO_NAME`
+- You can dynamically switch repositories during runtime without restarting the application
+- Repository history is maintained for quick access to recently used repositories
+
 ## 📊 Sample Output
+
+### **Repository Management Menu**
+
+```
+🤖 AI Code Reviewer
+
+Choose an option:
+
+  1. 📝 List recent commits
+  2. 🔍 Review latest commit (Push Event)
+  3. 🔍 Review commit by hash
+  4. 📋 List open Pull Requests
+  5. 🔀 Review Pull Request
+  6. 🏠 Manage repositories
+  7. 🚪 Exit
+
+Enter your choice (1-7): 6
+
+🏠 Repository Management
+Current repository: YourOrg/YourRepo
+
+Choose an option:
+  1. 📋 List available repositories
+  2. ➕ Add new repository
+  3. 🔄 Switch repository
+  4. 📊 Show repository history
+  5. ⬅️ Back to main menu
+
+Enter your choice (1-5): 1
+
+📋 Available Repositories:
+  1. YourOrg/YourRepo (current)
+  2. YourOrg/AnotherProject
+  3. YourOrg/WebApp
+  4. YourOrg/MobileApp
+
+Enter repository number to switch (or 0 to cancel): 2
+
+✅ Switched to repository: YourOrg/AnotherProject
+```
 
 ### **Latest Commit Review**
 
