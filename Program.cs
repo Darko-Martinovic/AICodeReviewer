@@ -13,7 +13,7 @@ namespace AICodeReviewer
     /// </summary>
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             try
             {
@@ -33,8 +33,8 @@ namespace AICodeReviewer
                 using (serviceProvider)
                 {
                     var application = serviceProvider.GetRequiredService<CodeReviewApplication>();
-                    await InitializeServicesAsync(serviceProvider);
-                    await ShowMainMenuAsync(application);
+                    InitializeServicesAsync(serviceProvider).Wait();
+                    ShowMainMenuAsync(application).Wait();
                 }
             }
             catch (Exception ex)

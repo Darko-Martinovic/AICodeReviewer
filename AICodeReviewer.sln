@@ -61,6 +61,9 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(StartupProject) = preSolution
+		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE} = AICodeReviewer
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D206E547-11EF-469B-955A-2A9A5B4CF90F} = {66854BFA-EAEA-B2BE-FC64-F7442E819120}
 		{EF6DA17C-F693-426B-8BEE-2D45E3EE9F60} = {66854BFA-EAEA-B2BE-FC64-F7442E819120}
