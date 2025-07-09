@@ -8,7 +8,7 @@ out/
 *.suo
 *.cache
 *.docstates
-
+.cursorrules
 # Visual Studio / VS Code
 .vs/
 .vscode/
