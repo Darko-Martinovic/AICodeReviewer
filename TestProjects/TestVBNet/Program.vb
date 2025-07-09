@@ -9,7 +9,7 @@ Namespace TestVBNet
         Private y As String = "test"
         
         ' Hardcoded connection string - security issue
-        Private connectionString As String = "Server=localhost;Database=MyDB;User Id=admin;Password=password123;"
+        Private Shared connectionString As String = "Server=localhost;Database=MyDB;User Id=admin;Password=password123;"
         
         ' Missing error handling
         Public Sub TestMethod()
@@ -31,9 +31,11 @@ Namespace TestVBNet
             
             ' Poor exception handling
             Try
-                Dim result As Integer = 100 / 0
+                Dim divisor As Integer = 0
+                Dim result As Integer = 100 / divisor
             Catch ex As Exception
                 Console.WriteLine("Error occurred")
+                ' Missing proper error logging and handling
             End Try
             
             ' Inconsistent indentation
@@ -52,6 +54,7 @@ Namespace TestVBNet
                 ' Direct database access in service layer
                 Using conn As New SqlConnection(connectionString)
                     conn.Open()
+                    ' SQL injection vulnerability - should use parameters
                     Dim cmd As New SqlCommand("SELECT * FROM Users WHERE Id = " & id, conn)
                     Dim reader As SqlDataReader = cmd.ExecuteReader()
                     If reader.Read() Then
@@ -65,6 +68,7 @@ Namespace TestVBNet
                 ' No validation
                 Using conn As New SqlConnection(connectionString)
                     conn.Open()
+                    ' SQL injection vulnerability - should use parameters
                     Dim cmd As New SqlCommand("INSERT INTO Users (Name, Email) VALUES ('" & name & "', '" & email & "')", conn)
                     cmd.ExecuteNonQuery()
                 End Using
