@@ -21,7 +21,8 @@ namespace AICodeReviewer.Models
         private const decimal OUTPUT_TOKEN_COST_PER_1K = 0.002m;
 
         public double IssuesPerFile => FilesReviewed > 0 ? (double)IssuesFound / FilesReviewed : 0;
-        public double LinesPerMinute => Duration.TotalMinutes > 0 ? TotalLinesOfCode / Duration.TotalMinutes : 0;
+        public double LinesPerMinute =>
+            Duration.TotalMinutes > 0 ? TotalLinesOfCode / Duration.TotalMinutes : 0;
         public decimal CostPerIssue => IssuesFound > 0 ? EstimatedCost / IssuesFound : 0;
 
         public override string ToString()
@@ -68,7 +69,8 @@ Cost/File: ${(FilesReviewed > 0 ? EstimatedCost / FilesReviewed : 0):F4}";
         /// </summary>
         private static decimal CalculateCost(int inputTokens, int outputTokens)
         {
-            return (inputTokens / 1000m * INPUT_TOKEN_COST_PER_1K) + (outputTokens / 1000m * OUTPUT_TOKEN_COST_PER_1K);
+            return (inputTokens / 1000m * INPUT_TOKEN_COST_PER_1K)
+                + (outputTokens / 1000m * OUTPUT_TOKEN_COST_PER_1K);
         }
 
         /// <summary>
