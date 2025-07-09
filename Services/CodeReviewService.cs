@@ -135,10 +135,26 @@ namespace AICodeReviewer.Services
                         if (issues.Any())
                         {
                             Console.WriteLine($"    🔍 Found {issues.Count} issue(s):");
-                            foreach (var issue in issues)
+                            
+                            // Display detailed issues with full information
+                            foreach (var detailedIssue in detailedIssues)
                             {
-                                Console.WriteLine($"      • {issue}");
-                                allIssues.Add($"{fileName}: {issue}");
+                                Console.WriteLine($"      • [{detailedIssue.Severity}] {detailedIssue.Title}");
+                                if (!string.IsNullOrEmpty(detailedIssue.Description))
+                                {
+                                    Console.WriteLine($"        📝 {detailedIssue.Description}");
+                                }
+                                if (!string.IsNullOrEmpty(detailedIssue.Recommendation))
+                                {
+                                    Console.WriteLine($"        💡 {detailedIssue.Recommendation}");
+                                }
+                                if (detailedIssue.LineNumber.HasValue)
+                                {
+                                    Console.WriteLine($"        📍 Line: {detailedIssue.LineNumber}");
+                                }
+                                Console.WriteLine();
+                                
+                                allIssues.Add($"{fileName}: [{detailedIssue.Severity}] {detailedIssue.Title}");
                             }
 
                             // Add detailed issues to result
