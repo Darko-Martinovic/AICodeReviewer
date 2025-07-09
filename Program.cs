@@ -69,6 +69,15 @@ namespace AICodeReviewer
             services.AddSingleton<ILanguageDetectionService, LanguageDetectionService>();
             services.AddSingleton<IPromptManagementService, PromptManagementService>();
 
+            // Repository management service
+            services.AddSingleton<IRepositoryManagementService>(provider =>
+            {
+                var configService = provider.GetRequiredService<IConfigurationService>();
+                var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+                    ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
+                return new RepositoryManagementService(configService.Settings, token);
+            });
+
             // Core services (singletons for this console app)
             services.AddSingleton<IAzureOpenAIService>(provider =>
             {
@@ -140,9 +149,10 @@ namespace AICodeReviewer
                 Console.WriteLine("  3. 🔍 Review commit by hash");
                 Console.WriteLine("  4. 📋 List open Pull Requests");
                 Console.WriteLine("  5. 🔀 Review Pull Request");
-                Console.WriteLine("  6. 🚪 Exit");
+                Console.WriteLine("  6. 🏠 Manage repositories");
+                Console.WriteLine("  7. 🚪 Exit");
                 Console.WriteLine();
-                Console.Write("Enter your choice (1-6): ");
+                Console.Write("Enter your choice (1-7): ");
 
                 string? choice = Console.ReadLine();
                 Console.WriteLine();
@@ -165,6 +175,9 @@ namespace AICodeReviewer
                         await application.ReviewPullRequestAsync();
                         break;
                     case "6":
+                        await application.ManageRepositoriesAsync();
+                        break;
+                    case "7":
                         Console.WriteLine("👋 Goodbye! Thanks for using AI Code Reviewer!");
                         return;
                     default:

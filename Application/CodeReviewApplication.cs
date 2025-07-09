@@ -1,9 +1,13 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using AICodeReviewer.Services;
+using AICodeReviewer.Models;
 
 namespace AICodeReviewer.Application
 {
     /// <summary>
-    /// Application layer service that orchestrates the code review workflow
+    /// Main application class that orchestrates the code review process
     /// </summary>
     public class CodeReviewApplication
     {
@@ -11,42 +15,63 @@ namespace AICodeReviewer.Application
         private readonly ICodeReviewService _codeReviewService;
         private readonly INotificationService _notificationService;
         private readonly IJiraService _jiraService;
+        private readonly IRepositoryManagementService _repositoryManagementService;
+        private bool _repositorySelected = true; // Set to true initially since we have a default repository
 
         public CodeReviewApplication(
             IGitHubService gitHubService,
             ICodeReviewService codeReviewService,
             INotificationService notificationService,
-            IJiraService jiraService
+            IJiraService jiraService,
+            IRepositoryManagementService repositoryManagementService
         )
         {
-            _gitHubService =
-                gitHubService ?? throw new ArgumentNullException(nameof(gitHubService));
-            _codeReviewService =
-                codeReviewService ?? throw new ArgumentNullException(nameof(codeReviewService));
-            _notificationService =
-                notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            _jiraService = jiraService ?? throw new ArgumentNullException(nameof(jiraService));
+            _gitHubService = gitHubService;
+            _codeReviewService = codeReviewService;
+            _notificationService = notificationService;
+            _jiraService = jiraService;
+            _repositoryManagementService = repositoryManagementService;
         }
 
         /// <summary>
-        /// Reviews the latest commit on the main branch
+        /// Ensures a repository is selected, prompting only if necessary
+        /// </summary>
+        private async Task<(string Owner, string Name)> EnsureRepositorySelectedAsync()
+        {
+            // If repository is already selected, just return the current one
+            if (_repositorySelected)
+            {
+                var currentRepo = await _repositoryManagementService.GetCurrentRepositoryAsync();
+                _gitHubService.UpdateRepository(currentRepo.Owner, currentRepo.Name);
+                return currentRepo;
+            }
+
+            // Otherwise, prompt for repository selection
+            var (owner, name) = await _repositoryManagementService.PromptForRepositoryAsync();
+            _gitHubService.UpdateRepository(owner, name);
+            _repositorySelected = true;
+            return (owner, name);
+        }
+
+        /// <summary>
+        /// Reviews the latest commit (simulating a push event)
         /// </summary>
         public async Task ReviewLatestCommitAsync()
         {
             try
             {
-                Console.WriteLine("🔍 Fetching latest commit...");
+                // Ensure repository is selected
+                var (owner, name) = await EnsureRepositorySelectedAsync();
+
+                Console.WriteLine("🔍 Review Latest Commit (Push Event)");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
 
                 // Get repository info
                 var repoInfo = await GetRepositoryInfoAsync();
                 Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
-                Console.WriteLine($"🌿 Branch: main");
-                Console.WriteLine();
 
-                // Get latest commit from main branch
+                // Get latest commits
                 var commits = await _gitHubService.GetCommitsAsync();
-
                 if (!commits.Any())
                 {
                     Console.WriteLine("❌ No commits found.\n");
@@ -54,13 +79,11 @@ namespace AICodeReviewer.Application
                 }
 
                 var latestCommit = commits.First();
-                Console.WriteLine(
-                    $"📝 Latest commit: {latestCommit.Sha[..8]} - {latestCommit.Commit.Message}"
-                );
+                Console.WriteLine($"📝 Latest commit: {latestCommit.Sha[..8]} - {latestCommit.Commit.Message}");
                 Console.WriteLine($"👤 Author: {latestCommit.Commit.Author.Name}");
                 Console.WriteLine($"📅 Date: {latestCommit.Commit.Author.Date:yyyy-MM-dd HH:mm}");
 
-                // Get commit details with file changes
+                // Get detailed commit info with file changes
                 var commitDetail = await _gitHubService.GetCommitDetailAsync(latestCommit.Sha);
 
                 Console.WriteLine($"\n📁 Files changed: {commitDetail.Files.Count}");
@@ -90,7 +113,7 @@ namespace AICodeReviewer.Application
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error reviewing commit: {ex.Message}\n");
+                Console.WriteLine($"❌ Error reviewing latest commit: {ex.Message}\n");
             }
         }
 
@@ -101,6 +124,9 @@ namespace AICodeReviewer.Application
         {
             try
             {
+                // Ensure repository is selected
+                var (owner, name) = await EnsureRepositorySelectedAsync();
+
                 Console.WriteLine("🔍 Review Commit by Hash");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
 
@@ -170,6 +196,9 @@ namespace AICodeReviewer.Application
         {
             try
             {
+                // Ensure repository is selected
+                var (owner, name) = await EnsureRepositorySelectedAsync();
+
                 Console.WriteLine("🔍 Fetching open Pull Requests...");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
 
@@ -397,150 +426,206 @@ namespace AICodeReviewer.Application
             comment += "🎯 **Recommendations:**\n";
             if (reviewResult.IssueCount == 0)
             {
-                comment += "✅ Code looks good! Ready to merge.\n";
-            }
-            else if (reviewResult.IssueCount <= 2)
-            {
-                comment += "⚠️ Minor issues found. Consider reviewing before merge.\n";
-            }
-            else if (reviewResult.IssueCount <= 5)
-            {
-                comment += "🔶 Several issues identified. Please review and address.\n";
+                comment += "✅ Code looks good! No issues found.\n";
             }
             else
             {
-                comment += "🚨 Multiple issues found. Recommend fixes before merge.\n";
+                comment += "🔧 Please review the issues above and address them before merging.\n";
+                comment += "💡 Consider running additional tests to ensure stability.\n";
             }
 
-            comment += "\n---\n*Generated by AI Code Reviewer* 🤖";
+            comment += "\n---\n";
+            comment += "*This review was performed by AI Code Reviewer 🤖*";
+
             return comment;
         }
 
         /// <summary>
-        /// Lists recent commits
+        /// Lists recent commits for the repository
         /// </summary>
         public async Task ListRecentCommitsAsync()
         {
             try
             {
-                Console.WriteLine("📝 Recent commits:");
+                // Ensure repository is selected
+                var (owner, name) = await EnsureRepositorySelectedAsync();
+
+                Console.WriteLine("📝 Recent Commits");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
 
-                var commits = await _gitHubService.GetCommitsAsync();
-                var recentCommits = commits.Take(5);
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
 
-                if (!recentCommits.Any())
+                var commits = await _gitHubService.GetCommitsAsync();
+
+                if (!commits.Any())
                 {
-                    Console.WriteLine("  No commits found.");
-                    Console.WriteLine(
-                        "──────────────────────────────────────────────────────────────\n"
-                    );
+                    Console.WriteLine("❌ No commits found.\n");
                     return;
                 }
 
-                // Get repository info from GitHubService (we'll need to add a method for this)
-                var repoInfo = await GetRepositoryInfoAsync();
-
-                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
-                Console.WriteLine($"🌿 Branch: main");
-                Console.WriteLine($"📊 Total commits: {commits.Count}");
-                Console.WriteLine();
-
-                int commitNumber = 1;
-                foreach (var commit in recentCommits)
+                Console.WriteLine($"\n📝 Recent commits ({commits.Count} found):");
+                for (int i = 0; i < commits.Count; i++)
                 {
-                    var date = commit.Commit.Author.Date.ToString("yyyy-MM-dd HH:mm");
-                    var shortSha = commit.Sha[..8];
-                    var message =
-                        commit.Commit.Message.Length > 60
-                            ? commit.Commit.Message[..57] + "..."
-                            : commit.Commit.Message;
-
-                    Console.WriteLine($"  {commitNumber}. 🔗 {shortSha}");
-                    Console.WriteLine($"     📝 {message}");
-                    Console.WriteLine($"     👤 {commit.Commit.Author.Name}");
-                    Console.WriteLine($"     📅 {date}");
+                    var commit = commits[i];
+                    Console.WriteLine($"{i + 1}. {commit.Sha[..8]} - {commit.Commit.Message}");
+                    Console.WriteLine($"   👤 {commit.Commit.Author.Name} | 📅 {commit.Commit.Author.Date:yyyy-MM-dd HH:mm}");
                     Console.WriteLine();
-                    commitNumber++;
                 }
-
-                Console.WriteLine(
-                    "──────────────────────────────────────────────────────────────\n"
-                );
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error fetching commits: {ex.Message}\n");
+                Console.WriteLine($"❌ Error listing commits: {ex.Message}\n");
             }
         }
 
         /// <summary>
-        /// Lists open pull requests
+        /// Lists open pull requests for the repository
         /// </summary>
         public async Task ListOpenPullRequestsAsync()
         {
             try
             {
-                Console.WriteLine("🔀 Open Pull Requests:");
+                // Ensure repository is selected
+                var (owner, name) = await EnsureRepositorySelectedAsync();
+
+                Console.WriteLine("📋 Open Pull Requests");
                 Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+                // Get repository info
+                var repoInfo = await GetRepositoryInfoAsync();
+                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
 
                 var pullRequests = await _gitHubService.GetOpenPullRequestsAsync();
 
                 if (!pullRequests.Any())
                 {
-                    Console.WriteLine("  No open Pull Requests found.");
-                    Console.WriteLine(
-                        "──────────────────────────────────────────────────────────────\n"
-                    );
+                    Console.WriteLine("❌ No open Pull Requests found.\n");
                     return;
                 }
 
-                // Get repository info
-                var repoInfo = await GetRepositoryInfoAsync();
-
-                Console.WriteLine($"🏠 Repository: {repoInfo.Owner}/{repoInfo.Name}");
-                Console.WriteLine($"📊 Total open PRs: {pullRequests.Count}");
-                Console.WriteLine();
-
-                int prNumber = 1;
-                foreach (var pr in pullRequests)
+                Console.WriteLine($"\n📋 Open Pull Requests ({pullRequests.Count} found):");
+                for (int i = 0; i < pullRequests.Count; i++)
                 {
-                    var title = pr.Title.Length > 50 ? pr.Title[..47] + "..." : pr.Title;
-                    var createdAt = pr.CreatedAt.ToString("yyyy-MM-dd HH:mm");
-                    var updatedAt = pr.UpdatedAt.ToString("yyyy-MM-dd HH:mm");
-
-                    Console.WriteLine($"  {prNumber}. 🔀 PR #{pr.Number}");
-                    Console.WriteLine($"     📝 {title}");
-                    Console.WriteLine($"     👤 {pr.User.Login}");
-                    Console.WriteLine($"     🌿 {pr.Head.Ref} → {pr.Base.Ref}");
-                    Console.WriteLine($"     📅 Created: {createdAt}");
-                    Console.WriteLine($"     🔄 Updated: {updatedAt}");
-
-                    // Show PR status indicators
-                    var statusIndicators = new List<string>();
-                    if (pr.Draft)
-                        statusIndicators.Add("📋 Draft");
-                    if (pr.Merged)
-                        statusIndicators.Add("✅ Merged");
-                    if (pr.ClosedAt.HasValue)
-                        statusIndicators.Add("❌ Closed");
-
-                    if (statusIndicators.Any())
-                    {
-                        Console.WriteLine($"     🏷️  {string.Join(" | ", statusIndicators)}");
-                    }
-
+                    var pr = pullRequests[i];
+                    Console.WriteLine($"{i + 1}. PR #{pr.Number}: {pr.Title}");
+                    Console.WriteLine($"   👤 {pr.User.Login} | 🌿 {pr.Head.Ref} → {pr.Base.Ref}");
+                    Console.WriteLine($"   📅 Created: {pr.CreatedAt:yyyy-MM-dd HH:mm}");
                     Console.WriteLine();
-                    prNumber++;
                 }
-
-                Console.WriteLine(
-                    "──────────────────────────────────────────────────────────────\n"
-                );
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error fetching PRs: {ex.Message}\n");
+                Console.WriteLine($"❌ Error listing pull requests: {ex.Message}\n");
+            }
+        }
+
+        /// <summary>
+        /// Manages repository selection and settings
+        /// </summary>
+        public async Task ManageRepositoriesAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    Console.WriteLine("🏠 Repository Management");
+                    Console.WriteLine("──────────────────────────────────────────────────────────────");
+
+                    var currentRepo = await _repositoryManagementService.GetCurrentRepositoryAsync();
+                    Console.WriteLine($"📍 Current repository: {currentRepo.Owner}/{currentRepo.Name}");
+
+                    var history = await _repositoryManagementService.GetRepositoryHistoryAsync();
+                    Console.WriteLine($"\n📚 Repository history ({history.Count} repositories):");
+
+                    for (int i = 0; i < history.Count; i++)
+                    {
+                        var repo = history[i];
+                        var currentIndicator = (repo.Owner == currentRepo.Owner && repo.Name == currentRepo.Name) ? "📍 " : "   ";
+                        Console.WriteLine($"{currentIndicator}{i + 1}. {repo.FullName}");
+                        if (!string.IsNullOrEmpty(repo.Description))
+                        {
+                            Console.WriteLine($"     {repo.Description}");
+                        }
+                    }
+
+                    Console.WriteLine("\nOptions:");
+                    Console.WriteLine("  1. 🔄 Change current repository");
+                    Console.WriteLine("  2. 📚 Select from available repositories");
+                    Console.WriteLine("  3. 🔙 Back to main menu");
+                    Console.WriteLine();
+
+                    Console.Write("Enter your choice (1-3): ");
+                    var choice = Console.ReadLine()?.Trim();
+
+                    switch (choice)
+                    {
+                        case "1":
+                            await _repositoryManagementService.PromptForRepositoryAsync();
+                            _repositorySelected = true; // Mark that a repository has been selected
+                            Console.WriteLine(); // Add spacing after repository change
+                            break;
+                        case "2":
+                            // Get available repositories and allow selection
+                            var availableRepos = await _repositoryManagementService.GetAvailableRepositoriesAsync();
+                            if (!availableRepos.Any())
+                            {
+                                Console.WriteLine("❌ No repositories found or accessible.\n");
+                                break;
+                            }
+
+                            Console.WriteLine($"\n📚 Available repositories ({availableRepos.Count} found):");
+                            for (int i = 0; i < availableRepos.Count; i++)
+                            {
+                                var repo = availableRepos[i];
+                                var currentIndicator = (repo.Owner == currentRepo.Owner && repo.Name == currentRepo.Name) ? "📍 " : "   ";
+                                Console.WriteLine($"{currentIndicator}{i + 1}. {repo.FullName} ({(repo.IsPrivate ? "private" : "public")})");
+                                if (!string.IsNullOrEmpty(repo.Description))
+                                {
+                                    Console.WriteLine($"     {repo.Description}");
+                                }
+                            }
+
+                            Console.WriteLine("\n💡 Select a repository to switch to it:");
+                            Console.Write($"Enter selection (1-{availableRepos.Count}) or 0 to cancel: ");
+                            if (int.TryParse(Console.ReadLine(), out int selection))
+                            {
+                                if (selection == 0)
+                                {
+                                    Console.WriteLine("❌ Cancelled.\n");
+                                }
+                                else if (selection >= 1 && selection <= availableRepos.Count)
+                                {
+                                    var selectedRepo = availableRepos[selection - 1];
+                                    // Update the GitHub service with the new repository
+                                    _gitHubService.UpdateRepository(selectedRepo.Owner, selectedRepo.Name);
+                                    await _repositoryManagementService.AddToHistoryAsync(selectedRepo.Owner, selectedRepo.Name, selectedRepo.Description);
+                                    _repositorySelected = true; // Mark that a repository has been selected
+                                    Console.WriteLine($"✅ Selected repository: {selectedRepo.FullName}\n");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"❌ Invalid selection. Please enter a number between 1 and {availableRepos.Count}.\n");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("❌ Invalid input. Please enter a number.\n");
+                            }
+                            break;
+                        case "3":
+                            Console.WriteLine("🔙 Returning to main menu...\n");
+                            return;
+                        default:
+                            Console.WriteLine("❌ Invalid choice. Please try again.\n");
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Error managing repositories: {ex.Message}\n");
+                }
             }
         }
 
@@ -549,10 +634,7 @@ namespace AICodeReviewer.Application
         /// </summary>
         private async Task<(string Owner, string Name)> GetRepositoryInfoAsync()
         {
-            // For now, we'll get this from the GitHubService
-            // In a more robust implementation, we could add a method to GitHubService to get repo details
-            var repoDetails = await _gitHubService.GetRepositoryDetailsAsync();
-            return (repoDetails.Owner.Login, repoDetails.Name);
+            return await _gitHubService.GetRepositoryInfoAsync();
         }
     }
 }

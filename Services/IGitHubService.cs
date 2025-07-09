@@ -17,5 +17,6 @@ namespace AICodeReviewer.Services
         Task<(string Owner, string Name)> GetRepositoryInfoAsync();
         Task<Repository> GetRepositoryDetailsAsync();
         Task<bool> PostPullRequestCommentAsync(int prNumber, string comment);
+        void UpdateRepository(string owner, string name);
     }
 }

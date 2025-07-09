@@ -8,8 +8,8 @@ namespace AICodeReviewer.Services
     public class GitHubService : IGitHubService
     {
         private readonly GitHubClient _gitHubClient;
-        private readonly string _repoOwner;
-        private readonly string _repoName;
+        private string _repoOwner;
+        private string _repoName;
 
         public GitHubService(string token, string repoOwner, string repoName)
         {
@@ -18,6 +18,15 @@ namespace AICodeReviewer.Services
 
             _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
             _gitHubClient.Credentials = new Credentials(token);
+        }
+
+        /// <summary>
+        /// Updates the current repository
+        /// </summary>
+        public void UpdateRepository(string owner, string name)
+        {
+            _repoOwner = owner ?? throw new ArgumentNullException(nameof(owner));
+            _repoName = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         /// <summary>
