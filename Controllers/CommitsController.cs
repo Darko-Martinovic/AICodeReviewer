@@ -45,11 +45,12 @@ namespace AICodeReviewer.Controllers
                     Count = commits.Count,
                     Commits = commits.Select(c => new
                     {
-                        Sha = c.Sha,
-                        Message = c.Commit.Message,
-                        Author = c.Commit.Author.Name,
-                        Date = c.Commit.Author.Date,
-                        Url = c.HtmlUrl
+                        sha = c.Sha,
+                        message = c.Commit.Message,
+                        author = c.Commit.Author.Name,
+                        authorEmail = c.Commit.Author.Email ?? "",
+                        date = c.Commit.Author.Date,
+                        htmlUrl = c.HtmlUrl
                     })
                 });
             }
