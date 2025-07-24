@@ -13,10 +13,12 @@ namespace AICodeReviewer.Controllers
     public class RepositoriesController : ControllerBase
     {
         private readonly IRepositoryManagementService _repositoryService;
+        private readonly IGitHubService _gitHubService;
 
-        public RepositoriesController(IRepositoryManagementService repositoryService)
+        public RepositoriesController(IRepositoryManagementService repositoryService, IGitHubService gitHubService)
         {
             _repositoryService = repositoryService;
+            _gitHubService = gitHubService;
         }
 
         /// <summary>
@@ -208,6 +210,9 @@ namespace AICodeReviewer.Controllers
 
                 // Set current repository and add to history
                 await _repositoryService.SetCurrentRepositoryAsync(request.Owner, request.Name);
+
+                // Update GitHubService to use the new repository
+                _gitHubService.UpdateRepository(request.Owner, request.Name);
 
                 return Ok(new
                 {
