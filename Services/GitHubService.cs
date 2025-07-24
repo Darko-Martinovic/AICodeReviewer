@@ -88,14 +88,42 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Gets all commits for the main branch
+        /// Gets the default branch name for the current repository
+        /// </summary>
+        private async Task<string> GetDefaultBranchAsync()
+        {
+            try
+            {
+                var repo = await _gitHubClient.Repository.Get(_repoOwner, _repoName);
+                return repo.DefaultBranch;
+            }
+            catch
+            {
+                // Fallback: try to detect if master or main exists
+                try
+                {
+                    // Try master first (common in older repos)
+                    await _gitHubClient.Repository.Branch.Get(_repoOwner, _repoName, "master");
+                    return "master";
+                }
+                catch
+                {
+                    // Default to main
+                    return "main";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets all commits for the default branch
         /// </summary>
         public async Task<IReadOnlyList<GitHubCommit>> GetCommitsAsync()
         {
+            var defaultBranch = await GetDefaultBranchAsync();
             return await _gitHubClient.Repository.Commit.GetAll(
                 _repoOwner,
                 _repoName,
-                new CommitRequest { Sha = "main" }
+                new CommitRequest { Sha = defaultBranch }
             );
         }
 
@@ -104,9 +132,10 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<IReadOnlyList<GitHubCommit>> GetRecentCommitsAsync(int count = 10)
         {
+            var defaultBranch = await GetDefaultBranchAsync();
             var commitRequest = new CommitRequest
             {
-                Sha = "main"
+                Sha = defaultBranch
             };
             var commits = await _gitHubClient.Repository.Commit.GetAll(_repoOwner, _repoName, commitRequest);
             return commits.Take(count).ToList();

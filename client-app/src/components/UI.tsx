@@ -196,12 +196,17 @@ export const useToast = () => {
   const addToast = (toast: Omit<Toast, "id">) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast = { ...toast, id };
-    setToasts((prev) => [...prev, newToast]);
 
-    // Auto remove after duration
+    // Limit to 3 concurrent toasts to prevent overlap
+    setToasts((prev) => {
+      const newToasts = [...prev, newToast];
+      return newToasts.slice(-3); // Keep only the last 3
+    });
+
+    // Auto remove after duration (reduced from 5000ms to 3000ms)
     setTimeout(() => {
       removeToast(id);
-    }, toast.duration || 5000);
+    }, toast.duration || 3000);
 
     return id;
   };

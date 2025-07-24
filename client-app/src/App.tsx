@@ -44,6 +44,8 @@ interface AppState {
   activeTab: TabType;
   codeReview: CodeReview | null;
   showReviewModal: boolean;
+  reviewingCommits: Set<string>; // Track individual commits being reviewed
+  reviewingPRs: Set<number>; // Track individual PRs being reviewed
 }
 
 function App() {
@@ -63,6 +65,8 @@ function App() {
     activeTab: "repositories",
     codeReview: null,
     showReviewModal: false,
+    reviewingCommits: new Set(),
+    reviewingPRs: new Set(),
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -88,12 +92,8 @@ function App() {
         await loadCommits();
         await loadPullRequests();
 
-        // Switch to commits tab if we have a repository
-        setState((prev) => ({
-          ...prev,
-          activeTab: "commits",
-        }));
-        console.log("📋 Switched to commits tab");
+        // Keep on repositories tab initially - user can manually switch
+        console.log("📋 Staying on repositories tab");
       } else {
         console.log("❌ No current repository found");
       }
@@ -204,42 +204,84 @@ function App() {
       );
     } catch (error) {
       console.error("❌ Failed to load commits:", error);
+
+      // Handle different error types more gracefully
+      let errorMessage = "Failed to load commits";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status: number } };
+        if (axiosError.response?.status === 400) {
+          errorMessage =
+            "Repository has no accessible commits or default branch not found";
+        } else if (axiosError.response?.status === 404) {
+          errorMessage = "Repository not found or not accessible";
+        } else if (axiosError.response?.status === 403) {
+          errorMessage = "Access denied to repository commits";
+        }
+      }
+
       setState((prev) => ({
         ...prev,
+        commits: [], // Clear commits on error
         loading: { ...prev.loading, commits: false },
-        error: "Failed to load commits",
+        error: null, // Don't show global error for this
       }));
+
       addToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to load commits",
+        type: "warning",
+        title: "Commits Unavailable",
+        message: errorMessage,
       });
     }
   };
 
   const loadPullRequests = async () => {
     try {
+      console.log("📋 Loading pull requests...");
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, pullRequests: true },
       }));
       const response = await pullRequestsApi.getAll("all");
+      console.log("📋 Pull requests API response:", response.data);
       setState((prev) => ({
         ...prev,
         pullRequests: response.data,
         loading: { ...prev.loading, pullRequests: false },
         error: null,
       }));
+      console.log(
+        "📋 Pull requests loaded successfully:",
+        response.data.length,
+        "pull requests"
+      );
     } catch (error) {
+      console.error("❌ Failed to load pull requests:", error);
+
+      // Handle different error types more gracefully
+      let errorMessage = "Failed to load pull requests";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status: number } };
+        if (axiosError.response?.status === 400) {
+          errorMessage =
+            "Repository has no accessible pull requests or not found";
+        } else if (axiosError.response?.status === 404) {
+          errorMessage = "Repository not found or not accessible";
+        } else if (axiosError.response?.status === 403) {
+          errorMessage = "Access denied to repository pull requests";
+        }
+      }
+
       setState((prev) => ({
         ...prev,
+        pullRequests: [], // Clear pull requests on error
         loading: { ...prev.loading, pullRequests: false },
-        error: "Failed to load pull requests",
+        error: null, // Don't show global error for this
       }));
+
       addToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to load pull requests",
+        type: "warning",
+        title: "Pull Requests Unavailable",
+        message: errorMessage,
       });
     }
   };
@@ -255,10 +297,12 @@ function App() {
       setState((prev) => ({
         ...prev,
         currentRepository: repository,
-        activeTab: "commits",
+        // Don't auto-switch tabs - let user decide
         // Clear existing data while loading new data
         commits: [],
         pullRequests: [],
+        reviewingCommits: new Set(),
+        reviewingPRs: new Set(),
         loading: {
           ...prev.loading,
           commits: true,
@@ -292,19 +336,23 @@ function App() {
     try {
       setState((prev) => ({
         ...prev,
-        loading: { ...prev.loading, review: true },
+        reviewingCommits: new Set([...prev.reviewingCommits, sha]),
       }));
       const response = await commitsApi.review(sha);
       setState((prev) => ({
         ...prev,
         codeReview: response.data,
         showReviewModal: true,
-        loading: { ...prev.loading, review: false },
+        reviewingCommits: new Set(
+          [...prev.reviewingCommits].filter((id) => id !== sha)
+        ),
       }));
-    } catch (error) {
+    } catch {
       setState((prev) => ({
         ...prev,
-        loading: { ...prev.loading, review: false },
+        reviewingCommits: new Set(
+          [...prev.reviewingCommits].filter((id) => id !== sha)
+        ),
       }));
       addToast({
         type: "error",
@@ -318,19 +366,23 @@ function App() {
     try {
       setState((prev) => ({
         ...prev,
-        loading: { ...prev.loading, review: true },
+        reviewingPRs: new Set([...prev.reviewingPRs, number]),
       }));
       const response = await pullRequestsApi.review(number);
       setState((prev) => ({
         ...prev,
         codeReview: response.data,
         showReviewModal: true,
-        loading: { ...prev.loading, review: false },
+        reviewingPRs: new Set(
+          [...prev.reviewingPRs].filter((id) => id !== number)
+        ),
       }));
-    } catch (error) {
+    } catch {
       setState((prev) => ({
         ...prev,
-        loading: { ...prev.loading, review: false },
+        reviewingPRs: new Set(
+          [...prev.reviewingPRs].filter((id) => id !== number)
+        ),
       }));
       addToast({
         type: "error",
@@ -360,7 +412,7 @@ function App() {
       });
       await loadRepositories();
       await getCurrentRepository();
-    } catch (error) {
+    } catch {
       addToast({
         type: "error",
         title: "Error",
@@ -369,11 +421,19 @@ function App() {
     }
   };
 
-  const filteredRepositories = state.repositories.filter(
-    (repo) =>
-      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      repo.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRepositories = state.repositories
+    .filter(
+      (repo) =>
+        repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        repo.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Current repository always first
+      if (a.isCurrent) return -1;
+      if (b.isCurrent) return 1;
+      // Then sort by ID (which represents the order from backend - most recently used first)
+      return a.id - b.id;
+    });
 
   const filteredCommits = state.commits.filter(
     (commit) =>
@@ -405,14 +465,21 @@ function App() {
 
               <div className="flex items-center gap-4">
                 {state.currentRepository && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="font-medium">Current:</span>{" "}
-                    {state.currentRepository.fullName}
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="text-sm">
+                      <span className="text-gray-600 dark:text-gray-400 font-medium">
+                        Current:
+                      </span>{" "}
+                      <span className="text-blue-700 dark:text-blue-300 font-semibold">
+                        {state.currentRepository.fullName}
+                      </span>
+                    </div>
                   </div>
                 )}
                 <button
                   onClick={loadInitialData}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                   title="Refresh"
                 >
                   <RefreshCw className="w-5 h-5" />
@@ -561,15 +628,30 @@ function App() {
                   description="No commits match your search criteria or the repository has no recent commits."
                 />
               ) : (
-                <div className="space-y-4">
-                  {filteredCommits.map((commit) => (
-                    <CommitCard
-                      key={commit.sha}
-                      commit={commit}
-                      onReview={handleCommitReview}
-                      isReviewing={state.loading.review}
-                    />
-                  ))}
+                <div>
+                  {/* Info note about commit limit */}
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div className="flex items-center">
+                      <GitCommit className="w-4 h-4 text-blue-600 mr-2" />
+                      <p className="text-sm text-blue-800">
+                        <strong>Demo Mode:</strong> Showing the last 20 commits
+                        only.
+                        {filteredCommits.length === 20 &&
+                          " This repository may have additional commits."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {filteredCommits.map((commit) => (
+                      <CommitCard
+                        key={commit.sha}
+                        commit={commit}
+                        onReview={handleCommitReview}
+                        isReviewing={state.reviewingCommits.has(commit.sha)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -606,7 +688,7 @@ function App() {
                       key={pr.number}
                       pullRequest={pr}
                       onReview={handlePullRequestReview}
-                      isReviewing={state.loading.review}
+                      isReviewing={state.reviewingPRs.has(pr.number)}
                     />
                   ))}
                 </div>

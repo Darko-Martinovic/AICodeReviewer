@@ -9,6 +9,7 @@ namespace AICodeReviewer.Models.Configuration
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public bool IsPrivate { get; set; }
+        public string DefaultBranch { get; set; } = "main";
         public string FullName => $"{Owner}/{Name}";
         public string DisplayName => string.IsNullOrEmpty(Owner) || string.IsNullOrEmpty(Name)
             ? "Not configured"

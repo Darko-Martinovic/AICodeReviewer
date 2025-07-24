@@ -335,7 +335,8 @@ namespace AICodeReviewer.Services
                     Owner = r.Owner.Login,
                     Name = r.Name,
                     Description = r.Description ?? "",
-                    IsPrivate = r.Private
+                    IsPrivate = r.Private,
+                    DefaultBranch = r.DefaultBranch ?? "main"
                 }).ToList();
             }
             catch (Exception ex)

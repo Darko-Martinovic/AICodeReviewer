@@ -74,7 +74,7 @@ namespace AICodeReviewer.Controllers
                     FullName = $"{currentOwner}/{currentName}",
                     Owner = currentOwner,
                     Description = currentRepoInfo?.Description ?? "Repository information not available",
-                    DefaultBranch = "main",
+                    DefaultBranch = currentRepoInfo?.DefaultBranch ?? "master",
                     Private = currentRepoInfo?.IsPrivate ?? false,
                     HtmlUrl = $"https://github.com/{currentOwner}/{currentName}",
                     IsCurrent = true
@@ -92,7 +92,7 @@ namespace AICodeReviewer.Controllers
                             FullName = repo.FullName,
                             Owner = repo.Owner,
                             Description = repo.Description,
-                            DefaultBranch = "main",
+                            DefaultBranch = repo.DefaultBranch,
                             Private = repo.IsPrivate,
                             HtmlUrl = $"https://github.com/{repo.Owner}/{repo.Name}",
                             IsCurrent = false

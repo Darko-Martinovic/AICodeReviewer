@@ -49,6 +49,7 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
   };
 
   const getComplexityColor = (complexity: string) => {
+    if (!complexity) return "text-gray-600 bg-gray-100";
     switch (complexity.toLowerCase()) {
       case "high":
         return "text-red-600 bg-red-100";

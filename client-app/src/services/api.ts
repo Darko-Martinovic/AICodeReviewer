@@ -53,6 +53,7 @@ export interface Repository {
   defaultBranch: string;
   private: boolean;
   htmlUrl: string;
+  isCurrent?: boolean;
 }
 
 export interface Commit {
