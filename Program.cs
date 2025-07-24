@@ -19,9 +19,7 @@ namespace AICodeReviewer
             try
             {
                 // Load environment variables
-                Console.WriteLine("🔍 Debug: Loading environment variables from .env file...");
                 Env.Load();
-                Console.WriteLine("🔍 Debug: Environment variables loaded");
 
                 Console.WriteLine("🤖 AI Code Reviewer");
                 Console.WriteLine("Starting up...");
@@ -104,8 +102,9 @@ namespace AICodeReviewer
                     ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
                 var name = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
                     ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
+                var configService = provider.GetRequiredService<IConfigurationService>();
 
-                return new GitHubService(token, owner, name);
+                return new GitHubService(token, owner, name, configService);
             });
 
             services.AddSingleton<ICodeReviewService, CodeReviewService>();
@@ -121,16 +120,23 @@ namespace AICodeReviewer
         /// </summary>
         private static async Task InitializeServicesAsync(ServiceProvider serviceProvider)
         {
-            // Display configuration summary
             var configService = serviceProvider.GetRequiredService<IConfigurationService>();
-            configService.DisplayConfigurationSummary();
+
+            // Display configuration summary only if debug logging is enabled
+            if (configService.Settings.DebugLogging)
+            {
+                configService.DisplayConfigurationSummary();
+            }
 
             // Initialize GitHub connection
             var gitHubService = serviceProvider.GetRequiredService<IGitHubService>();
             await gitHubService.InitializeAsync();
 
-            Console.WriteLine("✅ Azure OpenAI configured");
-            Console.WriteLine("✅ All services initialized successfully");
+            if (configService.Settings.DebugLogging)
+            {
+                Console.WriteLine("✅ Azure OpenAI configured");
+                Console.WriteLine("✅ All services initialized successfully");
+            }
             Console.WriteLine("🚀 Ready to review code!\n");
         }
 

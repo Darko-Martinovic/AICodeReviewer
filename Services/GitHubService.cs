@@ -9,13 +9,15 @@ namespace AICodeReviewer.Services
     public class GitHubService : IGitHubService
     {
         private readonly GitHubClient _gitHubClient;
+        private readonly IConfigurationService _configurationService;
         private string _repoOwner;
         private string _repoName;
 
-        public GitHubService(string token, string repoOwner, string repoName)
+        public GitHubService(string token, string repoOwner, string repoName, IConfigurationService configurationService)
         {
             _repoOwner = repoOwner ?? throw new ArgumentNullException(nameof(repoOwner));
             _repoName = repoName ?? throw new ArgumentNullException(nameof(repoName));
+            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
 
             _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
             _gitHubClient.Credentials = new Credentials(token);
@@ -40,7 +42,10 @@ namespace AICodeReviewer.Services
                 var user = await _gitHubClient.User.Current();
                 Console.WriteLine($"✅ Connected to GitHub as: {user.Login}");
 
-                Console.WriteLine($"🔍 Attempting to access repository: {_repoOwner}/{_repoName}");
+                if (_configurationService.Settings.DebugLogging)
+                {
+                    Console.WriteLine($"🔍 Attempting to access repository: {_repoOwner}/{_repoName}");
+                }
 
                 var repo = await _gitHubClient.Repository.Get(_repoOwner, _repoName);
                 Console.WriteLine($"✅ Repository access: {repo.FullName}");

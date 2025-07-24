@@ -15,24 +15,30 @@ namespace AICodeReviewer.Services
         private readonly string? _jiraApiToken;
         private readonly string? _jiraUserEmail;
         private readonly HttpClient _httpClient;
+        private readonly IConfigurationService _configurationService;
 
-        public JiraService()
+        public JiraService(IConfigurationService configurationService)
         {
+            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+
             // Load Jira configuration from environment variables
             _jiraBaseUrl = Environment.GetEnvironmentVariable("JIRA_BASE_URL");
             _jiraApiToken = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
             _jiraUserEmail = Environment.GetEnvironmentVariable("JIRA_USER_EMAIL");
 
             // Debug: Check what environment variables are loaded
-            Console.WriteLine(
-                $"🔍 Debug: JIRA_BASE_URL = {(_jiraBaseUrl != null ? "SET" : "NOT SET")}"
-            );
-            Console.WriteLine(
-                $"🔍 Debug: JIRA_API_TOKEN = {(_jiraApiToken != null ? "SET" : "NOT SET")}"
-            );
-            Console.WriteLine(
-                $"🔍 Debug: JIRA_USER_EMAIL = {(_jiraUserEmail != null ? "SET" : "NOT SET")}"
-            );
+            if (_configurationService.Settings.DebugLogging)
+            {
+                Console.WriteLine(
+                    $"🔍 Debug: JIRA_BASE_URL = {(_jiraBaseUrl != null ? "SET" : "NOT SET")}"
+                );
+                Console.WriteLine(
+                    $"🔍 Debug: JIRA_API_TOKEN = {(_jiraApiToken != null ? "SET" : "NOT SET")}"
+                );
+                Console.WriteLine(
+                    $"🔍 Debug: JIRA_USER_EMAIL = {(_jiraUserEmail != null ? "SET" : "NOT SET")}"
+                );
+            }
 
             _httpClient = new HttpClient();
 
@@ -47,13 +53,20 @@ namespace AICodeReviewer.Services
                 _httpClient.DefaultRequestHeaders.Accept.Add(
                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json")
                 );
-                Console.WriteLine($"🔍 Debug: JIRA API configured successfully");
+
+                if (_configurationService.Settings.DebugLogging)
+                {
+                    Console.WriteLine($"🔍 Debug: JIRA API configured successfully");
+                }
             }
             else
             {
-                Console.WriteLine(
-                    $"🔍 Debug: JIRA API not configured - missing environment variables"
-                );
+                if (_configurationService.Settings.DebugLogging)
+                {
+                    Console.WriteLine(
+                        $"🔍 Debug: JIRA API not configured - missing environment variables"
+                    );
+                }
             }
         }
 
@@ -78,10 +91,13 @@ namespace AICodeReviewer.Services
                 .ToList();
 
             // Debug output to show what was extracted
-            Console.WriteLine($"🔍 Debug: Extracting tickets from PR title: \"{prTitle}\"");
-            Console.WriteLine(
-                $"🔍 Debug: Found {tickets.Count} ticket(s): {string.Join(", ", tickets)}"
-            );
+            if (_configurationService.Settings.DebugLogging)
+            {
+                Console.WriteLine($"🔍 Debug: Extracting tickets from PR title: \"{prTitle}\"");
+                Console.WriteLine(
+                    $"🔍 Debug: Found {tickets.Count} ticket(s): {string.Join(", ", tickets)}"
+                );
+            }
 
             return tickets;
         }
@@ -244,34 +260,40 @@ namespace AICodeReviewer.Services
                 var url = $"{_jiraBaseUrl}/rest/api/3/issue/{ticketKey}";
 
                 // Maximum debug output
-                Console.WriteLine($"   🔍 Debug: Making PUT request to {url}");
-                Console.WriteLine($"   🔍 Debug: HTTP Method: PUT");
-                Console.WriteLine($"   🔍 Debug: Request Headers:");
-                foreach (var header in _httpClient.DefaultRequestHeaders)
+                if (_configurationService.Settings.DebugLogging)
                 {
-                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                    Console.WriteLine($"   🔍 Debug: Making PUT request to {url}");
+                    Console.WriteLine($"   🔍 Debug: HTTP Method: PUT");
+                    Console.WriteLine($"   🔍 Debug: Request Headers:");
+                    foreach (var header in _httpClient.DefaultRequestHeaders)
+                    {
+                        Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                    }
+                    Console.WriteLine($"   🔍 Debug: Content Headers:");
+                    foreach (var header in content.Headers)
+                    {
+                        Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                    }
+                    Console.WriteLine($"   🔍 Debug: Payload: {json}");
                 }
-                Console.WriteLine($"   🔍 Debug: Content Headers:");
-                foreach (var header in content.Headers)
-                {
-                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
-                }
-                Console.WriteLine($"   🔍 Debug: Payload: {json}");
 
                 var response = await _httpClient.PutAsync(url, content);
-
-                Console.WriteLine($"   🔍 Debug: Response Status Code: {response.StatusCode}");
-                Console.WriteLine($"   🔍 Debug: Response Headers:");
-                foreach (var header in response.Headers)
-                {
-                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
-                }
-                foreach (var header in response.Content.Headers)
-                {
-                    Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
-                }
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"   🔍 Debug: Response Body: {responseBody}");
+
+                if (_configurationService.Settings.DebugLogging)
+                {
+                    Console.WriteLine($"   🔍 Debug: Response Status Code: {response.StatusCode}");
+                    Console.WriteLine($"   🔍 Debug: Response Headers:");
+                    foreach (var header in response.Headers)
+                    {
+                        Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                    }
+                    foreach (var header in response.Content.Headers)
+                    {
+                        Console.WriteLine($"     {header.Key}: {string.Join(", ", header.Value)}");
+                    }
+                    Console.WriteLine($"   🔍 Debug: Response Body: {responseBody}");
+                }
 
                 if (response.IsSuccessStatusCode)
                 {

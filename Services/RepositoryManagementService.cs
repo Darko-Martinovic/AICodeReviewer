@@ -33,7 +33,10 @@ namespace AICodeReviewer.Services
                 !string.IsNullOrEmpty(defaultName) ? defaultName : "AICodeReviewer"
             );
 
-            Console.WriteLine($"🔍 Debug: Initialized with repository: {_currentRepository.Owner}/{_currentRepository.Name}");
+            if (_settings.DebugLogging)
+            {
+                Console.WriteLine($"🔍 Debug: Initialized with repository: {_currentRepository.Owner}/{_currentRepository.Name}");
+            }
         }
 
         /// <summary>

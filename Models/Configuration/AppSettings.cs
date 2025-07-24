@@ -7,6 +7,7 @@ namespace AICodeReviewer.Models.Configuration
     /// </summary>
     public class AppSettings
     {
+        public bool DebugLogging { get; set; } = false;
         public AzureOpenAISettings AzureOpenAI { get; set; } = new();
         public CodeReviewSettings CodeReview { get; set; } = new();
         public TeamsSettings Teams { get; set; } = new();

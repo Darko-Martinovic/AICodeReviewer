@@ -70,7 +70,10 @@ namespace AICodeReviewer.Services
                 {
                     // Copy values from JSON to our settings object
                     CopySettings(jsonSettings, settings);
-                    Console.WriteLine($"✅ Configuration loaded from '{configFile}'");
+                    if (settings.DebugLogging)
+                    {
+                        Console.WriteLine($"✅ Configuration loaded from '{configFile}'");
+                    }
                 }
             }
             catch (Exception ex)
@@ -142,7 +145,10 @@ namespace AICodeReviewer.Services
                 settings.CodeReview.MaxIssuesInSummary = maxIssues;
             }
 
-            Console.WriteLine("✅ Environment variable overrides applied");
+            if (settings.DebugLogging)
+            {
+                Console.WriteLine("✅ Environment variable overrides applied");
+            }
         }
 
         /// <summary>
