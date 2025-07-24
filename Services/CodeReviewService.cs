@@ -38,6 +38,15 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Performs AI code review on a specific commit by SHA
+        /// </summary>
+        public async Task<CodeReviewResult> ReviewCommitAsync(string commitSha)
+        {
+            var commit = await _gitHubService.GetCommitAsync(commitSha);
+            return await ReviewCommitAsync(commit.Files);
+        }
+
+        /// <summary>
         /// Performs AI code review on pull request files
         /// </summary>
         public async Task<CodeReviewResult> ReviewPullRequestAsync(
@@ -45,6 +54,15 @@ namespace AICodeReviewer.Services
         )
         {
             return await ReviewFilesInternalAsync(files.Cast<object>().ToList());
+        }
+
+        /// <summary>
+        /// Performs AI code review on a specific pull request by number
+        /// </summary>
+        public async Task<CodeReviewResult> ReviewPullRequestAsync(int pullRequestNumber)
+        {
+            var files = await _gitHubService.GetPullRequestFilesAsync(pullRequestNumber);
+            return await ReviewPullRequestAsync(files);
         }
 
         private async Task<CodeReviewResult> ReviewFilesInternalAsync(List<object> files)

@@ -100,11 +100,32 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Gets recent commits with a specified count
+        /// </summary>
+        public async Task<IReadOnlyList<GitHubCommit>> GetRecentCommitsAsync(int count = 10)
+        {
+            var commitRequest = new CommitRequest
+            {
+                Sha = "main"
+            };
+            var commits = await _gitHubClient.Repository.Commit.GetAll(_repoOwner, _repoName, commitRequest);
+            return commits.Take(count).ToList();
+        }
+
+        /// <summary>
         /// Gets detailed commit information including file changes
         /// </summary>
         public async Task<GitHubCommit> GetCommitDetailAsync(string sha)
         {
             return await _gitHubClient.Repository.Commit.Get(_repoOwner, _repoName, sha);
+        }
+
+        /// <summary>
+        /// Alias for GetCommitDetailAsync to maintain API consistency
+        /// </summary>
+        public async Task<GitHubCommit> GetCommitAsync(string sha)
+        {
+            return await GetCommitDetailAsync(sha);
         }
 
         /// <summary>
@@ -117,6 +138,14 @@ namespace AICodeReviewer.Services
                 _repoName,
                 new PullRequestRequest { State = ItemStateFilter.Open }
             );
+        }
+
+        /// <summary>
+        /// Gets a specific pull request by number
+        /// </summary>
+        public async Task<PullRequest> GetPullRequestAsync(int number)
+        {
+            return await _gitHubClient.PullRequest.Get(_repoOwner, _repoName, number);
         }
 
         /// <summary>

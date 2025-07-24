@@ -1,56 +1,30 @@
-﻿using System;
-using System.Threading.Tasks;
-using DotNetEnv;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using DotNetEnv;
 using AICodeReviewer.Services;
 using AICodeReviewer.Services.Interfaces;
-using AICodeReviewer.Application;
 
 namespace AICodeReviewer
 {
     /// <summary>
-    /// Main entry point for the AI Code Reviewer application
+    /// Web API entry point for the AI Code Reviewer application
     /// </summary>
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            try
-            {
-                // Load environment variables
-                Env.Load();
+            // Load environment variables
+            Env.Load();
 
-                Console.WriteLine("🤖 AI Code Reviewer");
-                Console.WriteLine("Starting up...");
-                Console.WriteLine();
+            var builder = WebApplication.CreateBuilder(args);
 
-                // Build service provider
-                var serviceProvider = BuildServiceProvider();
+            // Configure services
+            ConfigureServices(builder.Services);
 
-                // Run the application
-                using (serviceProvider)
-                {
-                    var application = serviceProvider.GetRequiredService<CodeReviewApplication>();
-                    InitializeServicesAsync(serviceProvider).Wait();
-                    ShowMainMenuAsync(application).Wait();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Application startup failed: {ex.Message}");
-                Environment.Exit(1);
-            }
-        }
+            var app = builder.Build();
 
-        /// <summary>
-        /// Builds and configures the dependency injection service provider
-        /// </summary>
-        private static ServiceProvider BuildServiceProvider()
-        {
-            var services = new ServiceCollection();
-            ConfigureServices(services);
-            return services.BuildServiceProvider();
+            // Configure the HTTP request pipeline
+            ConfigurePipeline(app);
+
+            app.Run();
         }
 
         /// <summary>
@@ -58,6 +32,37 @@ namespace AICodeReviewer
         /// </summary>
         private static void ConfigureServices(IServiceCollection services)
         {
+            // Add controllers
+            services.AddControllers();
+
+            // Add API Explorer for Swagger
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new()
+                {
+                    Title = "AI Code Reviewer API",
+                    Version = "v1",
+                    Description = "AI-powered code review tool for GitHub repositories using Azure OpenAI"
+                });
+            });
+
+            // Add CORS
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp", policy =>
+                {
+                    policy.WithOrigins(
+                        "http://localhost:3000", "https://localhost:3000",
+                        "http://localhost:5173", "https://localhost:5173",
+                        "http://localhost:5174", "https://localhost:5174",
+                        "http://localhost:5175", "https://localhost:5175")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
             // Configuration service (singleton)
             services.AddSingleton<IConfigurationService, ConfigurationService>();
 
@@ -77,7 +82,7 @@ namespace AICodeReviewer
                 return new RepositoryManagementService(configService.Settings, token);
             });
 
-            // Core services (singletons for this console app)
+            // Core services (singletons for this web app)
             services.AddSingleton<IAzureOpenAIService>(provider =>
             {
                 var httpClient = provider.GetRequiredService<HttpClient>();
@@ -110,88 +115,47 @@ namespace AICodeReviewer
             services.AddSingleton<ICodeReviewService, CodeReviewService>();
             services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IJiraService, JiraService>();
-
-            // Application layer
-            services.AddSingleton<CodeReviewApplication>();
         }
 
         /// <summary>
-        /// Initializes services that require async setup
+        /// Configures the HTTP request pipeline
         /// </summary>
-        private static async Task InitializeServicesAsync(ServiceProvider serviceProvider)
+        private static void ConfigurePipeline(WebApplication app)
         {
-            var configService = serviceProvider.GetRequiredService<IConfigurationService>();
-
-            // Display configuration summary only if debug logging is enabled
-            if (configService.Settings.DebugLogging)
+            // Configure the HTTP request pipeline
+            if (app.Environment.IsDevelopment())
             {
-                configService.DisplayConfigurationSummary();
-            }
-
-            // Initialize GitHub connection
-            var gitHubService = serviceProvider.GetRequiredService<IGitHubService>();
-            await gitHubService.InitializeAsync();
-
-            if (configService.Settings.DebugLogging)
-            {
-                Console.WriteLine("✅ Azure OpenAI configured");
-                Console.WriteLine("✅ All services initialized successfully");
-            }
-            Console.WriteLine("🚀 Ready to review code!\n");
-        }
-
-        /// <summary>
-        /// Shows the main application menu and handles user interaction
-        /// </summary>
-        private static async Task ShowMainMenuAsync(CodeReviewApplication application)
-        {
-            while (true)
-            {
-                Console.WriteLine("🤖 AI Code Reviewer");
-                Console.WriteLine();
-                Console.WriteLine("Choose an option:");
-                Console.WriteLine();
-                Console.WriteLine("  1. 📝 List recent commits");
-                Console.WriteLine("  2. 🔍 Review latest commit (Push Event)");
-                Console.WriteLine("  3. 🔍 Review commit by hash");
-                Console.WriteLine("  4. 📋 List open Pull Requests");
-                Console.WriteLine("  5. 🔀 Review Pull Request");
-                Console.WriteLine("  6. 🏠 Manage repositories");
-                Console.WriteLine("  7. 🚪 Exit");
-                Console.WriteLine();
-                Console.Write("Enter your choice (1-7): ");
-
-                string? choice = Console.ReadLine();
-                Console.WriteLine();
-
-                switch (choice)
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
                 {
-                    case "1":
-                        await application.ListRecentCommitsAsync();
-                        break;
-                    case "2":
-                        await application.ReviewLatestCommitAsync();
-                        break;
-                    case "3":
-                        await application.ReviewCommitByHashAsync();
-                        break;
-                    case "4":
-                        await application.ListOpenPullRequestsAsync();
-                        break;
-                    case "5":
-                        await application.ReviewPullRequestAsync();
-                        break;
-                    case "6":
-                        await application.ManageRepositoriesAsync();
-                        break;
-                    case "7":
-                        Console.WriteLine("👋 Goodbye! Thanks for using AI Code Reviewer!");
-                        return;
-                    default:
-                        Console.WriteLine("❌ Invalid choice. Please try again.\n");
-                        break;
-                }
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Code Reviewer API v1");
+                    c.RoutePrefix = "api/docs"; // Swagger will be available at /api/docs
+                });
             }
+
+            app.UseHttpsRedirection();
+
+            app.UseCors("AllowReactApp");
+
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            // Add a simple health check endpoint
+            app.MapGet("/api/health", () => new
+            {
+                Status = "Healthy",
+                Timestamp = DateTime.UtcNow,
+                Version = "1.0.0"
+            });
+
+            // Root endpoint with API information
+            app.MapGet("/", () => new
+            {
+                Message = "AI Code Reviewer API",
+                Documentation = "/api/docs",
+                Health = "/api/health"
+            });
         }
     }
 }

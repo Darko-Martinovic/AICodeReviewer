@@ -9,6 +9,8 @@ namespace AICodeReviewer.Services.Interfaces
     public interface ICodeReviewService
     {
         Task<CodeReviewResult> ReviewCommitAsync(IReadOnlyList<GitHubCommitFile> files);
+        Task<CodeReviewResult> ReviewCommitAsync(string commitSha);
         Task<CodeReviewResult> ReviewPullRequestAsync(IReadOnlyList<PullRequestFile> files);
+        Task<CodeReviewResult> ReviewPullRequestAsync(int pullRequestNumber);
     }
 }

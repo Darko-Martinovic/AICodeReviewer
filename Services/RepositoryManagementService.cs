@@ -48,6 +48,24 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Sets the current repository (for web API calls)
+        /// </summary>
+        /// <param name="owner">Repository owner</param>
+        /// <param name="name">Repository name</param>
+        public async Task SetCurrentRepositoryAsync(string owner, string name)
+        {
+            _currentRepository = (owner, name);
+
+            if (_settings.DebugLogging)
+            {
+                Console.WriteLine($"🔍 Debug: Current repository changed to: {owner}/{name}");
+            }
+
+            // Add to history
+            await AddToHistoryAsync(owner, name);
+        }
+
+        /// <summary>
         /// Prompts user to select a repository and returns the selection
         /// </summary>
         public async Task<(string Owner, string Name)> PromptForRepositoryAsync()

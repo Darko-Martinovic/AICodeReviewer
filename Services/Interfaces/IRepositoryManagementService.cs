@@ -15,6 +15,13 @@ namespace AICodeReviewer.Services.Interfaces
         Task<(string Owner, string Name)> GetCurrentRepositoryAsync();
 
         /// <summary>
+        /// Sets the current repository (for web API calls)
+        /// </summary>
+        /// <param name="owner">Repository owner</param>
+        /// <param name="name">Repository name</param>
+        Task SetCurrentRepositoryAsync(string owner, string name);
+
+        /// <summary>
         /// Prompts user to select a repository and returns the selection
         /// </summary>
         Task<(string Owner, string Name)> PromptForRepositoryAsync();

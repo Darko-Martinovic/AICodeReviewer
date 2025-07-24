@@ -9,9 +9,12 @@ namespace AICodeReviewer.Services.Interfaces
     {
         Task InitializeAsync();
         Task<IReadOnlyList<GitHubCommit>> GetCommitsAsync();
+        Task<IReadOnlyList<GitHubCommit>> GetRecentCommitsAsync(int count = 10);
         Task<GitHubCommit> GetCommitDetailAsync(string sha);
+        Task<GitHubCommit> GetCommitAsync(string sha);
         Task<IReadOnlyList<PullRequest>> GetPullRequestsAsync();
         Task<IReadOnlyList<PullRequest>> GetOpenPullRequestsAsync();
+        Task<PullRequest> GetPullRequestAsync(int number);
         Task<IReadOnlyList<PullRequestFile>> GetPullRequestFilesAsync(int pullRequestNumber);
         Task<string> GetFileContentAsync(string fileName);
         Task<(string Owner, string Name)> GetRepositoryInfoAsync();

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for AI Code Reviewer */
+.bg-gradient-main {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.card {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700;
+}
+
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white;
+}
+
+/* Code syntax highlighting */
+.code-block {
+  @apply bg-gray-100 dark:bg-gray-900 p-4 rounded-md font-mono text-sm overflow-x-auto;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+}
+
+/* Status indicators */
+.status-success {
+  @apply text-green-600 bg-green-100 px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.status-error {
+  @apply text-red-600 bg-red-100 px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.status-warning {
+  @apply text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.status-info {
+  @apply text-blue-600 bg-blue-100 px-2 py-1 rounded-full text-sm font-medium;
+}
