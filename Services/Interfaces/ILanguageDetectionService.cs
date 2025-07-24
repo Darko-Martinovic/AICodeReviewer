@@ -1,4 +1,4 @@
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Service for detecting programming language based on file extension

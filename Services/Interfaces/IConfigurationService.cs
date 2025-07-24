@@ -1,6 +1,6 @@
 using AICodeReviewer.Models.Configuration;
 
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Interface for configuration service operations

@@ -1,5 +1,6 @@
 using AICodeReviewer.Models;
 using AICodeReviewer.Models.Configuration;
+using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Utils;
 using Octokit;
 

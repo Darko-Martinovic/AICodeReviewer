@@ -1,4 +1,4 @@
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Interface for Azure OpenAI service operations

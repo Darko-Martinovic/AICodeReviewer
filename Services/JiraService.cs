@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Text.Json;
 using AICodeReviewer.Models;
+using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Services
 {

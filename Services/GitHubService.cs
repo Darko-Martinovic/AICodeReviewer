@@ -1,3 +1,4 @@
+using AICodeReviewer.Services.Interfaces;
 using Octokit;
 
 namespace AICodeReviewer.Services

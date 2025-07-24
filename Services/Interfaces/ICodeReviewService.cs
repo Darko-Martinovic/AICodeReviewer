@@ -1,7 +1,7 @@
 using AICodeReviewer.Models;
 using Octokit;
 
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Interface for code review service operations

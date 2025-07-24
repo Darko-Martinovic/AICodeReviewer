@@ -1,6 +1,6 @@
 using AICodeReviewer.Models;
 
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Interface for Jira service operations

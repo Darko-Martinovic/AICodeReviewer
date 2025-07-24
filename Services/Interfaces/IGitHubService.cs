@@ -1,6 +1,6 @@
 using Octokit;
 
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Interface for GitHub service operations

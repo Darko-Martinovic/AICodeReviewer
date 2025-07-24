@@ -1,4 +1,4 @@
-namespace AICodeReviewer.Services
+namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
     /// Service for managing dynamic prompts based on file language

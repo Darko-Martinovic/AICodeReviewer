@@ -4,6 +4,7 @@ using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AICodeReviewer.Services;
+using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Application;
 
 namespace AICodeReviewer

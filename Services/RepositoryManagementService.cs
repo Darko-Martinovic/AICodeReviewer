@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AICodeReviewer.Models.Configuration;
+using AICodeReviewer.Services.Interfaces;
 using Octokit;
 
 namespace AICodeReviewer.Services

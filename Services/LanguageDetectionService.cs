@@ -1,3 +1,5 @@
+using AICodeReviewer.Services.Interfaces;
+
 namespace AICodeReviewer.Services
 {
     /// <summary>

@@ -1,4 +1,5 @@
 using AICodeReviewer.Models.Configuration;
+using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Services
 {

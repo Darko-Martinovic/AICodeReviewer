@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AICodeReviewer.Services;
+using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Models;
 using AICodeReviewer.Models.Configuration;
 
