@@ -22,8 +22,12 @@ const SystemPromptsManager: React.FC = () => {
   const [activeLanguage, setActiveLanguage] = useState<string>("CSharp");
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<string | null>(null);
-  const [previewMode, setPreviewMode] = useState<{ [key: string]: boolean }>({});
-  const [previewData, setPreviewData] = useState<{ [key: string]: PreviewData }>({});
+  const [previewMode, setPreviewMode] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [previewData, setPreviewData] = useState<{
+    [key: string]: PreviewData;
+  }>({});
 
   const languages = [
     { key: "CSharp", label: "C#", icon: "🟢" },
@@ -54,7 +58,9 @@ const SystemPromptsManager: React.FC = () => {
 
   const loadPromptTemplates = async () => {
     try {
-      const response = await fetch("https://localhost:7001/api/systemprompts/templates");
+      const response = await fetch(
+        "https://localhost:7001/api/systemprompts/templates"
+      );
       const data = await response.json();
       setTemplates(data);
     } catch (error) {
@@ -68,11 +74,14 @@ const SystemPromptsManager: React.FC = () => {
   ) => {
     try {
       setSaving(language);
-      await fetch(`https://localhost:7001/api/systemprompts/${language}/custom`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customAdditions }),
-      });
+      await fetch(
+        `https://localhost:7001/api/systemprompts/${language}/custom`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customAdditions }),
+        }
+      );
 
       setPrompts((prev) => ({
         ...prev,
@@ -91,13 +100,16 @@ const SystemPromptsManager: React.FC = () => {
 
   const previewCombinedPrompt = async (language: string) => {
     try {
-      const response = await fetch(`https://localhost:7001/api/systemprompts/preview/${language}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customAdditions: prompts[language]?.customAdditions || "",
-        }),
-      });
+      const response = await fetch(
+        `https://localhost:7001/api/systemprompts/preview/${language}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customAdditions: prompts[language]?.customAdditions || "",
+          }),
+        }
+      );
       const data = await response.json();
 
       setPreviewData((prev) => ({
@@ -119,7 +131,8 @@ const SystemPromptsManager: React.FC = () => {
       ...prev,
       [language]: {
         ...prev[language],
-        customAdditions: (prev[language]?.customAdditions || "") + "\n" + template,
+        customAdditions:
+          (prev[language]?.customAdditions || "") + "\n" + template,
       },
     }));
   };
@@ -186,8 +199,8 @@ const SystemPromptsManager: React.FC = () => {
                   </span>
                 </h2>
                 <p className="text-gray-600 text-sm mt-1">
-                  Default system prompt loaded from configuration. This cannot be
-                  modified.
+                  Default system prompt loaded from configuration. This cannot
+                  be modified.
                 </p>
               </div>
               <textarea
