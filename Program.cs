@@ -155,20 +155,6 @@ namespace AICodeReviewer
             services.AddSingleton<TeamsPlugin>();
             services.AddSingleton<JiraPlugin>();
 
-            // Add plugins to kernel after the services are registered
-            services.AddSingleton<Kernel>(provider =>
-            {
-                var kernel = provider.GetRequiredService<Kernel>();
-                
-                // Add plugins from instances
-                kernel.Plugins.AddFromObject(provider.GetRequiredService<CodeReviewPlugin>(), "CodeReview");
-                kernel.Plugins.AddFromObject(provider.GetRequiredService<GitHubPlugin>(), "GitHub");
-                kernel.Plugins.AddFromObject(provider.GetRequiredService<TeamsPlugin>(), "Teams");
-                kernel.Plugins.AddFromObject(provider.GetRequiredService<JiraPlugin>(), "Jira");
-
-                return kernel;
-            });
-
             // Register workflow engine service
             services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();
         }

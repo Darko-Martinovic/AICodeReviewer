@@ -361,8 +361,8 @@ namespace AICodeReviewer.Controllers
 
                 Console.WriteLine($"🚀 Executing commit workflow for {sha}");
                 var workflowContext = await _workflowEngineService.ExecuteWorkflowAsync(
-                    "CommitReview", 
-                    "manual_review", 
+                    "CommitReview",
+                    "manual_review",
                     workflowData);
 
                 // Extract the code review result from workflow results
