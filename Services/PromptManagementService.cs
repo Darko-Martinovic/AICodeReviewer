@@ -112,16 +112,16 @@ Note: {analysisNote}"
             var isTruncated = contentLength > contentLimit;
             var truncatedContent = isTruncated ? fileContent.Substring(0, contentLimit) : fileContent;
 
-            var truncationNotice = isTruncated 
-                ? $"(Showing first {contentLimit:N0} characters of {contentLength:N0} total)" 
+            var truncationNotice = isTruncated
+                ? $"(Showing first {contentLimit:N0} characters of {contentLength:N0} total)"
                 : "";
 
-            var truncationIndicator = isTruncated 
-                ? "\n... [Content truncated for analysis] ..." 
+            var truncationIndicator = isTruncated
+                ? "\n... [Content truncated for analysis] ..."
                 : "";
 
-            var analysisNote = isTruncated 
-                ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section." 
+            var analysisNote = isTruncated
+                ? "This is a partial view of a larger file. Focus on identifying patterns, architectural issues, and code quality problems that are visible in this section."
                 : "This is the complete file content.";
 
             return template
@@ -144,4 +144,4 @@ Note: {analysisNote}"
             return _languageDetectionService.IsLanguageSupported(fileName);
         }
     }
-} 
+}

@@ -136,7 +136,7 @@ namespace AICodeReviewer.Services
                         if (issues.Any())
                         {
                             Console.WriteLine($"    🔍 Found {issues.Count} issue(s):");
-                            
+
                             // Display detailed issues with full information
                             foreach (var detailedIssue in detailedIssues)
                             {
@@ -154,7 +154,7 @@ namespace AICodeReviewer.Services
                                     Console.WriteLine($"        📍 Line: {detailedIssue.LineNumber}");
                                 }
                                 Console.WriteLine();
-                                
+
                                 allIssues.Add($"{fileName}: [{detailedIssue.Severity}] {detailedIssue.Title}");
                             }
 
