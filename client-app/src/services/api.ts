@@ -4,14 +4,31 @@ const API_BASE_URL = "https://localhost:7001/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // Reduced from 30s to 10s
+  timeout: 10000, // Default timeout for quick operations
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Response interceptor for error handling
+// Create a separate instance for long-running operations like reviews
+const longRunningApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 60000, // 60 seconds for reviews and heavy operations
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Response interceptor for error handling (both APIs)
 api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Error:", error);
+    return Promise.reject(error);
+  }
+);
+
+longRunningApi.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("API Error:", error);
@@ -31,7 +48,7 @@ export const repositoryApi = {
 export const commitsApi = {
   getRecent: (count: number = 10) =>
     api.get("/commits/recent", { params: { count } }),
-  review: (sha: string) => api.post(`/commits/review/${sha}`),
+  review: (sha: string) => longRunningApi.post(`/commits/review/${sha}`),
   getBySha: (sha: string) => api.get(`/commits/${sha}`),
 };
 
@@ -40,7 +57,8 @@ export const pullRequestsApi = {
   getAll: (state: "open" | "closed" | "all" = "open") =>
     api.get("/pullrequests", { params: { state } }),
   getById: (number: number) => api.get(`/pullrequests/${number}`),
-  review: (number: number) => api.post(`/pullrequests/review/${number}`),
+  review: (number: number) =>
+    longRunningApi.post(`/pullrequests/review/${number}`),
 };
 
 // Types
