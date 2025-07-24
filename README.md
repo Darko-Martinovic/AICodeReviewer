@@ -1,5 +1,17 @@
 # 🤖 AI Code Reviewer
 
+A comprehensive .NET web application that performs AI-powered code reviews using Azure OpenAI with a modern React-based management interface.
+
+## ✨ Key Features
+
+- **🔍 AI Code Analysis**: Automated code review using Azure OpenAI with language-specific intelligence
+- **🌐 Modern Web Interface**: React + TypeScript frontend with Tailwind CSS styling
+- **🎯 Multi-Language Support**: C#, VB.NET, JavaScript, TypeScript, React, T-SQL with specialized prompts
+- **⚙️ Advanced System Prompts Management**: Visual interface to customize AI behavior per programming language
+- **📊 Performance Metrics**: Real-time tracking of review efficiency, costs, and ROI calculations
+- **🔗 Enterprise Integrations**: GitHub, Jira, Microsoft Teams with workflow automation
+- **🎨 Template Library**: Pre-built prompt templates for common coding standards and requirements Reviewer
+
 A .NET application that performs AI-powered code reviews using Azure OpenAI with web UI management interface.
 
 ## ✨ Key Features
@@ -13,6 +25,17 @@ A .NET application that performs AI-powered code reviews using Azure OpenAI with
 
 ## � Quick Start
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **.NET 9.0 SDK** - Latest version for optimal performance
+- **Node.js 18+** - For React frontend development
+- **Azure OpenAI Service** - Access to GPT models for code analysis
+- **GitHub Account** - Repository integration and API access
+
+### Installation & Setup
+
 1. **Clone the repository**
 
    ```bash
@@ -20,64 +43,201 @@ A .NET application that performs AI-powered code reviews using Azure OpenAI with
    cd AICodeReviewer
    ```
 
-2. **Configure environment**
+2. **Configure environment variables**
 
-   ```bash
-   # Copy environment template
-   cp .env.example .env
+   Copy `.env.example` to `.env` and configure your settings:
 
-   # Edit .env with your Azure OpenAI credentials
+   ```env
+   # Azure OpenAI Configuration
    AZURE_OPENAI_ENDPOINT=your-endpoint
    AZURE_OPENAI_API_KEY=your-api-key
+   CHATCOMPLETION_DEPLOYMENTNAME=gpt-4
+
+   # GitHub Configuration (Optional)
+   GITHUB_TOKEN=your-github-token
+   GITHUB_REPO_OWNER=your-username
+   GITHUB_REPO_NAME=your-repository
+
+   # Integration Settings (Optional)
+   JIRA_BASE_URL=https://company.atlassian.net
+   TEAMS_WEBHOOK_URL=your-teams-webhook
    ```
 
-3. **Run the application**
+3. **Start the Backend API**
 
    ```bash
-   # Start backend API
+   # Development mode with hot reload
    dotnet run
+   # Or use the batch file
+   start-backend.bat
+   ```
 
-   # Start frontend (in another terminal)
+4. **Start the Frontend Application**
+
+   ```bash
+   # Navigate to client app directory
    cd client-app
+
+   # Install dependencies
    npm install
+
+   # Start development server
    npm run dev
    ```
 
-4. **Access the web interface**
-   - Backend API: `https://localhost:7001`
-   - Frontend UI: `http://localhost:5173`
+5. **Access the Application**
+   - **Backend API**: `https://localhost:7001`
+   - **Frontend UI**: `http://localhost:5173`
+   - **Swagger Documentation**: `https://localhost:7001/swagger`
 
 ## 📁 Project Structure
 
 ```
 AICodeReviewer/
-├── Controllers/              # Web API controllers
-├── Services/                # Business logic services
-├── Models/                  # Data models and configuration
-├── client-app/             # React frontend application
-├── Configuration/          # Workflow and prompt configurations
-├── TestProjects/          # Test code for AI validation
-└── appsettings.json       # Application configuration
+├── Controllers/              # Web API controllers for system management
+│   ├── SystemPromptsController.cs    # API endpoints for prompt management
+│   └── ...                   # Additional API controllers
+├── Services/                # Business logic and integrations
+│   ├── AzureOpenAIService.cs # AI-powered code analysis engine
+│   ├── GitHubService.cs      # Repository and commit management
+│   └── ...                   # Integration services (Jira, Teams)
+├── Models/                  # Data models and configuration classes
+│   ├── Configuration/        # System prompt configurations per language
+│   └── ...                   # Request/response models
+├── client-app/             # React + TypeScript frontend application
+│   ├── src/
+│   │   ├── components/       # React components
+│   │   │   ├── SystemPromptsManager.tsx  # Main prompt management UI
+│   │   │   ├── RepositoryCard.tsx        # Repository selection interface
+│   │   │   └── ...          # Additional UI components
+│   │   ├── App.tsx          # Main React application
+│   │   └── main.tsx         # Application entry point
+│   ├── package.json         # Frontend dependencies
+│   └── tailwind.config.js   # Styling configuration
+├── Configuration/          # Workflow and application configurations
+│   └── Workflows/          # Review workflow definitions
+├── TestProjects/          # Sample code for AI validation
+│   ├── TestCSharp/         # C# test files with intentional issues
+│   ├── TestVBNet/          # VB.NET test samples
+│   └── TestSQL/            # T-SQL test scripts
+├── appsettings.json       # Application configuration and AI prompts
+├── Program.cs             # Main application entry point
+└── start-backend.bat      # Quick start script for development
 ```
 
 ## 🎛️ System Prompts Management
 
-The web interface provides a **System Prompts** tab where you can:
+The **System Prompts Manager** provides a comprehensive web interface for customizing AI behavior across different programming languages. Access this powerful feature through the "System Prompts" tab in the web application.
 
-- View base system prompts for each programming language
-- Add custom requirements and coding standards
-- Use quick templates for common prompt additions
-- Preview combined prompts before saving
-- Track modification history
+### 🌟 Key Features
 
-### Supported Languages
+**Language-Specific Customization:**
 
-- **C#** - .NET specific code review guidelines
-- **VB.NET** - Visual Basic specific patterns
-- **T-SQL** - Database and query optimization
-- **JavaScript** - Modern JS best practices
-- **TypeScript** - Type safety and patterns
-- **React** - Component and hook guidelines
+- **Base System Prompts**: View read-only foundational prompts optimized for each language
+- **Custom Additions**: Add your own coding standards, company-specific requirements, and focus areas
+- **Live Preview**: See exactly how the combined prompt will appear to the AI before saving
+- **Template Library**: Quick-insert common prompt templates for various scenarios
+
+**Interactive Web Interface:**
+
+- **Tabbed Navigation**: Switch seamlessly between programming languages
+- **Real-time Editing**: Immediate feedback and validation as you type
+- **Save & Preview**: Test your changes before applying them to active reviews
+- **History Tracking**: See when prompts were last modified
+
+### Supported Languages & Specializations
+
+| Language       | Icon | Specialization Focus                                      |
+| -------------- | ---- | --------------------------------------------------------- |
+| **C#**         | 🟢   | .NET best practices, async patterns, SOLID principles     |
+| **VB.NET**     | 🔵   | Legacy code modernization, error handling patterns        |
+| **T-SQL**      | 🗄️   | Query optimization, security, indexing strategies         |
+| **JavaScript** | 🟨   | Modern ES6+, performance, browser compatibility           |
+| **TypeScript** | 🔷   | Type safety, interface design, strict mode compliance     |
+| **React**      | ⚛️   | Component patterns, hooks usage, performance optimization |
+
+### 📝 Usage Examples
+
+**Adding Company Standards:**
+
+```
+- Follow our naming convention: PascalCase for classes, camelCase for methods
+- All public APIs must include XML documentation
+- Use dependency injection for all service dependencies
+- Implement proper logging for all error scenarios
+```
+
+**Performance Focus:**
+
+```
+- Pay special attention to database query efficiency
+- Flag any N+1 query patterns
+- Ensure proper async/await usage in data access layers
+- Check for memory leaks in disposable resources
+```
+
+**Security Requirements:**
+
+```
+- Validate all user inputs against injection attacks
+- Ensure sensitive data is not logged or exposed
+- Check for proper authentication and authorization
+- Flag any hardcoded secrets or credentials
+```
+
+## 🌐 Web Interface Features
+
+The React-based frontend provides an intuitive and powerful interface for managing all aspects of the AI Code Reviewer system.
+
+### 📊 Main Dashboard
+
+**Repository Management:**
+
+- **Multi-Repository Support**: Switch between different GitHub repositories
+- **Repository Browser**: View commits, pull requests, and file changes
+- **Quick Actions**: Perform code reviews directly from the web interface
+- **History Tracking**: Access previously reviewed commits and results
+
+**Navigation Tabs:**
+
+- **🏠 Repositories**: Browse and select repositories for review
+- **📝 Commits**: View recent commits and trigger reviews
+- **🔀 Pull Requests**: Manage PR reviews and approvals
+- **⚙️ System Prompts**: Customize AI behavior and prompts
+
+### 🎨 System Prompts Interface
+
+**Language Tabs with Visual Indicators:**
+
+- **🟢 C#**: .NET ecosystem optimization
+- **🔵 VB.NET**: Legacy code improvement
+- **🗄️ T-SQL**: Database performance focus
+- **🟨 JavaScript**: Modern web standards
+- **🔷 TypeScript**: Type safety enforcement
+- **⚛️ React**: Component best practices
+
+**Editing Experience:**
+
+- **Split-Pane Layout**: Base prompts on left, custom additions on right
+- **Template Library**: Pre-built snippets for common requirements
+- **Live Preview**: Real-time combined prompt generation
+- **Auto-Save**: Persistent storage of your customizations
+
+### 🔧 Technical Implementation
+
+**Frontend Stack:**
+
+- **React 19** with TypeScript for type safety
+- **Tailwind CSS** for responsive, modern styling
+- **Vite** for fast development and optimized builds
+- **Lucide React** for consistent iconography
+
+**API Integration:**
+
+- **RESTful Backend**: Clean separation between frontend and backend
+- **Real-time Updates**: Instant feedback on prompt changes
+- **Error Handling**: Comprehensive error states and user feedback
+- **Loading States**: Smooth user experience during operations
 
 ## 📊 Review Metrics
 
@@ -118,24 +278,71 @@ Run reviews on test projects to validate AI performance.
 
 ## 🛠️ Development
 
+### **Development Environment Setup**
+
 **Prerequisites:**
 
-- .NET 9.0 SDK
-- Node.js 18+ for frontend
-- Azure OpenAI service access
+- **.NET 9.0 SDK** - Latest LTS version
+- **Node.js 18+** with npm for frontend development
+- **Azure OpenAI service** access with API keys
+- **Git** for version control
+- **VS Code** or **Visual Studio** recommended
 
-**Backend Development:**
+### **Development Workflow**
+
+**Backend Development (.NET API):**
 
 ```bash
-dotnet watch run  # Hot reload for API changes
+# Start with hot reload for immediate feedback
+dotnet watch run
+
+# Run tests
+dotnet test
+
+# Build for production
+dotnet build --configuration Release
 ```
 
-**Frontend Development:**
+**Frontend Development (React + TypeScript):**
 
 ```bash
+# Navigate to frontend directory
 cd client-app
-npm run dev  # Hot reload for UI changes
+
+# Install dependencies (first time only)
+npm install
+
+# Start development server with hot reload
+npm run dev
+
+# Run linting
+npm run lint
+
+# Build for production
+npm run build
 ```
+
+**Full Stack Development:**
+
+```bash
+# Terminal 1: Start backend API
+dotnet watch run
+
+# Terminal 2: Start frontend application
+cd client-app && npm run dev
+
+# Access at:
+# Backend: https://localhost:7001
+# Frontend: http://localhost:5173
+```
+
+### **Key Development Features**
+
+- **Hot Reload**: Both backend and frontend support live reloading
+- **TypeScript**: Full type safety across the React application
+- **Tailwind CSS**: Utility-first styling with responsive design
+- **API Integration**: RESTful API with Swagger documentation
+- **Component Library**: Reusable React components with consistent styling
 
 ## � License
 
@@ -595,4 +802,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Ready to revolutionize your code review process?** 🚀
 
-Start with the [Quick Start](#quick-start) guide and see the difference AI-powered code reviews can make for your development workflow!
+The AI Code Reviewer combines the power of Azure OpenAI with an intuitive web interface to deliver:
+
+✅ **Enterprise-grade code analysis** with language-specific intelligence  
+✅ **Visual prompt management** through the React-based interface  
+✅ **Customizable AI behavior** tailored to your coding standards  
+✅ **Real-time performance metrics** and cost tracking  
+✅ **Seamless integration** with GitHub, Jira, and Teams
+
+### 🎯 Get Started in Minutes
+
+1. **Clone the repository** and configure your Azure OpenAI credentials
+2. **Start the backend** with `dotnet run`
+3. **Launch the frontend** with `npm run dev` in the `client-app` directory
+4. **Open your browser** to `http://localhost:5173` and begin customizing prompts
+5. **Connect your repositories** and start automated AI-powered reviews
+
+Transform your development workflow with intelligent, customizable code reviews that scale with your team's needs!
