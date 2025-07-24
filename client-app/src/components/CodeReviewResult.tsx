@@ -18,6 +18,33 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
   review,
   onClose,
 }) => {
+  // Debug logging
+  console.log("🎯 CodeReviewResult component rendered");
+  console.log("📋 Review prop:", review);
+  console.log("📋 Review type:", typeof review);
+  console.log(
+    "📋 Review keys:",
+    review ? Object.keys(review) : "null/undefined"
+  );
+
+  if (review) {
+    console.log("🔍 Review prop breakdown:");
+    console.log("  - Summary:", review.summary);
+    console.log("  - Summary type:", typeof review.summary);
+    console.log("  - Summary length:", review.summary?.length);
+    console.log("  - Issues:", review.issues);
+    console.log("  - Issues is array:", Array.isArray(review.issues));
+    console.log("  - Issues length:", review.issues?.length);
+    console.log("  - Suggestions:", review.suggestions);
+    console.log("  - Suggestions is array:", Array.isArray(review.suggestions));
+    console.log("  - Suggestions length:", review.suggestions?.length);
+    console.log("  - Complexity:", review.complexity);
+    console.log("  - Test Coverage:", review.testCoverage);
+    console.log("  - Security:", review.security);
+    console.log("  - Security is array:", Array.isArray(review.security));
+    console.log("  - Security length:", review.security?.length);
+  }
+
   const getSeverityIcon = (severity: string) => {
     switch (severity.toLowerCase()) {
       case "critical":
@@ -81,38 +108,118 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Summary */}
-          <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-              Summary
+          {/* Debug Information */}
+          <div className="card bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+            <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
+              Debug Information
             </h3>
-            <p className="text-gray-700 dark:text-gray-300">{review.summary}</p>
-
-            <div className="flex items-center gap-4 mt-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Complexity:
-                </span>
-                <span
-                  className={`px-2 py-1 rounded-full text-sm font-medium ${getComplexityColor(
-                    review.complexity
-                  )}`}
-                >
-                  {review.complexity}
-                </span>
-              </div>
-              {review.testCoverage && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Test Coverage:
-                  </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {review.testCoverage}
-                  </span>
-                </div>
+            <div className="text-sm space-y-1 font-mono">
+              <div>Review object exists: {review ? "✅ Yes" : "❌ No"}</div>
+              {review && (
+                <>
+                  <div>
+                    Summary exists: {review.summary ? "✅ Yes" : "❌ No"}
+                  </div>
+                  <div>
+                    Summary content:{" "}
+                    {review.summary
+                      ? `"${review.summary.substring(0, 100)}${
+                          review.summary.length > 100 ? "..." : ""
+                        }"`
+                      : "Empty"}
+                  </div>
+                  <div>Issues count: {review.issues?.length || 0}</div>
+                  <div>
+                    Suggestions count: {review.suggestions?.length || 0}
+                  </div>
+                  <div>
+                    Security issues count: {review.security?.length || 0}
+                  </div>
+                  <div>Complexity: {review.complexity || "None"}</div>
+                  <div>Test Coverage: {review.testCoverage || "None"}</div>
+                </>
               )}
             </div>
           </div>
+
+          {/* Show message if no review data */}
+          {!review && (
+            <div className="card border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-3">
+                No Review Data
+              </h3>
+              <p className="text-red-700 dark:text-red-300">
+                The code review response is empty or invalid. This could be due
+                to:
+              </p>
+              <ul className="list-disc list-inside mt-2 text-red-700 dark:text-red-300 text-sm">
+                <li>AI service returned an empty response</li>
+                <li>Network error during the request</li>
+                <li>Backend processing error</li>
+                <li>Invalid response format</li>
+              </ul>
+            </div>
+          )}
+
+          {/* Show message if review exists but has no content */}
+          {review &&
+            !review.summary &&
+            (!review.issues || review.issues.length === 0) &&
+            (!review.suggestions || review.suggestions.length === 0) &&
+            (!review.security || review.security.length === 0) && (
+              <div className="card border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800">
+                <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
+                  Empty Review Content
+                </h3>
+                <p className="text-yellow-700 dark:text-yellow-300">
+                  The AI returned a valid response structure but with no
+                  content. This could mean:
+                </p>
+                <ul className="list-disc list-inside mt-2 text-yellow-700 dark:text-yellow-300 text-sm">
+                  <li>The code changes are too minimal to analyze</li>
+                  <li>AI service had an internal processing error</li>
+                  <li>The commit/PR has no reviewable code changes</li>
+                  <li>Configuration issue with the AI service</li>
+                </ul>
+              </div>
+            )}
+
+          {/* Summary */}
+          {review?.summary && (
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Summary
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300">
+                {review.summary}
+              </p>
+
+              <div className="flex items-center gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Complexity:
+                  </span>
+                  <span
+                    className={`px-2 py-1 rounded-full text-sm font-medium ${getComplexityColor(
+                      review.complexity
+                    )}`}
+                  >
+                    {review.complexity || "Not specified"}
+                  </span>
+                </div>
+                {review.testCoverage && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Test Coverage:
+                    </span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {review.testCoverage}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Code Issues */}
           {review.issues && review.issues.length > 0 && (

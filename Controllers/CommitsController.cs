@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Models;
 
 namespace AICodeReviewer.Controllers
 {
@@ -120,24 +121,157 @@ namespace AICodeReviewer.Controllers
                 var commit = await _gitHubService.GetCommitAsync(sha);
                 var review = await _codeReviewService.ReviewCommitAsync(sha);
 
-                return Ok(new
+                // Map CodeReviewResult to the format expected by frontend
+                var mappedReview = new
                 {
-                    Repository = $"{owner}/{name}",
-                    CommitSha = sha,
-                    Commit = new
+                    summary = GenerateSummary(review),
+                    issues = review.DetailedIssues.Select(issue => new
                     {
-                        Sha = commit.Sha,
-                        Message = commit.Commit.Message,
-                        Author = commit.Commit.Author.Name,
-                        Date = commit.Commit.Author.Date
-                    },
-                    Review = review
-                });
+                        severity = issue.Severity,
+                        file = issue.FileName,
+                        line = issue.LineNumber ?? 0,
+                        message = issue.Description,
+                        suggestion = issue.Recommendation
+                    }).ToList(),
+                    suggestions = ExtractSuggestions(review),
+                    complexity = DetermineComplexity(review),
+                    testCoverage = DetermineTestCoverage(review),
+                    security = review.DetailedIssues
+                        .Where(issue => issue.Category?.ToLower().Contains("security") == true)
+                        .Select(issue => new
+                        {
+                            severity = issue.Severity,
+                            type = issue.Category,
+                            description = issue.Description,
+                            recommendation = issue.Recommendation
+                        }).ToList()
+                };
+
+                Console.WriteLine($"🔍 Backend review mapping:");
+                Console.WriteLine($"  - Original issues count: {review.DetailedIssues.Count}");
+                Console.WriteLine($"  - Mapped issues count: {mappedReview.issues.Count}");
+                Console.WriteLine($"  - Summary: {mappedReview.summary}");
+                Console.WriteLine($"  - Suggestions count: {mappedReview.suggestions.Count}");
+                Console.WriteLine($"  - Security issues count: {mappedReview.security.Count}");
+
+                return Ok(mappedReview);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message });
+                Console.WriteLine($"❌ Error in ReviewCommitByHash: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { Error = ex.Message });
             }
+        }
+
+        private string GenerateSummary(CodeReviewResult review)
+        {
+            if (review.HasIssues)
+            {
+                var highSeverityCount = review.DetailedIssues.Count(i => i.Severity?.ToLower() == "high" || i.Severity?.ToLower() == "critical");
+                var mediumSeverityCount = review.DetailedIssues.Count(i => i.Severity?.ToLower() == "medium");
+                var lowSeverityCount = review.DetailedIssues.Count(i => i.Severity?.ToLower() == "low");
+
+                var summaryParts = new List<string>();
+                if (highSeverityCount > 0) summaryParts.Add($"{highSeverityCount} high-priority issue(s)");
+                if (mediumSeverityCount > 0) summaryParts.Add($"{mediumSeverityCount} medium-priority issue(s)");
+                if (lowSeverityCount > 0) summaryParts.Add($"{lowSeverityCount} low-priority issue(s)");
+
+                return $"Code review completed. Found {summaryParts.Count} categories of issues: {string.Join(", ", summaryParts)}. " +
+                       $"Total files reviewed: {review.Metrics.FilesReviewed}. " +
+                       $"Review took {review.Metrics.Duration.TotalSeconds:F1} seconds.";
+            }
+            else
+            {
+                return $"Code review completed successfully. No issues found in {review.Metrics.FilesReviewed} file(s). " +
+                       $"Review took {review.Metrics.Duration.TotalSeconds:F1} seconds. Great work!";
+            }
+        }
+
+        private List<string> ExtractSuggestions(CodeReviewResult review)
+        {
+            var suggestions = new List<string>();
+
+            // Add general suggestions based on the review
+            if (review.DetailedIssues.Any(i => i.Category?.ToLower().Contains("performance") == true))
+            {
+                suggestions.Add("Consider performance optimizations in identified areas");
+            }
+
+            if (review.DetailedIssues.Any(i => i.Category?.ToLower().Contains("security") == true))
+            {
+                suggestions.Add("Review and implement security best practices");
+            }
+
+            if (review.DetailedIssues.Any(i => i.Category?.ToLower().Contains("maintainability") == true))
+            {
+                suggestions.Add("Improve code maintainability and readability");
+            }
+
+            // Add specific recommendations from detailed issues
+            suggestions.AddRange(review.DetailedIssues
+                .Where(i => !string.IsNullOrWhiteSpace(i.Recommendation))
+                .Select(i => i.Recommendation)
+                .Distinct()
+                .Take(5)); // Limit to 5 suggestions to avoid overwhelming
+
+            // If no specific suggestions, add general ones
+            if (!suggestions.Any())
+            {
+                if (review.HasIssues)
+                {
+                    suggestions.Add("Address the identified issues to improve code quality");
+                    suggestions.Add("Consider adding unit tests for better coverage");
+                }
+                else
+                {
+                    suggestions.Add("Code looks good! Consider adding documentation if needed");
+                    suggestions.Add("Keep up the good coding practices");
+                }
+            }
+
+            return suggestions.Take(10).ToList(); // Limit to 10 suggestions maximum
+        }
+
+        private string DetermineComplexity(CodeReviewResult review)
+        {
+            // Simple heuristic based on number of issues and files
+            var issueCount = review.IssueCount;
+            var filesReviewed = review.Metrics.FilesReviewed;
+
+            if (issueCount == 0) return "Low";
+
+            var issuesPerFile = filesReviewed > 0 ? (double)issueCount / filesReviewed : issueCount;
+
+            if (issuesPerFile >= 3) return "High";
+            if (issuesPerFile >= 1.5) return "Medium";
+            return "Low";
+        }
+
+        private string DetermineTestCoverage(CodeReviewResult review)
+        {
+            // Simple heuristic - look for test files or test-related issues
+            var hasTestFiles = review.ReviewedFiles.Any(f =>
+                f.ToLower().Contains("test") ||
+                f.ToLower().Contains("spec") ||
+                f.ToLower().EndsWith(".test.cs") ||
+                f.ToLower().EndsWith(".test.js"));
+
+            if (hasTestFiles)
+            {
+                return "Some test coverage detected";
+            }
+
+            var hasTestRelatedIssues = review.DetailedIssues.Any(i =>
+                i.Description?.ToLower().Contains("test") == true ||
+                i.Recommendation?.ToLower().Contains("test") == true);
+
+            if (hasTestRelatedIssues)
+            {
+                return "Test coverage needs improvement";
+            }
+
+            return "Test coverage analysis not available";
         }
 
         /// <summary>

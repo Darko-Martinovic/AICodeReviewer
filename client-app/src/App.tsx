@@ -334,11 +334,41 @@ function App() {
 
   const handleCommitReview = async (sha: string) => {
     try {
+      console.log("🔍 Starting commit review for SHA:", sha);
       setState((prev) => ({
         ...prev,
         reviewingCommits: new Set([...prev.reviewingCommits, sha]),
       }));
+
+      console.log("📡 Calling commits API review...");
       const response = await commitsApi.review(sha);
+
+      console.log("✅ API Response received:", response);
+      console.log("📋 Response data:", response.data);
+      console.log("📋 Response data type:", typeof response.data);
+      console.log("📋 Response data keys:", Object.keys(response.data || {}));
+
+      // Log each property of the review data
+      if (response.data) {
+        console.log("🔍 Review data breakdown:");
+        console.log("  - Summary:", response.data.summary);
+        console.log("  - Summary type:", typeof response.data.summary);
+        console.log("  - Summary length:", response.data.summary?.length);
+        console.log("  - Issues:", response.data.issues);
+        console.log("  - Issues length:", response.data.issues?.length);
+        console.log("  - Suggestions:", response.data.suggestions);
+        console.log(
+          "  - Suggestions length:",
+          response.data.suggestions?.length
+        );
+        console.log("  - Complexity:", response.data.complexity);
+        console.log("  - Test Coverage:", response.data.testCoverage);
+        console.log("  - Security:", response.data.security);
+        console.log("  - Security length:", response.data.security?.length);
+      } else {
+        console.error("❌ Response data is null or undefined!");
+      }
+
       setState((prev) => ({
         ...prev,
         codeReview: response.data,
@@ -347,7 +377,10 @@ function App() {
           [...prev.reviewingCommits].filter((id) => id !== sha)
         ),
       }));
-    } catch {
+
+      console.log("✅ State updated, modal should show");
+    } catch (error) {
+      console.error("❌ Commit review failed:", error);
       setState((prev) => ({
         ...prev,
         reviewingCommits: new Set(
@@ -364,11 +397,41 @@ function App() {
 
   const handlePullRequestReview = async (number: number) => {
     try {
+      console.log("🔍 Starting pull request review for number:", number);
       setState((prev) => ({
         ...prev,
         reviewingPRs: new Set([...prev.reviewingPRs, number]),
       }));
+
+      console.log("📡 Calling pull requests API review...");
       const response = await pullRequestsApi.review(number);
+
+      console.log("✅ API Response received:", response);
+      console.log("📋 Response data:", response.data);
+      console.log("📋 Response data type:", typeof response.data);
+      console.log("📋 Response data keys:", Object.keys(response.data || {}));
+
+      // Log each property of the review data
+      if (response.data) {
+        console.log("🔍 Review data breakdown:");
+        console.log("  - Summary:", response.data.summary);
+        console.log("  - Summary type:", typeof response.data.summary);
+        console.log("  - Summary length:", response.data.summary?.length);
+        console.log("  - Issues:", response.data.issues);
+        console.log("  - Issues length:", response.data.issues?.length);
+        console.log("  - Suggestions:", response.data.suggestions);
+        console.log(
+          "  - Suggestions length:",
+          response.data.suggestions?.length
+        );
+        console.log("  - Complexity:", response.data.complexity);
+        console.log("  - Test Coverage:", response.data.testCoverage);
+        console.log("  - Security:", response.data.security);
+        console.log("  - Security length:", response.data.security?.length);
+      } else {
+        console.error("❌ Response data is null or undefined!");
+      }
+
       setState((prev) => ({
         ...prev,
         codeReview: response.data,
@@ -377,7 +440,10 @@ function App() {
           [...prev.reviewingPRs].filter((id) => id !== number)
         ),
       }));
-    } catch {
+
+      console.log("✅ State updated, modal should show");
+    } catch (error) {
+      console.error("❌ Pull request review failed:", error);
       setState((prev) => ({
         ...prev,
         reviewingPRs: new Set(
