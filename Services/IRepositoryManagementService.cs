@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AICodeReviewer.Models.Configuration;
 
 namespace AICodeReviewer.Services
 {
@@ -37,17 +38,5 @@ namespace AICodeReviewer.Services
         /// Gets available repositories for the current user
         /// </summary>
         Task<List<RepositoryInfo>> GetAvailableRepositoriesAsync();
-    }
-
-    /// <summary>
-    /// Repository information model
-    /// </summary>
-    public class RepositoryInfo
-    {
-        public string Owner { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public bool IsPrivate { get; set; }
-        public string FullName => $"{Owner}/{Name}";
     }
 }
