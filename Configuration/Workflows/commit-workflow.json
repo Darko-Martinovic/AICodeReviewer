@@ -1,0 +1,73 @@
+{
+  "workflowName": "CommitReview",
+  "description": "Lightweight workflow for commit reviews with optional integrations",
+  "version": "1.0",
+  "triggers": {
+    "events": ["push", "manual_review"]
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "code_review",
+        "name": "AI Code Review",
+        "plugin": "CodeReview",
+        "function": "ReviewCommit",
+        "required": true,
+        "parameters": {
+          "includeSecurityCheck": true,
+          "includeComplexityAnalysis": false,
+          "includeTestCoverage": false
+        }
+      },
+      {
+        "id": "github_status",
+        "name": "Update Commit Status",
+        "plugin": "GitHub",
+        "function": "SetCommitStatus",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "parameters": {
+          "context": "ai-code-review",
+          "description": "AI code review completed"
+        }
+      },
+      {
+        "id": "teams_summary",
+        "name": "Daily Summary",
+        "plugin": "Teams",
+        "function": "SendMessage",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "isMainBranch": true,
+          "timeOfDay": "17:00"
+        },
+        "parameters": {
+          "channel": "dev-summary",
+          "template": "commit-summary",
+          "aggregate": true
+        }
+      },
+      {
+        "id": "security_alert",
+        "name": "Security Alert",
+        "plugin": "Teams",
+        "function": "SendUrgentMessage",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "securityIssues": ">= 1"
+        },
+        "parameters": {
+          "channel": "security-alerts",
+          "template": "security-issue-alert",
+          "mentionSecurityTeam": true
+        }
+      }
+    ]
+  },
+  "templates": {
+    "commit-summary": "📊 **Daily Commit Summary**\n\nCommit: {{commitSha}}\nAuthor: {{author}}\nIssues: {{issueCount}}\nComplexity: {{complexity}}",
+    "security-issue-alert": "🔒 **Security Issue Detected**\n\nCommit: {{commitSha}}\nRepository: {{repository}}\nIssues: {{securityIssues}}"
+  }
+}

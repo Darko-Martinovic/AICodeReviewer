@@ -1,0 +1,96 @@
+{
+  "workflowName": "PullRequestReview",
+  "description": "Comprehensive workflow for pull request reviews with integrations",
+  "version": "1.0",
+  "triggers": {
+    "events": [
+      "pull_request.opened",
+      "pull_request.synchronize",
+      "manual_review"
+    ]
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "code_review",
+        "name": "AI Code Review",
+        "plugin": "CodeReview",
+        "function": "ReviewPullRequest",
+        "required": true,
+        "parameters": {
+          "includeSecurityCheck": true,
+          "includeComplexityAnalysis": true,
+          "includeTestCoverage": true
+        }
+      },
+      {
+        "id": "github_comment",
+        "name": "Post GitHub Comment",
+        "plugin": "GitHub",
+        "function": "PostPullRequestComment",
+        "required": true,
+        "dependsOn": ["code_review"],
+        "parameters": {
+          "template": "pr-review-template",
+          "includeMetrics": true,
+          "tagReviewers": true
+        }
+      },
+      {
+        "id": "jira_ticket",
+        "name": "Create Jira Ticket",
+        "plugin": "Jira",
+        "function": "CreateTicket",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "highSeverityIssues": ">= 1",
+          "complexity": "High"
+        },
+        "parameters": {
+          "project": "DEV",
+          "issueType": "Bug",
+          "priority": "High",
+          "assignee": "auto-assign-from-pr"
+        }
+      },
+      {
+        "id": "teams_notification",
+        "name": "Teams Notification",
+        "plugin": "Teams",
+        "function": "SendAdaptiveCard",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "criticalIssues": ">= 1"
+        },
+        "parameters": {
+          "channel": "dev-reviews",
+          "template": "critical-issues-alert",
+          "mentionTeam": true
+        }
+      },
+      {
+        "id": "approval_check",
+        "name": "Auto Approval Check",
+        "plugin": "GitHub",
+        "function": "SetPullRequestStatus",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "noHighSeverityIssues": true,
+          "hasTests": true,
+          "complexity": "Low|Medium"
+        },
+        "parameters": {
+          "status": "approved",
+          "message": "Auto-approved: No critical issues found"
+        }
+      }
+    ]
+  },
+  "templates": {
+    "pr-review-template": "## 🤖 AI Code Review\n\n{{summary}}\n\n### Issues Found\n{{#each issues}}\n- **{{severity}}**: {{message}} ({{file}}:{{line}})\n{{/each}}\n\n### Suggestions\n{{#each suggestions}}\n- {{this}}\n{{/each}}",
+    "critical-issues-alert": "🚨 Critical issues found in PR #{{prNumber}}: {{prTitle}}"
+  }
+}

@@ -1,6 +1,8 @@
 ﻿using DotNetEnv;
 using AICodeReviewer.Services;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Plugins;
+using Microsoft.SemanticKernel;
 
 namespace AICodeReviewer
 {
@@ -115,6 +117,60 @@ namespace AICodeReviewer
             services.AddSingleton<ICodeReviewService, CodeReviewService>();
             services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IJiraService, JiraService>();
+
+            // Configure Semantic Kernel
+            ConfigureSemanticKernel(services);
+        }
+
+        /// <summary>
+        /// Configures Semantic Kernel with plugins and workflow engine
+        /// </summary>
+        private static void ConfigureSemanticKernel(IServiceCollection services)
+        {
+            // Configure Semantic Kernel
+            var kernelBuilder = services.AddKernel();
+
+            // Add Azure OpenAI chat completion
+            var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
+                ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
+            var apiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
+                ?? throw new InvalidOperationException("AOAI_APIKEY not set");
+            var deployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
+                ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
+
+            kernelBuilder.AddAzureOpenAIChatCompletion(
+                deploymentName: deployment,
+                endpoint: endpoint,
+                apiKey: apiKey);
+
+            // Register plugin instances with proper dependencies
+            services.AddSingleton<CodeReviewPlugin>(provider =>
+                new CodeReviewPlugin(
+                    provider.GetRequiredService<ICodeReviewService>(),
+                    provider.GetRequiredService<IGitHubService>()));
+
+            services.AddSingleton<GitHubPlugin>(provider =>
+                new GitHubPlugin(provider.GetRequiredService<IGitHubService>()));
+
+            services.AddSingleton<TeamsPlugin>();
+            services.AddSingleton<JiraPlugin>();
+
+            // Add plugins to kernel after the services are registered
+            services.AddSingleton<Kernel>(provider =>
+            {
+                var kernel = provider.GetRequiredService<Kernel>();
+                
+                // Add plugins from instances
+                kernel.Plugins.AddFromObject(provider.GetRequiredService<CodeReviewPlugin>(), "CodeReview");
+                kernel.Plugins.AddFromObject(provider.GetRequiredService<GitHubPlugin>(), "GitHub");
+                kernel.Plugins.AddFromObject(provider.GetRequiredService<TeamsPlugin>(), "Teams");
+                kernel.Plugins.AddFromObject(provider.GetRequiredService<JiraPlugin>(), "Jira");
+
+                return kernel;
+            });
+
+            // Register workflow engine service
+            services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();
         }
 
         /// <summary>

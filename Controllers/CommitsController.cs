@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Models;
+using AICodeReviewer.Services;
 
 namespace AICodeReviewer.Controllers
 {
@@ -16,15 +17,18 @@ namespace AICodeReviewer.Controllers
         private readonly IGitHubService _gitHubService;
         private readonly ICodeReviewService _codeReviewService;
         private readonly IRepositoryManagementService _repositoryService;
+        private readonly IWorkflowEngineService _workflowEngineService;
 
         public CommitsController(
             IGitHubService gitHubService,
             ICodeReviewService codeReviewService,
-            IRepositoryManagementService repositoryService)
+            IRepositoryManagementService repositoryService,
+            IWorkflowEngineService workflowEngineService)
         {
             _gitHubService = gitHubService;
             _codeReviewService = codeReviewService;
             _repositoryService = repositoryService;
+            _workflowEngineService = workflowEngineService;
         }
 
         /// <summary>
@@ -322,6 +326,93 @@ namespace AICodeReviewer.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Reviews a commit using Semantic Kernel workflow (New workflow-based approach)
+        /// </summary>
+        /// <param name="sha">Commit SHA hash</param>
+        /// <returns>Workflow execution result</returns>
+        [HttpPost("review-workflow/{sha}")]
+        public async Task<IActionResult> ReviewCommitWithWorkflow(string sha)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(sha))
+                {
+                    return BadRequest(new { Error = "Commit SHA is required" });
+                }
+
+                var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+
+                // Get commit details for context
+                var commit = await _gitHubService.GetCommitAsync(sha);
+
+                // Execute the workflow
+                var workflowData = new Dictionary<string, object>
+                {
+                    ["commitSha"] = sha,
+                    ["repository"] = $"{owner}/{name}",
+                    ["author"] = commit.Commit.Author.Name,
+                    ["branch"] = "main", // Could be extracted from commit context
+                    ["triggerEvent"] = "manual_review"
+                };
+
+                Console.WriteLine($"🚀 Executing commit workflow for {sha}");
+                var workflowContext = await _workflowEngineService.ExecuteWorkflowAsync(
+                    "CommitReview", 
+                    "manual_review", 
+                    workflowData);
+
+                // Extract the code review result from workflow results
+                var codeReviewStep = workflowContext.Results.FirstOrDefault(r => r.StepId == "code_review");
+                object? reviewData = null;
+
+                if (codeReviewStep?.Result != null)
+                {
+                    try
+                    {
+                        reviewData = System.Text.Json.JsonSerializer.Deserialize<object>(codeReviewStep.Result.ToString() ?? "{}");
+                    }
+                    catch
+                    {
+                        reviewData = codeReviewStep.Result;
+                    }
+                }
+
+                return Ok(new
+                {
+                    WorkflowExecution = new
+                    {
+                        WorkflowId = workflowContext.WorkflowId,
+                        TriggerEvent = workflowContext.TriggerEvent,
+                        StartTime = workflowContext.StartTime,
+                        Duration = DateTime.UtcNow.Subtract(workflowContext.StartTime).TotalSeconds,
+                        StepsExecuted = workflowContext.Results.Count
+                    },
+                    Commit = new
+                    {
+                        Sha = commit.Sha,
+                        Message = commit.Commit.Message,
+                        Author = commit.Commit.Author.Name,
+                        Date = commit.Commit.Author.Date
+                    },
+                    Review = reviewData,
+                    WorkflowResults = workflowContext.Results.Select(r => new
+                    {
+                        r.StepId,
+                        r.Status,
+                        r.ExecutedAt,
+                        r.Error,
+                        HasResult = r.Result != null
+                    })
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Workflow execution failed: {ex.Message}");
+                return StatusCode(500, new { Error = ex.Message });
             }
         }
     }

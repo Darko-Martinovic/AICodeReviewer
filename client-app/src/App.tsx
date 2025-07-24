@@ -83,99 +83,70 @@ function App() {
   const loadInitialData = async () => {
     try {
       console.log("🚀 Loading initial data...");
-      // Load current repository first
-      const currentRepo = await getCurrentRepository();
-      console.log("📁 Current repository:", currentRepo);
 
-      if (currentRepo) {
-        console.log("✅ Repository found, loading commits and PRs...");
-        await loadCommits();
-        await loadPullRequests();
+      // Load repositories and current repository info together
+      const [currentRepoResponse, repositoriesResponse] = await Promise.all([
+        repositoryApi.getCurrent().catch(() => null), // Don't fail if no current repo
+        repositoryApi.getAll(),
+      ]);
 
-        // Keep on repositories tab initially - user can manually switch
-        console.log("📋 Staying on repositories tab");
+      console.log(
+        "📚 Repositories loaded:",
+        repositoriesResponse.data.length,
+        "repositories"
+      );
+
+      // Update repositories in state
+      setState((prev) => ({
+        ...prev,
+        repositories: repositoriesResponse.data,
+        loading: { ...prev.loading, repositories: false },
+      }));
+
+      // Find current repository if it exists
+      let currentRepo = null;
+      if (currentRepoResponse?.data) {
+        const repo = currentRepoResponse.data;
+        console.log("✅ Current repository from backend:", repo);
+
+        currentRepo = repositoriesResponse.data.find(
+          (r: Repository) => r.owner === repo.Owner && r.name === repo.Name
+        );
+        console.log("📁 Current repository resolved:", currentRepo);
       } else {
         console.log("❌ No current repository found");
       }
-      await loadRepositories();
+
+      // Update current repository in state
+      setState((prev) => ({
+        ...prev,
+        currentRepository: currentRepo,
+      }));
+
+      if (currentRepo) {
+        console.log("✅ Repository found, loading commits and PRs...");
+        await Promise.all([loadCommits(), loadPullRequests()]);
+        console.log("📋 Data loaded for current repository");
+      } else {
+        console.log("❌ No current repository - ensuring clean state");
+        // Ensure clean state when no repository is selected
+        setState((prev) => ({
+          ...prev,
+          commits: [],
+          pullRequests: [],
+        }));
+      }
     } catch (error) {
       console.error("❌ Failed to load initial data:", error);
+      setState((prev) => ({
+        ...prev,
+        loading: { ...prev.loading, repositories: false },
+      }));
       addToast({
         type: "error",
         title: "Initialization Error",
         message:
           "Failed to load initial data. Please check your configuration.",
-      });
-    }
-  };
-
-  const getCurrentRepository = async () => {
-    try {
-      console.log("🔍 Getting current repository from backend...");
-      setState((prev) => ({
-        ...prev,
-        loading: { ...prev.loading, repositories: true },
-      }));
-      const response = await repositoryApi.getCurrent();
-      const repo = response.data;
-      console.log("✅ Current repository from backend:", repo);
-
-      // Find the full repository info from the repositories list
-      const repositories = await repositoryApi.getAll();
-      const fullRepoInfo = repositories.data.find(
-        (r: Repository) => r.owner === repo.Owner && r.name === repo.Name
-      );
-
-      console.log("📋 Full repository info:", fullRepoInfo);
-
-      setState((prev) => ({
-        ...prev,
-        currentRepository: fullRepoInfo || null,
-        loading: { ...prev.loading, repositories: false },
-      }));
-      return fullRepoInfo || repo;
-    } catch (error) {
-      console.error("❌ No current repository set:", error);
-      setState((prev) => ({
-        ...prev,
-        currentRepository: null,
-        loading: { ...prev.loading, repositories: false },
-      }));
-      return null;
-    }
-  };
-
-  const loadRepositories = async () => {
-    try {
-      console.log("📚 Loading repositories...");
-      setState((prev) => ({
-        ...prev,
-        loading: { ...prev.loading, repositories: true },
-      }));
-      const response = await repositoryApi.getAll();
-      console.log("📚 Repositories API response:", response.data);
-      setState((prev) => ({
-        ...prev,
-        repositories: response.data,
-        loading: { ...prev.loading, repositories: false },
-        error: null,
-      }));
-      console.log(
-        "📚 Repositories loaded successfully:",
-        response.data.length,
-        "repositories"
-      );
-    } catch (error) {
-      console.error("❌ Failed to load repositories:", error);
-      setState((prev) => ({
-        ...prev,
-        loading: { ...prev.loading, repositories: false },
-        error: "Failed to load repositories",
-      }));
-      addToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to load repositories",
       });
     }
   };
@@ -476,8 +447,8 @@ function App() {
         title: "Repository Added",
         message: `Successfully added ${newRepoForm.owner}/${newRepoForm.name}`,
       });
-      await loadRepositories();
-      await getCurrentRepository();
+      // Reload initial data to get updated repositories and current repository
+      await loadInitialData();
     } catch {
       addToast({
         type: "error",
@@ -583,7 +554,8 @@ function App() {
                 }`}
               >
                 <GitCommit className="w-4 h-4" />
-                Commits ({state.commits.length})
+                Commits
+                {state.currentRepository ? ` (${state.commits.length})` : ""}
               </button>
               <button
                 onClick={() =>
@@ -596,7 +568,10 @@ function App() {
                 }`}
               >
                 <GitPullRequest className="w-4 h-4" />
-                Pull Requests ({state.pullRequests.length})
+                Pull Requests
+                {state.currentRepository
+                  ? ` (${state.pullRequests.length})`
+                  : ""}
               </button>
             </div>
           </div>
