@@ -60,16 +60,20 @@ namespace AICodeReviewer.Controllers
                 // Combine and deduplicate repositories
                 var allRepos = new List<object>();
 
-                // Add current repository first
+                // Find the current repository in available repos to get its proper description
+                var currentRepoInfo = availableRepos.FirstOrDefault(r =>
+                    r.Owner == currentOwner && r.Name == currentName);
+
+                // Add current repository first with proper description
                 allRepos.Add(new
                 {
                     Id = 0,
                     Name = currentName,
                     FullName = $"{currentOwner}/{currentName}",
                     Owner = currentOwner,
-                    Description = "Current repository",
+                    Description = currentRepoInfo?.Description ?? "Repository information not available",
                     DefaultBranch = "main",
-                    Private = false,
+                    Private = currentRepoInfo?.IsPrivate ?? false,
                     HtmlUrl = $"https://github.com/{currentOwner}/{currentName}",
                     IsCurrent = true
                 });

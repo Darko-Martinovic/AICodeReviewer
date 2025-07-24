@@ -78,15 +78,28 @@ function App() {
 
   const loadInitialData = async () => {
     try {
+      console.log("🚀 Loading initial data...");
       // Load current repository first
       const currentRepo = await getCurrentRepository();
+      console.log("📁 Current repository:", currentRepo);
+
       if (currentRepo) {
+        console.log("✅ Repository found, loading commits and PRs...");
         await loadCommits();
         await loadPullRequests();
+
+        // Switch to commits tab if we have a repository
+        setState((prev) => ({
+          ...prev,
+          activeTab: "commits",
+        }));
+        console.log("📋 Switched to commits tab");
+      } else {
+        console.log("❌ No current repository found");
       }
       await loadRepositories();
     } catch (error) {
-      console.error("Failed to load initial data:", error);
+      console.error("❌ Failed to load initial data:", error);
       addToast({
         type: "error",
         title: "Initialization Error",
@@ -98,20 +111,31 @@ function App() {
 
   const getCurrentRepository = async () => {
     try {
+      console.log("🔍 Getting current repository from backend...");
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, repositories: true },
       }));
       const response = await repositoryApi.getCurrent();
       const repo = response.data;
+      console.log("✅ Current repository from backend:", repo);
+
+      // Find the full repository info from the repositories list
+      const repositories = await repositoryApi.getAll();
+      const fullRepoInfo = repositories.data.find(
+        (r: Repository) => r.owner === repo.Owner && r.name === repo.Name
+      );
+
+      console.log("📋 Full repository info:", fullRepoInfo);
+
       setState((prev) => ({
         ...prev,
-        currentRepository: repo,
+        currentRepository: fullRepoInfo || null,
         loading: { ...prev.loading, repositories: false },
       }));
-      return repo;
+      return fullRepoInfo || repo;
     } catch (error) {
-      console.error("No current repository set");
+      console.error("❌ No current repository set:", error);
       setState((prev) => ({
         ...prev,
         currentRepository: null,
@@ -123,18 +147,26 @@ function App() {
 
   const loadRepositories = async () => {
     try {
+      console.log("📚 Loading repositories...");
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, repositories: true },
       }));
       const response = await repositoryApi.getAll();
+      console.log("📚 Repositories API response:", response.data);
       setState((prev) => ({
         ...prev,
         repositories: response.data,
         loading: { ...prev.loading, repositories: false },
         error: null,
       }));
+      console.log(
+        "📚 Repositories loaded successfully:",
+        response.data.length,
+        "repositories"
+      );
     } catch (error) {
+      console.error("❌ Failed to load repositories:", error);
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, repositories: false },
@@ -150,18 +182,28 @@ function App() {
 
   const loadCommits = async () => {
     try {
+      console.log("📝 Loading commits...");
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, commits: true },
       }));
       const response = await commitsApi.getRecent(20);
+      console.log("📝 Commits API response:", response.data);
+      console.log("📝 Commits array:", response.data.commits);
+
       setState((prev) => ({
         ...prev,
-        commits: response.data.Commits || [],
+        commits: response.data.commits || [],
         loading: { ...prev.loading, commits: false },
         error: null,
       }));
+      console.log(
+        "📝 Commits loaded successfully:",
+        response.data.commits?.length || 0,
+        "commits"
+      );
     } catch (error) {
+      console.error("❌ Failed to load commits:", error);
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, commits: false },
@@ -204,20 +246,40 @@ function App() {
 
   const handleRepositorySelect = async (repository: Repository) => {
     try {
+      console.log("🔄 Switching to repository:", repository.fullName);
+
+      // First update the backend
       await repositoryApi.setRepository(repository.owner, repository.name);
+
+      // Update the frontend state
       setState((prev) => ({
         ...prev,
         currentRepository: repository,
         activeTab: "commits",
+        // Clear existing data while loading new data
+        commits: [],
+        pullRequests: [],
+        loading: {
+          ...prev.loading,
+          commits: true,
+          pullRequests: true,
+        },
       }));
+
+      console.log("✅ Repository switched, loading new data...");
+
       addToast({
         type: "success",
         title: "Repository Selected",
         message: `Switched to ${repository.fullName}`,
       });
-      await loadCommits();
-      await loadPullRequests();
+
+      // Load new data for the selected repository
+      await Promise.all([loadCommits(), loadPullRequests()]);
+
+      console.log("✅ Repository data loaded successfully");
     } catch (error) {
+      console.error("❌ Failed to switch repository:", error);
       addToast({
         type: "error",
         title: "Error",
