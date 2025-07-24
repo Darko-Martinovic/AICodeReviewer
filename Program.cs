@@ -154,6 +154,11 @@ namespace AICodeReviewer
 
             services.AddSingleton<TeamsPlugin>();
             services.AddSingleton<JiraPlugin>();
+            services.AddSingleton<SlackPlugin>(provider =>
+                new SlackPlugin(
+                    provider.GetRequiredService<ILogger<SlackPlugin>>(),
+                    provider.GetRequiredService<HttpClient>(),
+                    provider.GetRequiredService<IConfiguration>()));
 
             // Register workflow engine service
             services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();

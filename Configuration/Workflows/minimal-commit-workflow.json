@@ -1,0 +1,30 @@
+{
+  "workflowName": "MinimalCommitReview",
+  "description": "Lightweight commit review - only AI review, no integrations",
+  "version": "1.0",
+  "triggers": {
+    "events": ["push", "manual_review"]
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "code_review",
+        "name": "AI Code Review",
+        "plugin": "CodeReview",
+        "function": "ReviewCommit",
+        "required": true,
+        "parameters": {
+          "includeSecurityCheck": true,
+          "includeComplexityAnalysis": false,
+          "includeTestCoverage": false
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "enableSlack": false,
+    "enableTeams": false,
+    "enableJira": false,
+    "enableGitHub": false
+  }
+}

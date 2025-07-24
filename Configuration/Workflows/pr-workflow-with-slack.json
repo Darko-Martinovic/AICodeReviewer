@@ -1,0 +1,154 @@
+{
+  "workflowName": "PullRequestReviewWithSlack",
+  "description": "Enhanced workflow for pull request reviews with Slack integration",
+  "version": "2.0",
+  "triggers": {
+    "events": [
+      "pull_request.opened",
+      "pull_request.synchronize",
+      "manual_review"
+    ]
+  },
+  "workflow": {
+    "steps": [
+      {
+        "id": "code_review",
+        "name": "AI Code Review",
+        "plugin": "CodeReview",
+        "function": "ReviewPullRequest",
+        "required": true,
+        "parameters": {
+          "includeSecurityCheck": true,
+          "includeComplexityAnalysis": true,
+          "includeTestCoverage": true
+        }
+      },
+      {
+        "id": "slack_start_notification",
+        "name": "Slack Start Notification",
+        "plugin": "Slack",
+        "function": "SendMessage",
+        "required": false,
+        "parameters": {
+          "message": "🔍 Starting code review for PR #{{prNumber}}: {{prTitle}}",
+          "channel": "#code-reviews",
+          "username": "Code Review Bot"
+        }
+      },
+      {
+        "id": "github_comment",
+        "name": "Post GitHub Comment",
+        "plugin": "GitHub",
+        "function": "PostPullRequestComment",
+        "required": true,
+        "dependsOn": ["code_review"],
+        "parameters": {
+          "template": "pr-review-template",
+          "includeMetrics": true,
+          "tagReviewers": true
+        }
+      },
+      {
+        "id": "slack_summary",
+        "name": "Slack Review Summary",
+        "plugin": "Slack",
+        "function": "SendCodeReviewSummary",
+        "required": true,
+        "dependsOn": ["code_review"],
+        "parameters": {
+          "prNumber": "{{prNumber}}",
+          "prTitle": "{{prTitle}}",
+          "issuesCount": "{{issuesCount}}",
+          "severity": "{{highestSeverity}}",
+          "channel": "#code-reviews"
+        }
+      },
+      {
+        "id": "slack_critical_alert",
+        "name": "Slack Critical Issues Alert",
+        "plugin": "Slack",
+        "function": "SendRichMessage",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "criticalIssues": ">= 1"
+        },
+        "parameters": {
+          "message": "Critical security or high-severity issues found!",
+          "title": "🚨 URGENT: PR #{{prNumber}} requires immediate attention",
+          "color": "danger",
+          "fields": "[{\"title\": \"Repository\", \"value\": \"{{repository}}\", \"short\": true}, {\"title\": \"Author\", \"value\": \"{{author}}\", \"short\": true}]",
+          "channel": "#security-alerts"
+        }
+      },
+      {
+        "id": "jira_ticket",
+        "name": "Create Jira Ticket",
+        "plugin": "Jira",
+        "function": "CreateTicket",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "highSeverityIssues": ">= 2",
+          "complexity": "High"
+        },
+        "parameters": {
+          "project": "DEV",
+          "issueType": "Bug",
+          "priority": "High",
+          "assignee": "auto-assign-from-pr"
+        }
+      },
+      {
+        "id": "teams_notification",
+        "name": "Teams Notification",
+        "plugin": "Teams",
+        "function": "SendAdaptiveCard",
+        "required": false,
+        "dependsOn": ["code_review"],
+        "conditions": {
+          "excludeSlack": true,
+          "mediumIssues": ">= 3"
+        },
+        "parameters": {
+          "channel": "dev-reviews",
+          "template": "medium-issues-card",
+          "mentionTeam": false
+        }
+      },
+      {
+        "id": "approval_check",
+        "name": "Auto Approval Check",
+        "plugin": "GitHub",
+        "function": "SetPullRequestStatus",
+        "required": false,
+        "dependsOn": ["code_review", "slack_summary"],
+        "conditions": {
+          "noHighSeverityIssues": true,
+          "hasTests": true,
+          "complexity": "Low|Medium"
+        },
+        "parameters": {
+          "status": "approved",
+          "message": "Auto-approved: No critical issues found"
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "enableSlack": true,
+    "enableTeams": false,
+    "enableJira": true,
+    "slackChannels": {
+      "default": "#code-reviews",
+      "critical": "#security-alerts",
+      "daily": "#dev-daily"
+    },
+    "excludedSteps": [],
+    "conditionalExecution": true
+  },
+  "templates": {
+    "pr-review-template": "## 🤖 AI Code Review\n\n{{summary}}\n\n### Issues Found\n{{#each issues}}\n- **{{severity}}**: {{message}} ({{file}}:{{line}})\n{{/each}}\n\n### Suggestions\n{{#each suggestions}}\n- {{this}}\n{{/each}}",
+    "slack-critical-template": "🚨 *Critical Issues Found in PR #{{prNumber}}*\n\n*Repository:* {{repository}}\n*Author:* {{author}}\n*Issues:* {{criticalCount}} critical, {{highCount}} high severity\n\n<{{prUrl}}|View Pull Request>"
+  }
+}
