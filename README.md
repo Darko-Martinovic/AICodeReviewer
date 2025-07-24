@@ -565,103 +565,128 @@ All sensitive data and environment-specific settings can be configured via envir
 - You can dynamically switch repositories during runtime without restarting the application
 - Repository history is maintained for quick access to recently used repositories
 
-## 📊 Sample Output
+## 📊 Web Interface Examples
 
-### **Repository Management Menu**
+### **Repository Management Interface**
 
-```
-🤖 AI Code Reviewer
+The modern web interface provides intuitive repository management through a clean, responsive design:
 
-Choose an option:
+**Main Dashboard Navigation:**
 
-  1. 📝 List recent commits
-  2. 🔍 Review latest commit (Push Event)
-  3. 🔍 Review commit by hash
-  4. 📋 List open Pull Requests
-  5. 🔀 Review Pull Request
-  6. 🏠 Manage repositories
-  7. 🚪 Exit
+- **🏠 Repositories Tab**: Browse and select GitHub repositories
+- **📝 Commits Tab**: View recent commits with review status
+- **� Pull Requests Tab**: Manage PR reviews and approvals
+- **⚙️ System Prompts Tab**: Customize AI behavior per language
 
-Enter your choice (1-7): 6
-
-🏠 Repository Management
-Current repository: YourOrg/YourRepo
-
-Choose an option:
-  1. 📋 List available repositories
-  2. ➕ Add new repository
-  3. 🔄 Switch repository
-  4. 📊 Show repository history
-  5. ⬅️ Back to main menu
-
-Enter your choice (1-5): 1
-
-📋 Available Repositories:
-  1. YourOrg/YourRepo (current)
-  2. YourOrg/AnotherProject
-  3. YourOrg/WebApp
-  4. YourOrg/MobileApp
-
-Enter repository number to switch (or 0 to cancel): 2
-
-✅ Switched to repository: YourOrg/AnotherProject
-```
-
-### **Latest Commit Review**
+**Repository Selection:**
 
 ```
-🔍 Fetching latest commit...
-🏠 Repository: YourOrg/YourRepo
-🌿 Branch: main
-📝 Latest commit: a1b2c3d4 - Fix authentication logic
-👤 Author: John Developer
-📅 Date: 2025-07-05 15:30
+┌─────────────────────────────────────────────────┐
+│ 🏠 Repository Management                        │
+├─────────────────────────────────────────────────┤
+│ Current: YourOrg/YourRepo                       │
+│                                                 │
+│ Available Repositories:                         │
+│ ✓ YourOrg/YourRepo (current)                    │
+│   YourOrg/AnotherProject                        │
+│   YourOrg/WebApp                                │
+│   YourOrg/MobileApp                             │
+│                                                 │
+│ [+ Add Repository]  [🔄 Refresh]                │
+└─────────────────────────────────────────────────┘
+```
 
-📁 Files changed: 3
-  - modified: src/auth/AuthService.cs (+15/-8)
-  - modified: src/models/User.cs (+3/-1)
-  - added: tests/AuthServiceTests.cs (+45/-0)
+### **Code Review Results Display**
 
-🤖 Starting AI Code Review...
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  📄 [1/3] Analyzing src/auth/AuthService.cs...
-    🔄 Retrieving file content... ✅ (2,341 characters)
-    🤖 Sending to AI for analysis... (1,847ms) ✅ Complete
-    🔍 Found 2 issue(s):
-      • [High] Hardcoded API key in authentication method
-      • [Medium] Missing ConfigureAwait(false) on async calls
-  📄 [2/3] Analyzing src/models/User.cs...
-    🔄 Retrieving file content... ✅ (567 characters)
-    🤖 Sending to AI for analysis... (634ms) ✅ Complete
-    ✅ No issues found
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Repository Information:**
+
+- **Repository**: YourOrg/YourRepo
+- **Branch**: main
+- **Latest Commit**: a1b2c3d4 - Fix authentication logic
+- **Author**: John Developer
+- **Date**: 2025-07-05 15:30
+
+**Files Changed:**
+
+- ✏️ `src/auth/AuthService.cs` (+15/-8 lines)
+- ✏️ `src/models/User.cs` (+3/-1 lines)
+- ➕ `tests/AuthServiceTests.cs` (+45/-0 lines)
+
+**AI Analysis Results:**
+
+```
+🤖 AI Code Review Complete
 
 📊 REVIEW PERFORMANCE METRICS
-Duration: 00:45
-Files Reviewed: 3
-Issues Found: 7
-Lines of Code: 487
-Total Tokens: 2,247
-Input Tokens: 1,834
-Output Tokens: 413
+Duration: 00:45 | Files: 3 | Issues: 12
+Lines of Code: 487 | Tokens: 2,247
 Estimated Cost: $0.0035
-────────────────────────────────────────
-EFFICIENCY METRICS
-Issues/File: 2.3
-Lines/Minute: 649
-Cost/Issue: $0.0005
-Cost/File: $0.0012
+Cost Savings vs Manual: 99.8%
+
+🔍 ISSUES FOUND BY CATEGORY
+🔒 Security: 2 issues (1 Critical, 1 High)
+⚡ Performance: 3 issues (2 Medium, 1 Low)
+🏗️ Code Quality: 4 issues (3 Medium, 1 Low)
+🐛 Potential Bugs: 3 issues (2 High, 1 Medium)
 ```
 
-### **Detailed Issue Example**
+### **Detailed Issue Report**
+
+**Web Interface Issue Card:**
 
 ```
-CATEGORY: Security
-SEVERITY: Critical
-TITLE: Hardcoded API key exposed in source code
-DESCRIPTION: The API key is hardcoded as a string literal on line 42, making it visible to anyone with source code access and potentially exposing it in version control history.
-RECOMMENDATION: Move the API key to environment variables or secure configuration. Use Environment.GetEnvironmentVariable("API_KEY") or inject via IConfiguration.
-LINE: 42
+┌─────────────────────────────────────────────────────────────────┐
+│ 🔒 SECURITY - CRITICAL                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ Hardcoded API key exposed in source code                       │
+│                                                                 │
+│ 📄 File: src/auth/AuthService.cs                               │
+│ 📍 Line: 42                                                    │
+│                                                                 │
+│ 📝 Description:                                                │
+│ The API key is hardcoded as a string literal, making it        │
+│ visible to anyone with source code access and potentially      │
+│ exposing it in version control history.                        │
+│                                                                 │
+│ 💡 Recommendation:                                             │
+│ Move the API key to environment variables or secure            │
+│ configuration. Use Environment.GetEnvironmentVariable()        │
+│ or inject via IConfiguration.                                  │
+│                                                                 │
+│ 🔧 Example Fix:                                                │
+│ // Instead of: var key = "sk-abc123...";                       │
+│ // Use: var key = _config["AzureOpenAI:ApiKey"];               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### **System Prompts Management Interface**
+
+**Language Selection Tabs:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ [🟢 C#] [🔵 VB.NET] [🗄️ T-SQL] [🟨 JS] [🔷 TS] [⚛️ React]     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 📝 Base System Prompt (Read-only)                              │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ You are a C# code reviewer focused on .NET best practices, │ │
+│ │ security, performance, and maintainability. Look for:      │ │
+│ │ - SOLID principle violations                                │ │
+│ │ - Async/await pattern issues                               │ │
+│ │ - Memory management problems...                            │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ ✏️ Custom Additions (Editable)                                 │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │ - Follow our company naming conventions                     │ │
+│ │ - Ensure all public APIs have XML documentation           │ │
+│ │ - Focus on dependency injection patterns                   │ │
+│ │ - Check for proper logging in error scenarios             │ │
+│ └─────────────────────────────────────────────────────────────┘ │
+│                                                                 │
+│ [💾 Save] [👁️ Preview] [🔄 Reset] [📋 Templates]              │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## 🏗️ Architecture Benefits
