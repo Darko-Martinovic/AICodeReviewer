@@ -1,153 +1,146 @@
 # 🤖 AI Code Reviewer
 
-A .NET console application that performs AI-powered code reviews on GitHub repositories using Azure OpenAI with enterprise-grade dependency injection and configuration management.
+A .NET application that performs AI-powered code reviews using Azure OpenAI with web UI management interface.
 
-## ✨ Features
+## ✨ Key Features
 
-- **🔍 Automated Code Analysis**: AI-powered review of commits and pull requests
-- **🏠 Multi-Repository Support**: Dynamic repository switching and management with history tracking
-- **🎯 Multi-Language Support**: C#, JavaScript, TypeScript, Python, Java, and more
-- **🧠 Dynamic Language-Specific Prompts**: Intelligent prompt selection for C#, VB.NET, JavaScript, TypeScript, React, and T-SQL
-- **🔗 Jira Integration**: Automatic ticket updates with review results
-- **📢 Teams Notifications**: Real-time notifications with review summaries
-- **⚙️ Highly Configurable**: Customizable prompts, limits, and settings
-- **🏗️ Enterprise Architecture**: Dependency injection, interfaces, and clean code principles
-- **📊 Performance Metrics**: Detailed tracking of review efficiency and costs
-- **🧪 Comprehensive Test Projects**: Built-in test projects for C#, VB.NET, and T-SQL with intentional issues for AI testing
+- **🔍 AI Code Analysis**: Automated code review using Azure OpenAI
+- **� Web Interface**: React-based UI for managing reviews and system prompts
+- **🎯 Multi-Language Support**: C#, VB.NET, JavaScript, TypeScript, React, T-SQL
+- **⚙️ Configurable System Prompts**: Customize AI prompts per programming language
+- **📊 Performance Metrics**: Track review efficiency, costs, and ROI
+- **🔗 Integrations**: GitHub, Jira, Microsoft Teams notifications
 
-## 📊 Review Metrics
+## � Quick Start
 
-After each AI-powered code review, the application provides detailed performance metrics to help you measure efficiency, cost, and ROI:
+1. **Clone the repository**
 
-```
-📊 REVIEW PERFORMANCE METRICS
-Duration: 00:45
-Files Reviewed: 3
-Issues Found: 12
-Lines of Code: 487
-Total Tokens: 2,247
-Input Tokens: 1,834
-Output Tokens: 413
-Estimated Cost: $0.0035
-────────────────────────────────────────
-EFFICIENCY METRICS
-Issues/File: 4.0
-Lines/Minute: 649
-Cost/Issue: $0.0003
-Cost/File: $0.0012
-```
+   ```bash
+   git clone <repository-url>
+   cd AICodeReviewer
+   ```
 
-### Metrics Explained
+2. **Configure environment**
 
-**Performance Metrics:**
-- **Duration**: Total time spent analyzing code
-- **Files Reviewed**: Number of code files processed
-- **Issues Found**: Total issues detected across all files
-- **Lines of Code**: Total lines of code analyzed
-- **Token Usage**: Azure OpenAI API token consumption (input/output breakdown)
-- **Estimated Cost**: Real-time cost calculation based on current Azure OpenAI pricing
+   ```bash
+   # Copy environment template
+   cp .env.example .env
 
-**Efficiency Metrics:**
-- **Issues/File**: Average number of issues found per file
-- **Lines/Minute**: Code processing speed
-- **Cost/Issue**: Cost efficiency for issue detection
-- **Cost/File**: Average cost per file reviewed
+   # Edit .env with your Azure OpenAI credentials
+   AZURE_OPENAI_ENDPOINT=your-endpoint
+   AZURE_OPENAI_API_KEY=your-api-key
+   ```
 
-### Business Value
+3. **Run the application**
 
-These metrics help you:
-- **📈 Track ROI**: Measure cost savings vs manual code reviews
-- **⚡ Optimize Performance**: Monitor review speed and efficiency
-- **💰 Control Costs**: Real-time tracking of Azure OpenAI expenses
-- **📋 Report to Stakeholders**: Concrete data for management presentations
-- **🔧 Tune Configuration**: Adjust settings based on performance data
+   ```bash
+   # Start backend API
+   dotnet run
 
-### Cost Analysis
+   # Start frontend (in another terminal)
+   cd client-app
+   npm install
+   npm run dev
+   ```
 
-Based on real usage metrics:
+4. **Access the web interface**
+   - Backend API: `https://localhost:7001`
+   - Frontend UI: `http://localhost:5173`
 
-**Manual Code Review Cost:**
-- Senior developer: $80/hour
-- Average review time: 25 minutes per file
-- **Cost per file: $33.33**
-
-**AI Code Review Cost:**
-- Azure OpenAI (GPT-3.5-Turbo): ~$0.004 per file
-- **Cost savings: 99.8%**
-- **ROI: 8,325%**
-
-## 🏗️ Architecture Overview
-
-This application follows Clean Architecture principles with **Microsoft.Extensions.DependencyInjection** for proper service lifecycle management:
+## 📁 Project Structure
 
 ```
 AICodeReviewer/
-├── Models/                    # Data models and DTOs
-│   ├── Configuration/         # Configuration models
-│   │   └── AppSettings.cs     # Structured configuration settings
-│   ├── ChatMessage.cs         # Azure OpenAI API message model
-│   ├── ChatRequest.cs         # Azure OpenAI API request model
-│   ├── ChatChoice.cs          # Azure OpenAI API choice model
-│   ├── ChatResponse.cs        # Azure OpenAI API response model
-│   ├── Usage.cs               # Token usage information
-│   ├── ReviewMetrics.cs       # Performance and cost tracking
-│   └── CodeReviewResult.cs    # Code review result with detailed issues
-├── Services/                  # Business logic and external integrations
-│   ├── Interfaces/            # Service contracts
-│   │   ├── IAzureOpenAIService.cs    # AI service interface
-│   │   ├── IGitHubService.cs         # GitHub service interface
-│   │   ├── ICodeReviewService.cs     # Code review interface
-│   │   ├── INotificationService.cs   # Notification interface
-│   │   ├── IJiraService.cs           # Jira service interface
-│   │   ├── IConfigurationService.cs  # Configuration interface
-│   │   ├── ILanguageDetectionService.cs # Language detection interface
-│   │   ├── IPromptManagementService.cs   # Prompt management interface
-│   │   └── IRepositoryManagementService.cs # Repository management interface
-│   ├── AzureOpenAIService.cs         # Azure OpenAI API interactions
-│   ├── GitHubService.cs              # GitHub API interactions
-│   ├── CodeReviewService.cs          # Core code review logic
-│   ├── NotificationService.cs        # Teams notification logic
-│   ├── JiraService.cs               # Jira integration for ticket updates
-│   ├── ConfigurationService.cs      # Structured configuration management
-│   ├── LanguageDetectionService.cs  # Language detection by file extension
-│   ├── PromptManagementService.cs   # Dynamic prompt selection and formatting
-│   └── RepositoryManagementService.cs # Multi-repository management and switching
-├── Application/               # Application orchestration layer
-│   └── CodeReviewApplication.cs     # Main application workflows
-├── DemoCode/                  # Demo files for presentations
-│   └── BuggyCodeExample.cs          # Intentional issues for testing
-├── TestProjects/              # Test projects for AI validation
-│   ├── TestCSharp/           # C# test project with intentional issues
-│   ├── TestVBNet/            # VB.NET test project with intentional issues
-│   └── TestSQL/              # T-SQL test files with database issues
-├── Utils/                     # Utility classes and helpers
-│   └── FileUtils.cs                 # File-related utility methods
-├── Program.cs                 # Entry point with DI container setup
-├── appsettings.json          # Structured configuration file
-└── .env                      # Environment-specific secrets (gitignored)
+├── Controllers/              # Web API controllers
+├── Services/                # Business logic services
+├── Models/                  # Data models and configuration
+├── client-app/             # React frontend application
+├── Configuration/          # Workflow and prompt configurations
+├── TestProjects/          # Test code for AI validation
+└── appsettings.json       # Application configuration
 ```
 
-## ⚡ Key Technical Features
+## 🎛️ System Prompts Management
 
-### 🏭 **Enterprise-Grade Dependency Injection**
+The web interface provides a **System Prompts** tab where you can:
 
-- ✅ **Microsoft.Extensions.DependencyInjection** implementation
-- ✅ Interface-based service contracts for all components
-- ✅ Proper service lifetime management (Singleton for console app)
-- ✅ Automatic resource disposal (`IDisposable` services)
-- ✅ Clean separation of service registration and application logic
+- View base system prompts for each programming language
+- Add custom requirements and coding standards
+- Use quick templates for common prompt additions
+- Preview combined prompts before saving
+- Track modification history
 
-### 🎛️ **Advanced Configuration Management**
+### Supported Languages
 
-- ✅ **Hierarchical configuration**: `appsettings.json` → Environment Variables → Defaults
-- ✅ **Structured settings** with strongly-typed configuration models
-- ✅ **Runtime configuration summary** displayed at startup
-- ✅ **Hot-swappable AI parameters** (temperature, tokens, prompts)
-- ✅ **Externally configurable** without code changes
+- **C#** - .NET specific code review guidelines
+- **VB.NET** - Visual Basic specific patterns
+- **T-SQL** - Database and query optimization
+- **JavaScript** - Modern JS best practices
+- **TypeScript** - Type safety and patterns
+- **React** - Component and hook guidelines
 
-### 🔍 **Detailed AI Code Analysis**
+## 📊 Review Metrics
 
-- ✅ **Structured issue reporting** with severity, category, recommendations
+Each review provides detailed metrics:
+
+```
+📊 REVIEW PERFORMANCE METRICS
+Duration: 00:45 | Files: 3 | Issues: 12
+Lines of Code: 487 | Tokens: 2,247
+Estimated Cost: $0.0035
+Cost Savings vs Manual: 99.8%
+```
+
+## ⚙️ Configuration
+
+Key settings in `appsettings.json`:
+
+- **Azure OpenAI**: Endpoint, API key, model settings
+- **GitHub**: Repository settings and authentication
+- **Integrations**: Jira, Teams notification settings
+- **System Prompts**: Language-specific review guidelines
+
+## 🔗 Integrations
+
+- **GitHub**: Pull request and commit reviews
+- **Jira**: Automatic ticket updates with review results
+- **Microsoft Teams**: Real-time notification messages
+
+## 🧪 Testing
+
+Built-in test projects with intentional issues:
+
+- `TestProjects/TestCSharp/` - C# code samples
+- `TestProjects/TestVBNet/` - VB.NET samples
+- `TestProjects/TestSQL/` - T-SQL samples
+
+Run reviews on test projects to validate AI performance.
+
+## 🛠️ Development
+
+**Prerequisites:**
+
+- .NET 9.0 SDK
+- Node.js 18+ for frontend
+- Azure OpenAI service access
+
+**Backend Development:**
+
+```bash
+dotnet watch run  # Hot reload for API changes
+```
+
+**Frontend Development:**
+
+```bash
+cd client-app
+npm run dev  # Hot reload for UI changes
+```
+
+## � License
+
+This project is licensed under the MIT License.
+
 - ✅ **Line-by-line feedback** with specific file locations
 - ✅ **Actionable recommendations** with code examples
 - ✅ **Configurable AI behavior** (temperature, max tokens, system prompts)
@@ -176,36 +169,39 @@ AICodeReviewer/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/AICodeReviewer.git
    cd AICodeReviewer
    ```
 
 2. **Install dependencies**
+
    ```bash
    dotnet restore
    ```
 
 3. **Configure environment variables**
-   
+
    Copy `.env.example` to `.env` and configure your settings:
+
    ```env
    # Azure OpenAI Configuration
    AOAI_ENDPOINT=your-azure-openai-endpoint
    AOAI_APIKEY=your-azure-openai-api-key
    CHATCOMPLETION_DEPLOYMENTNAME=your-gpt-deployment-name
-   
+
    # GitHub Configuration
    GITHUB_TOKEN=your-github-token
    GITHUB_REPO_OWNER=your-github-username
    GITHUB_REPO_NAME=your-repository-name
-   
+
    # Jira Configuration (Optional)
    JIRA_BASE_URL=https://your-company.atlassian.net
    JIRA_USER_EMAIL=your-email@company.com
    JIRA_API_TOKEN=your-jira-api-token
    JIRA_PROJECT_KEY=YOUR-PROJECT-KEY
-   
+
    # Teams Configuration (Optional)
    TEAMS_WEBHOOK_URL=your-teams-webhook-url
    ```
@@ -243,6 +239,7 @@ The system performs comprehensive analysis focusing on:
 ### 3. Repository Management
 
 **Multi-Repository Support:**
+
 - **Dynamic Repository Switching**: Seamlessly switch between multiple GitHub repositories
 - **Repository History**: Track recently used repositories for quick access
 - **Validation & Error Handling**: Automatic validation of repository access and permissions
@@ -250,6 +247,7 @@ The system performs comprehensive analysis focusing on:
 - **Repository Selection**: Interactive menu for selecting repositories before operations
 
 **Repository Management Features:**
+
 - **List Available Repositories**: View all repositories accessible with your GitHub token
 - **Add New Repository**: Dynamically add repositories to your working set
 - **Repository Validation**: Verify repository access and permissions before operations
@@ -259,18 +257,21 @@ The system performs comprehensive analysis focusing on:
 ### 4. Integration Features
 
 **Jira Integration:**
+
 - Automatically detects related tickets from commit messages
 - Posts detailed review comments with ADF formatting
 - Manages labels based on review severity
 - Links issues to specific files and line numbers
 
 **Teams Notifications:**
+
 - Real-time review summaries with issue counts
 - Interactive team member simulations
 - Severity-based color coding and reactions
 - Direct links to pull requests and Jira tickets
 
 **Performance Tracking:**
+
 - Token usage monitoring for cost control
 - Review duration and efficiency metrics
 - ROI calculations for business justification
@@ -332,16 +333,19 @@ The system performs comprehensive analysis focusing on:
 All sensitive data and environment-specific settings can be configured via environment variables:
 
 **Azure OpenAI Configuration:**
+
 - `AOAI_ENDPOINT`: Your Azure OpenAI service endpoint
 - `AOAI_APIKEY`: Your Azure OpenAI API key
 - `CHATCOMPLETION_DEPLOYMENTNAME`: Your GPT deployment name
 
 **GitHub Configuration:**
+
 - `GITHUB_TOKEN`: Your GitHub personal access token
 - `GITHUB_REPO_OWNER`: Default repository owner (e.g., "YourOrg")
 - `GITHUB_REPO_NAME`: Default repository name (e.g., "YourRepo")
 
 **AI Review Settings:**
+
 - `AI_TEMPERATURE`: AI creativity level (0.1-1.0)
 - `AI_MAX_TOKENS`: Maximum response length
 - `AI_CONTENT_LIMIT`: Maximum file size to analyze
@@ -349,6 +353,7 @@ All sensitive data and environment-specific settings can be configured via envir
 - `MAX_ISSUES_IN_SUMMARY`: Maximum issues in notifications
 
 **Repository Management:**
+
 - The application automatically uses the default repository from `GITHUB_REPO_OWNER` and `GITHUB_REPO_NAME`
 - You can dynamically switch repositories during runtime without restarting the application
 - Repository history is maintained for quick access to recently used repositories
@@ -507,16 +512,19 @@ The project includes `DemoCode/BuggyCodeExample.cs` with intentional issues for 
 The solution includes dedicated test projects for validating AI capabilities across different languages:
 
 #### **TestCSharp Project** (`TestProjects/TestCSharp/`)
+
 - **Purpose**: C# code review testing
 - **Issues**: Poor naming conventions, missing error handling, hardcoded values
 - **Features**: Intentional code quality issues for AI detection
 
 #### **TestVBNet Project** (`TestProjects/TestVBNet/`)
+
 - **Purpose**: VB.NET code review testing
 - **Issues**: SQL injection vulnerabilities, poor exception handling, inefficient loops
 - **Features**: VB.NET-specific issues with database access patterns
 
 #### **TestSQL Project** (`TestProjects/TestSQL/`)
+
 - **Purpose**: T-SQL code review testing
 - **Files**:
   - `CreateUsersTable.sql` - Table creation with missing constraints
@@ -530,6 +538,7 @@ The solution includes dedicated test projects for validating AI capabilities acr
 ### Language-Specific Testing
 
 Each test project demonstrates the AI's ability to:
+
 - **Detect language-specific issues** (C# async patterns, VB.NET exception handling, T-SQL performance)
 - **Apply appropriate severity levels** based on language context
 - **Provide language-optimized recommendations** with specific syntax examples
