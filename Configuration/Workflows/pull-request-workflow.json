@@ -45,8 +45,8 @@
         "dependsOn": ["code_review"],
         "conditions": {},
         "parameters": {
-          "project": "DEV",
-          "issueType": "Bug",
+          "project": "OPS",
+          "issueType": "Task",
           "summary": "Code Review Issues Found in PR {{data.prNumber}}",
           "description": "Automated code review found issues that need attention. See GitHub PR for details.",
           "priority": "High",
