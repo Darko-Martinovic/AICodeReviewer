@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Modal, Alert } from "./UI";
 
 interface SystemPrompt {
   language: string;
@@ -28,6 +29,15 @@ const SystemPromptsManager: React.FC = () => {
   const [previewData, setPreviewData] = useState<{
     [key: string]: PreviewData;
   }>({});
+
+  // Add Language Modal state
+  const [showAddLanguageModal, setShowAddLanguageModal] =
+    useState<boolean>(false);
+  const [newLanguageForm, setNewLanguageForm] = useState({
+    name: "",
+    key: "",
+    icon: "",
+  });
 
   const languages = [
     { key: "CSharp", label: "C#", icon: "🟢" },
@@ -147,6 +157,41 @@ const SystemPromptsManager: React.FC = () => {
     }));
   };
 
+  const handleAddLanguage = () => {
+    // This is a placeholder function for the "Add Language" feature
+    // In a real implementation, this would call an API to add a new language
+    setShowAddLanguageModal(false);
+    setNewLanguageForm({ name: "", key: "", icon: "" });
+
+    // Show a comprehensive "Under Development" message
+    const message = `🚧 Feature Under Development 🚧
+
+The "Add Programming Language" feature is currently being developed and will include:
+
+🎯 Core Features:
+• Custom language configuration and prompts
+• File extension mapping and syntax rules  
+• Specialized AI analysis patterns
+• Language-specific best practices
+
+⚙️ Configuration Options:
+• Base system prompt templates
+• Custom coding standards integration
+• Performance and security focus areas
+• Integration with existing workflows
+
+📅 Coming Soon:
+This feature will be available in the next major release. 
+
+Would you like to be notified when it's ready?`;
+
+    alert(message);
+  };
+
+  const openAddLanguageModal = () => {
+    setShowAddLanguageModal(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -161,7 +206,7 @@ const SystemPromptsManager: React.FC = () => {
       {/* Language Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-8 items-center">
             {languages.map((language) => (
               <button
                 key={language.key}
@@ -176,6 +221,16 @@ const SystemPromptsManager: React.FC = () => {
                 {language.label}
               </button>
             ))}
+
+            {/* Add Language Button */}
+            <button
+              onClick={openAddLanguageModal}
+              className="ml-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+              title="Add new programming language support"
+            >
+              <span className="text-lg">➕</span>
+              <span>Add Language</span>
+            </button>
           </nav>
         </div>
       </div>
@@ -371,6 +426,91 @@ const SystemPromptsManager: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Add Language Modal */}
+      <Modal
+        isOpen={showAddLanguageModal}
+        onClose={() => setShowAddLanguageModal(false)}
+        title="Add New Programming Language"
+        maxWidth="md"
+      >
+        <div className="space-y-4">
+          <Alert
+            type="info"
+            message="Configure a new programming language for AI code reviews. This will add language-specific prompts and analysis capabilities."
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Language Name
+            </label>
+            <input
+              type="text"
+              value={newLanguageForm.name}
+              onChange={(e) =>
+                setNewLanguageForm((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="e.g., Python, Rust, Go"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Language Key
+            </label>
+            <input
+              type="text"
+              value={newLanguageForm.key}
+              onChange={(e) =>
+                setNewLanguageForm((prev) => ({
+                  ...prev,
+                  key: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="e.g., Python, Rust, Go"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Language Icon (Emoji)
+            </label>
+            <input
+              type="text"
+              value={newLanguageForm.icon}
+              onChange={(e) =>
+                setNewLanguageForm((prev) => ({
+                  ...prev,
+                  icon: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="e.g., 🐍, 🦀, 🐹"
+              maxLength={2}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={handleAddLanguage}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            >
+              Add Language
+            </button>
+            <button
+              onClick={() => setShowAddLanguageModal(false)}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
