@@ -65,6 +65,20 @@ namespace AICodeReviewer
                 });
             });
 
+            // Configure HTTPS redirection and HSTS
+            services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+                options.HttpsPort = 7001;
+            });
+
+            services.AddHsts(options =>
+            {
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(365);
+            });
+
             // Configuration service (singleton)
             services.AddSingleton<IConfigurationService, ConfigurationService>();
 
@@ -146,11 +160,13 @@ namespace AICodeReviewer
             // Add plugins using AddFromType method
             kernelBuilder.Plugins.AddFromType<CodeReviewPlugin>("CodeReview");
             kernelBuilder.Plugins.AddFromType<GitHubPlugin>("GitHub");
-            kernelBuilder.Plugins.AddFromType<JiraPlugin>("Jira");
             kernelBuilder.Plugins.AddFromType<TeamsPlugin>("Teams");
             kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack");
 
             Console.WriteLine("🔌 Semantic Kernel plugins configured for registration");
+
+            // Register Jira plugin with dependency injection
+            services.AddSingleton<JiraPlugin>();
 
             // Register workflow engine service
             services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();
@@ -170,6 +186,11 @@ namespace AICodeReviewer
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Code Reviewer API v1");
                     c.RoutePrefix = "api/docs"; // Swagger will be available at /api/docs
                 });
+            }
+            else
+            {
+                // Enable HSTS for production
+                app.UseHsts();
             }
 
             app.UseHttpsRedirection();

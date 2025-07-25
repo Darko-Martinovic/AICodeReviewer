@@ -22,11 +22,16 @@ public class WorkflowEngineService : IWorkflowEngineService
     public WorkflowEngineService(
         Kernel kernel,
         ILogger<WorkflowEngineService> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        JiraPlugin jiraPlugin)
     {
         _kernel = kernel;
         _logger = logger;
         _workflowsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration", "Workflows");
+
+        // Register the JiraPlugin with dependency injection
+        _kernel.Plugins.AddFromObject(jiraPlugin, "Jira");
+        _logger.LogInformation("🔌 JiraPlugin registered with dependency injection");
     }
 
     public async Task<WorkflowContext> ExecuteWorkflowAsync(string workflowName, string triggerEvent, Dictionary<string, object> data)

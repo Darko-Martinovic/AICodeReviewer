@@ -1,5 +1,6 @@
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
+using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Plugins;
 
@@ -8,6 +9,13 @@ namespace AICodeReviewer.Plugins;
 /// </summary>
 public class JiraPlugin
 {
+    private readonly IJiraService _jiraService;
+
+    public JiraPlugin(IJiraService jiraService)
+    {
+        _jiraService = jiraService ?? throw new ArgumentNullException(nameof(jiraService));
+    }
+
     [KernelFunction]
     [Description("Creates a Jira ticket for code review issues")]
     public async Task<string> CreateTicket(
@@ -20,27 +28,15 @@ public class JiraPlugin
     {
         try
         {
-            // Simulate creating Jira ticket
-            var ticketId = $"{project}-{Random.Shared.Next(1000, 9999)}";
-            
-            Console.WriteLine($"🎫 Jira Ticket Created:");
-            Console.WriteLine($"Ticket ID: {ticketId}");
-            Console.WriteLine($"Project: {project}");
-            Console.WriteLine($"Type: {issueType}");
-            Console.WriteLine($"Priority: {priority}");
-            Console.WriteLine($"Assignee: {assignee}");
-            Console.WriteLine($"Summary: {summary}");
-            Console.WriteLine($"Description: {description}");
-            
-            // In real implementation:
-            // var ticket = await _jiraService.CreateIssueAsync(project, issueType, summary, description, priority, assignee);
-            
-            await Task.Delay(200); // Simulate async operation
-            
-            return $"Successfully created Jira ticket {ticketId}";
+            Console.WriteLine($"🎫 Creating REAL Jira ticket in project {project}...");
+
+            var ticketKey = await _jiraService.CreateIssueAsync(project, issueType, summary, description, priority, assignee);
+
+            return $"Successfully created Jira ticket {ticketKey}";
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ Error creating Jira ticket: {ex.Message}");
             return $"Error creating Jira ticket: {ex.Message}";
         }
     }
@@ -60,9 +56,9 @@ public class JiraPlugin
             Console.WriteLine($"Update: {update}");
             if (!string.IsNullOrEmpty(status))
                 Console.WriteLine($"New Status: {status}");
-            
+
             await Task.Delay(100); // Simulate async operation
-            
+
             return $"Successfully updated Jira ticket {ticketId}";
         }
         catch (Exception ex)

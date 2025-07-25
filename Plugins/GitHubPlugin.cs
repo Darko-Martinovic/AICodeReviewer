@@ -28,9 +28,9 @@ public class GitHubPlugin
         {
             Console.WriteLine($"📝 Attempting to post REAL GitHub Comment on PR #{prNumber}:");
             Console.WriteLine($"Content: {content}");
-            
+
             // REAL GitHub API implementation
-            try 
+            try
             {
                 await _gitHubService.PostPullRequestCommentAsync(prNumber, content);
                 Console.WriteLine($"✅ Successfully posted REAL comment to GitHub PR #{prNumber}");
@@ -66,10 +66,10 @@ public class GitHubPlugin
             Console.WriteLine($"Context: {context}");
             Console.WriteLine($"State: {state}");
             Console.WriteLine($"Description: {description}");
-            
+
             // In real implementation:
             // await _gitHubService.SetCommitStatusAsync(commitSha, context, state, description);
-            
+
             return $"Successfully set status for commit {commitSha}";
         }
         catch (Exception ex)
@@ -91,9 +91,9 @@ public class GitHubPlugin
             Console.WriteLine($"PR: #{prNumber}");
             Console.WriteLine($"Status: {status}");
             Console.WriteLine($"Message: {message}");
-            
+
             // REAL GitHub API implementation
-            try 
+            try
             {
                 // Note: GitHubService may not have this method yet, so we'll simulate for now
                 // await _gitHubService.SetPullRequestReviewAsync(prNumber, status, message);

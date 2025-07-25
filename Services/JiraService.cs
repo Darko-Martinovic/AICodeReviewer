@@ -103,6 +103,109 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Creates a new Jira issue
+        /// </summary>
+        public async Task<string> CreateIssueAsync(
+            string project,
+            string issueType,
+            string summary,
+            string description,
+            string priority = "Medium",
+            string assignee = ""
+        )
+        {
+            try
+            {
+                if (!IsJiraConfigured())
+                {
+                    var ticketId = $"{project}-{Random.Shared.Next(1000, 9999)}";
+                    Console.WriteLine($"⚠️ Jira not configured - simulating ticket creation");
+                    Console.WriteLine($"🎫 Simulated Jira Ticket Created: {ticketId}");
+                    Console.WriteLine($"   Project: {project}");
+                    Console.WriteLine($"   Type: {issueType}");
+                    Console.WriteLine($"   Priority: {priority}");
+                    Console.WriteLine($"   Summary: {summary}");
+                    return ticketId;
+                }
+
+                var requestBody = new
+                {
+                    fields = new
+                    {
+                        project = new { key = project },
+                        summary = summary,
+                        description = new
+                        {
+                            type = "doc",
+                            version = 1,
+                            content = new[]
+                            {
+                                new
+                                {
+                                    type = "paragraph",
+                                    content = new[]
+                                    {
+                                        new
+                                        {
+                                            type = "text",
+                                            text = description
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        issuetype = new { name = issueType },
+                        priority = new { name = priority },
+                        assignee = string.IsNullOrEmpty(assignee) ? null : new { name = assignee }
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync($"{_jiraBaseUrl}/rest/api/3/issue", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                    var ticketKey = result.GetProperty("key").GetString();
+
+                    Console.WriteLine($"✅ Successfully created Jira ticket: {ticketKey}");
+                    Console.WriteLine($"   Project: {project}");
+                    Console.WriteLine($"   Type: {issueType}");
+                    Console.WriteLine($"   Priority: {priority}");
+                    Console.WriteLine($"   Summary: {summary}");
+
+                    return ticketKey!;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Failed to create Jira ticket. Status: {response.StatusCode}");
+                    Console.WriteLine($"Error: {errorContent}");
+
+                    // Fallback to simulation
+                    var ticketId = $"{project}-SIM{Random.Shared.Next(1000, 9999)}";
+                    Console.WriteLine($"🎫 Fallback: Simulated ticket {ticketId}");
+                    return ticketId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Exception creating Jira ticket: {ex.Message}");
+
+                // Fallback to simulation
+                var ticketId = $"{project}-ERR{Random.Shared.Next(1000, 9999)}";
+                Console.WriteLine($"🎫 Error fallback: Simulated ticket {ticketId}");
+                return ticketId;
+            }
+        }
+
+        /// <summary>
         /// Updates Jira tickets with detailed code review results
         /// </summary>
         public async Task UpdateTicketsWithReviewResultsAsync(

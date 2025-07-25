@@ -7,6 +7,14 @@ namespace AICodeReviewer.Services.Interfaces
     /// </summary>
     public interface IJiraService : IDisposable
     {
+        Task<string> CreateIssueAsync(
+            string project,
+            string issueType,
+            string summary,
+            string description,
+            string priority = "Medium",
+            string assignee = ""
+        );
         List<string> ExtractTicketKeysFromTitle(string prTitle);
         Task UpdateTicketsWithReviewResultsAsync(
             List<string> ticketKeys,

@@ -47,8 +47,10 @@
         "parameters": {
           "project": "DEV",
           "issueType": "Bug",
+          "summary": "Code Review Issues Found in PR {{data.prNumber}}",
+          "description": "Automated code review found issues that need attention. See GitHub PR for details.",
           "priority": "High",
-          "assignee": "auto-assign-from-pr"
+          "assignee": ""
         }
       },
       {
