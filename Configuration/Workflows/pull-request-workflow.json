@@ -33,7 +33,8 @@
         "parameters": {
           "template": "pr-review-template",
           "includeMetrics": true,
-          "tagReviewers": true
+          "tagReviewers": true,
+          "reviewData": "{{results.code_review.result}}"
         }
       },
       {
@@ -48,7 +49,7 @@
           "project": "OPS",
           "issueType": "Task",
           "summary": "Code Review Issues Found in PR {{data.prNumber}}",
-          "description": "Automated code review found issues that need attention. See GitHub PR for details.",
+          "description": "Automated code review found issues that need attention.\n\nPR: {{data.owner}}/{{data.repository}}/pull/{{data.prNumber}}\nGitHub: https://github.com/{{data.owner}}/{{data.repository}}/pull/{{data.prNumber}}\n\nReview Details: {{results.code_review.result}}",
           "priority": "High",
           "assignee": ""
         }

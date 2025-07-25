@@ -1,6 +1,7 @@
 using Microsoft.SemanticKernel;
 using AICodeReviewer.Models.Workflows;
 using AICodeReviewer.Plugins;
+using AICodeReviewer.Services.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -177,6 +178,41 @@ public class WorkflowEngineService : IWorkflowEngineService
                 _logger.LogInformation("  📊 Context data: {Key} = {Value}", data.Key, data.Value);
             }
 
+            // Add results from dependent steps
+            if (step.DependsOn.Any())
+            {
+                foreach (var dependencyId in step.DependsOn)
+                {
+                    var dependentResult = context.Results.FirstOrDefault(r => r.StepId == dependencyId);
+                    if (dependentResult?.Result != null)
+                    {
+                        // For the GitHub comment step, if it depends on code_review, pass the review result as content
+                        if (step.Id == "github_comment" && dependencyId == "code_review")
+                        {
+                            arguments["content"] = dependentResult.Result.ToString();
+                            arguments["reviewData"] = dependentResult.Result.ToString();
+                            _logger.LogInformation("  🔗 Dependency result: {DependencyId} → content/reviewData = {ResultPreview}...",
+                                dependencyId, dependentResult.Result.ToString()?.Substring(0, Math.Min(100, dependentResult.Result.ToString()?.Length ?? 0)));
+                        }
+                        // For the Jira ticket step, format the review data for better description
+                        else if (step.Id == "jira_ticket" && dependencyId == "code_review")
+                        {
+                            var reviewData = dependentResult.Result.ToString();
+                            var formattedDescription = FormatReviewDataForJira(reviewData, context.Data);
+                            arguments["description"] = formattedDescription;
+                            _logger.LogInformation("  🔗 Dependency result: {DependencyId} → formatted Jira description", dependencyId);
+                        }
+                        else
+                        {
+                            // Generic approach: add dependency results with prefixed keys
+                            arguments[$"dependency_{dependencyId}_result"] = dependentResult.Result;
+                            _logger.LogInformation("  🔗 Dependency result: dependency_{DependencyId}_result = {Result}", dependencyId, dependentResult.Result);
+                        }
+                        }
+                    }
+                }
+            }
+
             // Check if plugin exists
             if (!_kernel.Plugins.TryGetPlugin(step.Plugin, out var plugin))
             {
@@ -335,6 +371,122 @@ public class WorkflowEngineService : IWorkflowEngineService
         }
 
         return workflows;
+    }
+
+    private string FormatReviewDataForJira(string reviewData, Dictionary<string, object> contextData)
+    {
+        try
+        {
+            // Get PR information from context
+            var owner = contextData.TryGetValue("owner", out var ownerVal) ? ownerVal.ToString() : "unknown";
+            var repository = contextData.TryGetValue("repository", out var repoVal) ? repoVal.ToString() : "unknown";
+            var prNumber = contextData.TryGetValue("prNumber", out var prVal) ? prVal.ToString() : "unknown";
+
+            // Parse JSON review data
+            var reviewJson = JsonDocument.Parse(reviewData);
+            var root = reviewJson.RootElement;
+
+            var summary = root.TryGetProperty("Summary", out var summaryProp) ? summaryProp.GetString() : "Review completed";
+            var issues = root.TryGetProperty("Issues", out var issuesProp) ? issuesProp : default;
+            var metrics = root.TryGetProperty("Metrics", out var metricsProp) ? metricsProp : default;
+
+            var description = $@"Automated code review found issues that need attention.
+
+*PR Information:*
+• Repository: {owner}/{repository}
+• Pull Request: #{prNumber}
+• GitHub Link: https://github.com/{owner}/{repository}/pull/{prNumber}
+
+*Review Summary:*
+{summary}
+
+*Review Details:*";
+
+            // Add metrics if available
+            if (metrics.ValueKind == JsonValueKind.Object)
+            {
+                var filesReviewed = metrics.TryGetProperty("FilesReviewed", out var filesProp) ? filesProp.GetInt32() : 0;
+                var issuesFound = metrics.TryGetProperty("IssuesFound", out var issuesFoundProp) ? issuesFoundProp.GetInt32() : 0;
+                var duration = metrics.TryGetProperty("Duration", out var durationProp) ? durationProp.GetDouble() : 0;
+
+                description += $@"
+• Files Reviewed: {filesReviewed}
+• Issues Found: {issuesFound}
+• Review Duration: {duration:F1} seconds
+
+";
+            }
+
+            // Add issues by priority
+            if (issues.ValueKind == JsonValueKind.Array && issues.GetArrayLength() > 0)
+            {
+                var highIssues = new List<string>();
+                var mediumIssues = new List<string>();
+                var lowIssues = new List<string>();
+
+                foreach (var issue in issues.EnumerateArray())
+                {
+                    var severity = issue.TryGetProperty("Severity", out var severityProp) ? severityProp.GetString() : "Unknown";
+                    var file = issue.TryGetProperty("File", out var fileProp) ? fileProp.GetString() : "Unknown";
+                    var message = issue.TryGetProperty("Message", out var messageProp) ? messageProp.GetString() : "No description";
+                    var suggestion = issue.TryGetProperty("Suggestion", out var suggestionProp) ? suggestionProp.GetString() : "";
+                    var line = issue.TryGetProperty("Line", out var lineProp) && lineProp.ValueKind != JsonValueKind.Null 
+                        ? lineProp.GetInt32().ToString() 
+                        : "N/A";
+
+                    var issueText = $"*File:* {file} {(line != "N/A" ? $"(Line {line})" : "")}\n*Issue:* {message}\n*Suggestion:* {suggestion}";
+
+                    switch (severity?.ToLower())
+                    {
+                        case "high":
+                        case "critical":
+                            highIssues.Add(issueText);
+                            break;
+                        case "medium":
+                            mediumIssues.Add(issueText);
+                            break;
+                        case "low":
+                            lowIssues.Add(issueText);
+                            break;
+                    }
+                }
+
+                if (highIssues.Any())
+                {
+                    description += "\n*High Priority Issues:*\n" + string.Join("\n\n", highIssues.Select((issue, i) => $"{i + 1}. {issue}")) + "\n";
+                }
+                if (mediumIssues.Any())
+                {
+                    description += "\n*Medium Priority Issues:*\n" + string.Join("\n\n", mediumIssues.Select((issue, i) => $"{i + 1}. {issue}")) + "\n";
+                }
+                if (lowIssues.Any())
+                {
+                    description += "\n*Low Priority Issues:*\n" + string.Join("\n\n", lowIssues.Select((issue, i) => $"{i + 1}. {issue}")) + "\n";
+                }
+            }
+            else
+            {
+                description += "\n✓ No issues found! Code looks great!";
+            }
+
+            description += "\n\n*Next Steps:*\nPlease review and address the issues listed above, prioritizing high and medium severity items.";
+
+            return description;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to format review data for Jira");
+            var owner = contextData.TryGetValue("owner", out var ownerVal) ? ownerVal.ToString() : "unknown";
+            var repository = contextData.TryGetValue("repository", out var repoVal) ? repoVal.ToString() : "unknown";
+            var prNumber = contextData.TryGetValue("prNumber", out var prVal) ? prVal.ToString() : "unknown";
+
+            return $@"Automated code review completed for PR #{prNumber}.
+
+Repository: {owner}/{repository}
+GitHub Link: https://github.com/{owner}/{repository}/pull/{prNumber}
+
+Please check the GitHub PR for detailed review results.";
+        }
     }
 
     public async Task<WorkflowConfiguration?> GetWorkflowConfigurationAsync(string workflowName)
