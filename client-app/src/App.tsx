@@ -11,6 +11,7 @@ import { CommitCard } from "./components/CommitCard";
 import { PullRequestCard } from "./components/PullRequestCard";
 import { CodeReviewResult } from "./components/CodeReviewResult";
 import SystemPromptsManager from "./components/SystemPromptsManagerFixed";
+import WorkflowManager from "./components/WorkflowManagerNew";
 import {
   ErrorBoundary,
   LoadingSpinner,
@@ -26,9 +27,15 @@ import {
   RefreshCw,
   Search,
   Plus,
+  Workflow,
 } from "lucide-react";
 
-type TabType = "repositories" | "commits" | "pullrequests" | "systemprompts";
+type TabType =
+  | "repositories"
+  | "commits"
+  | "pullrequests"
+  | "systemprompts"
+  | "workflows";
 
 interface AppState {
   currentRepository: Repository | null;
@@ -587,6 +594,19 @@ function App() {
                 <Settings className="w-4 h-4" />
                 System Prompts
               </button>
+              <button
+                onClick={() =>
+                  setState((prev) => ({ ...prev, activeTab: "workflows" }))
+                }
+                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                  state.activeTab === "workflows"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Workflow className="w-4 h-4" />
+                Workflows
+              </button>
             </div>
           </div>
         </nav>
@@ -752,6 +772,8 @@ function App() {
           )}
 
           {state.activeTab === "systemprompts" && <SystemPromptsManager />}
+
+          {state.activeTab === "workflows" && <WorkflowManager />}
         </main>
 
         {/* Add Repository Modal */}
