@@ -201,8 +201,27 @@ public class WorkflowEngineService : IWorkflowEngineService
                         else if (step.Id == "jira_ticket" && dependencyId == "code_review")
                         {
                             var reviewData = dependentResult.Result.ToString();
-                            var formattedDescription = FormatReviewDataForJira(reviewData, context.Data);
+                            var formattedDescription = await FormatReviewDataForJiraAsync(reviewData, context.Data);
                             arguments["description"] = formattedDescription;
+
+                            // Get PR title for better Jira summary
+                            try
+                            {
+                                if (context.Data.TryGetValue("prNumber", out var prNumberObj) && int.TryParse(prNumberObj.ToString(), out var prNumber))
+                                {
+                                    var pullRequest = await _gitHubService.GetPullRequestAsync(prNumber);
+                                    if (pullRequest != null)
+                                    {
+                                        arguments["summary"] = $"Code Review: {pullRequest.Title}";
+                                        _logger.LogInformation("  📝 Updated Jira summary with PR title: {Title}", pullRequest.Title);
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Could not fetch PR title for Jira ticket");
+                            }
+
                             _logger.LogInformation("  🔗 Dependency result: {DependencyId} → formatted Jira description", dependencyId);
                         }
                         else
@@ -210,7 +229,6 @@ public class WorkflowEngineService : IWorkflowEngineService
                             // Generic approach: add dependency results with prefixed keys
                             arguments[$"dependency_{dependencyId}_result"] = dependentResult.Result;
                             _logger.LogInformation("  🔗 Dependency result: dependency_{DependencyId}_result = {Result}", dependencyId, dependentResult.Result);
-                        }
                         }
                     }
                 }
@@ -376,7 +394,7 @@ public class WorkflowEngineService : IWorkflowEngineService
         return workflows;
     }
 
-    private string FormatReviewDataForJira(string reviewData, Dictionary<string, object> contextData)
+    private async Task<string> FormatReviewDataForJiraAsync(string reviewData, Dictionary<string, object> contextData)
     {
         try
         {
@@ -437,9 +455,12 @@ public class WorkflowEngineService : IWorkflowEngineService
                         ? lineProp.GetInt32().ToString() 
                         : "N/A";
 
+                    // Clean severity - remove brackets if present
+                    var cleanSeverity = severity?.Trim('[', ']').ToLower();
+
                     var issueText = $"*File:* {file} {(line != "N/A" ? $"(Line {line})" : "")}\n*Issue:* {message}\n*Suggestion:* {suggestion}";
 
-                    switch (severity?.ToLower())
+                    switch (cleanSeverity)
                     {
                         case "high":
                         case "critical":

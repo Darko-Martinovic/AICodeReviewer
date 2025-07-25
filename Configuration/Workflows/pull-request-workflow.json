@@ -49,7 +49,7 @@
           "project": "OPS",
           "issueType": "Task",
           "summary": "Code Review Issues Found in PR {{data.prNumber}}",
-          "description": "Automated code review found issues that need attention.\n\nPR: {{data.owner}}/{{data.repository}}/pull/{{data.prNumber}}\nGitHub: https://github.com/{{data.owner}}/{{data.repository}}/pull/{{data.prNumber}}\n\nReview Details: {{results.code_review.result}}",
+          "description": "Automated code review found issues that need attention. Review details will be populated automatically.",
           "priority": "High",
           "assignee": ""
         }
