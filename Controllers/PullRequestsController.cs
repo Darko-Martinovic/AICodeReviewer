@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Services;
 using AICodeReviewer.Models;
 
 namespace AICodeReviewer.Controllers
@@ -16,15 +17,24 @@ namespace AICodeReviewer.Controllers
         private readonly IGitHubService _gitHubService;
         private readonly ICodeReviewService _codeReviewService;
         private readonly IRepositoryManagementService _repositoryService;
+        private readonly IJiraService _jiraService;
+        private readonly INotificationService _notificationService;
+        private readonly IWorkflowEngineService _workflowEngineService;
 
         public PullRequestsController(
             IGitHubService gitHubService,
             ICodeReviewService codeReviewService,
-            IRepositoryManagementService repositoryService)
+            IRepositoryManagementService repositoryService,
+            IJiraService jiraService,
+            INotificationService notificationService,
+            IWorkflowEngineService workflowEngineService)
         {
             _gitHubService = gitHubService;
             _codeReviewService = codeReviewService;
             _repositoryService = repositoryService;
+            _jiraService = jiraService;
+            _notificationService = notificationService;
+            _workflowEngineService = workflowEngineService;
         }
 
         /// <summary>
@@ -116,6 +126,23 @@ namespace AICodeReviewer.Controllers
                 }
 
                 var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+
+                // Execute the full workflow instead of just code review
+                Console.WriteLine($"🚀 Starting PR review workflow for PR #{number}");
+
+                var workflowData = new Dictionary<string, object>
+                {
+                    ["pullRequestNumber"] = number,
+                    ["owner"] = owner,
+                    ["repository"] = name
+                };
+
+                var workflowContext = await _workflowEngineService.ExecuteWorkflowAsync(
+                    "PullRequestReview",
+                    "manual_review",
+                    workflowData);
+
+                // Extract the review result from workflow context
                 var review = await _codeReviewService.ReviewPullRequestAsync(number);
 
                 // Map CodeReviewResult to the format expected by frontend
@@ -144,10 +171,11 @@ namespace AICodeReviewer.Controllers
                         }).ToList()
                 };
 
-                Console.WriteLine($"🔍 Backend PR review mapping:");
+                Console.WriteLine($"🔍 Backend PR review workflow completed:");
                 Console.WriteLine($"  - Original issues count: {review.DetailedIssues.Count}");
                 Console.WriteLine($"  - Mapped issues count: {mappedReview.issues.Count}");
                 Console.WriteLine($"  - Summary: {mappedReview.summary}");
+                Console.WriteLine($"  - Workflow steps executed: {workflowContext.Results.Count}");
 
                 return Ok(mappedReview);
             }

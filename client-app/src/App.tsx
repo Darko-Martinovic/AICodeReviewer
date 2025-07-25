@@ -382,10 +382,26 @@ function App() {
         reviewingPRs: new Set([...prev.reviewingPRs, number]),
       }));
 
+      // Show workflow start notification
+      addToast({
+        type: "info",
+        title: "Integration Workflow Started",
+        message: "Running AI Code Review with full integration pipeline...",
+      });
+
       console.log("📡 Calling pull requests API review...");
       const response = await pullRequestsApi.review(number);
 
       console.log("✅ API Response received:", response);
+
+      // Show workflow completion notification
+      addToast({
+        type: "success",
+        title: "Integration Workflow Complete",
+        message: "AI Review → Jira Update → GitHub PR Comment completed",
+        duration: 5000,
+      });
+
       console.log("📋 Response data:", response.data);
       console.log("📋 Response data type:", typeof response.data);
       console.log("📋 Response data keys:", Object.keys(response.data || {}));
