@@ -18,16 +18,19 @@ public class WorkflowEngineService : IWorkflowEngineService
 {
     private readonly Kernel _kernel;
     private readonly ILogger<WorkflowEngineService> _logger;
+    private readonly IGitHubService _gitHubService;
     private readonly string _workflowsPath;
 
     public WorkflowEngineService(
         Kernel kernel,
         ILogger<WorkflowEngineService> logger,
+        IGitHubService gitHubService,
         IConfiguration configuration,
         JiraPlugin jiraPlugin)
     {
         _kernel = kernel;
         _logger = logger;
+        _gitHubService = gitHubService;
         _workflowsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configuration", "Workflows");
 
         // Register the JiraPlugin with dependency injection
