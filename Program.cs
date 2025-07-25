@@ -143,22 +143,14 @@ namespace AICodeReviewer
                 endpoint: endpoint,
                 apiKey: apiKey);
 
-            // Register plugin instances with proper dependencies
-            services.AddSingleton<CodeReviewPlugin>(provider =>
-                new CodeReviewPlugin(
-                    provider.GetRequiredService<ICodeReviewService>(),
-                    provider.GetRequiredService<IGitHubService>()));
+            // Add plugins using AddFromType method
+            kernelBuilder.Plugins.AddFromType<CodeReviewPlugin>("CodeReview");
+            kernelBuilder.Plugins.AddFromType<GitHubPlugin>("GitHub");
+            kernelBuilder.Plugins.AddFromType<JiraPlugin>("Jira");
+            kernelBuilder.Plugins.AddFromType<TeamsPlugin>("Teams");
+            kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack");
 
-            services.AddSingleton<GitHubPlugin>(provider =>
-                new GitHubPlugin(provider.GetRequiredService<IGitHubService>()));
-
-            services.AddSingleton<TeamsPlugin>();
-            services.AddSingleton<JiraPlugin>();
-            services.AddSingleton<SlackPlugin>(provider =>
-                new SlackPlugin(
-                    provider.GetRequiredService<ILogger<SlackPlugin>>(),
-                    provider.GetRequiredService<HttpClient>(),
-                    provider.GetRequiredService<IConfiguration>()));
+            Console.WriteLine("🔌 Semantic Kernel plugins configured for registration");
 
             // Register workflow engine service
             services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();

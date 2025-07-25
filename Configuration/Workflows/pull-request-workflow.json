@@ -43,10 +43,7 @@
         "function": "CreateTicket",
         "required": false,
         "dependsOn": ["code_review"],
-        "conditions": {
-          "highSeverityIssues": ">= 1",
-          "complexity": "High"
-        },
+        "conditions": {},
         "parameters": {
           "project": "DEV",
           "issueType": "Bug",
@@ -61,9 +58,7 @@
         "function": "SendAdaptiveCard",
         "required": false,
         "dependsOn": ["code_review"],
-        "conditions": {
-          "criticalIssues": ">= 1"
-        },
+        "conditions": {},
         "parameters": {
           "channel": "dev-reviews",
           "template": "critical-issues-alert",

@@ -113,7 +113,7 @@ public class WorkflowEngineService : IWorkflowEngineService
 
             // Execute the semantic kernel function
             var functionResult = await InvokePluginFunctionAsync(step, context);
-            
+
             result.Status = "Success";
             result.Result = functionResult;
             result.Metadata["executionTime"] = DateTime.UtcNow.Subtract(result.ExecutedAt).TotalMilliseconds;
@@ -134,32 +134,72 @@ public class WorkflowEngineService : IWorkflowEngineService
     {
         try
         {
+            _logger.LogInformation("🔍 Invoking plugin function {Plugin}.{Function}", step.Plugin, step.Function);
+
+            // Log available plugins
+            _logger.LogInformation("📦 Available plugins: {Plugins}", string.Join(", ", _kernel.Plugins.Select(p => p.Name)));
+
             // Build function arguments from step parameters and context data
             var arguments = new KernelArguments();
-            
-            // Add step parameters
+
+            // Add step parameters with proper type conversion
             foreach (var param in step.Parameters)
             {
-                arguments[param.Key] = param.Value;
+                object convertedValue = param.Value;
+
+                // Convert JsonElement to appropriate .NET types
+                if (param.Value is JsonElement jsonElement)
+                {
+                    convertedValue = jsonElement.ValueKind switch
+                    {
+                        JsonValueKind.True => true,
+                        JsonValueKind.False => false,
+                        JsonValueKind.String => jsonElement.GetString() ?? "",
+                        JsonValueKind.Number => jsonElement.TryGetInt32(out var intVal) ? intVal : jsonElement.GetDouble(),
+                        _ => jsonElement.ToString()
+                    };
+                }
+
+                arguments[param.Key] = convertedValue;
+                _logger.LogInformation("  📝 Step parameter: {Key} = {Value} (Type: {Type})",
+                    param.Key, convertedValue, convertedValue?.GetType().Name ?? "null");
             }
 
             // Add context data (override step parameters if same key exists)
             foreach (var data in context.Data)
             {
                 arguments[data.Key] = data.Value;
+                _logger.LogInformation("  📊 Context data: {Key} = {Value}", data.Key, data.Value);
             }
 
-            // Get the plugin function
-            var function = _kernel.Plugins.GetFunction(step.Plugin, step.Function);
-            
+            // Check if plugin exists
+            if (!_kernel.Plugins.TryGetPlugin(step.Plugin, out var plugin))
+            {
+                var availablePlugins = string.Join(", ", _kernel.Plugins.Select(p => p.Name));
+                throw new InvalidOperationException($"Plugin '{step.Plugin}' not found. Available plugins: {availablePlugins}");
+            }
+
+            // Check if function exists
+            if (!plugin.TryGetFunction(step.Function, out var function))
+            {
+                var availableFunctions = string.Join(", ", plugin.Select(f => f.Name));
+                throw new InvalidOperationException($"Function '{step.Function}' not found in plugin '{step.Plugin}'. Available functions: {availableFunctions}");
+            }
+
+            _logger.LogInformation("✅ Found function {Plugin}.{Function}, invoking with {ArgCount} arguments",
+                step.Plugin, step.Function, arguments.Count);
+
             // Invoke the function
             var result = await _kernel.InvokeAsync(function, arguments);
-            
-            return result.GetValue<object>();
+
+            var resultValue = result.GetValue<object>();
+            _logger.LogInformation("🎯 Function result: {Result}", resultValue?.ToString() ?? "null");
+
+            return resultValue;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to invoke plugin function {Plugin}.{Function}", step.Plugin, step.Function);
+            _logger.LogError(ex, "❌ Failed to invoke plugin function {Plugin}.{Function}", step.Plugin, step.Function);
             throw;
         }
     }
@@ -182,7 +222,7 @@ public class WorkflowEngineService : IWorkflowEngineService
         try
         {
             var conditionStr = conditionValue.ToString() ?? "";
-            
+
             // For demo purposes, implement basic conditions
             switch (conditionKey.ToLower())
             {
@@ -220,7 +260,7 @@ public class WorkflowEngineService : IWorkflowEngineService
             return actualValue < int.Parse(condition[1..].Trim());
         if (condition.StartsWith("=="))
             return actualValue == int.Parse(condition[2..].Trim());
-        
+
         return actualValue == int.Parse(condition);
     }
 
@@ -244,13 +284,13 @@ public class WorkflowEngineService : IWorkflowEngineService
 
     private string GetComplexity(WorkflowContext context)
     {
-        return context.Data.TryGetValue("complexity", out var complexity) ? 
+        return context.Data.TryGetValue("complexity", out var complexity) ?
             complexity?.ToString() ?? "Low" : "Low";
     }
 
     private bool IsMainBranch(WorkflowContext context)
     {
-        return context.Data.TryGetValue("branch", out var branch) && 
+        return context.Data.TryGetValue("branch", out var branch) &&
             (branch?.ToString()?.Equals("main", StringComparison.OrdinalIgnoreCase) == true ||
              branch?.ToString()?.Equals("master", StringComparison.OrdinalIgnoreCase) == true);
     }
@@ -258,7 +298,7 @@ public class WorkflowEngineService : IWorkflowEngineService
     public async Task<List<WorkflowConfiguration>> GetAvailableWorkflowsAsync()
     {
         var workflows = new List<WorkflowConfiguration>();
-        
+
         if (!Directory.Exists(_workflowsPath))
         {
             _logger.LogWarning("Workflows directory not found: {WorkflowsPath}", _workflowsPath);
@@ -266,7 +306,7 @@ public class WorkflowEngineService : IWorkflowEngineService
         }
 
         var workflowFiles = Directory.GetFiles(_workflowsPath, "*.json");
-        
+
         foreach (var file in workflowFiles)
         {
             try
@@ -277,7 +317,7 @@ public class WorkflowEngineService : IWorkflowEngineService
                     PropertyNameCaseInsensitive = true,
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 });
-                
+
                 if (config != null)
                 {
                     workflows.Add(config);
