@@ -4,7 +4,6 @@ import {
   Pause,
   CheckCircle,
   XCircle,
-  Clock,
   GitPullRequest,
   Settings,
   Plus,
@@ -25,7 +24,7 @@ interface Integration {
   type: "source" | "processing" | "notification" | "storage";
   icon: React.ReactNode;
   status: "active" | "inactive" | "error";
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   description: string;
 }
 
@@ -46,10 +45,7 @@ interface WorkflowDefinition {
 }
 
 const WorkflowManager: React.FC = () => {
-  const [selectedWorkflow, setSelectedWorkflow] =
-    useState<WorkflowDefinition | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showAddIntegration, setShowAddIntegration] = useState(false);
   const [expandedWorkflow, setExpandedWorkflow] = useState<string | null>(
     "main-workflow"
   );
@@ -180,14 +176,17 @@ const WorkflowManager: React.FC = () => {
     }
   };
 
-  const handleConfigureIntegration = (integration: Integration) => {
-    setSelectedWorkflow(null);
+  const handleConfigureIntegration = () => {
+    setShowModal(true);
+  };
+
+  const handleAddIntegration = () => {
+    // Placeholder for add integration functionality
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedWorkflow(null);
   };
 
   const renderWorkflowStep = (
@@ -222,7 +221,7 @@ const WorkflowManager: React.FC = () => {
                 {integration.status}
               </span>
               <button
-                onClick={() => handleConfigureIntegration(integration)}
+                onClick={() => handleConfigureIntegration()}
                 className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <Settings className="w-4 h-4" />
@@ -268,7 +267,7 @@ const WorkflowManager: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setShowAddIntegration(true)}
+            onClick={() => handleAddIntegration()}
             className="btn-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
@@ -359,7 +358,7 @@ const WorkflowManager: React.FC = () => {
                 {/* Add Step Button */}
                 <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <button
-                    onClick={() => setShowAddIntegration(true)}
+                    onClick={() => handleAddIntegration()}
                     className="flex items-center gap-2 px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
                   >
                     <Plus className="w-4 h-4" />
@@ -382,7 +381,7 @@ const WorkflowManager: React.FC = () => {
             <div
               key={integration.id}
               className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer"
-              onClick={() => handleConfigureIntegration(integration)}
+              onClick={() => handleConfigureIntegration()}
             >
               <div className="flex items-center gap-2 mb-2">
                 {integration.icon}

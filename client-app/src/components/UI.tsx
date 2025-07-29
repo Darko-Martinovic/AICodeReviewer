@@ -194,7 +194,7 @@ export const useToast = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = (toast: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = Math.random().toString(36).slice(2, 11);
     const newToast = { ...toast, id };
 
     // Limit to 3 concurrent toasts to prevent overlap
