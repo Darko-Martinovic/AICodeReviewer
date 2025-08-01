@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Alert } from "./UI";
+import styles from "./SystemPromptsManagerFixed.module.css";
 
 interface SystemPrompt {
   language: string;
@@ -194,28 +195,28 @@ Would you like to be notified when it's ready?`;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2">Loading system prompts...</span>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <span className={styles.loadingText}>Loading system prompts...</span>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className={styles.container}>
       {/* Language Tabs */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 items-center">
+      <div className={styles.tabsContainer}>
+        <div className={styles.tabsBorder}>
+          <nav className={styles.tabsNav}>
             {languages.map((language) => (
               <button
                 key={language.key}
                 onClick={() => setActiveLanguage(language.key)}
-                className={`${
+                className={`${styles.tab} ${
                   activeLanguage === language.key
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
+                    ? styles.tabActive
+                    : styles.tabInactive
+                }`}
               >
                 <span>{language.icon}</span>
                 {language.label}
@@ -225,10 +226,10 @@ Would you like to be notified when it's ready?`;
             {/* Add Language Button */}
             <button
               onClick={openAddLanguageModal}
-              className="ml-4 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center gap-2"
+              className={styles.addLanguageButton}
               title="Add new programming language support"
             >
-              <span className="text-lg">➕</span>
+              <span className={styles.addIcon}>➕</span>
               <span>Add Language</span>
             </button>
           </nav>
@@ -237,23 +238,21 @@ Would you like to be notified when it's ready?`;
 
       {/* Main Content - Fixed Layout */}
       {prompts[activeLanguage] && (
-        <div className="flex-1 flex flex-col lg:flex-row gap-6">
+        <div className={styles.contentLayout}>
           {/* Left Panel - Base System Prompt and Custom Additions */}
-          <div className="flex-1 space-y-6">
+          <div className={styles.leftPanel}>
             {/* Base System Prompt (Read-only) */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>
                   <span>
                     {languages.find((l) => l.key === activeLanguage)?.icon}
                   </span>
                   {languages.find((l) => l.key === activeLanguage)?.label} Base
                   System Prompt
-                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
-                    Read-only
-                  </span>
+                  <span className={styles.badgeReadonly}>Read-only</span>
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className={styles.cardDescription}>
                   Default system prompt loaded from configuration. This cannot
                   be modified.
                 </p>
@@ -261,22 +260,20 @@ Would you like to be notified when it's ready?`;
               <textarea
                 value={prompts[activeLanguage]?.systemPrompt || ""}
                 readOnly
-                className="w-full h-64 p-3 border rounded-md bg-gray-50 font-mono text-sm resize-none"
+                className={styles.textareaReadonly}
                 placeholder="Loading base prompt..."
               />
             </div>
 
             {/* Custom Additions */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h2 className={styles.cardTitle}>
                   Custom Additions for{" "}
                   {languages.find((l) => l.key === activeLanguage)?.label}
-                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-sm">
-                    Editable
-                  </span>
+                  <span className={styles.badgeEditable}>Editable</span>
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className={styles.cardDescription}>
                   Add your own requirements, coding standards, or specific focus
                   areas for{" "}
                   {languages.find((l) => l.key === activeLanguage)?.label}{" "}
@@ -298,10 +295,10 @@ Would you like to be notified when it's ready?`;
                 placeholder={`Add custom requirements for ${
                   languages.find((l) => l.key === activeLanguage)?.label
                 } code reviews...\n\nExamples:\n- Follow our company naming conventions\n- Focus on performance in data processing functions\n- Ensure all public APIs have documentation\n- Check for proper error handling in async operations`}
-                className="w-full h-48 p-3 border rounded-md font-mono text-sm resize-none"
+                className={styles.textareaEditable}
               />
 
-              <div className="flex gap-2 mt-4">
+              <div className={styles.buttonGroup}>
                 <button
                   onClick={() =>
                     updateCustomAdditions(
@@ -310,10 +307,10 @@ Would you like to be notified when it's ready?`;
                     )
                   }
                   disabled={saving === activeLanguage}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  className={styles.buttonPrimary}
                 >
                   {saving === activeLanguage ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className={styles.buttonSpinner}></div>
                   ) : (
                     <span>💾</span>
                   )}
@@ -322,7 +319,7 @@ Would you like to be notified when it's ready?`;
 
                 <button
                   onClick={() => previewCombinedPrompt(activeLanguage)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 flex items-center gap-2"
+                  className={styles.buttonSecondary}
                 >
                   <span>👁️</span>
                   Preview Combined
@@ -330,7 +327,7 @@ Would you like to be notified when it's ready?`;
 
                 <button
                   onClick={() => resetCustomAdditions(activeLanguage)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 flex items-center gap-2"
+                  className={styles.buttonSecondary}
                 >
                   <span>🔄</span>
                   Reset
@@ -338,7 +335,7 @@ Would you like to be notified when it's ready?`;
               </div>
 
               {prompts[activeLanguage]?.lastModified && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className={styles.lastModified}>
                   Last modified:{" "}
                   {new Date(
                     prompts[activeLanguage].lastModified
@@ -349,26 +346,24 @@ Would you like to be notified when it's ready?`;
           </div>
 
           {/* Right Panel - Template Library */}
-          <div className="w-full lg:w-80 bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              💡 Quick Templates
-            </h2>
-            <p className="text-gray-600 text-sm mb-4">
+          <div className={styles.rightPanel}>
+            <h2 className={styles.templatesTitle}>💡 Quick Templates</h2>
+            <p className={styles.templatesDescription}>
               Click to add common prompt additions
             </p>
 
             {templates && (
-              <div className="space-y-4">
+              <div className={styles.templatesContainer}>
                 {Object.entries(templates).map(([category, items]) => (
                   <div key={category}>
-                    <h4 className="font-medium mb-2 capitalize text-gray-800">
+                    <h4 className={styles.templateCategory}>
                       {category.replace(/([A-Z])/g, " $1").trim()}
                     </h4>
-                    <div className="space-y-2">
+                    <div className={styles.templateItems}>
                       {items.map((template: string, index: number) => (
                         <button
                           key={index}
-                          className="w-full text-left p-2 border rounded text-xs hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                          className={styles.templateButton}
                           onClick={() =>
                             insertTemplate(activeLanguage, template)
                           }
@@ -387,16 +382,14 @@ Would you like to be notified when it's ready?`;
 
       {/* Preview Panel - Full Width */}
       {previewMode[activeLanguage] && previewData[activeLanguage] && (
-        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4">
-            Combined Prompt Preview
-          </h2>
-          <p className="text-gray-600 text-sm mb-4">
+        <div className={styles.previewCard}>
+          <h2 className={styles.previewTitle}>Combined Prompt Preview</h2>
+          <p className={styles.templatesDescription}>
             This is how the final prompt will look when sent to the AI
           </p>
 
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-            <p className="text-blue-800 text-sm">
+          <div className={styles.previewMeta}>
+            <p>
               Preview generated at:{" "}
               {new Date(
                 previewData[activeLanguage].previewGeneratedAt
@@ -404,12 +397,12 @@ Would you like to be notified when it's ready?`;
             </p>
           </div>
 
-          <div className="border-t pt-4">
-            <h4 className="font-medium mb-2">Combined System Prompt:</h4>
+          <div>
+            <h4>Combined System Prompt:</h4>
             <textarea
               value={previewData[activeLanguage].combinedPrompt}
               readOnly
-              className="w-full h-80 p-3 border rounded-md bg-gray-50 font-mono text-sm resize-none"
+              className={styles.previewTextarea}
             />
           </div>
 
@@ -420,7 +413,7 @@ Would you like to be notified when it's ready?`;
                 [activeLanguage]: false,
               }))
             }
-            className="mt-4 px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+            className={styles.closePreviewButton}
           >
             Close Preview
           </button>
@@ -434,16 +427,14 @@ Would you like to be notified when it's ready?`;
         title="Add New Programming Language"
         maxWidth="md"
       >
-        <div className="space-y-4">
+        <div className={styles.modalContent}>
           <Alert
             type="info"
             message="Configure a new programming language for AI code reviews. This will add language-specific prompts and analysis capabilities."
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Language Name
-            </label>
+            <label className={styles.formLabel}>Language Name</label>
             <input
               type="text"
               value={newLanguageForm.name}
@@ -453,15 +444,13 @@ Would you like to be notified when it's ready?`;
                   name: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className={styles.formInput}
               placeholder="e.g., Python, Rust, Go"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Language Key
-            </label>
+            <label className={styles.formLabel}>Language Key</label>
             <input
               type="text"
               value={newLanguageForm.key}
@@ -471,15 +460,13 @@ Would you like to be notified when it's ready?`;
                   key: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className={styles.formInput}
               placeholder="e.g., Python, Rust, Go"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Language Icon (Emoji)
-            </label>
+            <label className={styles.formLabel}>Language Icon (Emoji)</label>
             <input
               type="text"
               value={newLanguageForm.icon}
@@ -489,22 +476,22 @@ Would you like to be notified when it's ready?`;
                   icon: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className={styles.formInput}
               placeholder="e.g., 🐍, 🦀, 🐹"
               maxLength={2}
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className={styles.modalButtonGroup}>
             <button
               onClick={handleAddLanguage}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className={styles.modalPrimaryButton}
             >
               Add Language
             </button>
             <button
               onClick={() => setShowAddLanguageModal(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+              className={styles.modalSecondaryButton}
             >
               Cancel
             </button>

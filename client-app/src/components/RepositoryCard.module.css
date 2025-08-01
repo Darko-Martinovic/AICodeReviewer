@@ -1,0 +1,178 @@
+/* RepositoryCard.module.css */
+
+/* Main card container */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid rgb(229 231 235);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Selected state */
+.cardSelected {
+  background-color: rgb(239 246 255);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 2px rgb(59 130 246);
+  border: 1px solid rgb(59 130 246);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.cardSelected:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Header section */
+.headerSection {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.contentContainer {
+  flex: 1;
+}
+
+/* Title section */
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+.lockIcon {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(107 114 128);
+}
+
+.unlockIcon {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(107 114 128);
+}
+
+/* Repository info */
+.fullName {
+  font-size: 0.875rem;
+  color: rgb(75 85 99);
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: rgb(55 65 81);
+  margin-bottom: 0.75rem;
+}
+
+/* Metadata section */
+.metadataSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+
+.branchInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.branchIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Status indicators */
+.statusPrivate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(245 158 11);
+  color: white;
+}
+
+.statusPublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(34 197 94);
+  color: white;
+}
+
+/* External link */
+.externalLink {
+  color: rgb(156 163 175);
+  transition: color 0.15s ease-in-out;
+}
+
+.externalLink:hover {
+  color: rgb(75 85 99);
+}
+
+.externalLinkIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Dark mode styles */
+:global(.dark) .card {
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .cardSelected {
+  background-color: rgb(30 58 138);
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .title {
+  color: white;
+}
+
+:global(.dark) .fullName {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .description {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .metadataSection {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .externalLink {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .externalLink:hover {
+  color: rgb(209 213 219);
+}

@@ -1,0 +1,282 @@
+/* UI Components CSS Module */
+
+/* Error Boundary */
+.errorBoundaryContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(249 250 251);
+}
+
+.errorBoundaryCard {
+  /* Uses global card class - could be converted later */
+  max-width: 448px;
+  width: 100%;
+}
+
+.errorBoundaryContent {
+  text-align: center;
+}
+
+.errorBoundaryTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  margin-bottom: 0.5rem;
+}
+
+.errorBoundaryDescription {
+  color: rgb(75 85 99);
+  margin-bottom: 1rem;
+}
+
+.errorBoundaryButton {
+  /* Button styling handled by global btn-primary class */
+  width: 100%;
+  display: inline-block;
+}
+
+/* Loading Spinner */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.loadingSpinner {
+  /* Uses global spinner class - animation defined globally */
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgb(59 130 246);
+  animation: spin 1s linear infinite;
+}
+
+/* Alert Component */
+.alertBase {
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border-width: 1px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.alertSuccess {
+  background-color: rgb(240 253 244);
+  border-color: rgb(187 247 208);
+}
+
+.alertError {
+  background-color: rgb(254 242 242);
+  border-color: rgb(252 165 165);
+}
+
+.alertWarning {
+  background-color: rgb(254 252 232);
+  border-color: rgb(251 191 36);
+}
+
+.alertInfo {
+  background-color: rgb(239 246 255);
+  border-color: rgb(147 197 253);
+}
+
+.alertContent {
+  flex: 1;
+}
+
+.alertTitle {
+  font-weight: 500;
+  color: rgb(17 24 39);
+  margin-bottom: 0.25rem;
+}
+
+.alertMessage {
+  color: rgb(55 65 81);
+}
+
+.alertCloseButton {
+  color: rgb(156 163 175);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.alertCloseButton:hover {
+  color: rgb(75 85 99);
+}
+
+/* Empty State Component */
+.emptyStateContainer {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.emptyStateIcon {
+  margin: 0 auto 1rem;
+}
+
+.emptyStateTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: rgb(17 24 39);
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateDescription {
+  color: rgb(75 85 99);
+  margin-bottom: 1.5rem;
+  max-width: 448px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.emptyStateButton {
+  /* Button styling handled by global btn-primary class */
+  display: inline-block;
+}
+
+/* Toast Container */
+.toastContainer {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Modal Component */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modalContainer {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+}
+
+.modalMaxWidthSm {
+  max-width: 384px;
+}
+
+.modalMaxWidthMd {
+  max-width: 448px;
+}
+
+.modalMaxWidthLg {
+  max-width: 512px;
+}
+
+.modalMaxWidthXl {
+  max-width: 576px;
+}
+
+.modalContent {
+  padding: 1.5rem;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.modalTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+.modalCloseButton {
+  color: rgb(156 163 175);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.modalCloseButton:hover {
+  color: rgb(75 85 99);
+}
+
+/* Dark mode styles */
+:global(.dark) .errorBoundaryContainer {
+  background-color: rgb(17 24 39);
+}
+
+:global(.dark) .errorBoundaryTitle {
+  color: white;
+}
+
+:global(.dark) .errorBoundaryDescription {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .alertSuccess {
+  background-color: rgb(6 78 59);
+  border-color: rgb(4 120 87);
+}
+
+:global(.dark) .alertError {
+  background-color: rgb(127 29 29);
+  border-color: rgb(153 27 27);
+}
+
+:global(.dark) .alertWarning {
+  background-color: rgb(120 53 15);
+  border-color: rgb(146 64 14);
+}
+
+:global(.dark) .alertInfo {
+  background-color: rgb(30 58 138);
+  border-color: rgb(29 78 216);
+}
+
+:global(.dark) .alertTitle {
+  color: white;
+}
+
+:global(.dark) .alertMessage {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .alertCloseButton:hover {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .emptyStateTitle {
+  color: white;
+}
+
+:global(.dark) .emptyStateDescription {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .modalContainer {
+  background-color: rgb(31 41 55);
+}
+
+:global(.dark) .modalTitle {
+  color: white;
+}
+
+:global(.dark) .modalCloseButton:hover {
+  color: rgb(209 213 219);
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { repositoryApi, commitsApi, pullRequestsApi } from "./services/api";
 import type {
   Repository,
@@ -11,7 +11,10 @@ import { CommitCard } from "./components/CommitCard";
 import { PullRequestCard } from "./components/PullRequestCard";
 import { CodeReviewResult } from "./components/CodeReviewResult";
 import SystemPromptsManager from "./components/SystemPromptsManagerFixed";
-import WorkflowManager from "./components/WorkflowManagerNew";
+import WorkflowManager from "./components/WorkflowManager";
+import Header from "./components/Header";
+import Navigation from "./components/Navigation";
+import SearchAndActions from "./components/SearchAndActions";
 import {
   ErrorBoundary,
   LoadingSpinner,
@@ -19,16 +22,7 @@ import {
   EmptyState,
   useToast,
 } from "./components/UI";
-import {
-  Github,
-  GitCommit,
-  GitPullRequest,
-  Settings,
-  RefreshCw,
-  Search,
-  Plus,
-  Workflow,
-} from "lucide-react";
+import { GitCommit, GitPullRequest, Settings } from "lucide-react";
 
 type TabType =
   | "repositories"
@@ -514,118 +508,21 @@ function App() {
         <ToastContainer />
 
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-3">
-                <Github className="w-8 h-8 text-blue-600" />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  AI Code Reviewer
-                </h1>
-              </div>
-
-              <div className="flex items-center gap-4">
-                {state.currentRepository && (
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div className="text-sm">
-                      <span className="text-gray-600 dark:text-gray-400 font-medium">
-                        Current:
-                      </span>{" "}
-                      <span className="text-blue-700 dark:text-blue-300 font-semibold">
-                        {state.currentRepository.fullName}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <button
-                  onClick={loadInitialData}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                  title="Refresh"
-                >
-                  <RefreshCw className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <Header
+          currentRepository={state.currentRepository}
+          onRefresh={loadInitialData}
+        />
 
         {/* Navigation */}
-        <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8">
-              <button
-                onClick={() =>
-                  setState((prev) => ({ ...prev, activeTab: "repositories" }))
-                }
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                  state.activeTab === "repositories"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Repositories
-              </button>
-              <button
-                onClick={() =>
-                  setState((prev) => ({ ...prev, activeTab: "commits" }))
-                }
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                  state.activeTab === "commits"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <GitCommit className="w-4 h-4" />
-                Commits
-                {state.currentRepository ? ` (${state.commits.length})` : ""}
-              </button>
-              <button
-                onClick={() =>
-                  setState((prev) => ({ ...prev, activeTab: "pullrequests" }))
-                }
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                  state.activeTab === "pullrequests"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <GitPullRequest className="w-4 h-4" />
-                Pull Requests
-                {state.currentRepository
-                  ? ` (${state.pullRequests.length})`
-                  : ""}
-              </button>
-              <button
-                onClick={() =>
-                  setState((prev) => ({ ...prev, activeTab: "systemprompts" }))
-                }
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                  state.activeTab === "systemprompts"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                System Prompts
-              </button>
-              <button
-                onClick={() =>
-                  setState((prev) => ({ ...prev, activeTab: "workflows" }))
-                }
-                className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                  state.activeTab === "workflows"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                <Workflow className="w-4 h-4" />
-                Workflows
-              </button>
-            </div>
-          </div>
-        </nav>
+        <Navigation
+          activeTab={state.activeTab}
+          onTabChange={(tab) =>
+            setState((prev) => ({ ...prev, activeTab: tab }))
+          }
+          currentRepository={state.currentRepository}
+          commits={state.commits}
+          pullRequests={state.pullRequests}
+        />
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -638,30 +535,14 @@ function App() {
           )}
 
           {/* Search and Actions */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="relative max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pl-10"
-              />
-            </div>
-
-            {state.activeTab === "repositories" && (
-              <button
-                onClick={() =>
-                  setNewRepoForm((prev) => ({ ...prev, show: true }))
-                }
-                className="btn-primary flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Repository
-              </button>
-            )}
-          </div>
+          <SearchAndActions
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeTab={state.activeTab}
+            onAddRepository={() =>
+              setNewRepoForm((prev) => ({ ...prev, show: true }))
+            }
+          />
 
           {/* Tab Content */}
           {state.activeTab === "repositories" && (

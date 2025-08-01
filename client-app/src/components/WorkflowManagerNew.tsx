@@ -17,6 +17,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { Modal, Alert } from "./UI";
+import styles from "./WorkflowManagerNew.module.css";
 
 interface Integration {
   id: string;
@@ -157,12 +158,20 @@ const WorkflowManager: React.FC = () => {
   const getStatusColor = (status: Integration["status"]) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        return styles.statusActive;
       case "inactive":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+        return styles.statusInactive;
       case "error":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        return styles.statusError;
     }
+  };
+
+  const getWorkflowStatusClass = (isActive: boolean) => {
+    return isActive ? styles.statusActive : styles.statusInactive;
+  };
+
+  const getExecutionModeClass = (mode: "serial" | "parallel") => {
+    return mode === "serial" ? styles.modeSerial : styles.modeParallel;
   };
 
   const getStatusIcon = (status: Integration["status"]) => {
@@ -198,23 +207,19 @@ const WorkflowManager: React.FC = () => {
     const hasMultipleConnections = step.connections.length > 1;
 
     return (
-      <div key={step.id} className="flex items-center">
+      <div key={step.id} className={styles.stepContainer}>
         {/* Integration Step */}
-        <div className="relative group">
-          <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors min-w-[160px]">
-            <div className="flex items-center gap-2 mb-2">
+        <div className={styles.stepCard}>
+          <div className={styles.stepCardInner}>
+            <div className={styles.stepHeader}>
               {integration.icon}
-              <span className="font-medium text-gray-900 dark:text-white">
-                {integration.name}
-              </span>
+              <span className={styles.stepName}>{integration.name}</span>
               {getStatusIcon(integration.status)}
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-              {integration.description}
-            </p>
-            <div className="flex items-center justify-between">
+            <p className={styles.stepDescription}>{integration.description}</p>
+            <div className={styles.stepFooter}>
               <span
-                className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                className={`${styles.stepStatus} ${getStatusColor(
                   integration.status
                 )}`}
               >
@@ -222,7 +227,7 @@ const WorkflowManager: React.FC = () => {
               </span>
               <button
                 onClick={() => handleConfigureIntegration()}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className={styles.stepConfigButton}
               >
                 <Settings className="w-4 h-4" />
               </button>
@@ -232,18 +237,18 @@ const WorkflowManager: React.FC = () => {
 
         {/* Connection Arrow(s) */}
         {!isLast && (
-          <div className="flex flex-col items-center mx-4">
+          <div className={styles.connector}>
             {workflow.executionMode === "serial" ? (
-              <ArrowRight className="w-6 h-6 text-blue-500" />
+              <ArrowRight className={styles.connectorIcon} />
             ) : hasMultipleConnections ? (
-              <div className="flex flex-col items-center">
-                <ArrowRight className="w-6 h-6 text-blue-500" />
-                <ArrowDown className="w-6 h-6 text-blue-500 -mt-2" />
+              <div className={styles.connectorBranch}>
+                <ArrowRight className={styles.connectorIcon} />
+                <ArrowDown className={styles.connectorBranchIcon} />
               </div>
             ) : (
-              <ArrowRight className="w-6 h-6 text-blue-500" />
+              <ArrowRight className={styles.connectorIcon} />
             )}
-            <span className="text-xs text-gray-500 mt-1">
+            <span className={styles.connectorLabel}>
               {workflow.executionMode}
             </span>
           </div>
@@ -253,27 +258,27 @@ const WorkflowManager: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className={styles.container}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.headerTitle}>
             <Workflow className="w-7 h-7" />
             Integration Workflows
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className={styles.headerDescription}>
             Configure and manage integration flows between services
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className={styles.headerActions}>
           <button
             onClick={() => handleAddIntegration()}
-            className="btn-primary flex items-center gap-2"
+            className={styles.btnPrimary}
           >
             <Plus className="w-4 h-4" />
             Add Integration
           </button>
-          <button className="btn-secondary flex items-center gap-2">
+          <button className={styles.btnSecondary}>
             <Settings className="w-4 h-4" />
             Workflow Settings
           </button>
@@ -281,23 +286,20 @@ const WorkflowManager: React.FC = () => {
       </div>
 
       {/* Workflows List */}
-      <div className="space-y-4">
+      <div className={styles.workflowList}>
         {workflows.map((workflow) => (
-          <div
-            key={workflow.id}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
-          >
+          <div key={workflow.id} className={styles.workflowCard}>
             {/* Workflow Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <div className={styles.workflowHeader}>
+              <div className={styles.workflowHeaderContent}>
+                <div className={styles.workflowInfo}>
                   <button
                     onClick={() =>
                       setExpandedWorkflow(
                         expandedWorkflow === workflow.id ? null : workflow.id
                       )
                     }
-                    className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    className={styles.expandButton}
                   >
                     {expandedWorkflow === workflow.id ? (
                       <ChevronDown className="w-5 h-5" />
@@ -306,36 +308,30 @@ const WorkflowManager: React.FC = () => {
                     )}
                   </button>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {workflow.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h3 className={styles.workflowTitle}>{workflow.name}</h3>
+                    <p className={styles.workflowDescription}>
                       {workflow.description}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className={styles.workflowMeta}>
                   <span
-                    className={`px-3 py-1 text-sm rounded-full ${
+                    className={`${styles.statusBadge} ${getWorkflowStatusClass(
                       workflow.isActive
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-                    }`}
+                    )}`}
                   >
                     {workflow.isActive ? "Active" : "Inactive"}
                   </span>
                   <span
-                    className={`px-3 py-1 text-sm rounded-full ${
-                      workflow.executionMode === "serial"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                    }`}
+                    className={`${
+                      styles.executionModeBadge
+                    } ${getExecutionModeClass(workflow.executionMode)}`}
                   >
                     {workflow.executionMode === "serial"
                       ? "Sequential"
                       : "Parallel"}
                   </span>
-                  <button className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                  <button className={styles.actionButton}>
                     <Play className="w-4 h-4" />
                   </button>
                 </div>
@@ -344,8 +340,8 @@ const WorkflowManager: React.FC = () => {
 
             {/* Workflow Steps */}
             {expandedWorkflow === workflow.id && (
-              <div className="p-6">
-                <div className="flex items-center overflow-x-auto">
+              <div className={styles.workflowContent}>
+                <div className={styles.workflowSteps}>
                   {workflow.steps.map((step, index) =>
                     renderWorkflowStep(
                       step,
@@ -356,10 +352,10 @@ const WorkflowManager: React.FC = () => {
                 </div>
 
                 {/* Add Step Button */}
-                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className={styles.addStepSection}>
                   <button
                     onClick={() => handleAddIntegration()}
-                    className="flex items-center gap-2 px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                    className={styles.addStepButton}
                   >
                     <Plus className="w-4 h-4" />
                     Add Integration Step
@@ -372,29 +368,29 @@ const WorkflowManager: React.FC = () => {
       </div>
 
       {/* Available Integrations */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <div className={styles.integrationsPanel}>
+        <h3 className={styles.integrationsPanelTitle}>
           Available Integrations
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className={styles.integrationsGrid}>
           {availableIntegrations.map((integration) => (
             <div
               key={integration.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer"
+              className={styles.integrationCard}
               onClick={() => handleConfigureIntegration()}
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className={styles.integrationHeader}>
                 {integration.icon}
-                <span className="font-medium text-gray-900 dark:text-white">
+                <span className={styles.integrationName}>
                   {integration.name}
                 </span>
                 {getStatusIcon(integration.status)}
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+              <p className={styles.integrationDescription}>
                 {integration.description}
               </p>
               <span
-                className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                className={`${styles.stepStatus} ${getStatusColor(
                   integration.status
                 )}`}
               >
@@ -412,18 +408,16 @@ const WorkflowManager: React.FC = () => {
         title="Integration Configuration - Under Development"
         maxWidth="lg"
       >
-        <div className="space-y-4">
+        <div className={styles.modalContent}>
           <Alert
             type="info"
             title="Feature Under Development"
             message="Integration configuration interface is currently being developed. The visual workflow designer is ready for demonstration, but the backend integration and configuration capabilities are still in progress."
           />
 
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Planned Features:
-            </h4>
-            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+          <div className={styles.modalSection}>
+            <h4 className={styles.modalSectionTitle}>Planned Features:</h4>
+            <ul className={styles.modalList}>
               <li>• Drag-and-drop workflow designer</li>
               <li>• Real-time integration testing</li>
               <li>• Custom webhook configuration</li>
@@ -433,17 +427,14 @@ const WorkflowManager: React.FC = () => {
             </ul>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className={styles.modalActions}>
             <button
               onClick={closeModal}
-              className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+              className={styles.modalSecondaryButton}
             >
               Close
             </button>
-            <button
-              onClick={closeModal}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
+            <button onClick={closeModal} className={styles.modalPrimaryButton}>
               Got it!
             </button>
           </div>

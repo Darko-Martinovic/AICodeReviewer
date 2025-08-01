@@ -7,6 +7,7 @@ import {
   User,
   GitBranch,
 } from "lucide-react";
+import styles from "./PullRequestCard.module.css";
 
 interface PullRequestCardProps {
   pullRequest: PullRequest;
@@ -36,87 +37,83 @@ export const PullRequestCard: React.FC<PullRequestCardProps> = ({
   const getStateColor = (state: string) => {
     switch (state.toLowerCase()) {
       case "open":
-        return "status-success";
+        return styles.stateOpen;
       case "closed":
-        return "status-error";
+        return styles.stateClosed;
       case "merged":
-        return "status-info";
+        return styles.stateMerged;
       default:
-        return "status-warning";
+        return styles.stateDefault;
     }
   };
 
   return (
-    <div className="card">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <GitPullRequest className="w-4 h-4 text-gray-500" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-              {pullRequest.title}
-            </h3>
+    <div className={styles.card}>
+      <div className={styles.headerSection}>
+        <div className={styles.contentContainer}>
+          <div className={styles.titleSection}>
+            <GitPullRequest className={styles.prIcon} />
+            <h3 className={styles.title}>{pullRequest.title}</h3>
             <span className={getStateColor(pullRequest.state)}>
               {pullRequest.state}
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-            <div className="flex items-center gap-1">
+          <div className={styles.metadataSection}>
+            <div className={styles.metadataItem}>
               <span>#{pullRequest.number}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <User className="w-3 h-3" />
+            <div className={styles.metadataItem}>
+              <User className={styles.metadataIcon} />
               <span>{pullRequest.author}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
+            <div className={styles.metadataItem}>
+              <Calendar className={styles.metadataIcon} />
               <span>{formatDate(pullRequest.createdAt)}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mb-3">
-            <GitBranch className="w-3 h-3 text-gray-500" />
-            <span className="text-sm">
-              <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">
+          <div className={styles.branchSection}>
+            <GitBranch className={styles.branchIcon} />
+            <span className={styles.branchText}>
+              <code className={styles.branchCode}>
                 {pullRequest.headBranch}
               </code>
-              <span className="mx-2">→</span>
-              <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">
+              <span className={styles.branchArrow}>→</span>
+              <code className={styles.branchCode}>
                 {pullRequest.baseBranch}
               </code>
             </span>
           </div>
 
           {pullRequest.body && (
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
-              {pullRequest.body}
-            </p>
+            <p className={styles.bodyText}>{pullRequest.body}</p>
           )}
 
-          <div className="flex items-center gap-2 mb-4">
+          <div className={styles.linkSection}>
             <a
               href={pullRequest.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className={styles.viewPrLink}
             >
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className={styles.linkIcon} />
             </a>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className={styles.buttonSection}>
         <button
           onClick={handleReview}
           disabled={isReviewing || pullRequest.state.toLowerCase() !== "open"}
-          className={`btn-primary flex items-center gap-2 ${
+          className={`${styles.reviewButton} ${
             isReviewing || pullRequest.state.toLowerCase() !== "open"
-              ? "opacity-50 cursor-not-allowed"
+              ? styles.reviewButtonDisabled
               : ""
           }`}
         >
-          {isReviewing && <div className="spinner" />}
+          {isReviewing && <div className={styles.spinner} />}
           {isReviewing ? "Reviewing..." : "Review PR"}
         </button>
       </div>

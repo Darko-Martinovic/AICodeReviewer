@@ -1,0 +1,165 @@
+/* Main card container */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+}
+
+.card:global(.dark) {
+  background-color: rgb(31 41 55);
+}
+
+/* Header section */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.content {
+  flex: 1;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.commitIcon {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(107 114 128);
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.title:global(.dark) {
+  color: white;
+}
+
+/* Metadata section */
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: rgb(75 85 99);
+  margin-bottom: 0.75rem;
+}
+
+.metadata:global(.dark) {
+  color: rgb(156 163 175);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.metaIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Commit info section */
+.commitInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.shaCode {
+  background-color: rgb(243 244 246);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.shaCode:global(.dark) {
+  background-color: rgb(31 41 55);
+}
+
+.externalLink {
+  color: rgb(156 163 175);
+  transition: color 0.2s ease-in-out;
+}
+
+.externalLink:hover {
+  color: rgb(75 85 99);
+}
+
+.externalLink:global(.dark):hover {
+  color: rgb(209 213 219);
+}
+
+.externalLinkIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Footer section */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.reviewButton {
+  background-color: rgb(59 130 246);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.reviewButton:hover:not(:disabled) {
+  background-color: rgb(37 99 235);
+}
+
+.reviewButton:focus {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+}
+
+.reviewButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinner for loading state */
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

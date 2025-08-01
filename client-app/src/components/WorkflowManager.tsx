@@ -4,350 +4,441 @@ import {
   Pause,
   CheckCircle,
   XCircle,
-  Clock,
-  GitCommit,
   GitPullRequest,
-  Shield,
-  Zap,
   Settings,
-  Activity,
-  Info,
+  Plus,
+  ArrowRight,
+  ArrowDown,
+  Zap,
+  MessageSquare,
+  ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  Workflow,
 } from "lucide-react";
 import { Modal, Alert } from "./UI";
+import styles from "./WorkflowManager.module.css";
 
-interface WorkflowStatus {
+interface Integration {
+  id: string;
+  name: string;
+  type: "source" | "processing" | "notification" | "storage";
+  icon: React.ReactNode;
+  status: "active" | "inactive" | "error";
+  config: Record<string, unknown>;
+  description: string;
+}
+
+interface WorkflowStep {
+  id: string;
+  integration: Integration;
+  position: { x: number; y: number };
+  connections: string[]; // IDs of connected steps
+}
+
+interface WorkflowDefinition {
   id: string;
   name: string;
   description: string;
-  status: "running" | "completed" | "failed" | "idle";
-  lastRun?: string;
-  nextRun?: string;
-  icon: React.ReactNode;
-  color: string;
+  steps: WorkflowStep[];
+  isActive: boolean;
+  executionMode: "serial" | "parallel";
 }
 
 const WorkflowManager: React.FC = () => {
-  const [selectedWorkflow, setSelectedWorkflow] =
-    useState<WorkflowStatus | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [expandedWorkflow, setExpandedWorkflow] = useState<string | null>(
+    "main-workflow"
+  );
 
-  const workflows: WorkflowStatus[] = [
+  // Available integrations
+  const availableIntegrations: Integration[] = [
     {
-      id: "commit-review",
-      name: "Commit Review",
-      description:
-        "Automatically review commits for code quality, security vulnerabilities, and best practices",
-      status: "idle",
-      lastRun: "2025-01-24 14:30",
-      nextRun: "On new commit",
-      icon: <GitCommit className="w-6 h-6" />,
-      color: "from-blue-500 to-blue-600",
+      id: "github",
+      name: "GitHub",
+      type: "source",
+      icon: <GitPullRequest className="w-5 h-5" />,
+      status: "active",
+      config: { webhook: true, repository: "AICodeReviewer" },
+      description: "Pull requests and commits from GitHub",
     },
     {
-      id: "pr-analysis",
-      name: "Pull Request Analysis",
-      description:
-        "Comprehensive analysis of pull requests including impact assessment and merge recommendations",
-      status: "completed",
-      lastRun: "2025-01-24 16:45",
-      nextRun: "On new PR",
-      icon: <GitPullRequest className="w-6 h-6" />,
-      color: "from-green-500 to-green-600",
+      id: "jira",
+      name: "Jira",
+      type: "processing",
+      icon: <ExternalLink className="w-5 h-5" />,
+      status: "active",
+      config: { project: "AIREV", ticketCreation: true },
+      description: "Create and update Jira tickets",
     },
     {
-      id: "security-scan",
-      name: "Security Scan",
-      description:
-        "Deep security analysis for vulnerabilities, dependency issues, and security best practices",
-      status: "running",
-      lastRun: "2025-01-24 17:00",
-      nextRun: "Daily at 02:00",
-      icon: <Shield className="w-6 h-6" />,
-      color: "from-purple-500 to-purple-600",
+      id: "slack",
+      name: "Slack",
+      type: "notification",
+      icon: <MessageSquare className="w-5 h-5" />,
+      status: "active",
+      config: { channel: "#code-reviews", mentions: true },
+      description: "Send notifications to Slack channels",
     },
     {
-      id: "performance-check",
-      name: "Performance Check",
-      description:
-        "Analyze code performance, identify bottlenecks, and suggest optimizations",
-      status: "failed",
-      lastRun: "2025-01-24 12:15",
-      nextRun: "Weekly on Sunday",
-      icon: <Zap className="w-6 h-6" />,
-      color: "from-yellow-500 to-yellow-600",
-    },
-    {
-      id: "code-quality",
-      name: "Code Quality Gate",
-      description:
-        "Enforce coding standards, check for code smells, and maintain quality metrics",
-      status: "idle",
-      lastRun: "2025-01-23 09:30",
-      nextRun: "On schedule",
-      icon: <Activity className="w-6 h-6" />,
-      color: "from-indigo-500 to-indigo-600",
-    },
-    {
-      id: "documentation",
-      name: "Documentation Sync",
-      description:
-        "Automatically update documentation based on code changes and API modifications",
-      status: "completed",
-      lastRun: "2025-01-24 11:20",
-      nextRun: "On code changes",
-      icon: <Info className="w-6 h-6" />,
-      color: "from-teal-500 to-teal-600",
+      id: "ai-review",
+      name: "AI Code Review",
+      type: "processing",
+      icon: <Zap className="w-5 h-5" />,
+      status: "active",
+      config: { model: "gpt-4", complexity: "detailed" },
+      description: "AI-powered code analysis and review",
     },
   ];
 
-  const getStatusIcon = (status: WorkflowStatus["status"]) => {
+  // Predefined workflows
+  const workflows: WorkflowDefinition[] = [
+    {
+      id: "main-workflow",
+      name: "PR Review Workflow",
+      description: "Complete pull request review and notification pipeline",
+      executionMode: "serial",
+      isActive: true,
+      steps: [
+        {
+          id: "step-1",
+          integration: availableIntegrations[0], // GitHub
+          position: { x: 0, y: 0 },
+          connections: ["step-2"],
+        },
+        {
+          id: "step-2",
+          integration: availableIntegrations[3], // AI Review
+          position: { x: 1, y: 0 },
+          connections: ["step-3", "step-4"],
+        },
+        {
+          id: "step-3",
+          integration: availableIntegrations[1], // Jira
+          position: { x: 2, y: 0 },
+          connections: [],
+        },
+        {
+          id: "step-4",
+          integration: availableIntegrations[2], // Slack
+          position: { x: 2, y: 1 },
+          connections: [],
+        },
+      ],
+    },
+    {
+      id: "notification-workflow",
+      name: "Notification Only",
+      description: "Simplified workflow for notifications",
+      executionMode: "parallel",
+      isActive: false,
+      steps: [
+        {
+          id: "step-n1",
+          integration: availableIntegrations[0], // GitHub
+          position: { x: 0, y: 0 },
+          connections: ["step-n2", "step-n3"],
+        },
+        {
+          id: "step-n2",
+          integration: availableIntegrations[1], // Jira
+          position: { x: 1, y: 0 },
+          connections: [],
+        },
+        {
+          id: "step-n3",
+          integration: availableIntegrations[2], // Slack
+          position: { x: 1, y: 1 },
+          connections: [],
+        },
+      ],
+    },
+  ];
+
+  const getStatusColor = (status: Integration["status"]) => {
     switch (status) {
-      case "running":
-        return <Clock className="w-5 h-5 text-blue-500 animate-spin" />;
-      case "completed":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case "failed":
-        return <XCircle className="w-5 h-5 text-red-500" />;
-      case "idle":
-        return <Pause className="w-5 h-5 text-gray-500" />;
+      case "active":
+        return styles.statusActive;
+      case "inactive":
+        return styles.statusInactive;
+      case "error":
+        return styles.statusError;
     }
   };
 
-  const getStatusBadge = (status: WorkflowStatus["status"]) => {
-    const badges = {
-      running: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      completed:
-        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      failed: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      idle: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
-    };
-
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${badges[status]}`}
-      >
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
+  const getWorkflowStatusClass = (isActive: boolean) => {
+    return isActive ? styles.statusActive : styles.statusInactive;
   };
 
-  const handleWorkflowAction = (workflow: WorkflowStatus) => {
-    setSelectedWorkflow(workflow);
+  const getExecutionModeClass = (mode: "serial" | "parallel") => {
+    return mode === "serial" ? styles.modeSerial : styles.modeParallel;
+  };
+
+  const getStatusIcon = (status: Integration["status"]) => {
+    switch (status) {
+      case "active":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "inactive":
+        return <Pause className="w-4 h-4 text-gray-500" />;
+      case "error":
+        return <XCircle className="w-4 h-4 text-red-500" />;
+    }
+  };
+
+  const handleConfigureIntegration = () => {
+    setShowModal(true);
+  };
+
+  const handleAddIntegration = () => {
+    // Placeholder for add integration functionality
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setSelectedWorkflow(null);
+  };
+
+  const renderWorkflowStep = (
+    step: WorkflowStep,
+    isLast: boolean,
+    workflow: WorkflowDefinition
+  ) => {
+    const { integration } = step;
+    const hasMultipleConnections = step.connections.length > 1;
+
+    return (
+      <div key={step.id} className={styles.stepContainer}>
+        {/* Integration Step */}
+        <div className={styles.stepCard}>
+          <div className={styles.stepCardInner}>
+            <div className={styles.stepHeader}>
+              {integration.icon}
+              <span className={styles.stepName}>{integration.name}</span>
+              {getStatusIcon(integration.status)}
+            </div>
+            <p className={styles.stepDescription}>{integration.description}</p>
+            <div className={styles.stepFooter}>
+              <span
+                className={`${styles.stepStatus} ${getStatusColor(
+                  integration.status
+                )}`}
+              >
+                {integration.status}
+              </span>
+              <button
+                onClick={() => handleConfigureIntegration()}
+                className={styles.stepConfigButton}
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Connection Arrow(s) */}
+        {!isLast && (
+          <div className={styles.connector}>
+            {workflow.executionMode === "serial" ? (
+              <ArrowRight className={styles.connectorIcon} />
+            ) : hasMultipleConnections ? (
+              <div className={styles.connectorBranch}>
+                <ArrowRight className={styles.connectorIcon} />
+                <ArrowDown className={styles.connectorBranchIcon} />
+              </div>
+            ) : (
+              <ArrowRight className={styles.connectorIcon} />
+            )}
+            <span className={styles.connectorLabel}>
+              {workflow.executionMode}
+            </span>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
+    <div className={styles.container}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Workflow Management
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.headerTitle}>
+            <Workflow className="w-7 h-7" />
+            Integration Workflows
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage and monitor automated code review workflows
+          <p className={styles.headerDescription}>
+            Configure and manage integration flows between services
           </p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
-          <Settings className="w-4 h-4" />
-          Configure Workflows
-        </button>
-      </div>
-
-      {/* Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Running
-              </p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {workflows.filter((w) => w.status === "running").length}
-              </p>
-            </div>
-            <Clock className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Completed
-              </p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {workflows.filter((w) => w.status === "completed").length}
-              </p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Failed
-              </p>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {workflows.filter((w) => w.status === "failed").length}
-              </p>
-            </div>
-            <XCircle className="w-8 h-8 text-red-500" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Idle
-              </p>
-              <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                {workflows.filter((w) => w.status === "idle").length}
-              </p>
-            </div>
-            <Pause className="w-8 h-8 text-gray-500" />
-          </div>
-        </div>
-      </div>
-
-      {/* Workflow Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {workflows.map((workflow) => (
-          <div
-            key={workflow.id}
-            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
+        <div className={styles.headerActions}>
+          <button
+            onClick={() => handleAddIntegration()}
+            className={styles.btnPrimary}
           >
-            {/* Header */}
-            <div
-              className={`bg-gradient-to-r ${workflow.color} p-4 rounded-t-lg`}
-            >
-              <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-3">
-                  {workflow.icon}
-                  <h3 className="font-semibold">{workflow.name}</h3>
+            <Plus className="w-4 h-4" />
+            Add Integration
+          </button>
+          <button className={styles.btnSecondary}>
+            <Settings className="w-4 h-4" />
+            Workflow Settings
+          </button>
+        </div>
+      </div>
+
+      {/* Workflows List */}
+      <div className={styles.workflowList}>
+        {workflows.map((workflow) => (
+          <div key={workflow.id} className={styles.workflowCard}>
+            {/* Workflow Header */}
+            <div className={styles.workflowHeader}>
+              <div className={styles.workflowHeaderContent}>
+                <div className={styles.workflowInfo}>
+                  <button
+                    onClick={() =>
+                      setExpandedWorkflow(
+                        expandedWorkflow === workflow.id ? null : workflow.id
+                      )
+                    }
+                    className={styles.expandButton}
+                  >
+                    {expandedWorkflow === workflow.id ? (
+                      <ChevronDown className="w-5 h-5" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5" />
+                    )}
+                  </button>
+                  <div>
+                    <h3 className={styles.workflowTitle}>{workflow.name}</h3>
+                    <p className={styles.workflowDescription}>
+                      {workflow.description}
+                    </p>
+                  </div>
                 </div>
-                {getStatusIcon(workflow.status)}
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                {workflow.description}
-              </p>
-
-              {/* Status Info */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Status:
+                <div className={styles.workflowMeta}>
+                  <span
+                    className={`${styles.statusBadge} ${getWorkflowStatusClass(
+                      workflow.isActive
+                    )}`}
+                  >
+                    {workflow.isActive ? "Active" : "Inactive"}
                   </span>
-                  {getStatusBadge(workflow.status)}
+                  <span
+                    className={`${
+                      styles.executionModeBadge
+                    } ${getExecutionModeClass(workflow.executionMode)}`}
+                  >
+                    {workflow.executionMode === "serial"
+                      ? "Sequential"
+                      : "Parallel"}
+                  </span>
+                  <button className={styles.actionButton}>
+                    <Play className="w-4 h-4" />
+                  </button>
                 </div>
-                {workflow.lastRun && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      Last Run:
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-white">
-                      {workflow.lastRun}
-                    </span>
-                  </div>
-                )}
-                {workflow.nextRun && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      Next Run:
-                    </span>
-                    <span className="text-sm text-gray-900 dark:text-white">
-                      {workflow.nextRun}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleWorkflowAction(workflow)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  <Play className="w-4 h-4" />
-                  Run
-                </button>
-                <button
-                  onClick={() => handleWorkflowAction(workflow)}
-                  className="flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
               </div>
             </div>
+
+            {/* Workflow Steps */}
+            {expandedWorkflow === workflow.id && (
+              <div className={styles.workflowContent}>
+                <div className={styles.workflowSteps}>
+                  {workflow.steps.map((step, index) =>
+                    renderWorkflowStep(
+                      step,
+                      index === workflow.steps.length - 1,
+                      workflow
+                    )
+                  )}
+                </div>
+
+                {/* Add Step Button */}
+                <div className={styles.addStepSection}>
+                  <button
+                    onClick={() => handleAddIntegration()}
+                    className={styles.addStepButton}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Integration Step
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
 
-      {/* Modal for workflow actions */}
+      {/* Available Integrations */}
+      <div className={styles.integrationsPanel}>
+        <h3 className={styles.integrationsPanelTitle}>
+          Available Integrations
+        </h3>
+        <div className={styles.integrationsGrid}>
+          {availableIntegrations.map((integration) => (
+            <div
+              key={integration.id}
+              className={styles.integrationCard}
+              onClick={() => handleConfigureIntegration()}
+            >
+              <div className={styles.integrationHeader}>
+                {integration.icon}
+                <span className={styles.integrationName}>
+                  {integration.name}
+                </span>
+                {getStatusIcon(integration.status)}
+              </div>
+              <p className={styles.integrationDescription}>
+                {integration.description}
+              </p>
+              <span
+                className={`${styles.stepStatus} ${getStatusColor(
+                  integration.status
+                )}`}
+              >
+                {integration.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal for integration configuration */}
       <Modal
         isOpen={showModal}
         onClose={closeModal}
-        title={
-          selectedWorkflow ? `${selectedWorkflow.name} - Under Development` : ""
-        }
+        title="Integration Configuration - Under Development"
         maxWidth="lg"
       >
-        {selectedWorkflow && (
-          <div className="space-y-4">
-            <Alert
-              type="info"
-              title="Feature Under Development"
-              message="This workflow management interface is currently being developed. The visual interface is ready for demonstration, but the backend integration and workflow execution capabilities are still in progress."
-            />
+        <div className={styles.modalContent}>
+          <Alert
+            type="info"
+            title="Feature Under Development"
+            message="Integration configuration interface is currently being developed. The visual workflow designer is ready for demonstration, but the backend integration and configuration capabilities are still in progress."
+          />
 
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                Planned Features:
-              </h4>
-              <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                <li>• Real-time workflow execution and monitoring</li>
-                <li>• Custom workflow configuration and scheduling</li>
-                <li>• Integration with Git webhooks for automatic triggers</li>
-                <li>• Detailed execution logs and performance metrics</li>
-                <li>• Advanced filtering and workflow dependencies</li>
-                <li>• Email and Slack notifications for workflow events</li>
-              </ul>
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-900 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                Current Workflow: {selectedWorkflow.name}
-              </h4>
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                {selectedWorkflow.description}
-              </p>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                onClick={closeModal}
-                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-              >
-                Close
-              </button>
-              <button
-                onClick={closeModal}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Got it!
-              </button>
-            </div>
+          <div className={styles.modalSection}>
+            <h4 className={styles.modalSectionTitle}>Planned Features:</h4>
+            <ul className={styles.modalList}>
+              <li>• Drag-and-drop workflow designer</li>
+              <li>• Real-time integration testing</li>
+              <li>• Custom webhook configuration</li>
+              <li>• Conditional branching and error handling</li>
+              <li>• Integration marketplace with pre-built connectors</li>
+              <li>• Monitoring and logging for each integration step</li>
+            </ul>
           </div>
-        )}
+
+          <div className={styles.modalActions}>
+            <button
+              onClick={closeModal}
+              className={styles.modalSecondaryButton}
+            >
+              Close
+            </button>
+            <button onClick={closeModal} className={styles.modalPrimaryButton}>
+              Got it!
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

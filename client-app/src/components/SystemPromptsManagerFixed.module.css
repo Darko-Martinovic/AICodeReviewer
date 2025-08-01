@@ -1,0 +1,525 @@
+/* SystemPromptsManagerFixed.module.css */
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16rem;
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 2rem;
+  width: 2rem;
+  border: 2px solid transparent;
+  border-bottom: 2px solid rgb(59 130 246);
+}
+
+.loadingText {
+  margin-left: 0.5rem;
+}
+
+/* Main container */
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Language tabs section */
+.tabsContainer {
+  margin-bottom: 1.5rem;
+}
+
+.tabsBorder {
+  border-bottom: 1px solid rgb(229 231 235);
+}
+
+.tabsNav {
+  margin-bottom: -1px;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.tab {
+  white-space: nowrap;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.tabActive {
+  border-bottom-color: rgb(59 130 246);
+  color: rgb(37 99 235);
+}
+
+.tabInactive {
+  border-bottom-color: transparent;
+  color: rgb(107 114 128);
+}
+
+.tabInactive:hover {
+  color: rgb(55 65 81);
+  border-bottom-color: rgb(209 213 219);
+}
+
+.addLanguageButton {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(to right, rgb(59 130 246), rgb(147 51 234));
+  border: none;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.addLanguageButton:hover {
+  background: linear-gradient(to right, rgb(37 99 235), rgb(126 34 206));
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.addIcon {
+  font-size: 1.125rem;
+}
+
+/* Content layout */
+.contentLayout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .contentLayout {
+    flex-direction: row;
+  }
+}
+
+.leftPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card sections */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.cardHeader {
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badgeReadonly {
+  background-color: rgb(243 244 246);
+  color: rgb(55 65 81);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.badgeEditable {
+  background-color: rgb(220 252 231);
+  color: rgb(21 128 61);
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.cardDescription {
+  color: rgb(75 85 99);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Text areas */
+.textareaReadonly {
+  width: 100%;
+  height: 16rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  background-color: rgb(249 250 251);
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  resize: none;
+}
+
+.textareaEditable {
+  width: 100%;
+  height: 12rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  resize: none;
+}
+
+/* Button groups */
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.buttonPrimary {
+  padding: 0.5rem 1rem;
+  background-color: rgb(37 99 235);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.buttonPrimary:hover {
+  background-color: rgb(29 78 216);
+}
+
+.buttonPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonSecondary {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgb(209 213 219);
+  color: rgb(55 65 81);
+  background-color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.buttonSecondary:hover {
+  background-color: rgb(249 250 251);
+}
+
+.buttonSpinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  border: 2px solid transparent;
+  border-bottom: 2px solid white;
+}
+
+/* Last modified info */
+.lastModified {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+  margin-top: 0.5rem;
+}
+
+/* Right panel - Templates */
+.rightPanel {
+  width: 100%;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .rightPanel {
+    width: 20rem;
+  }
+}
+
+.templatesTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.templatesDescription {
+  color: rgb(75 85 99);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.templatesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.templateCategory {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  text-transform: capitalize;
+  color: rgb(31 41 55);
+}
+
+.templateItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.templateButton {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.templateButton:hover {
+  background-color: rgb(239 246 255);
+  border-color: rgb(147 197 253);
+}
+
+/* Preview section */
+.previewCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.previewTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.previewTextarea {
+  width: 100%;
+  height: 24rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  background-color: rgb(249 250 251);
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  resize: none;
+}
+
+.previewMeta {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+  margin-top: 1rem;
+}
+
+.closePreviewButton {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgb(209 213 219);
+  color: rgb(55 65 81);
+  background-color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.closePreviewButton:hover {
+  background-color: rgb(249 250 251);
+}
+
+/* Dark mode styles */
+:global(.dark) .card {
+  background-color: rgb(31 41 55);
+}
+
+:global(.dark) .cardTitle {
+  color: white;
+}
+
+:global(.dark) .cardDescription {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .textareaReadonly {
+  background-color: rgb(55 65 81);
+  color: white;
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .textareaEditable {
+  background-color: rgb(55 65 81);
+  color: white;
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .rightPanel {
+  background-color: rgb(31 41 55);
+}
+
+:global(.dark) .previewCard {
+  background-color: rgb(31 41 55);
+}
+
+:global(.dark) .previewTitle {
+  color: white;
+}
+
+:global(.dark) .previewTextarea {
+  background-color: rgb(55 65 81);
+  color: white;
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .templatesTitle {
+  color: white;
+}
+
+:global(.dark) .templatesDescription {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .templateCategory {
+  color: rgb(209 213 219);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal form styles */
+.modalContent {
+  padding: 0;
+}
+
+.modalContent > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(55 65 81);
+  margin-bottom: 0.25rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.formInput:focus {
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.modalButtonGroup {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.modalPrimaryButton {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background-color: rgb(37 99 235);
+  color: white;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.modalPrimaryButton:hover {
+  background-color: rgb(29 78 216);
+}
+
+.modalPrimaryButton:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.modalSecondaryButton {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgb(209 213 219);
+  color: rgb(55 65 81);
+  background-color: white;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.modalSecondaryButton:hover {
+  background-color: rgb(249 250 251);
+}
+
+.modalSecondaryButton:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Dark mode for modal elements */
+:global(.dark) .formLabel {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .formInput {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: white;
+}
+
+:global(.dark) .modalSecondaryButton {
+  border-color: rgb(75 85 99);
+  color: rgb(209 213 219);
+  background-color: transparent;
+}
+
+:global(.dark) .modalSecondaryButton:hover {
+  background-color: rgb(55 65 81);
+}

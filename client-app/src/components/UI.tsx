@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AlertTriangle, Info, CheckCircle, XCircle } from "lucide-react";
+import styles from "./UI.module.css";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -42,17 +43,20 @@ export class ErrorBoundary extends React.Component<
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-          <div className="card max-w-md w-full">
-            <div className="text-center">
+        <div className={styles.errorBoundaryContainer}>
+          <div className={`card ${styles.errorBoundaryCard}`}>
+            <div className={styles.errorBoundaryContent}>
               <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 className={styles.errorBoundaryTitle}>
                 Something went wrong
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className={styles.errorBoundaryDescription}>
                 An unexpected error occurred. Please try refreshing the page.
               </p>
-              <button onClick={this.reset} className="btn-primary w-full">
+              <button
+                onClick={this.reset}
+                className={`btn-primary ${styles.errorBoundaryButton}`}
+              >
                 Try Again
               </button>
             </div>
@@ -76,8 +80,10 @@ export const LoadingSpinner: React.FC<{ size?: "sm" | "md" | "lg" }> = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className={`spinner ${sizeClasses[size]}`} />
+    <div className={styles.loadingContainer}>
+      <div
+        className={`spinner ${styles.loadingSpinner} ${sizeClasses[size]}`}
+      />
     </div>
   );
 };
@@ -110,35 +116,28 @@ export const Alert: React.FC<AlertProps> = ({
   };
 
   const getClasses = () => {
-    const baseClasses = "p-4 rounded-md border flex items-start gap-3";
+    const alertClass = styles.alertBase;
     switch (type) {
       case "success":
-        return `${baseClasses} bg-green-50 border-green-200 dark:bg-green-900 dark:border-green-700`;
+        return `${alertClass} ${styles.alertSuccess}`;
       case "error":
-        return `${baseClasses} bg-red-50 border-red-200 dark:bg-red-900 dark:border-red-700`;
+        return `${alertClass} ${styles.alertError}`;
       case "warning":
-        return `${baseClasses} bg-yellow-50 border-yellow-200 dark:bg-yellow-900 dark:border-yellow-700`;
+        return `${alertClass} ${styles.alertWarning}`;
       case "info":
-        return `${baseClasses} bg-blue-50 border-blue-200 dark:bg-blue-900 dark:border-blue-700`;
+        return `${alertClass} ${styles.alertInfo}`;
     }
   };
 
   return (
     <div className={getClasses()}>
       {getIcon()}
-      <div className="flex-1">
-        {title && (
-          <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-            {title}
-          </h4>
-        )}
-        <p className="text-gray-700 dark:text-gray-300">{message}</p>
+      <div className={styles.alertContent}>
+        {title && <h4 className={styles.alertTitle}>{title}</h4>}
+        <p className={styles.alertMessage}>{message}</p>
       </div>
       {onClose && (
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-        >
+        <button onClick={onClose} className={styles.alertCloseButton}>
           <XCircle className="w-5 h-5" />
         </button>
       )}
@@ -164,16 +163,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   action,
 }) => {
   return (
-    <div className="text-center py-12">
-      {icon && <div className="mx-auto mb-4">{icon}</div>}
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-        {title}
-      </h3>
-      <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-        {description}
-      </p>
+    <div className={styles.emptyStateContainer}>
+      {icon && <div className={styles.emptyStateIcon}>{icon}</div>}
+      <h3 className={styles.emptyStateTitle}>{title}</h3>
+      <p className={styles.emptyStateDescription}>{description}</p>
       {action && (
-        <button onClick={action.onClick} className="btn-primary">
+        <button
+          onClick={action.onClick}
+          className={`btn-primary ${styles.emptyStateButton}`}
+        >
           {action.label}
         </button>
       )}
@@ -216,7 +214,7 @@ export const useToast = () => {
   };
 
   const ToastContainer = () => (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
+    <div className={styles.toastContainer}>
       {toasts.map((toast) => (
         <Alert
           key={toast.id}
@@ -249,28 +247,21 @@ export const Modal: React.FC<ModalProps> = ({
   maxWidth = "md",
 }) => {
   const maxWidthClasses = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
+    sm: styles.modalMaxWidthSm,
+    md: styles.modalMaxWidthMd,
+    lg: styles.modalMaxWidthLg,
+    xl: styles.modalMaxWidthXl,
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div
-        className={`bg-white dark:bg-gray-800 rounded-lg shadow-xl ${maxWidthClasses[maxWidth]} w-full`}
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {title}
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
+    <div className={styles.modalOverlay}>
+      <div className={`${styles.modalContainer} ${maxWidthClasses[maxWidth]}`}>
+        <div className={styles.modalContent}>
+          <div className={styles.modalHeader}>
+            <h3 className={styles.modalTitle}>{title}</h3>
+            <button onClick={onClose} className={styles.modalCloseButton}>
               <XCircle className="w-5 h-5" />
             </button>
           </div>

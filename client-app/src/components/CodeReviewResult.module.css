@@ -1,0 +1,575 @@
+/* Modal overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+/* Modal container */
+.modal {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  max-width: 56rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal:global(.dark) {
+  background-color: rgb(31 41 55);
+}
+
+/* Header */
+.header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgb(229 231 235);
+}
+
+.header:global(.dark) {
+  border-bottom-color: rgb(55 65 81);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(17 24 39);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title:global(.dark) {
+  color: white;
+}
+
+.closeButton {
+  color: rgb(156 163 175);
+}
+
+.closeButton:hover {
+  color: rgb(75 85 99);
+}
+
+.closeButton:global(.dark):hover {
+  color: rgb(209 213 219);
+}
+
+/* Main content */
+.content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card styles */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+}
+
+.card:global(.dark) {
+  background-color: rgb(31 41 55);
+}
+
+/* Debug card */
+.debugCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+  background-color: rgb(254 252 232);
+  border: 1px solid rgb(254 240 138);
+}
+
+.debugCard:global(.dark) {
+  background-color: rgb(120 113 108 / 0.2);
+  border-color: rgb(146 64 14);
+}
+
+.debugTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(146 64 14);
+  margin-bottom: 0.75rem;
+}
+
+.debugTitle:global(.dark) {
+  color: rgb(254 240 138);
+}
+
+.debugContent {
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+/* Error/Warning cards */
+.errorCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+  border: 1px solid rgb(254 202 202);
+  background-color: rgb(254 242 242);
+}
+
+.errorCard:global(.dark) {
+  background-color: rgb(127 29 29 / 0.2);
+  border-color: rgb(153 27 27);
+}
+
+.warningCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+  border: 1px solid rgb(254 240 138);
+  background-color: rgb(254 252 232);
+}
+
+.warningCard:global(.dark) {
+  background-color: rgb(120 113 108 / 0.2);
+  border-color: rgb(146 64 14);
+}
+
+.errorTitle,
+.warningTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.errorTitle {
+  color: rgb(153 27 27);
+}
+
+.errorTitle:global(.dark) {
+  color: rgb(254 202 202);
+}
+
+.warningTitle {
+  color: rgb(146 64 14);
+}
+
+.warningTitle:global(.dark) {
+  color: rgb(254 240 138);
+}
+
+.errorText,
+.warningText {
+  margin-bottom: 0.5rem;
+}
+
+.errorText {
+  color: rgb(185 28 28);
+}
+
+.errorText:global(.dark) {
+  color: rgb(252 165 165);
+}
+
+.warningText {
+  color: rgb(180 83 9);
+}
+
+.warningText:global(.dark) {
+  color: rgb(251 191 36);
+}
+
+.errorList,
+.warningList {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.errorList {
+  color: rgb(185 28 28);
+}
+
+.errorList:global(.dark) {
+  color: rgb(252 165 165);
+}
+
+.warningList {
+  color: rgb(180 83 9);
+}
+
+.warningList:global(.dark) {
+  color: rgb(251 191 36);
+}
+
+/* Section titles */
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  margin-bottom: 0.75rem;
+}
+
+.sectionTitle:global(.dark) {
+  color: white;
+}
+
+.sectionTitleWithIcon {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sectionTitleWithIcon:global(.dark) {
+  color: white;
+}
+
+/* Summary section */
+.summaryText {
+  color: rgb(55 65 81);
+}
+
+.summaryText:global(.dark) {
+  color: rgb(209 213 219);
+}
+
+.summaryMetrics {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.metricGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(75 85 99);
+}
+
+.metricLabel:global(.dark) {
+  color: rgb(156 163 175);
+}
+
+.metricValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(17 24 39);
+}
+
+.metricValue:global(.dark) {
+  color: white;
+}
+
+.complexityBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Icons */
+.iconSmall {
+  width: 1rem;
+  height: 1rem;
+}
+
+.iconMedium {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.iconLarge {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Severity icons */
+.iconCritical {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(220 38 38);
+}
+
+.iconHigh {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(239 68 68);
+}
+
+.iconMediumSeverity {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(234 179 8);
+}
+
+.iconLow {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(59 130 246);
+}
+
+.iconDefault {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(107 114 128);
+}
+
+.iconSuccess {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(34 197 94);
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+/* Issue containers */
+.issuesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.issueItem {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+.issueItemCritical {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-color: rgb(239 68 68);
+  background-color: rgb(254 242 242);
+}
+
+.issueItemCritical:global(.dark) {
+  background-color: rgb(127 29 29);
+}
+
+.issueItemHigh {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-color: rgb(248 113 113);
+  background-color: rgb(254 242 242);
+}
+
+.issueItemHigh:global(.dark) {
+  background-color: rgb(127 29 29);
+}
+
+.issueItemMediumSeverity {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-color: rgb(251 191 36);
+  background-color: rgb(254 252 232);
+}
+
+.issueItemMediumSeverity:global(.dark) {
+  background-color: rgb(120 113 108);
+}
+
+.issueItemLow {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-color: rgb(96 165 250);
+  background-color: rgb(239 246 255);
+}
+
+.issueItemLow:global(.dark) {
+  background-color: rgb(30 58 138);
+}
+
+.issueItemDefault {
+  border-left: 4px solid;
+  padding: 1rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+  border-color: rgb(156 163 175);
+  background-color: rgb(249 250 251);
+}
+
+.issueItemDefault:global(.dark) {
+  background-color: rgb(55 65 81);
+}
+
+.issueContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.issueDetails {
+  flex: 1;
+}
+
+.issueHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.issueLocation {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(75 85 99);
+}
+
+.issueLocation:global(.dark) {
+  color: rgb(156 163 175);
+}
+
+.severityBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.severityBadgeCritical {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+.severityBadgeHigh {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(254 226 226);
+  color: rgb(185 28 28);
+}
+
+.severityBadgeMedium {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(254 240 138);
+  color: rgb(180 83 9);
+}
+
+.severityBadgeLow {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgb(219 234 254);
+  color: rgb(29 78 216);
+}
+
+.issueMessage {
+  color: rgb(31 41 55);
+  margin-bottom: 0.5rem;
+}
+
+.issueMessage:global(.dark) {
+  color: rgb(229 231 235);
+}
+
+.issueSuggestion {
+  background-color: rgb(243 244 246);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.issueSuggestion:global(.dark) {
+  background-color: rgb(55 65 81);
+}
+
+/* Suggestions list */
+.suggestionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.suggestionText {
+  color: rgb(55 65 81);
+}
+
+.suggestionText:global(.dark) {
+  color: rgb(209 213 219);
+}
+
+/* Footer */
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgb(229 231 235);
+}
+
+.footer:global(.dark) {
+  border-top-color: rgb(55 65 81);
+}
+
+.footerContent {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Complexity color variants */
+.complexityHigh {
+  color: rgb(220 38 38);
+  background-color: rgb(254 226 226);
+}
+
+.complexityMedium {
+  color: rgb(217 119 6);
+  background-color: rgb(254 240 138);
+}
+
+.complexityLow {
+  color: rgb(22 163 74);
+  background-color: rgb(220 252 231);
+}
+
+.complexityDefault {
+  color: rgb(75 85 99);
+  background-color: rgb(243 244 246);
+}
