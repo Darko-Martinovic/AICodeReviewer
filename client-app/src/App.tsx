@@ -6,23 +6,13 @@ import type {
   PullRequest,
   CodeReview,
 } from "./services/api";
-import { RepositoryCard } from "./components/RepositoryCard";
-import { CommitCard } from "./components/CommitCard";
-import { PullRequestCard } from "./components/PullRequestCard";
 import { CodeReviewResult } from "./components/CodeReviewResult";
-import SystemPromptsManager from "./components/SystemPromptsManagerFixed";
-import WorkflowManager from "./components/WorkflowManager";
 import Header from "./components/Header";
 import Navigation from "./components/Navigation";
 import SearchAndActions from "./components/SearchAndActions";
-import {
-  ErrorBoundary,
-  LoadingSpinner,
-  Alert,
-  EmptyState,
-  useToast,
-} from "./components/UI";
-import { GitCommit, GitPullRequest, Settings } from "lucide-react";
+import TabContent from "./components/TabContent";
+import AddRepositoryModal from "./components/AddRepositoryModal";
+import { ErrorBoundary, Alert, useToast } from "./components/UI";
 
 type TabType =
   | "repositories"
@@ -545,195 +535,36 @@ function App() {
           />
 
           {/* Tab Content */}
-          {state.activeTab === "repositories" && (
-            <div>
-              {state.loading.repositories ? (
-                <LoadingSpinner />
-              ) : filteredRepositories.length === 0 ? (
-                <EmptyState
-                  icon={<Settings className="w-12 h-12 text-gray-400" />}
-                  title="No repositories found"
-                  description="No repositories match your search criteria or none are configured."
-                  action={{
-                    label: "Add Repository",
-                    onClick: () =>
-                      setNewRepoForm((prev) => ({ ...prev, show: true })),
-                  }}
-                />
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredRepositories.map((repo) => (
-                    <RepositoryCard
-                      key={repo.id}
-                      repository={repo}
-                      onSelect={handleRepositorySelect}
-                      isSelected={state.currentRepository?.id === repo.id}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {state.activeTab === "commits" && (
-            <div>
-              {!state.currentRepository ? (
-                <EmptyState
-                  icon={<GitCommit className="w-12 h-12 text-gray-400" />}
-                  title="No repository selected"
-                  description="Please select a repository to view commits."
-                  action={{
-                    label: "Select Repository",
-                    onClick: () =>
-                      setState((prev) => ({
-                        ...prev,
-                        activeTab: "repositories",
-                      })),
-                  }}
-                />
-              ) : state.loading.commits ? (
-                <LoadingSpinner />
-              ) : filteredCommits.length === 0 ? (
-                <EmptyState
-                  icon={<GitCommit className="w-12 h-12 text-gray-400" />}
-                  title="No commits found"
-                  description="No commits match your search criteria or the repository has no recent commits."
-                />
-              ) : (
-                <div>
-                  {/* Info note about commit limit */}
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <div className="flex items-center">
-                      <GitCommit className="w-4 h-4 text-blue-600 mr-2" />
-                      <p className="text-sm text-blue-800">
-                        <strong>Demo Mode:</strong> Showing the last 20 commits
-                        only.
-                        {filteredCommits.length === 20 &&
-                          " This repository may have additional commits."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {filteredCommits.map((commit) => (
-                      <CommitCard
-                        key={commit.sha}
-                        commit={commit}
-                        onReview={handleCommitReview}
-                        isReviewing={state.reviewingCommits.has(commit.sha)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {state.activeTab === "pullrequests" && (
-            <div>
-              {!state.currentRepository ? (
-                <EmptyState
-                  icon={<GitPullRequest className="w-12 h-12 text-gray-400" />}
-                  title="No repository selected"
-                  description="Please select a repository to view pull requests."
-                  action={{
-                    label: "Select Repository",
-                    onClick: () =>
-                      setState((prev) => ({
-                        ...prev,
-                        activeTab: "repositories",
-                      })),
-                  }}
-                />
-              ) : state.loading.pullRequests ? (
-                <LoadingSpinner />
-              ) : filteredPullRequests.length === 0 ? (
-                <EmptyState
-                  icon={<GitPullRequest className="w-12 h-12 text-gray-400" />}
-                  title="No pull requests found"
-                  description="No pull requests match your search criteria or the repository has no pull requests."
-                />
-              ) : (
-                <div className="space-y-4">
-                  {filteredPullRequests.map((pr) => (
-                    <PullRequestCard
-                      key={pr.number}
-                      pullRequest={pr}
-                      onReview={handlePullRequestReview}
-                      isReviewing={state.reviewingPRs.has(pr.number)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {state.activeTab === "systemprompts" && <SystemPromptsManager />}
-
-          {state.activeTab === "workflows" && <WorkflowManager />}
+          <TabContent
+            activeTab={state.activeTab}
+            currentRepository={state.currentRepository}
+            repositories={filteredRepositories}
+            commits={filteredCommits}
+            pullRequests={filteredPullRequests}
+            loading={state.loading}
+            reviewingCommits={state.reviewingCommits}
+            reviewingPRs={state.reviewingPRs}
+            onRepositorySelect={handleRepositorySelect}
+            onCommitReview={handleCommitReview}
+            onPullRequestReview={handlePullRequestReview}
+            onAddRepository={() =>
+              setNewRepoForm((prev) => ({ ...prev, show: true }))
+            }
+            onTabChange={(tab) =>
+              setState((prev) => ({ ...prev, activeTab: tab }))
+            }
+          />
         </main>
 
         {/* Add Repository Modal */}
-        {newRepoForm.show && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Add Repository
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Owner
-                    </label>
-                    <input
-                      type="text"
-                      value={newRepoForm.owner}
-                      onChange={(e) =>
-                        setNewRepoForm((prev) => ({
-                          ...prev,
-                          owner: e.target.value,
-                        }))
-                      }
-                      className="input-field"
-                      placeholder="e.g., microsoft"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Repository Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newRepoForm.name}
-                      onChange={(e) =>
-                        setNewRepoForm((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      className="input-field"
-                      placeholder="e.g., vscode"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-3 mt-6">
-                  <button
-                    onClick={() =>
-                      setNewRepoForm({ owner: "", name: "", show: false })
-                    }
-                    className="btn-secondary"
-                  >
-                    Cancel
-                  </button>
-                  <button onClick={handleAddRepository} className="btn-primary">
-                    Add Repository
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <AddRepositoryModal
+          newRepoForm={newRepoForm}
+          onFormChange={(updates) =>
+            setNewRepoForm((prev) => ({ ...prev, ...updates }))
+          }
+          onAddRepository={handleAddRepository}
+          onClose={() => setNewRepoForm({ owner: "", name: "", show: false })}
+        />
 
         {/* Code Review Modal */}
         {state.showReviewModal && state.codeReview && (
