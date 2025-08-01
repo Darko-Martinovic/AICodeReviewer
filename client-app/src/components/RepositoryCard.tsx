@@ -1,6 +1,12 @@
 import React from "react";
 import type { Repository } from "../services/api";
-import { GitBranch, ExternalLink, Lock, Unlock } from "lucide-react";
+import {
+  GitBranch,
+  ExternalLink,
+  Lock,
+  Unlock,
+  ArrowRight,
+} from "lucide-react";
 import styles from "./RepositoryCard.module.css";
 
 interface RepositoryCardProps {
@@ -19,10 +25,7 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({
   };
 
   return (
-    <div
-      className={isSelected ? styles.cardSelected : styles.card}
-      onClick={handleSelect}
-    >
+    <div className={isSelected ? styles.cardSelected : styles.card}>
       <div className={styles.headerSection}>
         <div className={styles.contentContainer}>
           <div className={styles.titleSection}>
@@ -52,6 +55,14 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({
             >
               {repository.private ? "Private" : "Public"}
             </span>
+          </div>
+
+          {/* Action buttons */}
+          <div className={styles.actionSection}>
+            <button onClick={handleSelect} className={styles.viewDetailsButton}>
+              <ArrowRight className={styles.arrowIcon} />
+              View Details
+            </button>
           </div>
         </div>
 

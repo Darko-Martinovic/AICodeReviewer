@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { repositoryApi, commitsApi, pullRequestsApi } from "./services/api";
 import type {
   Repository,
@@ -14,7 +14,8 @@ import TabContent from "./components/TabContent";
 import AddRepositoryModal from "./components/AddRepositoryModal";
 import MainLayout from "./components/MainLayout";
 import ErrorDisplay from "./components/ErrorDisplay";
-import { ErrorBoundary, useToast } from "./components/UI";
+import { ErrorBoundary } from "./components/UI";
+import { useToast } from "./hooks/useToast";
 
 type TabType =
   | "repositories"
@@ -40,6 +41,7 @@ interface AppState {
   showReviewModal: boolean;
   reviewingCommits: Set<string>; // Track individual commits being reviewed
   reviewingPRs: Set<number>; // Track individual PRs being reviewed
+  isInRepositoryView: boolean; // Track if we're viewing repository details
 }
 
 function App() {
@@ -61,6 +63,7 @@ function App() {
     showReviewModal: false,
     reviewingCommits: new Set(),
     reviewingPRs: new Set(),
+    isInRepositoryView: false,
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,9 +75,10 @@ function App() {
 
   useEffect(() => {
     loadInitialData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
-  const loadInitialData = async () => {
+  const loadInitialData = useCallback(async () => {
     try {
       console.log("🚀 Loading initial data...");
 
@@ -143,9 +147,10 @@ function App() {
           "Failed to load initial data. Please check your configuration.",
       });
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addToast]); // loadCommits and loadPullRequests are stable functions
 
-  const loadCommits = async () => {
+  const loadCommits = useCallback(async () => {
     try {
       console.log("📝 Loading commits...");
       setState((prev) => ({
@@ -197,9 +202,9 @@ function App() {
         message: errorMessage,
       });
     }
-  };
+  }, [addToast]);
 
-  const loadPullRequests = async () => {
+  const loadPullRequests = useCallback(async () => {
     try {
       console.log("📋 Loading pull requests...");
       setState((prev) => ({
@@ -249,7 +254,7 @@ function App() {
         message: errorMessage,
       });
     }
-  };
+  }, [addToast]);
 
   const handleRepositorySelect = async (repository: Repository) => {
     try {
@@ -262,7 +267,8 @@ function App() {
       setState((prev) => ({
         ...prev,
         currentRepository: repository,
-        // Don't auto-switch tabs - let user decide
+        isInRepositoryView: true,
+        activeTab: "commits", // Switch to commits tab when entering repository
         // Clear existing data while loading new data
         commits: [],
         pullRequests: [],
@@ -295,6 +301,19 @@ function App() {
         message: "Failed to select repository",
       });
     }
+  };
+
+  const handleExitRepository = () => {
+    setState((prev) => ({
+      ...prev,
+      isInRepositoryView: false,
+      activeTab: "repositories",
+      // Keep currentRepository but clear view-specific data
+      commits: [],
+      pullRequests: [],
+      reviewingCommits: new Set(),
+      reviewingPRs: new Set(),
+    }));
   };
 
   const handleCommitReview = async (sha: string) => {
@@ -514,6 +533,8 @@ function App() {
           currentRepository={state.currentRepository}
           commits={state.commits}
           pullRequests={state.pullRequests}
+          isInRepositoryView={state.isInRepositoryView}
+          onExitRepository={handleExitRepository}
         />
 
         {/* Main Content */}
