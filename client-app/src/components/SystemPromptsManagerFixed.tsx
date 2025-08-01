@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Alert } from "./UI";
+import { Copy, Check } from "lucide-react";
 import styles from "./SystemPromptsManagerFixed.module.css";
 
 interface SystemPrompt {
@@ -30,6 +31,9 @@ const SystemPromptsManager: React.FC = () => {
   const [previewData, setPreviewData] = useState<{
     [key: string]: PreviewData;
   }>({});
+
+  // Copy to clipboard state
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Add Language Modal state
   const [showAddLanguageModal, setShowAddLanguageModal] =
@@ -148,6 +152,24 @@ const SystemPromptsManager: React.FC = () => {
     }));
   };
 
+  // Copy to clipboard functionality
+  const copyToClipboard = async (text: string, fieldId: string) => {
+    try {
+      await navigator.clipboard.writeText(formatTextForCopy(text));
+      setCopiedField(fieldId);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+    }
+  };
+
+  // Format text for better readability when copying
+  const formatTextForCopy = (text: string): string => {
+    // Add line breaks before numbered items (1., 2., 3., etc.)
+    return text.replace(/(\d+\.)/g, "\n$1");
+  };
+
   const resetCustomAdditions = (language: string) => {
     setPrompts((prev) => ({
       ...prev,
@@ -257,12 +279,39 @@ Would you like to be notified when it's ready?`;
                   be modified.
                 </p>
               </div>
-              <textarea
-                value={prompts[activeLanguage]?.systemPrompt || ""}
-                readOnly
-                className={styles.textareaReadonly}
-                placeholder="Loading base prompt..."
-              />
+
+              <div className={styles.textareaContainer}>
+                <div className={styles.textareaHeader}>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(
+                        prompts[activeLanguage]?.systemPrompt || "",
+                        `systemPrompt-${activeLanguage}`
+                      )
+                    }
+                    className={styles.copyButton}
+                    disabled={!prompts[activeLanguage]?.systemPrompt}
+                  >
+                    {copiedField === `systemPrompt-${activeLanguage}` ? (
+                      <>
+                        <Check className={styles.copyIcon} />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className={styles.copyIcon} />
+                        Copy to Clipboard
+                      </>
+                    )}
+                  </button>
+                </div>
+                <textarea
+                  value={prompts[activeLanguage]?.systemPrompt || ""}
+                  readOnly
+                  className={styles.textareaReadonly}
+                  placeholder="Loading base prompt..."
+                />
+              </div>
             </div>
 
             {/* Custom Additions */}
@@ -398,7 +447,30 @@ Would you like to be notified when it's ready?`;
           </div>
 
           <div>
-            <h4>Combined System Prompt:</h4>
+            <div className={styles.textareaHeader}>
+              <h4>Combined System Prompt:</h4>
+              <button
+                onClick={() =>
+                  copyToClipboard(
+                    previewData[activeLanguage].combinedPrompt,
+                    `preview-${activeLanguage}`
+                  )
+                }
+                className={styles.copyButton}
+              >
+                {copiedField === `preview-${activeLanguage}` ? (
+                  <>
+                    <Check className={styles.copyIcon} />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className={styles.copyIcon} />
+                    Copy to Clipboard
+                  </>
+                )}
+              </button>
+            </div>
             <textarea
               value={previewData[activeLanguage].combinedPrompt}
               readOnly

@@ -523,3 +523,98 @@
 :global(.dark) .modalSecondaryButton:hover {
   background-color: rgb(55 65 81);
 }
+
+/* Textarea container and copy functionality */
+.textareaContainer {
+  position: relative;
+}
+
+.textareaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.textareaHeader h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .textareaHeader h4 {
+  color: white;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background-color: rgb(59 130 246);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.copyButton:hover:not(:disabled) {
+  background-color: rgb(37 99 235);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.copyButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.copyButton:disabled {
+  background-color: rgb(156 163 175);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.copyIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Dark mode for copy functionality */
+:global(.dark) .copyButton {
+  background-color: rgb(37 99 235);
+}
+
+:global(.dark) .copyButton:hover:not(:disabled) {
+  background-color: rgb(29 78 216);
+}
+
+:global(.dark) .copyButton:disabled {
+  background-color: rgb(75 85 99);
+}
+
+/* Animation for copy success feedback */
+.copyButton:has(.copyIcon) {
+  transition: all 0.3s ease-in-out;
+}
+
+@keyframes copySuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.copyButton:has(.copyIcon:first-child) {
+  animation: copySuccess 0.3s ease-in-out;
+}
