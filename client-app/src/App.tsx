@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { repositoryApi, commitsApi, pullRequestsApi } from "./services/api";
 import type {
   Repository,
@@ -14,8 +14,7 @@ import TabContent from "./components/TabContent";
 import AddRepositoryModal from "./components/AddRepositoryModal";
 import MainLayout from "./components/MainLayout";
 import ErrorDisplay from "./components/ErrorDisplay";
-import { ErrorBoundary } from "./components/UI";
-import { useToast } from "./hooks/useToast";
+import { ErrorBoundary, useToast } from "./components/UI";
 
 type TabType =
   | "repositories"
@@ -75,10 +74,9 @@ function App() {
 
   useEffect(() => {
     loadInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
 
-  const loadInitialData = useCallback(async () => {
+  const loadInitialData = async () => {
     try {
       console.log("🚀 Loading initial data...");
 
@@ -147,10 +145,9 @@ function App() {
           "Failed to load initial data. Please check your configuration.",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addToast]); // loadCommits and loadPullRequests are stable functions
+  };
 
-  const loadCommits = useCallback(async () => {
+  const loadCommits = async () => {
     try {
       console.log("📝 Loading commits...");
       setState((prev) => ({
@@ -202,9 +199,9 @@ function App() {
         message: errorMessage,
       });
     }
-  }, [addToast]);
+  };
 
-  const loadPullRequests = useCallback(async () => {
+  const loadPullRequests = async () => {
     try {
       console.log("📋 Loading pull requests...");
       setState((prev) => ({
@@ -254,7 +251,7 @@ function App() {
         message: errorMessage,
       });
     }
-  }, [addToast]);
+  };
 
   const handleRepositorySelect = async (repository: Repository) => {
     try {

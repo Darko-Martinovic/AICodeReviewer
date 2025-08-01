@@ -1,128 +1,145 @@
 # 🤖 AI Code Reviewer
 
-A comprehensive .NET web application that performs AI-powered code reviews using Azure OpenAI with a modern React-based management interface.
+A .NET application that performs AI-powered code reviews using Azure OpenAI with a modern React frontend for system prompt management.
 
-## ✨ Key Features
-
-- **🔍 AI Code Analysis**: Automated code review using Azure OpenAI with language-specific intelligence
-- **🌐 Modern Web Interface**: React + TypeScript frontend with Tailwind CSS styling
-- **🎯 Multi-Language Support**: C#, VB.NET, JavaScript, TypeScript, React, T-SQL with specialized prompts
-- **⚙️ Advanced System Prompts Management**: Visual interface to customize AI behavior per programming language
-- **📊 Performance Metrics**: Real-time tracking of review efficiency, costs, and ROI calculations
-- **🔗 Enterprise Integrations**: GitHub, Jira, Microsoft Teams with workflow automation
-- **🎨 Template Library**: Pre-built prompt templates for common coding standards and requirements Reviewer
-
-A .NET application that performs AI-powered code reviews using Azure OpenAI with web UI management interface.
-
-## ✨ Key Features
+## ✨ Features
 
 - **🔍 AI Code Analysis**: Automated code review using Azure OpenAI
-- **� Web Interface**: React-based UI for managing reviews and system prompts
+- **🌐 Web Interface**: React + TypeScript frontend with Tailwind CSS
 - **🎯 Multi-Language Support**: C#, VB.NET, JavaScript, TypeScript, React, T-SQL
-- **⚙️ Configurable System Prompts**: Customize AI prompts per programming language
-- **📊 Performance Metrics**: Track review efficiency, costs, and ROI
-- **🔗 Integrations**: GitHub, Jira, Microsoft Teams notifications
-
-## � Quick Start
+- **⚙️ System Prompts Management**: Visual interface to customize AI behavior per language
+- ** Integrations**: GitHub, Jira, Microsoft Teams notifications
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- **.NET 9.0 SDK** - Latest version for optimal performance
-- **Node.js 18+** - For React frontend development
-- **Azure OpenAI Service** - Access to GPT models for code analysis
-- **GitHub Account** - Repository integration and API access
+- .NET 9.0 SDK
+- Node.js 18+
+- Azure OpenAI Service access
+- GitHub account (optional)
 
-### Installation & Setup
+### Setup
 
-1. **Clone the repository**
+1. **Clone and configure**
 
    ```bash
    git clone <repository-url>
    cd AICodeReviewer
    ```
 
-2. **Configure environment variables**
-
-   Copy `.env.example` to `.env` and configure your settings:
+2. **Environment variables** (create `.env` file)
 
    ```env
-   # Azure OpenAI Configuration
    AZURE_OPENAI_ENDPOINT=your-endpoint
    AZURE_OPENAI_API_KEY=your-api-key
-   CHATCOMPLETION_DEPLOYMENTNAME=gpt-4
-
-   # GitHub Configuration (Optional)
-   GITHUB_TOKEN=your-github-token
-   GITHUB_REPO_OWNER=your-username
-   GITHUB_REPO_NAME=your-repository
-
-   # Integration Settings (Optional)
-   JIRA_BASE_URL=https://company.atlassian.net
-   TEAMS_WEBHOOK_URL=your-teams-webhook
+   AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4
+   GITHUB_TOKEN=your-github-token (optional)
    ```
 
-3. **Start the Backend API**
+3. **Start backend**
 
    ```bash
-   # Development mode with hot reload
-   dotnet run
-   # Or use the batch file
-   start-backend.bat
+   dotnet run --launch-profile https --environment Development
    ```
 
-4. **Start the Frontend Application**
+4. **Start frontend**
 
    ```bash
-   # Navigate to client app directory
    cd client-app
-
-   # Install dependencies
    npm install
-
-   # Start development server
    npm run dev
    ```
 
-5. **Access the Application**
-   - **Backend API**: `https://localhost:7001`
-   - **Frontend UI**: `http://localhost:5173`
-   - **Swagger Documentation**: `https://localhost:7001/swagger`
+5. **Access application**
+   - Frontend: `http://localhost:5173`
+   - Backend API: `https://localhost:7001`
+   - Swagger: `https://localhost:7001/swagger`
 
 ## 📁 Project Structure
 
 ```
 AICodeReviewer/
-├── Controllers/              # Web API controllers for system management
-│   ├── SystemPromptsController.cs    # API endpoints for prompt management
-│   └── ...                   # Additional API controllers
-├── Services/                # Business logic and integrations
-│   ├── AzureOpenAIService.cs # AI-powered code analysis engine
-│   ├── GitHubService.cs      # Repository and commit management
-│   └── ...                   # Integration services (Jira, Teams)
-├── Models/                  # Data models and configuration classes
-│   ├── Configuration/        # System prompt configurations per language
-│   └── ...                   # Request/response models
-├── client-app/             # React + TypeScript frontend application
+├── Controllers/              # API controllers
+├── Services/                 # Business logic
+├── Models/                   # Data models
+├── client-app/              # React frontend
 │   ├── src/
-│   │   ├── components/       # React components
-│   │   │   ├── SystemPromptsManager.tsx  # Main prompt management UI
-│   │   │   ├── RepositoryCard.tsx        # Repository selection interface
-│   │   │   └── ...          # Additional UI components
-│   │   ├── App.tsx          # Main React application
-│   │   └── main.tsx         # Application entry point
-│   ├── package.json         # Frontend dependencies
-│   └── tailwind.config.js   # Styling configuration
-├── Configuration/          # Workflow and application configurations
-│   └── Workflows/          # Review workflow definitions
-├── TestProjects/          # Sample code for AI validation
-│   ├── TestCSharp/         # C# test files with intentional issues
-│   ├── TestVBNet/          # VB.NET test samples
-│   └── TestSQL/            # T-SQL test scripts
-├── appsettings.json       # Application configuration and AI prompts
-├── Program.cs             # Main application entry point
-└── start-backend.bat      # Quick start script for development
+│   │   ├── components/      # React components
+│   │   ├── services/        # API client
+│   │   └── styles/          # CSS modules
+│   └── package.json
+├── appsettings.json         # Configuration
+└── Program.cs               # Application entry point
+```
+
+## ⚙️ Configuration
+
+The application uses `appsettings.json` for configuration. Key sections:
+
+- **AzureOpenAI**: API settings and language-specific prompts
+- **GitHub**: Repository integration settings
+- **Teams/Jira**: Integration webhooks and settings
+
+System prompts can be customized through the web interface under **System Prompts** tab.
+
+## 🔧 Usage
+
+### Web Interface
+
+1. Navigate to the frontend URL
+2. Use **Repositories** tab to connect GitHub repos
+3. Browse **Commits** and **Pull Requests**
+4. Use **System Prompts** tab to customize AI behavior
+5. Run code reviews and view results
+
+### API Endpoints
+
+- `GET /api/systemprompts` - Get all system prompts
+- `PUT /api/systemprompts/{language}` - Update language prompt
+- `POST /api/repositories/{owner}/{repo}/commits/{sha}/review` - Review commit
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+**Transform your code review process with AI-powered analysis!** 🚀
+│ ├── AzureOpenAIService.cs # AI-powered code analysis engine
+│ ├── GitHubService.cs # Repository and commit management
+│ └── ... # Integration services (Jira, Teams)
+├── Models/ # Data models and configuration classes
+│ ├── Configuration/ # System prompt configurations per language
+│ └── ... # Request/response models
+├── client-app/ # React + TypeScript frontend application
+│ ├── src/
+│ │ ├── components/ # React components
+│ │ │ ├── SystemPromptsManager.tsx # Main prompt management UI
+│ │ │ ├── RepositoryCard.tsx # Repository selection interface
+│ │ │ └── ... # Additional UI components
+│ │ ├── App.tsx # Main React application
+│ │ └── main.tsx # Application entry point
+│ ├── package.json # Frontend dependencies
+│ └── tailwind.config.js # Styling configuration
+├── Configuration/ # Workflow and application configurations
+│ └── Workflows/ # Review workflow definitions
+├── TestProjects/ # Sample code for AI validation
+│ ├── TestCSharp/ # C# test files with intentional issues
+│ ├── TestVBNet/ # VB.NET test samples
+│ └── TestSQL/ # T-SQL test scripts
+├── appsettings.json # Application configuration and AI prompts
+├── Program.cs # Main application entry point
+└── start-backend.bat # Quick start script for development
+
 ```
 
 ## 🎛️ System Prompts Management
@@ -161,28 +178,34 @@ The **System Prompts Manager** provides a comprehensive web interface for custom
 **Adding Company Standards:**
 
 ```
+
 - Follow our naming convention: PascalCase for classes, camelCase for methods
 - All public APIs must include XML documentation
 - Use dependency injection for all service dependencies
 - Implement proper logging for all error scenarios
+
 ```
 
 **Performance Focus:**
 
 ```
+
 - Pay special attention to database query efficiency
 - Flag any N+1 query patterns
 - Ensure proper async/await usage in data access layers
 - Check for memory leaks in disposable resources
+
 ```
 
 **Security Requirements:**
 
 ```
+
 - Validate all user inputs against injection attacks
 - Ensure sensitive data is not logged or exposed
 - Check for proper authentication and authorization
 - Flag any hardcoded secrets or credentials
+
 ```
 
 ## 🌐 Web Interface Features
@@ -244,12 +267,14 @@ The React-based frontend provides an intuitive and powerful interface for managi
 Each review provides detailed metrics:
 
 ```
+
 📊 REVIEW PERFORMANCE METRICS
 Duration: 00:45 | Files: 3 | Issues: 12
 Lines of Code: 487 | Tokens: 2,247
 Estimated Cost: $0.0035
 Cost Savings vs Manual: 99.8%
-```
+
+````
 
 ## ⚙️ Configuration
 
@@ -301,7 +326,7 @@ dotnet test
 
 # Build for production
 dotnet build --configuration Release
-```
+````
 
 **Frontend Development (React + TypeScript):**
 

@@ -1,7 +1,6 @@
 import React from "react";
 import {
-  FolderGit2,
-  MessageSquareCode,
+  Settings,
   GitCommit,
   GitPullRequest,
   Workflow,
@@ -41,23 +40,20 @@ export const Navigation: React.FC<NavigationProps> = ({
     {
       id: "repositories" as TabType,
       label: "Repositories",
-      icon: FolderGit2,
+      icon: Settings,
       count: null,
-      color: "text-blue-600",
     },
     {
       id: "systemprompts" as TabType,
       label: "System Prompts",
-      icon: MessageSquareCode,
+      icon: Settings,
       count: null,
-      color: "text-purple-600",
     },
     {
       id: "workflows" as TabType,
       label: "Workflows",
       icon: Workflow,
       count: null,
-      color: "text-green-600",
     },
   ];
 
@@ -68,14 +64,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       label: "Commits",
       icon: GitCommit,
       count: commits.length,
-      color: "text-orange-600",
     },
     {
       id: "pullrequests" as TabType,
       label: "Pull Requests",
       icon: GitPullRequest,
       count: pullRequests.length,
-      color: "text-indigo-600",
     },
   ];
 
@@ -115,13 +109,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   isActive ? styles.tabButtonActive : styles.tabButtonInactive
                 }`}
               >
-                <Icon
-                  className={`${styles.tabIcon} ${
-                    isActive
-                      ? styles.tabIconActive
-                      : tab.color || "text-gray-500"
-                  }`}
-                />
+                <Icon className={styles.tabIcon} />
                 <span className={styles.tabLabel}>
                   {tab.label}
                   {tab.count !== null && (
