@@ -1,0 +1,28 @@
+/* MainLayout Component CSS Module */
+
+.layout {
+  min-height: 100vh;
+  background-color: rgb(249 250 251);
+}
+
+:global(.dark) .layout {
+  background-color: rgb(17 24 39);
+}
+
+.mainContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .mainContent {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mainContent {
+    padding: 2rem 2rem;
+  }
+}

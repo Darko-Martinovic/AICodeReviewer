@@ -12,7 +12,9 @@ import Navigation from "./components/Navigation";
 import SearchAndActions from "./components/SearchAndActions";
 import TabContent from "./components/TabContent";
 import AddRepositoryModal from "./components/AddRepositoryModal";
-import { ErrorBoundary, Alert, useToast } from "./components/UI";
+import MainLayout from "./components/MainLayout";
+import ErrorDisplay from "./components/ErrorDisplay";
+import { ErrorBoundary, useToast } from "./components/UI";
 
 type TabType =
   | "repositories"
@@ -494,7 +496,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <MainLayout>
         <ToastContainer />
 
         {/* Header */}
@@ -517,9 +519,8 @@ function App() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {state.error && (
-            <Alert
-              type="error"
-              message={state.error}
+            <ErrorDisplay
+              error={state.error}
               onClose={() => setState((prev) => ({ ...prev, error: null }))}
             />
           )}
@@ -579,7 +580,7 @@ function App() {
             }
           />
         )}
-      </div>
+      </MainLayout>
     </ErrorBoundary>
   );
 }
