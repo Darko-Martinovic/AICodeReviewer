@@ -3,6 +3,7 @@ bin/
 obj/
 out/
 
+presentation/
 # User-specific files
 *.user
 *.suo
