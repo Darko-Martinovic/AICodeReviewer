@@ -10,6 +10,8 @@ namespace AICodeReviewer.Models.Configuration
         public string Description { get; set; } = string.Empty;
         public bool IsPrivate { get; set; }
         public string DefaultBranch { get; set; } = "main";
+        public int StarCount { get; set; }
+        public int ForkCount { get; set; }
         public string FullName => $"{Owner}/{Name}";
         public string DisplayName => string.IsNullOrEmpty(Owner) || string.IsNullOrEmpty(Name)
             ? "Not configured"

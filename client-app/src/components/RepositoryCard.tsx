@@ -6,6 +6,8 @@ import {
   Lock,
   Unlock,
   ArrowRight,
+  Star,
+  GitFork,
 } from "lucide-react";
 import styles from "./RepositoryCard.module.css";
 
@@ -48,6 +50,18 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({
               <GitBranch className={styles.branchIcon} />
               <span>{repository.defaultBranch}</span>
             </div>
+
+            <div className={styles.statsContainer}>
+              <div className={styles.statItem}>
+                <Star className={styles.statIcon} />
+                <span>{repository.starCount}</span>
+              </div>
+              <div className={styles.statItem}>
+                <GitFork className={styles.statIcon} />
+                <span>{repository.forkCount}</span>
+              </div>
+            </div>
+
             <span
               className={
                 repository.private ? styles.statusPrivate : styles.statusPublic

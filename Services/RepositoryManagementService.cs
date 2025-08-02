@@ -336,7 +336,9 @@ namespace AICodeReviewer.Services
                     Name = r.Name,
                     Description = r.Description ?? "",
                     IsPrivate = r.Private,
-                    DefaultBranch = r.DefaultBranch ?? "main"
+                    DefaultBranch = r.DefaultBranch ?? "main",
+                    StarCount = r.StargazersCount,
+                    ForkCount = r.ForksCount
                 }).ToList();
             }
             catch (Exception ex)

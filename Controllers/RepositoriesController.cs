@@ -77,6 +77,8 @@ namespace AICodeReviewer.Controllers
                     DefaultBranch = currentRepoInfo?.DefaultBranch ?? "master",
                     Private = currentRepoInfo?.IsPrivate ?? false,
                     HtmlUrl = $"https://github.com/{currentOwner}/{currentName}",
+                    StarCount = currentRepoInfo?.StarCount ?? 0,
+                    ForkCount = currentRepoInfo?.ForkCount ?? 0,
                     IsCurrent = true
                 });
 
@@ -95,6 +97,8 @@ namespace AICodeReviewer.Controllers
                             DefaultBranch = repo.DefaultBranch,
                             Private = repo.IsPrivate,
                             HtmlUrl = $"https://github.com/{repo.Owner}/{repo.Name}",
+                            StarCount = repo.StarCount,
+                            ForkCount = repo.ForkCount,
                             IsCurrent = false
                         });
                     }
