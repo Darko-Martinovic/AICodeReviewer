@@ -40,19 +40,23 @@ export const SearchAndActions: React.FC<SearchAndActionsProps> = ({
   };
 
   const showAddRepositoryButton = activeTab === "repositories";
+  const showSearchBox =
+    activeTab !== "systemprompts" && activeTab !== "workflows";
 
   return (
     <div className={styles.searchAndActions}>
-      <div className={styles.searchContainer}>
-        <Search className={styles.searchIcon} />
-        <input
-          type="text"
-          placeholder={getSearchPlaceholder()}
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className={styles.searchInput}
-        />
-      </div>
+      {showSearchBox && (
+        <div className={styles.searchContainer}>
+          <Search className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder={getSearchPlaceholder()}
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+      )}
 
       {showAddRepositoryButton && (
         <div className={styles.actionsContainer}>
