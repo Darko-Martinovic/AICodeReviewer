@@ -1,6 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Commit } from "../services/api";
-import { GitCommit, ExternalLink, Calendar, User } from "lucide-react";
+import {
+  GitCommit,
+  ExternalLink,
+  Calendar,
+  User,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import styles from "./CommitCard.module.css";
 
 interface CommitCardProps {
@@ -14,6 +21,8 @@ export const CommitCard: React.FC<CommitCardProps> = ({
   onReview,
   isReviewing,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const handleReview = () => {
     onReview(commit.sha);
   };
@@ -28,14 +37,61 @@ export const CommitCard: React.FC<CommitCardProps> = ({
     });
   };
 
+  const formatCommitMessage = (message: string) => {
+    // Split the message into title and body
+    const lines = message.split("\n");
+    const title = lines[0] || "";
+    const body = lines
+      .slice(1)
+      .filter((line) => line.trim())
+      .join("\n");
+
+    return { title, body };
+  };
+
+  const { title, body } = formatCommitMessage(commit.message);
+  const hasBody = body && body.length > 0;
+  const shouldShowToggle = hasBody && body.length > 150; // Show toggle for long messages
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.content}>
           <div className={styles.titleSection}>
             <GitCommit className={styles.commitIcon} />
-            <h3 className={styles.title}>{commit.message}</h3>
+            <h3 className={styles.title}>{title}</h3>
           </div>
+
+          {hasBody && (
+            <div className={styles.messageBody}>
+              <div
+                className={`${styles.messageText} ${
+                  shouldShowToggle && !isExpanded ? styles.messageCollapsed : ""
+                }`}
+              >
+                <pre className={styles.messagePreformatted}>{body}</pre>
+              </div>
+              {shouldShowToggle && (
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className={styles.expandButton}
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp className={styles.expandIcon} />
+                      Show less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className={styles.expandIcon} />
+                      Show more
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
 
           <div className={styles.metadata}>
             <div className={styles.metaItem}>
