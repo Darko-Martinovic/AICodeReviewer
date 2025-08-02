@@ -28,10 +28,13 @@ interface AppState {
   repositories: Repository[];
   commits: Commit[];
   pullRequests: PullRequest[];
+  branches: string[];
+  selectedBranch: string;
   loading: {
     repositories: boolean;
     commits: boolean;
     pullRequests: boolean;
+    branches: boolean;
     review: boolean;
   };
   error: string | null;
@@ -50,10 +53,13 @@ function App() {
     repositories: [],
     commits: [],
     pullRequests: [],
+    branches: [],
+    selectedBranch: "",
     loading: {
       repositories: false,
       commits: false,
       pullRequests: false,
+      branches: false,
       review: false,
     },
     error: null,
@@ -120,14 +126,18 @@ function App() {
       }));
 
       if (currentRepo) {
-        console.log("✅ Repository found, loading commits and PRs...");
-        await Promise.all([loadCommits(), loadPullRequests()]);
+        console.log(
+          "✅ Repository found, loading branches, commits and PRs..."
+        );
+        await Promise.all([loadBranches(), loadCommits(), loadPullRequests()]);
         console.log("📋 Data loaded for current repository");
       } else {
         console.log("❌ No current repository - ensuring clean state");
         // Ensure clean state when no repository is selected
         setState((prev) => ({
           ...prev,
+          branches: [],
+          selectedBranch: "",
           commits: [],
           pullRequests: [],
         }));
@@ -147,14 +157,46 @@ function App() {
     }
   };
 
-  const loadCommits = async () => {
+  const loadBranches = async () => {
     try {
-      console.log("📝 Loading commits...");
+      console.log("🌿 Loading branches...");
+      setState((prev) => ({
+        ...prev,
+        loading: { ...prev.loading, branches: true },
+      }));
+      const response = await commitsApi.getBranches();
+      console.log("🌿 Branches API response:", response.data);
+
+      const branches = response.data.branches || [];
+      setState((prev) => ({
+        ...prev,
+        branches,
+        selectedBranch: prev.selectedBranch || branches[0] || "",
+        loading: { ...prev.loading, branches: false },
+      }));
+      console.log(
+        "🌿 Branches loaded successfully:",
+        branches.length,
+        "branches"
+      );
+    } catch (error) {
+      console.error("❌ Failed to load branches:", error);
+      setState((prev) => ({
+        ...prev,
+        branches: [],
+        loading: { ...prev.loading, branches: false },
+      }));
+    }
+  };
+
+  const loadCommits = async (branch?: string) => {
+    try {
+      console.log("📝 Loading commits for branch:", branch || "default");
       setState((prev) => ({
         ...prev,
         loading: { ...prev.loading, commits: true },
       }));
-      const response = await commitsApi.getRecent(20);
+      const response = await commitsApi.getRecent(20, branch);
       console.log("📝 Commits API response:", response.data);
       console.log("📝 Commits array:", response.data.commits);
 
@@ -168,6 +210,10 @@ function App() {
         "📝 Commits loaded successfully:",
         response.data.commits?.length || 0,
         "commits"
+      );
+      console.log(
+        "📝 State updated. New commits array length:",
+        response.data.commits?.length || 0
       );
     } catch (error) {
       console.error("❌ Failed to load commits:", error);
@@ -287,7 +333,7 @@ function App() {
       });
 
       // Load new data for the selected repository
-      await Promise.all([loadCommits(), loadPullRequests()]);
+      await Promise.all([loadBranches(), loadCommits(), loadPullRequests()]);
 
       console.log("✅ Repository data loaded successfully");
     } catch (error) {
@@ -306,11 +352,24 @@ function App() {
       isInRepositoryView: false,
       activeTab: "repositories",
       // Keep currentRepository but clear view-specific data
+      branches: [],
+      selectedBranch: "",
       commits: [],
       pullRequests: [],
       reviewingCommits: new Set(),
       reviewingPRs: new Set(),
     }));
+  };
+
+  const handleBranchSelect = async (branch: string) => {
+    console.log("🌿 Switching to branch:", branch);
+    setState((prev) => ({
+      ...prev,
+      selectedBranch: branch,
+    }));
+
+    // Reload commits for the selected branch
+    await loadCommits(branch);
   };
 
   const handleCommitReview = async (sha: string) => {
@@ -560,12 +619,15 @@ function App() {
             repositories={filteredRepositories}
             commits={filteredCommits}
             pullRequests={filteredPullRequests}
+            branches={state.branches}
+            selectedBranch={state.selectedBranch}
             loading={state.loading}
             reviewingCommits={state.reviewingCommits}
             reviewingPRs={state.reviewingPRs}
             onRepositorySelect={handleRepositorySelect}
             onCommitReview={handleCommitReview}
             onPullRequestReview={handlePullRequestReview}
+            onBranchSelect={handleBranchSelect}
             onAddRepository={() =>
               setNewRepoForm((prev) => ({ ...prev, show: true }))
             }

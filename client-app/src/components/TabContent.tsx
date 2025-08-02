@@ -4,6 +4,7 @@ import type { Repository, Commit, PullRequest } from "../services/api";
 import { RepositoryCard } from "./RepositoryCard";
 import { CommitCard } from "./CommitCard";
 import { PullRequestCard } from "./PullRequestCard";
+import { BranchSelector } from "./BranchSelector";
 import SystemPromptsManager from "./SystemPromptsManagerFixed";
 import WorkflowManager from "./WorkflowManager";
 import { LoadingSpinner, EmptyState } from "./UI";
@@ -22,10 +23,13 @@ interface TabContentProps {
   repositories: Repository[];
   commits: Commit[];
   pullRequests: PullRequest[];
+  branches: string[];
+  selectedBranch: string;
   loading: {
     repositories: boolean;
     commits: boolean;
     pullRequests: boolean;
+    branches: boolean;
     review: boolean;
   };
   reviewingCommits: Set<string>;
@@ -33,6 +37,7 @@ interface TabContentProps {
   onRepositorySelect: (repository: Repository) => void;
   onCommitReview: (sha: string) => void;
   onPullRequestReview: (number: number) => void;
+  onBranchSelect: (branch: string) => void;
   onAddRepository: () => void;
   onTabChange: (tab: TabType) => void;
 }
@@ -43,12 +48,15 @@ export const TabContent: React.FC<TabContentProps> = ({
   repositories,
   commits,
   pullRequests,
+  branches,
+  selectedBranch,
   loading,
   reviewingCommits,
   reviewingPRs,
   onRepositorySelect,
   onCommitReview,
   onPullRequestReview,
+  onBranchSelect,
   onAddRepository,
   onTabChange,
 }) => {
@@ -108,6 +116,14 @@ export const TabContent: React.FC<TabContentProps> = ({
           />
         ) : (
           <div>
+            {/* Branch Selector */}
+            <BranchSelector
+              branches={branches}
+              selectedBranch={selectedBranch}
+              onBranchSelect={onBranchSelect}
+              loading={loading.branches}
+            />
+
             {/* Demo Mode Info Banner */}
             <div className={styles.demoModeInfo}>
               <div className={styles.demoModeInfoContent}>

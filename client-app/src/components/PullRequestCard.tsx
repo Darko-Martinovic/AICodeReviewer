@@ -74,16 +74,34 @@ export const PullRequestCard: React.FC<PullRequestCardProps> = ({
           </div>
 
           <div className={styles.branchSection}>
-            <GitBranch className={styles.branchIcon} />
-            <span className={styles.branchText}>
-              <code className={styles.branchCode}>
-                {pullRequest.headBranch}
-              </code>
-              <span className={styles.branchArrow}>→</span>
-              <code className={styles.branchCode}>
-                {pullRequest.baseBranch}
-              </code>
-            </span>
+            <div className={styles.branchContainer}>
+              <GitBranch className={styles.branchIcon} />
+              <div className={styles.branchFlow}>
+                <div className={styles.branchItem}>
+                  <span className={styles.branchLabel}>From:</span>
+                  <code
+                    className={styles.branchCodeHead}
+                    title={`Source branch: ${pullRequest.headBranch}`}
+                  >
+                    {pullRequest.headBranch}
+                  </code>
+                </div>
+                <div className={styles.branchArrowContainer}>
+                  <div className={styles.branchArrow} title="Merge direction">
+                    →
+                  </div>
+                </div>
+                <div className={styles.branchItem}>
+                  <span className={styles.branchLabel}>Into:</span>
+                  <code
+                    className={styles.branchCodeBase}
+                    title={`Target branch: ${pullRequest.baseBranch}`}
+                  >
+                    {pullRequest.baseBranch}
+                  </code>
+                </div>
+              </div>
+            </div>
           </div>
 
           {pullRequest.body && (

@@ -32,21 +32,49 @@ namespace AICodeReviewer.Controllers
         }
 
         /// <summary>
-        /// Lists recent commits (Menu option 1)
+        /// Gets all repository branches
         /// </summary>
-        /// <param name="count">Number of commits to retrieve (default: 10)</param>
-        /// <returns>List of recent commits</returns>
-        [HttpGet("recent")]
-        public async Task<IActionResult> GetRecentCommits([FromQuery] int count = 10)
+        /// <returns>List of branch names</returns>
+        [HttpGet("branches")]
+        public async Task<IActionResult> GetBranches()
         {
             try
             {
                 var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
-                var commits = await _gitHubService.GetRecentCommitsAsync(count);
+                _gitHubService.UpdateRepository(owner, name);
+                var branches = await _gitHubService.GetBranchesAsync();
 
                 return Ok(new
                 {
                     Repository = $"{owner}/{name}",
+                    Branches = branches
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lists recent commits (Menu option 1)
+        /// </summary>
+        /// <param name="count">Number of commits to retrieve (default: 10)</param>
+        /// <param name="branch">Branch name to get commits from (optional, uses default branch if not specified)</param>
+        /// <returns>List of recent commits</returns>
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecentCommits([FromQuery] int count = 10, [FromQuery] string? branch = null)
+        {
+            try
+            {
+                var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+                _gitHubService.UpdateRepository(owner, name);
+                var commits = await _gitHubService.GetRecentCommitsAsync(count, branch);
+
+                return Ok(new
+                {
+                    Repository = $"{owner}/{name}",
+                    Branch = branch ?? "default",
                     Count = commits.Count,
                     Commits = commits.Select(c => new
                     {

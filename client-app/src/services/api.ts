@@ -46,8 +46,9 @@ export const repositoryApi = {
 
 // Commits API
 export const commitsApi = {
-  getRecent: (count: number = 10) =>
-    api.get("/commits/recent", { params: { count } }),
+  getBranches: () => api.get("/commits/branches"),
+  getRecent: (count: number = 10, branch?: string) =>
+    api.get("/commits/recent", { params: { count, branch } }),
   review: (sha: string) => longRunningApi.post(`/commits/review/${sha}`),
   getBySha: (sha: string) => api.get(`/commits/${sha}`),
 };

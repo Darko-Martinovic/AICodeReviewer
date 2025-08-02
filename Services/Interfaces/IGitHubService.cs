@@ -8,8 +8,9 @@ namespace AICodeReviewer.Services.Interfaces
     public interface IGitHubService
     {
         Task InitializeAsync();
-        Task<IReadOnlyList<GitHubCommit>> GetCommitsAsync();
-        Task<IReadOnlyList<GitHubCommit>> GetRecentCommitsAsync(int count = 10);
+        Task<IReadOnlyList<string>> GetBranchesAsync();
+        Task<IReadOnlyList<GitHubCommit>> GetCommitsAsync(string? branch = null);
+        Task<IReadOnlyList<GitHubCommit>> GetRecentCommitsAsync(int count = 10, string? branch = null);
         Task<GitHubCommit> GetCommitDetailAsync(string sha);
         Task<GitHubCommit> GetCommitAsync(string sha);
         Task<IReadOnlyList<PullRequest>> GetPullRequestsAsync();

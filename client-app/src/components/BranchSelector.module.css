@@ -1,0 +1,113 @@
+/* BranchSelector.module.css */
+
+.container {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgb(249 250 251);
+  border-radius: 0.5rem;
+  border: 1px solid rgb(229 231 235);
+}
+
+:global(.dark) .container {
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+}
+
+.selectorWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: rgb(75 85 99);
+  flex-shrink: 0;
+}
+
+:global(.dark) .icon {
+  color: rgb(156 163 175);
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(55 65 81);
+  flex-shrink: 0;
+}
+
+:global(.dark) .label {
+  color: rgb(209 213 219);
+}
+
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+}
+
+.select {
+  appearance: none;
+  background-color: white;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(17 24 39);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+}
+
+.select:focus {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 2px;
+  border-color: rgb(59 130 246);
+}
+
+.select:disabled {
+  background-color: rgb(243 244 246);
+  color: rgb(107 114 128);
+  cursor: not-allowed;
+}
+
+:global(.dark) .select {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: white;
+}
+
+:global(.dark) .select:focus {
+  border-color: rgb(59 130 246);
+}
+
+:global(.dark) .select:disabled {
+  background-color: rgb(31 41 55);
+  color: rgb(107 114 128);
+}
+
+.chevron {
+  position: absolute;
+  right: 0.75rem;
+  width: 1rem;
+  height: 1rem;
+  color: rgb(107 114 128);
+  pointer-events: none;
+}
+
+:global(.dark) .chevron {
+  color: rgb(156 163 175);
+}
+
+.loading {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+  font-style: italic;
+}
+
+:global(.dark) .loading {
+  color: rgb(156 163 175);
+}
