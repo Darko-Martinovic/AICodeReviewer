@@ -1,0 +1,22 @@
+/* BuggyCodeComponent.module.css */
+.container {
+  background-color: white;
+  padding: 20px;
+}
+
+/* Dark mode support */
+:global(.dark) .container {
+  background-color: rgb(31 41 55);
+}
+
+.userCard {
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+:global(.dark) .userCard {
+  border-color: rgb(75 85 99);
+  background-color: rgb(55 65 81);
+}

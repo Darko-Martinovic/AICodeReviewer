@@ -15,7 +15,7 @@ namespace AICodeReviewer.Services
         private const string ConnectionString = "Server=prod-server;Database=UserData;User=admin;Password=admin123;";
         private const string ApiKey = "sk-1234567890abcdef-PRODUCTION-SECRET";
         private const string EncryptionKey = "MySecretKey123!"; // BUG: Weak hardcoded encryption key
-        
+
         private SqlConnection _connection;
 
         public VulnerableSecurityService()
@@ -31,20 +31,20 @@ namespace AICodeReviewer.Services
         public async Task<List<string>> GetUserDataAsync(string userId, string tableName)
         {
             var results = new List<string>();
-            
+
             // CRITICAL BUG: SQL Injection - never do this!
             var query = $"SELECT * FROM {tableName} WHERE UserId = '{userId}'";
-            
+
             using var command = new SqlCommand(query, _connection);
             using var reader = await command.ExecuteReaderAsync();
-            
+
             while (await reader.ReadAsync())
             {
                 // BUG: Potentially exposing sensitive data in logs
                 Console.WriteLine($"Retrieved sensitive data for user: {userId}");
                 results.Add(reader["SensitiveData"].ToString());
             }
-            
+
             return results;
         }
 
@@ -55,14 +55,14 @@ namespace AICodeReviewer.Services
         {
             // BUG: Using deprecated/weak encryption
             using var des = new DESCryptoServiceProvider();
-            
+
             // BUG: Hardcoded IV and key
             des.Key = Encoding.ASCII.GetBytes("12345678");
             des.IV = Encoding.ASCII.GetBytes("12345678");
-            
+
             var dataBytes = Encoding.UTF8.GetBytes(data);
             using var encryptor = des.CreateEncryptor();
-            
+
             // BUG: No proper exception handling
             return Convert.ToBase64String(encryptor.TransformFinalBlock(dataBytes, 0, dataBytes.Length));
         }
@@ -74,13 +74,13 @@ namespace AICodeReviewer.Services
         {
             // CRITICAL BUG: Path traversal - user can access any file on system
             var filePath = $"C:\\UserFiles\\{fileName}";
-            
+
             // BUG: No validation of file path
             if (File.Exists(filePath))
             {
                 return await File.ReadAllTextAsync(filePath);
             }
-            
+
             return null;
         }
 
@@ -95,11 +95,11 @@ namespace AICodeReviewer.Services
             process.StartInfo.Arguments = $"/c {command}"; // User input executed directly!
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
-            
+
             process.Start();
             var output = await process.StandardOutput.ReadToEndAsync();
             process.WaitForExit();
-            
+
             return output;
         }
 
@@ -111,11 +111,11 @@ namespace AICodeReviewer.Services
         {
             // BUG: No XSS protection - user input returned directly to browser
             var html = $"<div class='user-comment'>{comment}</div>";
-            
+
             // BUG: Storing unvalidated user input
             var logEntry = $"User comment: {comment} at {DateTime.Now}";
             File.AppendAllText("C:\\logs\\comments.log", logEntry);
-            
+
             return Ok(new { message = html });
         }
 
@@ -128,20 +128,20 @@ namespace AICodeReviewer.Services
             {
                 // BUG: Detailed error messages reveal system information
                 var query = "SELECT * FROM Users WHERE Username = @username AND Password = @password";
-                
+
                 using var command = new SqlCommand(query, _connection);
                 command.Parameters.AddWithValue("@username", username);
-                
+
                 // BUG: Storing passwords in plain text (no hashing)
                 command.Parameters.AddWithValue("@password", password);
-                
+
                 var result = await command.ExecuteScalarAsync();
-                
+
                 if (result == null)
                 {
                     throw new UnauthorizedAccessException($"Authentication failed for user: {username}. Database connection: {ConnectionString}");
                 }
-                
+
                 return new { UserId = result, ApiKey = ApiKey }; // BUG: Exposing API key
             }
             catch (SqlException ex)
@@ -155,7 +155,7 @@ namespace AICodeReviewer.Services
         /// BUG: Race condition and thread safety issues
         /// </summary>
         private static int _counter = 0;
-        
+
         public int GetNextId()
         {
             // BUG: Race condition - not thread safe
@@ -175,7 +175,7 @@ namespace AICodeReviewer.Services
                 var memoryStream = new MemoryStream();
                 var fileStream = new FileStream($"temp_{i}.txt", FileMode.Create);
                 var httpClient = new HttpClient();
-                
+
                 // Never disposed - memory leak
             }
         }
@@ -189,7 +189,7 @@ namespace AICodeReviewer.Services
             var random = new Random(123); // BUG: Fixed seed makes it predictable
             var bytes = new byte[16];
             random.NextBytes(bytes);
-            
+
             return Convert.ToBase64String(bytes);
         }
 

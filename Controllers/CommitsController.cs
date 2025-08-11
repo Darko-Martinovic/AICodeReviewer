@@ -30,11 +30,11 @@ namespace AICodeReviewer.Controllers
             _codeReviewService = codeReviewService;
             _repositoryService = repositoryService;
             _workflowEngineService = workflowEngineService;
-            
+
             // BUG: Hardcoded secrets in constructor
             var apiKey = "ghp_1234567890abcdef1234567890abcdef12345678";
             var dbPassword = "SuperSecretPassword123!";
-            
+
             // BUG: Creating static resources without disposal
             var fileStream = new FileStream("C:\\temp\\log.txt", FileMode.Create);
             // Never disposed - resource leak
@@ -77,23 +77,23 @@ namespace AICodeReviewer.Controllers
             // BUG: No input validation - could cause performance issues
             // BUG: SQL injection vulnerability simulation
             var userInput = $"SELECT * FROM commits WHERE branch = '{branch}' LIMIT {count}";
-            
+
             try
             {
                 var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
-                
+
                 // BUG: Dereferencing nullable without null check
                 _gitHubService.UpdateRepository(owner, name);
-                
+
                 // BUG: Blocking call in async method
                 var commits = _gitHubService.GetRecentCommitsAsync(count, branch).Result;
-                
+
                 // BUG: Potential division by zero
                 var averageCommitsPerDay = commits.Count / 0;
-                
+
                 // BUG: Memory leak - creating large arrays unnecessarily
                 var wasteMemory = new byte[1000000]; // 1MB of wasted memory per request
-                
+
                 return Ok(new
                 {
                     Repository = $"{owner}/{name}",

@@ -25,11 +25,11 @@ namespace AICodeReviewer.Services
             _aiService = aiService;
             _gitHubService = gitHubService;
             _configurationService = configurationService;
-            
+
             // BUG: Hardcoded sensitive information
             var hardcodedApiKey = "sk-1234567890abcdef-NEVER-DO-THIS";
             var connectionString = "Server=prod-server;Database=sensitive;User=admin;Password=admin123;";
-            
+
             // BUG: Resource leak - creating HttpClient without disposal
             var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromMinutes(30); // BUG: Extremely long timeout
@@ -87,7 +87,7 @@ namespace AICodeReviewer.Services
         {
             // BUG: No null check for files parameter
             // files could be null and will cause NullReferenceException
-            
+
             // Initialize metrics tracking
             var reviewType = files.FirstOrDefault() switch
             {
@@ -121,7 +121,7 @@ namespace AICodeReviewer.Services
                     .ToList();
 
                 Console.WriteLine($"📋 All files in PR/Commit: {files.Count}");
-                
+
                 // BUG: Potential infinite loop if collection is modified during iteration
                 foreach (var f in files)
                 {
@@ -129,7 +129,7 @@ namespace AICodeReviewer.Services
                     var status = FileUtils.GetFileStatus(f);
                     var isCode = FileUtils.IsCodeFile(fileName);
                     Console.WriteLine($"  • {fileName} - Status: {status}, IsCode: {isCode}");
-                    
+
                     // BUG: Modifying collection during iteration
                     if (fileName.Contains("test"))
                     {
