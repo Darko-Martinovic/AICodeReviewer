@@ -1,0 +1,758 @@
+{
+  "info": {
+    "name": "AI Code Reviewer API",
+    "description": "Comprehensive API collection for the AI Code Reviewer system. This collection provides endpoints for repository management, pull request analysis, commit reviews, workflow execution, and system configuration.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7001",
+      "description": "Base API URL for the AI Code Reviewer service"
+    },
+    {
+      "key": "apiPath",
+      "value": "/api",
+      "description": "API path prefix"
+    },
+    {
+      "key": "currentOwner",
+      "value": "microsoft",
+      "description": "Current repository owner (can be changed for testing)"
+    },
+    {
+      "key": "currentRepo",
+      "value": "vscode",
+      "description": "Current repository name (can be changed for testing)"
+    },
+    {
+      "key": "prNumber",
+      "value": "1",
+      "description": "Pull request number for testing"
+    },
+    {
+      "key": "commitSha",
+      "value": "",
+      "description": "Commit SHA for testing (will be populated from API responses)"
+    }
+  ],
+  "item": [
+    {
+      "name": "Repository Management",
+      "description": "Operations for managing repositories and their context",
+      "item": [
+        {
+          "name": "Get Current Repository",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/current",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories", "current"]
+            },
+            "description": "Retrieves the currently configured repository"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Repositories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories"]
+            },
+            "description": "Gets a list of all available repositories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Repository History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories", "history"]
+            },
+            "description": "Gets the history of recently accessed repositories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Repositories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/available",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories", "available"]
+            },
+            "description": "Gets available repositories for the configured user"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Repository",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/validate/{{currentOwner}}/{{currentRepo}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "repositories",
+                "validate",
+                "{{currentOwner}}",
+                "{{currentRepo}}"
+              ]
+            },
+            "description": "Validates that a repository exists and is accessible"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Current Repository (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"owner\": \"{{currentOwner}}\",\n  \"name\": \"{{currentRepo}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/current",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories", "current"]
+            },
+            "description": "Sets the current repository context"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Repository (Alternative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"owner\": \"{{currentOwner}}\",\n  \"name\": \"{{currentRepo}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/set",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositories", "set"]
+            },
+            "description": "Alternative endpoint to set repository context"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pull Request Operations",
+      "description": "Operations for managing and reviewing pull requests",
+      "item": [
+        {
+          "name": "List All Pull Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests"]
+            },
+            "description": "Gets all pull requests for the current repository"
+          },
+          "response": []
+        },
+        {
+          "name": "Switch Repository Context",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/repository/{{currentOwner}}/{{currentRepo}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "pullrequests",
+                "repository",
+                "{{currentOwner}}",
+                "{{currentRepo}}"
+              ]
+            },
+            "description": "Switches the repository context for pull request operations"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Open Pull Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/open",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests", "open"]
+            },
+            "description": "Gets all open pull requests for the current repository"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Pull Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/review/{{prNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests", "review", "{{prNumber}}"]
+            },
+            "description": "Performs AI-powered review of a specific pull request"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pull Request Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/{{prNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests", "{{prNumber}}"]
+            },
+            "description": "Gets detailed information about a specific pull request"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pull Request Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/{{prNumber}}/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests", "{{prNumber}}", "files"]
+            },
+            "description": "Gets the list of files changed in a pull request"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Commit Operations",
+      "description": "Operations for managing and reviewing commits",
+      "item": [
+        {
+          "name": "Get Repository Branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/commits/branches",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "commits", "branches"]
+            },
+            "description": "Gets all branches for the current repository"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recent Commits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/commits/recent?count=10&branch=main",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "commits", "recent"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10",
+                  "description": "Number of commits to retrieve"
+                },
+                {
+                  "key": "branch",
+                  "value": "main",
+                  "description": "Branch name (optional)"
+                }
+              ]
+            },
+            "description": "Gets recent commits from the repository"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Latest Commit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/commits/review-latest",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "commits", "review-latest"]
+            },
+            "description": "Performs AI review of the latest commit"
+          },
+          "response": []
+        },
+        {
+          "name": "Review Specific Commit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/commits/review/{{commitSha}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "commits", "review", "{{commitSha}}"]
+            },
+            "description": "Performs AI review of a specific commit by SHA"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System Prompts",
+      "description": "Operations for managing AI system prompts and templates",
+      "item": [
+        {
+          "name": "Get All System Prompts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts"]
+            },
+            "description": "Gets all available system prompts for different languages"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Language-Specific Prompt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/CSharp",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "CSharp"]
+            },
+            "description": "Gets the system prompt for a specific language (CSharp, JavaScript, TypeScript, React, VBNet, TSQL)"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Custom Language Prompt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customPrompt\": \"You are an expert C# code reviewer. Focus on performance, security, and best practices.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/CSharp/custom",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "CSharp", "custom"]
+            },
+            "description": "Sets a custom system prompt for a specific language"
+          },
+          "response": []
+        },
+        {
+          "name": "Preview Language Prompt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customAdditions\": \"Focus on async/await patterns and dispose patterns.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/preview/CSharp",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "preview", "CSharp"]
+            },
+            "description": "Previews how a system prompt will look with custom additions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Prompt Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/templates",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "templates"]
+            },
+            "description": "Gets available prompt templates for different scenarios"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test Commits",
+      "description": "Operations for testing commit functionality with sample data",
+      "item": [
+        {
+          "name": "Get Recent Test Commits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/testcommits/recent",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "testcommits", "recent"]
+            },
+            "description": "Gets recent commits for testing purposes"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Test Commit Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/testcommits/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "testcommits", "test"]
+            },
+            "description": "Gets test commit data for development and testing"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workflow Engine",
+      "description": "Operations for executing automated workflows",
+      "item": [
+        {
+          "name": "Get All Workflows",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/workflows",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "workflows"]
+            },
+            "description": "Gets all available workflow configurations"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Workflow",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/workflows/pull-request-workflow",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "workflows", "pull-request-workflow"]
+            },
+            "description": "Gets configuration for a specific workflow"
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Pull Request Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workflowName\": \"pull-request-workflow\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/workflows/execute/pullrequest/{{prNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "workflows",
+                "execute",
+                "pullrequest",
+                "{{prNumber}}"
+              ]
+            },
+            "description": "Executes a workflow for a specific pull request"
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Commit Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workflowName\": \"commit-workflow\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/workflows/execute/commit/{{commitSha}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "workflows",
+                "execute",
+                "commit",
+                "{{commitSha}}"
+              ]
+            },
+            "description": "Executes a workflow for a specific commit"
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Custom Workflow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workflowName\": \"custom-workflow\",\n  \"context\": {\n    \"entityType\": \"pullrequest\",\n    \"entityId\": \"{{prNumber}}\",\n    \"repository\": \"{{currentOwner}}/{{currentRepo}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/workflows/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "workflows", "execute"]
+            },
+            "description": "Executes a custom workflow with specific context"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error Testing Scenarios",
+      "description": "Test cases for error handling and edge cases",
+      "item": [
+        {
+          "name": "Test Non-Existent Repository",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositories/validate/nonexistent/repository",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "repositories",
+                "validate",
+                "nonexistent",
+                "repository"
+              ]
+            },
+            "description": "Tests validation with a non-existent repository (should return 404)"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Non-Existent Pull Request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/pullrequests/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "pullrequests", "99999"]
+            },
+            "description": "Tests getting a non-existent pull request (should return 404)"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Invalid Commit SHA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/commits/review/invalid-sha-12345",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "commits", "review", "invalid-sha-12345"]
+            },
+            "description": "Tests reviewing an invalid commit SHA (should return error)"
+          },
+          "response": []
+        },
+        {
+          "name": "Test Unsupported Language Prompt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/UnsupportedLanguage",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "UnsupportedLanguage"]
+            },
+            "description": "Tests getting prompt for unsupported language (should return error or default)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-populate commitSha from previous responses if available",
+          "if (pm.response && pm.response.json) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        if (responseJson.commits && responseJson.commits.length > 0) {",
+          "            pm.collectionVariables.set('commitSha', responseJson.commits[0].sha);",
+          "        }",
+          "    } catch (e) {",
+          "        // Ignore JSON parsing errors",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for all requests",
+          "pm.test('Status code is not 500', function () {",
+          "    pm.expect(pm.response.code).to.not.equal(500);",
+          "});",
+          "",
+          "pm.test('Response has JSON content type or is expected error', function () {",
+          "    const contentType = pm.response.headers.get('Content-Type');",
+          "    const statusCode = pm.response.code;",
+          "    ",
+          "    if (statusCode >= 200 && statusCode < 300) {",
+          "        pm.expect(contentType).to.include('application/json');",
+          "    }",
+          "});",
+          "",
+          "// Extract useful data for subsequent requests",
+          "if (pm.response.code === 200) {",
+          "    try {",
+          "        const responseJson = pm.response.json();",
+          "        ",
+          "        // Extract commit SHA if available",
+          "        if (responseJson.commits && responseJson.commits.length > 0) {",
+          "            pm.collectionVariables.set('commitSha', responseJson.commits[0].sha);",
+          "        }",
+          "        ",
+          "        // Extract repository info if available",
+          "        if (responseJson.owner && responseJson.name) {",
+          "            pm.collectionVariables.set('currentOwner', responseJson.owner);",
+          "            pm.collectionVariables.set('currentRepo', responseJson.name);",
+          "        }",
+          "    } catch (e) {",
+          "        // Ignore JSON parsing errors",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

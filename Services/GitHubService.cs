@@ -1,5 +1,6 @@
 using AICodeReviewer.Services.Interfaces;
 using Octokit;
+using System.Text;
 
 namespace AICodeReviewer.Services
 {
@@ -187,11 +188,31 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Gets files changed in a pull request
+        /// Gets files changed in a pull request with pagination support
         /// </summary>
         public async Task<IReadOnlyList<PullRequestFile>> GetPullRequestFilesAsync(int prNumber)
         {
-            return await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber);
+            try
+            {
+                // Use ApiOptions to get all files, not just the first page
+                var apiOptions = new ApiOptions
+                {
+                    PageSize = 100, // Maximum page size
+                    StartPage = 1,
+                    PageCount = 10  // Allow up to 10 pages (1000 files max)
+                };
+
+                var allFiles = await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber, apiOptions);
+                Console.WriteLine($"      📁 Retrieved {allFiles.Count} total files from GitHub API");
+
+                return allFiles;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"      ❌ Error retrieving PR files: {ex.Message}");
+                // Fallback to default method without pagination
+                return await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber);
+            }
         }
 
         /// <summary>
@@ -208,9 +229,100 @@ namespace AICodeReviewer.Services
                 );
                 return fileContent.Any() ? fileContent[0].Content : "";
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"      ❌ GitHub API error for {fileName}: {ex.Message}");
                 return "";
+            }
+        }
+
+        /// <summary>
+        /// Gets the content of a file from a specific branch (for PR reviews)
+        /// </summary>
+        public async Task<string> GetFileContentFromBranchAsync(string fileName, string branch)
+        {
+            try
+            {
+                Console.WriteLine($"      🌿 Trying to get {fileName} from branch: {branch}");
+
+                // FIXED: Use GetAllContentsByRef to specify the branch reference
+                var fileContent = await _gitHubClient.Repository.Content.GetAllContentsByRef(
+                    _repoOwner,
+                    _repoName,
+                    fileName,
+                    branch  // Branch reference
+                );
+                var content = fileContent.Any() ? fileContent[0].Content : "";
+                Console.WriteLine($"      ✅ Retrieved {content.Length} characters");
+                return content;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"      ❌ Branch API error for {fileName}: {ex.Message}");
+                // Try alternative approach - get raw file content from PR branch
+                try
+                {
+                    Console.WriteLine($"      🔄 Trying alternative approach for {fileName}...");
+                    var commits = await _gitHubClient.Repository.Commit.GetAll(_repoOwner, _repoName, new CommitRequest { Sha = branch });
+                    if (commits.Any())
+                    {
+                        var latestCommit = commits.First();
+                        var tree = await _gitHubClient.Git.Tree.Get(_repoOwner, _repoName, latestCommit.Sha);
+                        var fileItem = tree.Tree.FirstOrDefault(t => t.Path == fileName);
+                        if (fileItem != null)
+                        {
+                            var blob = await _gitHubClient.Git.Blob.Get(_repoOwner, _repoName, fileItem.Sha);
+                            var content = Encoding.UTF8.GetString(Convert.FromBase64String(blob.Content));
+                            Console.WriteLine($"      ✅ Retrieved via Git API: {content.Length} characters");
+                            return content;
+                        }
+                    }
+                }
+                catch (Exception ex2)
+                {
+                    Console.WriteLine($"      ❌ Alternative approach failed: {ex2.Message}");
+                }
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Gets PR files with branch information 
+        /// </summary>
+        public async Task<(IReadOnlyList<PullRequestFile> files, string headBranch)> GetPullRequestFilesWithBranchAsync(int prNumber)
+        {
+            try
+            {
+                var pr = await _gitHubClient.PullRequest.Get(_repoOwner, _repoName, prNumber);
+
+                // Use pagination to get all files
+                var apiOptions = new ApiOptions
+                {
+                    PageSize = 100,
+                    StartPage = 1,
+                    PageCount = 10
+                };
+
+                var files = await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber, apiOptions);
+                Console.WriteLine($"      🔍 PR #{prNumber} head branch: {pr.Head.Ref}");
+                Console.WriteLine($"      📁 Retrieved {files.Count} total files with pagination");
+                return (files, pr.Head.Ref);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"      ❌ Error getting PR info: {ex.Message}");
+                // Fallback with pagination
+                try
+                {
+                    var apiOptions = new ApiOptions { PageSize = 100, StartPage = 1, PageCount = 10 };
+                    var files = await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber, apiOptions);
+                    return (files, "main");
+                }
+                catch
+                {
+                    var files = await _gitHubClient.PullRequest.Files(_repoOwner, _repoName, prNumber);
+                    return (files, "main"); // final fallback
+                }
             }
         }
 

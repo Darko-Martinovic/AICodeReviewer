@@ -18,6 +18,8 @@ namespace AICodeReviewer.Services.Interfaces
         Task<PullRequest> GetPullRequestAsync(int number);
         Task<IReadOnlyList<PullRequestFile>> GetPullRequestFilesAsync(int pullRequestNumber);
         Task<string> GetFileContentAsync(string fileName);
+        Task<string> GetFileContentFromBranchAsync(string fileName, string branch);
+        Task<(IReadOnlyList<PullRequestFile> files, string headBranch)> GetPullRequestFilesWithBranchAsync(int prNumber);
         Task<(string Owner, string Name)> GetRepositoryInfoAsync();
         Task<Repository> GetRepositoryDetailsAsync();
         Task<bool> PostPullRequestCommentAsync(int prNumber, string comment);

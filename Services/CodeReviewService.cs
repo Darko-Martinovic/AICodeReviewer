@@ -34,7 +34,7 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<CodeReviewResult> ReviewCommitAsync(IReadOnlyList<GitHubCommitFile> files)
         {
-            return await ReviewFilesInternalAsync(files.Cast<object>().ToList());
+            return await ReviewFilesInternalAsync(files.Cast<object>().ToList(), null);
         }
 
         /// <summary>
@@ -61,11 +61,23 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<CodeReviewResult> ReviewPullRequestAsync(int pullRequestNumber)
         {
-            var files = await _gitHubService.GetPullRequestFilesAsync(pullRequestNumber);
-            return await ReviewPullRequestAsync(files);
+            var (files, headBranch) = await _gitHubService.GetPullRequestFilesWithBranchAsync(pullRequestNumber);
+            Console.WriteLine($"🔍 PR #{pullRequestNumber} uses branch: {headBranch}");
+            return await ReviewPullRequestAsync(files, headBranch);
         }
 
-        private async Task<CodeReviewResult> ReviewFilesInternalAsync(List<object> files)
+        /// <summary>
+        /// Performs AI code review on pull request files with branch context
+        /// </summary>
+        public async Task<CodeReviewResult> ReviewPullRequestAsync(
+            IReadOnlyList<PullRequestFile> files,
+            string? headBranch = null
+        )
+        {
+            return await ReviewFilesInternalAsync(files.Cast<object>().ToList(), headBranch);
+        }
+
+        private async Task<CodeReviewResult> ReviewFilesInternalAsync(List<object> files, string? headBranch = null)
         {
             // Initialize metrics tracking
             var reviewType = files.FirstOrDefault() switch
@@ -88,6 +100,16 @@ namespace AICodeReviewer.Services
                             && FileUtils.GetFileStatus(f) != "removed"
                     )
                     .ToList();
+
+                Console.WriteLine($"📋 All files in PR/Commit: {files.Count}");
+                foreach (var f in files)
+                {
+                    var fileName = FileUtils.GetFileName(f);
+                    var status = FileUtils.GetFileStatus(f);
+                    var isCode = FileUtils.IsCodeFile(fileName);
+                    Console.WriteLine($"  • {fileName} - Status: {status}, IsCode: {isCode}");
+                }
+                Console.WriteLine($"🎯 Code files to review: {codeFiles.Count}");
 
                 if (!codeFiles.Any())
                 {
@@ -120,7 +142,7 @@ namespace AICodeReviewer.Services
                         Console.Write($"    🔄 Retrieving file content...");
 
                         // Get file content
-                        string fileContent = await GetFileContentAsync(file);
+                        string fileContent = await GetFileContentAsync(file, headBranch);
 
                         if (string.IsNullOrWhiteSpace(fileContent))
                         {
@@ -238,7 +260,7 @@ namespace AICodeReviewer.Services
             }
         }
 
-        private async Task<string> GetFileContentAsync(object file)
+        private async Task<string> GetFileContentAsync(object file, string? headBranch = null)
         {
             try
             {
@@ -250,19 +272,48 @@ namespace AICodeReviewer.Services
                     _ => 0
                 };
 
+                Console.WriteLine($"      🔍 File: {fileName}, Changes: {changes}");
+
                 // Get content limit from configuration
                 var contentLimit = _configurationService.Settings.AzureOpenAI.ContentLimit;
                 var maxFileSize = contentLimit / 3; // Allow files up to 1/3 of content limit in changes
 
+                Console.WriteLine($"      📏 Content limit: {contentLimit}, Max file size: {maxFileSize}");
+
                 // For reasonably sized files, we can get content directly
                 if (changes < maxFileSize)
                 {
-                    return await _gitHubService.GetFileContentAsync(fileName);
+                    Console.WriteLine($"      ✅ File size acceptable, retrieving content...");
+
+                    // For PR files, try to get content from the head branch first
+                    if (!string.IsNullOrEmpty(headBranch) && file is PullRequestFile)
+                    {
+                        Console.WriteLine($"      🌿 Attempting to retrieve from PR branch: {headBranch}");
+                        var branchContent = await _gitHubService.GetFileContentFromBranchAsync(fileName, headBranch);
+                        if (!string.IsNullOrEmpty(branchContent))
+                        {
+                            return branchContent;
+                        }
+                        Console.WriteLine($"      ⚠️ Branch retrieval failed, trying main branch...");
+                    }
+
+                    // Fallback to regular content retrieval
+                    var content = await _gitHubService.GetFileContentAsync(fileName);
+                    if (string.IsNullOrEmpty(content))
+                    {
+                        Console.WriteLine($"      ❌ GitHub API returned empty content for {fileName}");
+                    }
+                    return content;
                 }
-                return "";
+                else
+                {
+                    Console.WriteLine($"      ❌ File too large ({changes} changes > {maxFileSize} limit)");
+                    return "";
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"      ❌ Exception retrieving {FileUtils.GetFileName(file)}: {ex.Message}");
                 return "";
             }
         }

@@ -112,12 +112,33 @@ Only respond with 'No issues found' if the code is truly exemplary.";
 
                 // Get language-specific prompts
                 var systemPrompt = _promptManagementService.GetSystemPrompt(fileName);
+
+                // ENHANCED: Add additional strictness to force critical analysis
+                systemPrompt += "\n\n🚨 CRITICAL ANALYSIS REQUIREMENT:\n" +
+                    "You MUST find AT LEAST 2-3 specific improvement opportunities in this code. " +
+                    "Even if the code appears well-written, look for:\n" +
+                    "- Missing error handling, validation, or edge cases\n" +
+                    "- Performance optimizations (async patterns, caching, efficiency)\n" +
+                    "- Security improvements (input validation, data exposure)\n" +
+                    "- Code quality issues (naming, complexity, maintainability)\n" +
+                    "- Modern language features not being used\n" +
+                    "- Documentation or testing gaps\n" +
+                    "- Architecture or design pattern improvements\n\n" +
+                    "DO NOT respond with 'No issues found' unless you have thoroughly examined ALL " +
+                    "aspects and can provide detailed justification for why the code is absolutely perfect.";
+
                 var userPrompt = _promptManagementService.FormatUserPrompt(fileName, fileContent, _settings.ContentLimit);
 
                 // Log which prompt type is being used
                 var hasLanguageSpecificPrompts = _promptManagementService.HasLanguageSpecificPrompts(fileName);
                 var language = _promptManagementService.GetType().Assembly.GetName().Name; // This will be the service name
                 Console.Write($"    🤖 Using {(hasLanguageSpecificPrompts ? "language-specific" : "default")} prompts for {fileName}...");
+
+                // Enhanced debugging - log the actual prompts being used
+                Console.WriteLine($"\n🔍 DEBUG - System Prompt Length: {systemPrompt.Length} characters");
+                Console.WriteLine($"🔍 DEBUG - System Prompt Preview: {systemPrompt.Substring(0, Math.Min(200, systemPrompt.Length))}...");
+                Console.WriteLine($"🔍 DEBUG - User Prompt Length: {userPrompt.Length} characters");
+                Console.WriteLine($"🔍 DEBUG - User Prompt Preview: {userPrompt.Substring(0, Math.Min(200, userPrompt.Length))}...");
 
                 var request = new ChatRequest
                 {
@@ -127,7 +148,7 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                         new ChatMessage { role = "user", content = userPrompt }
                     },
                     max_tokens = _settings.MaxTokens,
-                    temperature = _settings.Temperature
+                    temperature = (float)Math.Max(_settings.Temperature, 0.8) // Higher temperature for more critical analysis
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(request);
@@ -158,15 +179,16 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                 var aiResponse = chatResponse?.choices?[0]?.message?.content ?? "No response";
                 var usage = chatResponse?.usage ?? new Usage();
 
-                // Parse AI response
-                if (
-                    aiResponse.Contains("No issues found") || aiResponse.Contains("no issues found")
-                )
-                {
-                    return (new List<string>(), new List<DetailedIssue>(), usage);
-                }
+                // Add debugging to see what the AI actually returned
+                Console.WriteLine($"\n🔍 DEBUG - AI Response for {fileName}:");
+                Console.WriteLine($"📝 Response length: {aiResponse.Length} characters");
+                Console.WriteLine($"📝 First 200 chars: {aiResponse.Substring(0, Math.Min(200, aiResponse.Length))}...");
 
+                // REMOVED: Don't filter out responses - always try to parse them
+                // The AI should be finding issues if the prompts are strong enough
+                Console.WriteLine($"🔍 DEBUG - Proceeding to parse detailed response");
                 var (issues, detailedIssues) = ParseDetailedResponse(fileName, aiResponse);
+                Console.WriteLine($"🔍 DEBUG - Parsed: {issues.Count} issues, {detailedIssues.Count} detailed issues");
                 return (issues, detailedIssues, usage);
             }
             catch (Exception ex)
@@ -258,6 +280,8 @@ Only respond with 'No issues found' if the code is truly exemplary.";
             // Fallback: if structured parsing failed, try simple parsing
             if (!detailedIssues.Any())
             {
+                Console.WriteLine($"🔍 DEBUG - Structured parsing failed, using fallback for response: '{aiResponse}'");
+
                 var simpleIssues = aiResponse
                     .Split('\n', StringSplitOptions.RemoveEmptyEntries)
                     .Where(line => !string.IsNullOrWhiteSpace(line))
