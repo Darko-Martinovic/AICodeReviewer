@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { ProgressIndicator } from "./ProgressIndicator";
+import type { ProgressStep } from "./ProgressIndicator";
 import styles from "./CommitCard.module.css";
 
 interface CommitCardProps {
@@ -15,6 +17,12 @@ interface CommitCardProps {
   onReview: (sha: string) => void;
   isReviewing: boolean;
 }
+
+const mockSteps: ProgressStep[] = [
+  { id: "analyzing", name: "Analyzing", status: "pending" },
+  { id: "reviewing", name: "AI Review", status: "pending" },
+  { id: "finalizing", name: "Finalizing", status: "pending" },
+];
 
 export const CommitCard: React.FC<CommitCardProps> = ({
   commit,
@@ -119,14 +127,17 @@ export const CommitCard: React.FC<CommitCardProps> = ({
       </div>
 
       <div className={styles.footer}>
-        <button
-          onClick={handleReview}
-          disabled={isReviewing}
-          className={styles.reviewButton}
-        >
-          {isReviewing && <div className={styles.spinner} />}
-          {isReviewing ? "Reviewing..." : "Review Code"}
-        </button>
+        {isReviewing ? (
+          <ProgressIndicator steps={mockSteps} compact={true} />
+        ) : (
+          <button
+            onClick={handleReview}
+            disabled={isReviewing}
+            className={styles.reviewButton}
+          >
+            Review Code
+          </button>
+        )}
       </div>
     </div>
   );

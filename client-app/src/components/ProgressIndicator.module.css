@@ -1,0 +1,275 @@
+/* Progress Indicator Styles */
+.progressContainer {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+}
+
+:global(.dark) .progressContainer {
+  background: rgb(31 41 55);
+  color: white;
+}
+
+.progressTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .progressTitle {
+  color: rgb(243 244 246);
+}
+
+/* Compact Progress */
+.compactProgress {
+  background: rgb(249 250 251);
+  border: 1px solid rgb(229 231 235);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 8px 0;
+}
+
+:global(.dark) .compactProgress {
+  background: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+}
+
+.compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.compactTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(55 65 81);
+}
+
+:global(.dark) .compactTitle {
+  color: rgb(209 213 219);
+}
+
+.compactCounter {
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+  font-weight: 500;
+}
+
+:global(.dark) .compactCounter {
+  color: rgb(156 163 175);
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: rgb(229 231 235);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+:global(.dark) .progressBar {
+  background: rgb(75 85 99);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, rgb(59 130 246), rgb(37 99 235));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Steps List */
+.stepsList {
+  position: relative;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding: 12px 0;
+}
+
+.stepIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  z-index: 2;
+}
+
+.stepContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.stepName {
+  font-weight: 500;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .stepName {
+  color: rgb(243 244 246);
+}
+
+.stepDuration {
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+  font-weight: 400;
+}
+
+:global(.dark) .stepDuration {
+  color: rgb(156 163 175);
+}
+
+.stepDescription {
+  font-size: 0.875rem;
+  color: rgb(107 114 128);
+  margin: 0;
+  line-height: 1.4;
+}
+
+:global(.dark) .stepDescription {
+  color: rgb(156 163 175);
+}
+
+.stepError {
+  font-size: 0.875rem;
+  color: rgb(239 68 68);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+:global(.dark) .stepError {
+  color: rgb(248 113 113);
+}
+
+.stepConnector {
+  position: absolute;
+  left: 11px;
+  top: 36px;
+  bottom: -12px;
+  width: 2px;
+  background: rgb(229 231 235);
+  z-index: 1;
+}
+
+:global(.dark) .stepConnector {
+  background: rgb(75 85 99);
+}
+
+/* Step Status Icons */
+.iconCompleted {
+  width: 16px;
+  height: 16px;
+  color: rgb(34 197 94);
+}
+
+.iconRunning {
+  width: 16px;
+  height: 16px;
+  color: rgb(59 130 246);
+}
+
+.iconFailed {
+  width: 16px;
+  height: 16px;
+  color: rgb(239 68 68);
+}
+
+.iconSkipped {
+  width: 16px;
+  height: 16px;
+  color: rgb(156 163 175);
+}
+
+.iconPending {
+  width: 16px;
+  height: 16px;
+  color: rgb(156 163 175);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Step Status Styles */
+.stepCompleted .stepIcon {
+  background: rgb(220 252 231);
+  border-radius: 50%;
+}
+
+:global(.dark) .stepCompleted .stepIcon {
+  background: rgb(22 101 52);
+}
+
+.stepRunning .stepIcon {
+  background: rgb(219 234 254);
+  border-radius: 50%;
+}
+
+:global(.dark) .stepRunning .stepIcon {
+  background: rgb(30 64 175);
+}
+
+.stepRunning .stepConnector {
+  background: rgb(59 130 246);
+}
+
+.stepCompleted .stepConnector {
+  background: rgb(34 197 94);
+}
+
+.stepFailed .stepIcon {
+  background: rgb(254 226 226);
+  border-radius: 50%;
+}
+
+:global(.dark) .stepFailed .stepIcon {
+  background: rgb(153 27 27);
+}
+
+.stepFailed .stepConnector {
+  background: rgb(239 68 68);
+}
+
+.stepSkipped .stepName {
+  color: rgb(156 163 175);
+  text-decoration: line-through;
+}
+
+:global(.dark) .stepSkipped .stepName {
+  color: rgb(107 114 128);
+}
+
+.stepPending .stepName {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .stepPending .stepName {
+  color: rgb(107 114 128);
+}

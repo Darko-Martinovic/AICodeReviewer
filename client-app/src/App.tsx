@@ -7,6 +7,7 @@ import type {
   CodeReview,
 } from "./services/api";
 import { CodeReviewResult } from "./components/CodeReviewResult";
+import ReviewProgressModal from "./components/ReviewProgressModal";
 import Header from "./components/Header";
 import Navigation from "./components/Navigation";
 import SearchAndActions from "./components/SearchAndActions";
@@ -44,6 +45,13 @@ interface AppState {
   reviewingCommits: Set<string>; // Track individual commits being reviewed
   reviewingPRs: Set<number>; // Track individual PRs being reviewed
   isInRepositoryView: boolean; // Track if we're viewing repository details
+  // Progress modal state
+  progressModal: {
+    show: boolean;
+    type: "commit" | "pullrequest" | null;
+    id: string | number | null;
+    title: string;
+  };
 }
 
 function App() {
@@ -69,6 +77,12 @@ function App() {
     reviewingCommits: new Set(),
     reviewingPRs: new Set(),
     isInRepositoryView: false,
+    progressModal: {
+      show: false,
+      type: null,
+      id: null,
+      title: "",
+    },
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -375,9 +389,23 @@ function App() {
   const handleCommitReview = async (sha: string) => {
     try {
       console.log("🔍 Starting commit review for SHA:", sha);
+
+      // Find the commit for display
+      const commit = state.commits.find((c) => c.sha === sha);
+      const commitTitle = commit
+        ? commit.message.split("\n")[0]
+        : `Commit ${sha.substring(0, 8)}`;
+
+      // Show progress modal and start tracking
       setState((prev) => ({
         ...prev,
         reviewingCommits: new Set([...prev.reviewingCommits, sha]),
+        progressModal: {
+          show: true,
+          type: "commit",
+          id: sha,
+          title: `Reviewing: ${commitTitle}`,
+        },
       }));
 
       console.log("📡 Calling commits API review...");
@@ -409,14 +437,21 @@ function App() {
         console.error("❌ Response data is null or undefined!");
       }
 
-      setState((prev) => ({
-        ...prev,
-        codeReview: response.data,
-        showReviewModal: true,
-        reviewingCommits: new Set(
-          [...prev.reviewingCommits].filter((id) => id !== sha)
-        ),
-      }));
+      // Wait a bit to let the progress modal complete its animation
+      setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          codeReview: response.data,
+          showReviewModal: true,
+          reviewingCommits: new Set(
+            [...prev.reviewingCommits].filter((id) => id !== sha)
+          ),
+          progressModal: {
+            ...prev.progressModal,
+            show: false,
+          },
+        }));
+      }, 1000);
 
       console.log("✅ State updated, modal should show");
     } catch (error) {
@@ -426,6 +461,10 @@ function App() {
         reviewingCommits: new Set(
           [...prev.reviewingCommits].filter((id) => id !== sha)
         ),
+        progressModal: {
+          ...prev.progressModal,
+          show: false,
+        },
       }));
       addToast({
         type: "error",
@@ -438,30 +477,27 @@ function App() {
   const handlePullRequestReview = async (number: number) => {
     try {
       console.log("🔍 Starting pull request review for number:", number);
+
+      // Find the PR for display
+      const pr = state.pullRequests.find((p) => p.number === number);
+      const prTitle = pr ? pr.title : `Pull Request #${number}`;
+
+      // Show progress modal and start tracking
       setState((prev) => ({
         ...prev,
         reviewingPRs: new Set([...prev.reviewingPRs, number]),
+        progressModal: {
+          show: true,
+          type: "pullrequest",
+          id: number,
+          title: `Reviewing: ${prTitle}`,
+        },
       }));
-
-      // Show workflow start notification
-      addToast({
-        type: "info",
-        title: "Integration Workflow Started",
-        message: "Running AI Code Review with full integration pipeline...",
-      });
 
       console.log("📡 Calling pull requests API review...");
       const response = await pullRequestsApi.review(number);
 
       console.log("✅ API Response received:", response);
-
-      // Show workflow completion notification
-      addToast({
-        type: "success",
-        title: "Integration Workflow Complete",
-        message: "AI Review → Jira Update → GitHub PR Comment completed",
-        duration: 5000,
-      });
 
       console.log("📋 Response data:", response.data);
       console.log("📋 Response data type:", typeof response.data);
@@ -488,14 +524,29 @@ function App() {
         console.error("❌ Response data is null or undefined!");
       }
 
-      setState((prev) => ({
-        ...prev,
-        codeReview: response.data,
-        showReviewModal: true,
-        reviewingPRs: new Set(
-          [...prev.reviewingPRs].filter((id) => id !== number)
-        ),
-      }));
+      // Wait a bit to let the progress modal complete its animation
+      setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          codeReview: response.data,
+          showReviewModal: true,
+          reviewingPRs: new Set(
+            [...prev.reviewingPRs].filter((id) => id !== number)
+          ),
+          progressModal: {
+            ...prev.progressModal,
+            show: false,
+          },
+        }));
+
+        // Show workflow completion notification
+        addToast({
+          type: "success",
+          title: "Integration Workflow Complete",
+          message: "AI Review → JIRA Update → GitHub PR Comment completed",
+          duration: 5000,
+        });
+      }, 1000);
 
       console.log("✅ State updated, modal should show");
     } catch (error) {
@@ -505,6 +556,10 @@ function App() {
         reviewingPRs: new Set(
           [...prev.reviewingPRs].filter((id) => id !== number)
         ),
+        progressModal: {
+          ...prev.progressModal,
+          show: false,
+        },
       }));
       addToast({
         type: "error",
@@ -660,6 +715,24 @@ function App() {
             }
           />
         )}
+
+        {/* Progress Modal */}
+        {state.progressModal.show &&
+          state.progressModal.type &&
+          state.progressModal.id && (
+            <ReviewProgressModal
+              isOpen={state.progressModal.show}
+              onClose={() =>
+                setState((prev) => ({
+                  ...prev,
+                  progressModal: { ...prev.progressModal, show: false },
+                }))
+              }
+              reviewType={state.progressModal.type}
+              reviewId={state.progressModal.id}
+              title={state.progressModal.title}
+            />
+          )}
       </MainLayout>
     </ErrorBoundary>
   );

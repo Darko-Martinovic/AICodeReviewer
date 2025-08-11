@@ -7,6 +7,8 @@ import {
   User,
   GitBranch,
 } from "lucide-react";
+import { ProgressIndicator } from "./ProgressIndicator";
+import type { ProgressStep } from "./ProgressIndicator";
 import styles from "./PullRequestCard.module.css";
 
 interface PullRequestCardProps {
@@ -14,6 +16,13 @@ interface PullRequestCardProps {
   onReview: (number: number) => void;
   isReviewing: boolean;
 }
+
+const mockPRSteps: ProgressStep[] = [
+  { id: "ai-review", name: "AI Review", status: "pending" },
+  { id: "github-comment", name: "GitHub Comment", status: "pending" },
+  { id: "jira-integration", name: "JIRA Integration", status: "pending" },
+  { id: "finalization", name: "Finalization", status: "pending" },
+];
 
 export const PullRequestCard: React.FC<PullRequestCardProps> = ({
   pullRequest,
@@ -122,18 +131,21 @@ export const PullRequestCard: React.FC<PullRequestCardProps> = ({
       </div>
 
       <div className={styles.buttonSection}>
-        <button
-          onClick={handleReview}
-          disabled={isReviewing || pullRequest.state.toLowerCase() !== "open"}
-          className={`${styles.reviewButton} ${
-            isReviewing || pullRequest.state.toLowerCase() !== "open"
-              ? styles.reviewButtonDisabled
-              : ""
-          }`}
-        >
-          {isReviewing && <div className={styles.spinner} />}
-          {isReviewing ? "Reviewing..." : "Review PR"}
-        </button>
+        {isReviewing ? (
+          <ProgressIndicator steps={mockPRSteps} compact={true} />
+        ) : (
+          <button
+            onClick={handleReview}
+            disabled={pullRequest.state.toLowerCase() !== "open"}
+            className={`${styles.reviewButton} ${
+              pullRequest.state.toLowerCase() !== "open"
+                ? styles.reviewButtonDisabled
+                : ""
+            }`}
+          >
+            Review PR
+          </button>
+        )}
       </div>
     </div>
   );
