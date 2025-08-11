@@ -140,6 +140,10 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                 Console.WriteLine($"🔍 DEBUG - User Prompt Length: {userPrompt.Length} characters");
                 Console.WriteLine($"🔍 DEBUG - User Prompt Preview: {userPrompt.Substring(0, Math.Min(200, userPrompt.Length))}...");
 
+                // Create the AI request with configured settings
+                // Temperature: Lower values (0.0-0.3) = more deterministic/consistent responses
+                //             Higher values (0.7-1.0) = more creative/varied responses
+                //             For code reviews, we want consistency, so use low temperature (0.1-0.2)
                 var request = new ChatRequest
                 {
                     messages = new[]
@@ -148,7 +152,7 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                         new ChatMessage { role = "user", content = userPrompt }
                     },
                     max_tokens = _settings.MaxTokens,
-                    temperature = (float)Math.Max(_settings.Temperature, 0.8) // Higher temperature for more critical analysis
+                    temperature = (float)_settings.Temperature // Use configured temperature for consistent code reviews
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(request);

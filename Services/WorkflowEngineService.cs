@@ -198,13 +198,14 @@ public class WorkflowEngineService : IWorkflowEngineService
                                 dependencyId, dependentResult.Result.ToString()?.Substring(0, Math.Min(100, dependentResult.Result.ToString()?.Length ?? 0)));
                         }
                         // For the Jira ticket step, format the review data for better description
-                        else if (step.Id == "jira_ticket" && dependencyId == "code_review")
+                        else if ((step.Id == "jira_ticket" || step.Id == "jira_smart_ticket") && dependencyId == "code_review")
                         {
                             var reviewData = dependentResult.Result.ToString();
                             var formattedDescription = await FormatReviewDataForJiraAsync(reviewData, context.Data);
                             arguments["description"] = formattedDescription;
+                            arguments["reviewSummary"] = formattedDescription;
 
-                            // Get PR title for better Jira summary
+                            // Get PR title and details for JIRA
                             try
                             {
                                 if (context.Data.TryGetValue("prNumber", out var prNumberObj) && int.TryParse(prNumberObj.ToString(), out var prNumber))
@@ -212,8 +213,18 @@ public class WorkflowEngineService : IWorkflowEngineService
                                     var pullRequest = await _gitHubService.GetPullRequestAsync(prNumber);
                                     if (pullRequest != null)
                                     {
+                                        // For smart ticket handling, provide PR title
+                                        arguments["prTitle"] = pullRequest.Title;
+                                        arguments["prNumber"] = prNumber.ToString();
+
+                                        // Extract issue count from review results
+                                        var totalIssueCount = GetTotalIssueCount(dependentResult.Result.ToString());
+                                        arguments["issueCount"] = totalIssueCount.ToString();
+
+                                        // For legacy ticket creation, provide summary
                                         arguments["summary"] = $"Code Review: {pullRequest.Title}";
-                                        _logger.LogInformation("  📝 Updated Jira summary with PR title: {Title}", pullRequest.Title);
+
+                                        _logger.LogInformation("  📝 Updated Jira parameters with PR title: {Title}, Issues: {IssueCount}", pullRequest.Title, totalIssueCount);
                                     }
                                 }
                             }
@@ -333,6 +344,36 @@ public class WorkflowEngineService : IWorkflowEngineService
     }
 
     // Helper methods to extract data from context
+    private int GetTotalIssueCount(string reviewData)
+    {
+        if (string.IsNullOrEmpty(reviewData))
+            return 0;
+
+        try
+        {
+            // Try to extract issue count from review data
+            // Look for patterns like "Found X issues" or count issue markers
+            var lines = reviewData.Split('\n');
+            var issueCount = 0;
+
+            foreach (var line in lines)
+            {
+                // Count lines that look like issues (contain severity indicators)
+                if (line.Contains("High") || line.Contains("Medium") || line.Contains("Low") ||
+                    line.Contains("Critical") || line.Contains("🟡") || line.Contains("🔴"))
+                {
+                    issueCount++;
+                }
+            }
+
+            return issueCount;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
     private int GetHighSeverityIssueCount(WorkflowContext context)
     {
         // Extract from previous step results or context data
@@ -451,8 +492,8 @@ public class WorkflowEngineService : IWorkflowEngineService
                     var file = issue.TryGetProperty("File", out var fileProp) ? fileProp.GetString() : "Unknown";
                     var message = issue.TryGetProperty("Message", out var messageProp) ? messageProp.GetString() : "No description";
                     var suggestion = issue.TryGetProperty("Suggestion", out var suggestionProp) ? suggestionProp.GetString() : "";
-                    var line = issue.TryGetProperty("Line", out var lineProp) && lineProp.ValueKind != JsonValueKind.Null 
-                        ? lineProp.GetInt32().ToString() 
+                    var line = issue.TryGetProperty("Line", out var lineProp) && lineProp.ValueKind != JsonValueKind.Null
+                        ? lineProp.GetInt32().ToString()
                         : "N/A";
 
                     // Clean severity - remove brackets if present
