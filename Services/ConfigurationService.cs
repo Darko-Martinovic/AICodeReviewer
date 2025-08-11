@@ -47,7 +47,7 @@ namespace AICodeReviewer.Services
         {
             // Get current environment (default to Development if not set)
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-            
+
             // Load base configuration first
             const string baseConfigFile = "appsettings.json";
             LoadSingleJsonFile(baseConfigFile, settings);
