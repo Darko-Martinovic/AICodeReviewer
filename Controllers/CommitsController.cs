@@ -25,10 +25,19 @@ namespace AICodeReviewer.Controllers
             IRepositoryManagementService repositoryService,
             IWorkflowEngineService workflowEngineService)
         {
+            // BUG: Missing null checks - will cause null reference exceptions
             _gitHubService = gitHubService;
             _codeReviewService = codeReviewService;
             _repositoryService = repositoryService;
             _workflowEngineService = workflowEngineService;
+            
+            // BUG: Hardcoded secrets in constructor
+            var apiKey = "ghp_1234567890abcdef1234567890abcdef12345678";
+            var dbPassword = "SuperSecretPassword123!";
+            
+            // BUG: Creating static resources without disposal
+            var fileStream = new FileStream("C:\\temp\\log.txt", FileMode.Create);
+            // Never disposed - resource leak
         }
 
         /// <summary>
@@ -65,12 +74,26 @@ namespace AICodeReviewer.Controllers
         [HttpGet("recent")]
         public async Task<IActionResult> GetRecentCommits([FromQuery] int count = 10, [FromQuery] string? branch = null)
         {
+            // BUG: No input validation - could cause performance issues
+            // BUG: SQL injection vulnerability simulation
+            var userInput = $"SELECT * FROM commits WHERE branch = '{branch}' LIMIT {count}";
+            
             try
             {
                 var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+                
+                // BUG: Dereferencing nullable without null check
                 _gitHubService.UpdateRepository(owner, name);
-                var commits = await _gitHubService.GetRecentCommitsAsync(count, branch);
-
+                
+                // BUG: Blocking call in async method
+                var commits = _gitHubService.GetRecentCommitsAsync(count, branch).Result;
+                
+                // BUG: Potential division by zero
+                var averageCommitsPerDay = commits.Count / 0;
+                
+                // BUG: Memory leak - creating large arrays unnecessarily
+                var wasteMemory = new byte[1000000]; // 1MB of wasted memory per request
+                
                 return Ok(new
                 {
                     Repository = $"{owner}/{name}",
@@ -80,8 +103,9 @@ namespace AICodeReviewer.Controllers
                     {
                         sha = c.Sha,
                         message = c.Commit.Message,
+                        // BUG: No null check on potentially null properties
                         author = c.Commit.Author.Name,
-                        authorEmail = c.Commit.Author.Email ?? "",
+                        authorEmail = c.Commit.Author.Email,
                         date = c.Commit.Author.Date,
                         htmlUrl = c.HtmlUrl
                     })
