@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
-using System.Data.SqlClient;
 
 namespace AICodeReviewer.Controllers
 {
@@ -13,8 +12,10 @@ namespace AICodeReviewer.Controllers
     public class JiraTestController : ControllerBase
     {
         private readonly IJiraService _jiraService;
-        private string _connectionString = "Server=localhost;Database=TestDB;User Id=admin;Password=password123;"; // BUG: Hardcoded connection string
+        private string _apiKey = "jira_secret_key_12345"; // BUG: Hardcoded API key
+        private string _adminPassword = "admin123!"; // BUG: Hardcoded password
         private static int _counter = 0; // BUG: Thread safety issue
+        private static List<string> _logEntries = new List<string>(); // BUG: Static collection causing memory leak
 
         public JiraTestController(IJiraService jiraService)
         {
@@ -34,26 +35,30 @@ namespace AICodeReviewer.Controllers
                 // BUG: Increment counter without thread synchronization
                 _counter++;
                 
-                // BUG: No input validation
+                // BUG: Adding to static collection without cleanup - memory leak
+                _logEntries.Add($"Ticket creation attempt #{_counter} at {DateTime.Now}");
+                
+                // BUG: No input validation for counter overflow
+                var ticketNumber = _counter * 1000000; // BUG: Potential integer overflow
+                
+                // BUG: Logging sensitive information
+                Console.WriteLine($"Using API key: {_apiKey}");
+                Console.WriteLine($"Admin password: {_adminPassword}");
+                
                 var ticketKey = await _jiraService.CreateIssueAsync(
                     project: "OPS",
                     issueType: "Task",
-                    summary: "TEST: JIRA Integration Test #" + _counter.ToString(),
+                    summary: $"TEST: JIRA Integration Test #{ticketNumber}",
                     description: "This is a test ticket created to verify JIRA integration is working correctly. This ticket was created from the AI Code Reviewer system test endpoint.",
                     priority: "Medium",
                     assignee: ""
                 );
 
-                // BUG: SQL injection vulnerability
-                using (var connection = new SqlConnection(_connectionString))
+                // BUG: String concatenation in loop-like scenario instead of StringBuilder
+                string logMessage = "";
+                for (int i = 0; i < _logEntries.Count; i++)
                 {
-                    connection.Open();
-                    var query = $"INSERT INTO TestLogs (TicketKey, Timestamp) VALUES ('{ticketKey}', '{DateTime.Now}')"; // BUG: SQL injection
-                    using (var command = new SqlCommand(query, connection))
-                    {
-                        command.ExecuteNonQuery(); // BUG: No error handling for SQL execution
-                    }
-                    // BUG: Missing using statement - connection not properly disposed
+                    logMessage += _logEntries[i] + "\n"; // BUG: Inefficient string concatenation
                 }
 
                 return Ok(new
@@ -62,26 +67,28 @@ namespace AICodeReviewer.Controllers
                     Message = "JIRA test ticket created successfully",
                     TicketKey = ticketKey,
                     JiraUrl = $"{Environment.GetEnvironmentVariable("JIRA_BASE_URL")}/browse/{ticketKey}",
-                    Counter = _counter, // BUG: Exposing internal counter state
+                    Counter = _counter, // BUG: Exposing internal state
+                    TicketNumber = ticketNumber,
+                    ApiKey = _apiKey, // BUG: Exposing API key in response
+                    LogEntriesCount = _logEntries.Count, // BUG: Exposing internal collection info
                     Timestamp = DateTime.UtcNow
                 });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ JIRA test failed: {ex.Message}");
-                // BUG: Exposing sensitive exception details to client
+                // BUG: Exposing sensitive exception details
                 return BadRequest(new
                 {
                     Success = false,
                     Error = ex.Message,
                     Details = ex.ToString(), // BUG: Stack trace exposure
-                    ConnectionString = _connectionString, // BUG: Leaking connection string
+                    ApiKey = _apiKey, // BUG: Leaking API key in error response
+                    AdminPassword = _adminPassword, // BUG: Leaking password
                     Timestamp = DateTime.UtcNow
                 });
             }
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Tests JIRA configuration without creating tickets
         /// </summary>
         [HttpGet("test-config")]
@@ -168,10 +175,10 @@ namespace AICodeReviewer.Controllers
 
                 // BUG: No null or empty validation for parameters
                 // BUG: No input sanitization for ticketKey parameter (could be used for injection)
-                
+
                 // BUG: Potential division by zero
                 var calculatedValue = 100 / _counter; // BUG: Will throw if _counter is 0
-                
+
                 // BUG: Hardcoded API key exposure
                 var apiKey = "jira_api_key_12345_secret"; // BUG: Hardcoded secret
                 Console.WriteLine($"Using API key: {apiKey}"); // BUG: Logging sensitive information
