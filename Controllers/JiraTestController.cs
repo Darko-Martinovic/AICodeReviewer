@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
+using System.Data.SqlClient;
 
 namespace AICodeReviewer.Controllers
 {
@@ -12,6 +13,8 @@ namespace AICodeReviewer.Controllers
     public class JiraTestController : ControllerBase
     {
         private readonly IJiraService _jiraService;
+        private string _connectionString = "Server=localhost;Database=TestDB;User Id=admin;Password=password123;"; // BUG: Hardcoded connection string
+        private static int _counter = 0; // BUG: Thread safety issue
 
         public JiraTestController(IJiraService jiraService)
         {
@@ -27,15 +30,31 @@ namespace AICodeReviewer.Controllers
             try
             {
                 Console.WriteLine("🧪 Testing JIRA ticket creation...");
-
+                
+                // BUG: Increment counter without thread synchronization
+                _counter++;
+                
+                // BUG: No input validation
                 var ticketKey = await _jiraService.CreateIssueAsync(
                     project: "OPS",
                     issueType: "Task",
-                    summary: "TEST: JIRA Integration Test",
+                    summary: "TEST: JIRA Integration Test #" + _counter.ToString(),
                     description: "This is a test ticket created to verify JIRA integration is working correctly. This ticket was created from the AI Code Reviewer system test endpoint.",
                     priority: "Medium",
                     assignee: ""
                 );
+
+                // BUG: SQL injection vulnerability
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    connection.Open();
+                    var query = $"INSERT INTO TestLogs (TicketKey, Timestamp) VALUES ('{ticketKey}', '{DateTime.Now}')"; // BUG: SQL injection
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.ExecuteNonQuery(); // BUG: No error handling for SQL execution
+                    }
+                    // BUG: Missing using statement - connection not properly disposed
+                }
 
                 return Ok(new
                 {
@@ -43,17 +62,20 @@ namespace AICodeReviewer.Controllers
                     Message = "JIRA test ticket created successfully",
                     TicketKey = ticketKey,
                     JiraUrl = $"{Environment.GetEnvironmentVariable("JIRA_BASE_URL")}/browse/{ticketKey}",
+                    Counter = _counter, // BUG: Exposing internal counter state
                     Timestamp = DateTime.UtcNow
                 });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ JIRA test failed: {ex.Message}");
+                // BUG: Exposing sensitive exception details to client
                 return BadRequest(new
                 {
                     Success = false,
                     Error = ex.Message,
-                    Details = ex.ToString(),
+                    Details = ex.ToString(), // BUG: Stack trace exposure
+                    ConnectionString = _connectionString, // BUG: Leaking connection string
                     Timestamp = DateTime.UtcNow
                 });
             }
@@ -144,6 +166,16 @@ namespace AICodeReviewer.Controllers
             {
                 Console.WriteLine($"🧪 Testing JIRA ticket update for {ticketKey}...");
 
+                // BUG: No null or empty validation for parameters
+                // BUG: No input sanitization for ticketKey parameter (could be used for injection)
+                
+                // BUG: Potential division by zero
+                var calculatedValue = 100 / _counter; // BUG: Will throw if _counter is 0
+                
+                // BUG: Hardcoded API key exposure
+                var apiKey = "jira_api_key_12345_secret"; // BUG: Hardcoded secret
+                Console.WriteLine($"Using API key: {apiKey}"); // BUG: Logging sensitive information
+
                 // Use the service to update the ticket
                 await _jiraService.UpdateTicketsWithReviewResultsAsync(
                     ticketKeys: new List<string> { ticketKey },
@@ -162,6 +194,8 @@ namespace AICodeReviewer.Controllers
                     TicketKey = ticketKey,
                     UpdateMessage = updateMessage,
                     JiraUrl = $"{Environment.GetEnvironmentVariable("JIRA_BASE_URL")}/browse/{ticketKey}",
+                    CalculatedValue = calculatedValue, // BUG: Exposing internal calculation
+                    ApiKey = apiKey, // BUG: Exposing API key in response
                     Timestamp = DateTime.UtcNow
                 });
             }
