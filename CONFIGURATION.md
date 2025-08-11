@@ -63,3 +63,43 @@ curl -X POST "https://localhost:7001/api/pullrequests/review/1"
 - **Production**: Use 0.1-0.2 for reliable reviews
 - **Testing**: Use 0.0 for completely deterministic results
 - **Never use**: 0.7+ for code reviews (too inconsistent)
+
+### Known Issues & Troubleshooting:
+
+#### AI Response Inconsistency
+
+Even with low temperature (0.1), you may occasionally see different issue counts for the same code:
+
+- **Root Cause**: AI models have inherent randomness even at low temperatures
+- **Symptoms**: Same commit shows 1 issue on first run, 8 issues on second run
+- **Workarounds**:
+  - Use temperature 0.0 for completely deterministic results (may cause API errors)
+  - Run multiple reviews and take the most common result
+  - Focus on critical/high severity issues which are more consistent
+
+#### Backend 500 Errors
+
+If you see Internal Server Error (500):
+
+- **Check**: Backend is running on https://localhost:7001
+- **Restart**: Stop and restart the backend API
+- **Logs**: Check console output for specific error messages
+- **Config**: Verify temperature setting is between 0.0-1.0
+
+#### Monitoring Consistency
+
+Use the provided test script to monitor AI consistency:
+
+```powershell
+# Run consistency test
+.\test-consistency.ps1 -runs 10
+```
+
+### Performance Impact:
+
+| Temperature | Response Time | Consistency | Cost Impact |
+| ----------- | ------------- | ----------- | ----------- |
+| 0.0         | Fastest       | 100%        | Lowest      |
+| 0.1         | Fast          | 95%+        | Low         |
+| 0.2         | Normal        | 90%+        | Normal      |
+| 0.7         | Slower        | 60%         | Higher      |

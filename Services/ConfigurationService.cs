@@ -14,7 +14,9 @@ namespace AICodeReviewer.Services
 
         public ConfigurationService()
         {
+            Console.WriteLine("🔧 LOADING CONFIGURATION - Starting initialization...");
             _appSettings = LoadConfiguration();
+            Console.WriteLine($"🔧 CONFIGURATION COMPLETE - Temperature: {_appSettings.AzureOpenAI.Temperature}");
         }
 
         /// <summary>
@@ -39,17 +41,37 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
-        /// Loads configuration from appsettings.json file
+        /// Loads configuration from appsettings.json and environment-specific files
         /// </summary>
         private static void LoadFromJsonFile(AppSettings settings)
         {
-            const string configFile = "appsettings.json";
+            // Get current environment (default to Development if not set)
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+            
+            // Load base configuration first
+            const string baseConfigFile = "appsettings.json";
+            LoadSingleJsonFile(baseConfigFile, settings);
 
+            // Load environment-specific configuration (overrides base)
+            var envConfigFile = $"appsettings.{environment}.json";
+            LoadSingleJsonFile(envConfigFile, settings);
+        }
+
+        /// <summary>
+        /// Loads configuration from a single JSON file
+        /// </summary>
+        private static void LoadSingleJsonFile(string configFile, AppSettings settings)
+        {
             if (!File.Exists(configFile))
             {
-                Console.WriteLine(
-                    $"⚠️  Configuration file '{configFile}' not found, using defaults"
-                );
+                if (configFile == "appsettings.json")
+                {
+                    Console.WriteLine($"⚠️  Base configuration file '{configFile}' not found, using defaults");
+                }
+                else
+                {
+                    Console.WriteLine($"📝 Environment-specific config '{configFile}' not found, using base settings");
+                }
                 return;
             }
 

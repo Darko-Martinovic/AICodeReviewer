@@ -31,20 +31,20 @@ namespace AICodeReviewer.Controllers
             try
             {
                 Console.WriteLine("🧪 Testing JIRA ticket creation...");
-                
+
                 // BUG: Increment counter without thread synchronization
                 _counter++;
-                
+
                 // BUG: Adding to static collection without cleanup - memory leak
                 _logEntries.Add($"Ticket creation attempt #{_counter} at {DateTime.Now}");
-                
+
                 // BUG: No input validation for counter overflow
                 var ticketNumber = _counter * 1000000; // BUG: Potential integer overflow
-                
+
                 // BUG: Logging sensitive information
                 Console.WriteLine($"Using API key: {_apiKey}");
                 Console.WriteLine($"Admin password: {_adminPassword}");
-                
+
                 var ticketKey = await _jiraService.CreateIssueAsync(
                     project: "OPS",
                     issueType: "Task",
@@ -89,8 +89,8 @@ namespace AICodeReviewer.Controllers
                 });
             }
         }        /// <summary>
-        /// Tests JIRA configuration without creating tickets
-        /// </summary>
+                 /// Tests JIRA configuration without creating tickets
+                 /// </summary>
         [HttpGet("test-config")]
         public IActionResult TestJiraConfig()
         {

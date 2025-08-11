@@ -152,10 +152,25 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                         new ChatMessage { role = "user", content = userPrompt }
                     },
                     max_tokens = _settings.MaxTokens,
-                    temperature = (float)_settings.Temperature // Use configured temperature for consistent code reviews
+                    temperature = 0.0f, // FORCE DETERMINISTIC: Hardcoded to 0.0 for complete consistency
+                    seed = 12345 // Fixed seed for completely deterministic results
                 };
 
+                // DEBUG: Log the actual temperature being used
+                Console.WriteLine($"🔍 DEBUG - FORCED Temperature: 0.0 (bypassing config)");
+                Console.WriteLine($"🔍 DEBUG - Settings Temperature: {_settings.Temperature}");
+                Console.WriteLine($"🔍 DEBUG - Using seed: 12345");
+                Console.WriteLine($"🔍 DEBUG - Request object temperature: {request.temperature}");
+
                 string jsonRequest = JsonSerializer.Serialize(request);
+                var tempCheck = jsonRequest.Contains("\"temperature\":0") ? "0.0" : "NOT 0.0";
+                Console.WriteLine($"🔍 DEBUG - JSON Request temperature: {tempCheck}");
+                var tempIndex = jsonRequest.IndexOf("temperature");
+                if (tempIndex >= 0)
+                {
+                    var snippet = jsonRequest.Substring(Math.Max(0, tempIndex - 20), Math.Min(60, jsonRequest.Length - Math.Max(0, tempIndex - 20)));
+                    Console.WriteLine($"🔍 DEBUG - JSON snippet: {snippet}");
+                }
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
                 var response = await _httpClient.PostAsync(url, content);
