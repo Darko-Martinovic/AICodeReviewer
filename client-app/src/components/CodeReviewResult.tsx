@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { CodeReview } from "../services/api";
 import {
   AlertTriangle,
@@ -7,6 +7,8 @@ import {
   Shield,
   Lightbulb,
   Code,
+  Copy,
+  Check,
 } from "lucide-react";
 import styles from "./CodeReviewResult.module.css";
 
@@ -19,6 +21,81 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
   review,
   onClose,
 }) => {
+  const [copiedItem, setCopiedItem] = useState<string | null>(null);
+
+  // Copy functions
+  const copyToClipboard = async (text: string, itemId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItem(itemId);
+      setTimeout(() => setCopiedItem(null), 2000); // Reset after 2 seconds
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const formatFullReview = () => {
+    let output = "# Code Review Results\n\n";
+
+    if (review.summary) {
+      output += `## Summary\n${review.summary}\n\n`;
+    }
+
+    output += `## Metrics\n`;
+    output += `- **Complexity**: ${review.complexity}\n`;
+    output += `- **Test Coverage**: ${review.testCoverage}\n\n`;
+
+    if (review.issues && review.issues.length > 0) {
+      output += `## Code Issues (${review.issues.length})\n\n`;
+      review.issues.forEach((issue, index) => {
+        output += `### ${index + 1}. ${issue.severity} - ${issue.file}:${
+          issue.line
+        }\n`;
+        output += `**Issue**: ${issue.message}\n`;
+        output += `**Suggestion**: ${issue.suggestion}\n\n`;
+      });
+    }
+
+    if (review.security && review.security.length > 0) {
+      output += `## Security Issues (${review.security.length})\n\n`;
+      review.security.forEach((issue, index) => {
+        output += `### ${index + 1}. ${issue.severity} - ${issue.type}\n`;
+        output += `**Description**: ${issue.description}\n`;
+        output += `**Recommendation**: ${issue.recommendation}\n\n`;
+      });
+    }
+
+    if (review.suggestions && review.suggestions.length > 0) {
+      output += `## Suggestions (${review.suggestions.length})\n\n`;
+      review.suggestions.forEach((suggestion, index) => {
+        output += `${index + 1}. ${suggestion}\n`;
+      });
+    }
+
+    return output;
+  };
+
+  const formatIssue = (
+    issue: any,
+    type: "code" | "security",
+    _index: number
+  ) => {
+    if (type === "code") {
+      return `${issue.severity} Issue - ${issue.file}:${issue.line}\n\nProblem: ${issue.message}\n\nSuggestion: ${issue.suggestion}`;
+    } else {
+      return `${issue.severity} Security Issue - ${issue.type}\n\nDescription: ${issue.description}\n\nRecommendation: ${issue.recommendation}`;
+    }
+  };
+
+  const formatAllSuggestions = () => {
+    if (!review.suggestions || review.suggestions.length === 0) return "";
+
+    let output = "Code Review Suggestions:\n\n";
+    review.suggestions.forEach((suggestion, index) => {
+      output += `${index + 1}. ${suggestion}\n`;
+    });
+    return output;
+  };
   // Debug logging
   console.log("🎯 CodeReviewResult component rendered");
   console.log("📋 Review prop:", review);
@@ -99,9 +176,25 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
               <Code className={styles.iconLarge} />
               Code Review Results
             </h2>
-            <button onClick={onClose} className={styles.closeButton}>
-              <XCircle className={styles.iconLarge} />
-            </button>
+            <div className={styles.headerButtons}>
+              <button
+                onClick={() =>
+                  copyToClipboard(formatFullReview(), "full-review")
+                }
+                className={styles.copyButton}
+                title="Copy full review to clipboard"
+              >
+                {copiedItem === "full-review" ? (
+                  <Check className={styles.iconSmall} />
+                ) : (
+                  <Copy className={styles.iconSmall} />
+                )}
+                Copy All
+              </button>
+              <button onClick={onClose} className={styles.closeButton}>
+                <XCircle className={styles.iconLarge} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -219,22 +312,40 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
                       {getSeverityIcon(issue.severity)}
                       <div className={styles.issueDetails}>
                         <div className={styles.issueHeader}>
-                          <span className={styles.issueLocation}>
-                            {issue.file}:{issue.line}
-                          </span>
-                          <span
-                            className={
-                              issue.severity.toLowerCase() === "critical"
-                                ? styles.severityBadgeCritical
-                                : issue.severity.toLowerCase() === "high"
-                                ? styles.severityBadgeHigh
-                                : issue.severity.toLowerCase() === "medium"
-                                ? styles.severityBadgeMedium
-                                : styles.severityBadgeLow
+                          <div className={styles.issueHeaderLeft}>
+                            <span className={styles.issueLocation}>
+                              {issue.file}:{issue.line}
+                            </span>
+                            <span
+                              className={
+                                issue.severity.toLowerCase() === "critical"
+                                  ? styles.severityBadgeCritical
+                                  : issue.severity.toLowerCase() === "high"
+                                  ? styles.severityBadgeHigh
+                                  : issue.severity.toLowerCase() === "medium"
+                                  ? styles.severityBadgeMedium
+                                  : styles.severityBadgeLow
+                              }
+                            >
+                              {issue.severity}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() =>
+                              copyToClipboard(
+                                formatIssue(issue, "code", index),
+                                `code-issue-${index}`
+                              )
                             }
+                            className={styles.copyButtonSmall}
+                            title="Copy this issue to clipboard"
                           >
-                            {issue.severity}
-                          </span>
+                            {copiedItem === `code-issue-${index}` ? (
+                              <Check className={styles.iconTiny} />
+                            ) : (
+                              <Copy className={styles.iconTiny} />
+                            )}
+                          </button>
                         </div>
                         <p className={styles.issueMessage}>{issue.message}</p>
                         {issue.suggestion && (
@@ -264,22 +375,40 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
                       {getSeverityIcon(issue.severity)}
                       <div className={styles.issueDetails}>
                         <div className={styles.issueHeader}>
-                          <span className={styles.issueLocation}>
-                            {issue.type}
-                          </span>
-                          <span
-                            className={
-                              issue.severity.toLowerCase() === "critical"
-                                ? styles.severityBadgeCritical
-                                : issue.severity.toLowerCase() === "high"
-                                ? styles.severityBadgeHigh
-                                : issue.severity.toLowerCase() === "medium"
-                                ? styles.severityBadgeMedium
-                                : styles.severityBadgeLow
+                          <div className={styles.issueHeaderLeft}>
+                            <span className={styles.issueLocation}>
+                              {issue.type}
+                            </span>
+                            <span
+                              className={
+                                issue.severity.toLowerCase() === "critical"
+                                  ? styles.severityBadgeCritical
+                                  : issue.severity.toLowerCase() === "high"
+                                  ? styles.severityBadgeHigh
+                                  : issue.severity.toLowerCase() === "medium"
+                                  ? styles.severityBadgeMedium
+                                  : styles.severityBadgeLow
+                              }
+                            >
+                              {issue.severity}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() =>
+                              copyToClipboard(
+                                formatIssue(issue, "security", index),
+                                `security-issue-${index}`
+                              )
                             }
+                            className={styles.copyButtonSmall}
+                            title="Copy this security issue to clipboard"
                           >
-                            {issue.severity}
-                          </span>
+                            {copiedItem === `security-issue-${index}` ? (
+                              <Check className={styles.iconTiny} />
+                            ) : (
+                              <Copy className={styles.iconTiny} />
+                            )}
+                          </button>
                         </div>
                         <p className={styles.issueMessage}>
                           {issue.description}
@@ -299,10 +428,26 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
           {/* Suggestions */}
           {review.suggestions && review.suggestions.length > 0 && (
             <div className={styles.card}>
-              <h3 className={styles.sectionTitleWithIcon}>
-                <Lightbulb className={styles.iconMedium} />
-                Suggestions ({review.suggestions.length})
-              </h3>
+              <div className={styles.sectionHeaderWithActions}>
+                <h3 className={styles.sectionTitleWithIcon}>
+                  <Lightbulb className={styles.iconMedium} />
+                  Suggestions ({review.suggestions.length})
+                </h3>
+                <button
+                  onClick={() =>
+                    copyToClipboard(formatAllSuggestions(), "all-suggestions")
+                  }
+                  className={styles.copyButtonSmall}
+                  title="Copy all suggestions to clipboard"
+                >
+                  {copiedItem === "all-suggestions" ? (
+                    <Check className={styles.iconTiny} />
+                  ) : (
+                    <Copy className={styles.iconTiny} />
+                  )}
+                  Copy All
+                </button>
+              </div>
               <ul className={styles.suggestionsList}>
                 {review.suggestions.map((suggestion, index) => (
                   <li key={index} className={styles.suggestionItem}>
