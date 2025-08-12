@@ -50,7 +50,7 @@
             "url": {
               "raw": "{{baseUrl}}{{apiPath}}/repositories/current",
               "host": ["{{baseUrl}}"],
-              "path": ["{{apiPath}}", "repositories", "current"]
+              "path": ["api", "repositories", "current"]
             },
             "description": "Retrieves the currently configured repository"
           },
@@ -156,7 +156,7 @@
               "raw": "{\n  \"owner\": \"{{currentOwner}}\",\n  \"name\": \"{{currentRepo}}\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}{{apiPath}}/repositories/set",
+              "raw": "{{baseUrl}}/{{apiPath}}/repositories/set",
               "host": ["{{baseUrl}}"],
               "path": ["{{apiPath}}", "repositories", "set"]
             },
