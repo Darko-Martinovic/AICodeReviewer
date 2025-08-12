@@ -1,8 +1,8 @@
 {
   "info": {
     "name": "AI Code Reviewer API",
-    "description": "Comprehensive API collection for the AI Code Reviewer system. This collection provides endpoints for repository management, pull request analysis, commit reviews, workflow execution, and system configuration.",
-    "version": "1.0.0",
+    "description": "Comprehensive API collection for the AI Code Reviewer system. This collection provides endpoints for repository management, pull request analysis, commit reviews, workflow execution, cache management, and system configuration.",
+    "version": "1.1.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -687,6 +687,94 @@
               "path": ["{{apiPath}}", "systemprompts", "UnsupportedLanguage"]
             },
             "description": "Tests getting prompt for unsupported language (should return error or default)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cache Management",
+      "description": "Operations for managing code review cache to improve performance",
+      "item": [
+        {
+          "name": "Check Commit Cache Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/cache/commit/{{commitSha}}/exists",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "cache",
+                "commit",
+                "{{commitSha}}",
+                "exists"
+              ]
+            },
+            "description": "Check if a commit review is cached. Returns true if cached, false otherwise."
+          },
+          "response": []
+        },
+        {
+          "name": "Check Pull Request Cache Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/cache/pullrequest/{{prNumber}}/exists",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "{{apiPath}}",
+                "cache",
+                "pullrequest",
+                "{{prNumber}}",
+                "exists"
+              ]
+            },
+            "description": "Check if a pull request review is cached. Returns true if cached, false otherwise."
+          },
+          "response": []
+        },
+        {
+          "name": "Clear All Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/cache/clear",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "cache", "clear"]
+            },
+            "description": "Clear all cached reviews. Use with caution as this will remove all cached commit and PR reviews."
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Specific Commit Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/cache/commit/{{commitSha}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "cache", "commit", "{{commitSha}}"]
+            },
+            "description": "Clear cached review for a specific commit SHA."
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Specific Pull Request Cache",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/cache/pullrequest/{{prNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "cache", "pullrequest", "{{prNumber}}"]
+            },
+            "description": "Clear cached review for a specific pull request number."
           },
           "response": []
         }
