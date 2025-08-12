@@ -14,11 +14,13 @@ namespace AICodeReviewer.Services
         private readonly IAzureOpenAIService _aiService;
         private readonly IGitHubService _gitHubService;
         private readonly IConfigurationService _configurationService;
+        private readonly ICacheService _cacheService;
 
         public CodeReviewService(
             IAzureOpenAIService aiService,
             IGitHubService gitHubService,
-            IConfigurationService configurationService
+            IConfigurationService configurationService,
+            ICacheService cacheService
         )
         {
             _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
@@ -27,6 +29,7 @@ namespace AICodeReviewer.Services
             _configurationService =
                 configurationService
                 ?? throw new ArgumentNullException(nameof(configurationService));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
         }
 
         /// <summary>
@@ -42,8 +45,22 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<CodeReviewResult> ReviewCommitAsync(string commitSha)
         {
+            // Check cache first
+            var cachedResult = await _cacheService.GetCommitReviewAsync(commitSha);
+            if (cachedResult != null)
+            {
+                Console.WriteLine($"📋 Found cached review for commit {commitSha}");
+                return cachedResult;
+            }
+
+            Console.WriteLine($"🆕 No cached review found for commit {commitSha}, performing new review");
             var commit = await _gitHubService.GetCommitAsync(commitSha);
-            return await ReviewCommitAsync(commit.Files);
+            var result = await ReviewCommitAsync(commit.Files);
+
+            // Cache the result
+            await _cacheService.SetCommitReviewAsync(commitSha, result);
+
+            return result;
         }
 
         /// <summary>
@@ -61,9 +78,23 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task<CodeReviewResult> ReviewPullRequestAsync(int pullRequestNumber)
         {
+            // Check cache first
+            var cachedResult = await _cacheService.GetPullRequestReviewAsync(pullRequestNumber);
+            if (cachedResult != null)
+            {
+                Console.WriteLine($"📋 Found cached review for PR #{pullRequestNumber}");
+                return cachedResult;
+            }
+
+            Console.WriteLine($"🆕 No cached review found for PR #{pullRequestNumber}, performing new review");
             var (files, headBranch) = await _gitHubService.GetPullRequestFilesWithBranchAsync(pullRequestNumber);
             Console.WriteLine($"🔍 PR #{pullRequestNumber} uses branch: {headBranch}");
-            return await ReviewPullRequestAsync(files, headBranch);
+            var result = await ReviewPullRequestAsync(files, headBranch);
+
+            // Cache the result
+            await _cacheService.SetPullRequestReviewAsync(pullRequestNumber, result);
+
+            return result;
         }
 
         /// <summary>

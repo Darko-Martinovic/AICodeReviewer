@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { repositoryApi, commitsApi, pullRequestsApi } from "./services/api";
+import {
+  repositoryApi,
+  commitsApi,
+  pullRequestsApi,
+  cacheApi,
+} from "./services/api";
 import type {
   Repository,
   Commit,
@@ -396,6 +401,38 @@ function App() {
         ? commit.message.split("\n")[0]
         : `Commit ${sha.substring(0, 8)}`;
 
+      // Check cache status first
+      console.log("📋 Checking cache for commit:", sha);
+      const cacheResponse = await cacheApi.hasCommitReview(sha);
+      const isCached = cacheResponse.data;
+
+      console.log(
+        "📋 Cache status for commit",
+        sha,
+        ":",
+        isCached ? "CACHED" : "NOT CACHED"
+      );
+
+      if (isCached) {
+        addToast({
+          type: "info",
+          title: "Using Cached Results",
+          message: `Review for commit ${sha.substring(
+            0,
+            8
+          )} will load instantly from cache.`,
+        });
+      } else {
+        addToast({
+          type: "info",
+          title: "Starting Fresh Review",
+          message: `Analyzing commit ${sha.substring(
+            0,
+            8
+          )} - expected duration: ~23 seconds.`,
+        });
+      }
+
       // Show progress modal and start tracking
       setState((prev) => ({
         ...prev,
@@ -404,40 +441,36 @@ function App() {
           show: true,
           type: "commit",
           id: sha,
-          title: `Reviewing: ${commitTitle}`,
+          title: `${
+            isCached ? "Loading Cached Review" : "Reviewing"
+          }: ${commitTitle}`,
         },
       }));
 
       console.log("📡 Calling commits API review...");
+      const startTime = Date.now();
       const response = await commitsApi.review(sha);
+      const duration = Date.now() - startTime;
 
-      console.log("✅ API Response received:", response);
+      console.log(`✅ API Response received in ${duration}ms:`, response);
       console.log("📋 Response data:", response.data);
-      console.log("📋 Response data type:", typeof response.data);
-      console.log("📋 Response data keys:", Object.keys(response.data || {}));
 
       // Log each property of the review data
       if (response.data) {
         console.log("🔍 Review data breakdown:");
         console.log("  - Summary:", response.data.summary);
-        console.log("  - Summary type:", typeof response.data.summary);
-        console.log("  - Summary length:", response.data.summary?.length);
-        console.log("  - Issues:", response.data.issues);
         console.log("  - Issues length:", response.data.issues?.length);
-        console.log("  - Suggestions:", response.data.suggestions);
         console.log(
           "  - Suggestions length:",
           response.data.suggestions?.length
         );
         console.log("  - Complexity:", response.data.complexity);
         console.log("  - Test Coverage:", response.data.testCoverage);
-        console.log("  - Security:", response.data.security);
         console.log("  - Security length:", response.data.security?.length);
-      } else {
-        console.error("❌ Response data is null or undefined!");
       }
 
-      // Wait a bit to let the progress modal complete its animation
+      // Wait a bit to let the progress modal complete its animation (less time if cached)
+      const delayMs = isCached ? 1000 : 2000;
       setTimeout(() => {
         setState((prev) => ({
           ...prev,
@@ -451,7 +484,7 @@ function App() {
             show: false,
           },
         }));
-      }, 1000);
+      }, delayMs);
 
       console.log("✅ State updated, modal should show");
     } catch (error) {
@@ -482,6 +515,32 @@ function App() {
       const pr = state.pullRequests.find((p) => p.number === number);
       const prTitle = pr ? pr.title : `Pull Request #${number}`;
 
+      // Check cache status first
+      console.log("📋 Checking cache for PR:", number);
+      const cacheResponse = await cacheApi.hasPullRequestReview(number);
+      const isCached = cacheResponse.data;
+
+      console.log(
+        "📋 Cache status for PR",
+        number,
+        ":",
+        isCached ? "CACHED" : "NOT CACHED"
+      );
+
+      if (isCached) {
+        addToast({
+          type: "info",
+          title: "Using Cached Results",
+          message: `Review for PR #${number} will load instantly from cache.`,
+        });
+      } else {
+        addToast({
+          type: "info",
+          title: "Starting Fresh Review",
+          message: `Analyzing PR #${number} - expected duration: ~3 minutes.`,
+        });
+      }
+
       // Show progress modal and start tracking
       setState((prev) => ({
         ...prev,
@@ -490,50 +549,44 @@ function App() {
           show: true,
           type: "pullrequest",
           id: number,
-          title: `Reviewing: ${prTitle}`,
+          title: `${
+            isCached ? "Loading Cached Review" : "Reviewing"
+          }: ${prTitle}`,
         },
       }));
 
       console.log("📡 Calling pull requests API review...");
       console.log("⏰ API call started at:", new Date().toISOString());
+      const startTime = Date.now();
       const response = await pullRequestsApi.review(number);
+      const duration = Date.now() - startTime;
 
-      console.log("✅ API Response received:", response);
+      console.log(`✅ API Response received in ${duration}ms:`, response);
       console.log("⏰ API call completed at:", new Date().toISOString());
 
       console.log("📋 Response data:", response.data);
-      console.log("📋 Response data type:", typeof response.data);
-      console.log("📋 Response data keys:", Object.keys(response.data || {}));
 
       // Log each property of the review data
       if (response.data) {
         console.log("🔍 Review data breakdown:");
         console.log("  - Summary:", response.data.summary);
-        console.log("  - Summary type:", typeof response.data.summary);
-        console.log("  - Summary length:", response.data.summary?.length);
-        console.log("  - Issues:", response.data.issues);
         console.log("  - Issues length:", response.data.issues?.length);
-        console.log("  - Suggestions:", response.data.suggestions);
         console.log(
           "  - Suggestions length:",
           response.data.suggestions?.length
         );
         console.log("  - Complexity:", response.data.complexity);
         console.log("  - Test Coverage:", response.data.testCoverage);
-        console.log("  - Security:", response.data.security);
         console.log("  - Security length:", response.data.security?.length);
-      } else {
-        console.error("❌ Response data is null or undefined!");
       }
 
-      // Wait a bit to let the progress modal complete its animation
+      // Wait a bit to let the progress modal complete its animation (less time if cached)
+      const delayMs = isCached ? 1000 : 2000;
       setTimeout(() => {
         console.log(
           "🔄 About to set PR review state with response:",
           response.data
         );
-        console.log("🔄 showReviewModal will be set to:", true);
-        console.log("🔄 codeReview will be set to:", response.data);
 
         setState((prev) => ({
           ...prev,
@@ -553,11 +606,15 @@ function App() {
         // Show workflow completion notification
         addToast({
           type: "success",
-          title: "Integration Workflow Complete",
-          message: "AI Review → JIRA Update → GitHub PR Comment completed",
+          title: isCached
+            ? "Cached Review Loaded"
+            : "Integration Workflow Complete",
+          message: isCached
+            ? `Cached review for PR #${number} loaded successfully`
+            : "AI Review → JIRA Update → GitHub PR Comment completed",
           duration: 5000,
         });
-      }, 1000);
+      }, delayMs);
 
       console.log("✅ State updated, modal should show");
     } catch (error) {

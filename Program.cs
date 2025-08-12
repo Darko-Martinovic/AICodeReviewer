@@ -131,6 +131,7 @@ namespace AICodeReviewer
             services.AddSingleton<ICodeReviewService, CodeReviewService>();
             services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IJiraService, JiraService>();
+            services.AddSingleton<ICacheService, CacheService>();
 
             // Configure Semantic Kernel
             ConfigureSemanticKernel(services);

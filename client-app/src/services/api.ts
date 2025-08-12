@@ -62,6 +62,18 @@ export const pullRequestsApi = {
     longRunningApi.post(`/pullrequests/review/${number}`),
 };
 
+// Cache API
+export const cacheApi = {
+  hasCommitReview: (commitSha: string) =>
+    api.get(`/cache/commit/${commitSha}/exists`),
+  hasPullRequestReview: (pullRequestNumber: number) =>
+    api.get(`/cache/pullrequest/${pullRequestNumber}/exists`),
+  clearAll: () => api.delete("/cache/clear"),
+  clearCommit: (commitSha: string) => api.delete(`/cache/commit/${commitSha}`),
+  clearPullRequest: (pullRequestNumber: number) =>
+    api.delete(`/cache/pullrequest/${pullRequestNumber}`),
+};
+
 // Types
 export interface Repository {
   id: number;

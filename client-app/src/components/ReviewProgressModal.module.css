@@ -273,7 +273,52 @@
   }
 }
 
-/* Waiting message styles */
+/* Cache Notice Styles */
+.cacheNotice {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+:global(.dark) .cacheNotice {
+  background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
+  border-color: #0ea5e9;
+}
+
+.cacheIcon {
+  width: 20px;
+  height: 20px;
+  color: #0ea5e9;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cacheTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0369a1;
+  margin: 0 0 4px 0;
+}
+
+:global(.dark) .cacheTitle {
+  color: #7dd3fc;
+}
+
+.cacheText {
+  font-size: 13px;
+  color: #075985;
+  margin: 0;
+  line-height: 1.4;
+}
+
+:global(.dark) .cacheText {
+  color: #bae6fd;
+}
 .waitingMessage {
   background: rgb(255 247 237);
   border: 1px solid rgb(255 165 0);
