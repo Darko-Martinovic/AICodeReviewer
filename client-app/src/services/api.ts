@@ -13,7 +13,7 @@ const api = axios.create({
 // Create a separate instance for long-running operations like reviews
 const longRunningApi = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000, // 60 seconds for reviews and heavy operations
+  timeout: 180000, // 3 minutes for reviews and heavy operations (was 60 seconds)
   headers: {
     "Content-Type": "application/json",
   },

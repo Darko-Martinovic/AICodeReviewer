@@ -272,3 +272,27 @@
     padding: 16px 20px;
   }
 }
+
+/* Waiting message styles */
+.waitingMessage {
+  background: rgb(255 247 237);
+  border: 1px solid rgb(255 165 0);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+:global(.dark) .waitingMessage {
+  background: rgb(92 56 20);
+  border-color: rgb(217 119 6);
+}
+
+.waitingText {
+  color: rgb(146 64 14);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:global(.dark) .waitingText {
+  color: rgb(253 186 116);
+}

@@ -10,6 +10,7 @@ interface ReviewProgressModalProps {
   reviewType: "commit" | "pullrequest";
   reviewId: string | number;
   title: string;
+  forceCompleted?: boolean; // External control for completion state
 }
 
 const COMMIT_STEPS: ProgressStep[] = [
@@ -72,6 +73,7 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
   reviewType,
   reviewId,
   title,
+  forceCompleted = false,
 }) => {
   const [steps, setSteps] = useState<ProgressStep[]>(
     reviewType === "commit" ? [...COMMIT_STEPS] : [...PR_STEPS]
@@ -96,7 +98,11 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
             status: step.status === "running" ? "completed" : step.status,
           }))
         );
-        setIsCompleted(true);
+
+        // Only auto-complete for commits or when forced
+        if (reviewType === "commit" || forceCompleted) {
+          setIsCompleted(true);
+        }
         return;
       }
 
@@ -135,7 +141,7 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
 
     // Start first step after small delay
     setTimeout(processNextStep, 500);
-  }, [reviewType]);
+  }, [reviewType, forceCompleted]);
 
   useEffect(() => {
     if (isOpen && !startTime) {
@@ -151,6 +157,13 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
       simulateProgress();
     }
   }, [isOpen, reviewType, startTime, simulateProgress]);
+
+  // Handle external completion signal
+  useEffect(() => {
+    if (forceCompleted && !isCompleted) {
+      setIsCompleted(true);
+    }
+  }, [forceCompleted, isCompleted]);
 
   const getElapsedTime = () => {
     if (!startTime) return "0s";
@@ -210,7 +223,7 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
             }
           />
 
-          {isCompleted && (
+          {isCompleted ? (
             <div className={styles.completionMessage}>
               <CheckCircle className={styles.completionIcon} />
               <div>
@@ -222,10 +235,23 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
                     : "pull request workflow"}{" "}
                   has been completed successfully.
                   {reviewType === "pullrequest" &&
-                    " Check GitHub for the review comment and JIRA for any created tickets."}
+                    " The actual AI review is still processing in the background - please wait for the results window to appear automatically."}
                 </p>
               </div>
             </div>
+          ) : (
+            reviewType === "pullrequest" && (
+              <div className={styles.waitingMessage}>
+                <div className={styles.waitingText}>
+                  <strong>Waiting for AI analysis to complete...</strong>
+                  <br />
+                  PR reviews include GitHub commenting and JIRA integration
+                  which may take several minutes.
+                  <br />
+                  Please wait for the actual completion.
+                </div>
+              </div>
+            )
           )}
         </div>
 

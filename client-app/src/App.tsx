@@ -495,9 +495,11 @@ function App() {
       }));
 
       console.log("📡 Calling pull requests API review...");
+      console.log("⏰ API call started at:", new Date().toISOString());
       const response = await pullRequestsApi.review(number);
 
       console.log("✅ API Response received:", response);
+      console.log("⏰ API call completed at:", new Date().toISOString());
 
       console.log("📋 Response data:", response.data);
       console.log("📋 Response data type:", typeof response.data);
@@ -526,6 +528,13 @@ function App() {
 
       // Wait a bit to let the progress modal complete its animation
       setTimeout(() => {
+        console.log(
+          "🔄 About to set PR review state with response:",
+          response.data
+        );
+        console.log("🔄 showReviewModal will be set to:", true);
+        console.log("🔄 codeReview will be set to:", response.data);
+
         setState((prev) => ({
           ...prev,
           codeReview: response.data,
@@ -539,6 +548,8 @@ function App() {
           },
         }));
 
+        console.log("✅ PR review state updated - modal should show now");
+
         // Show workflow completion notification
         addToast({
           type: "success",
@@ -551,6 +562,16 @@ function App() {
       console.log("✅ State updated, modal should show");
     } catch (error) {
       console.error("❌ Pull request review failed:", error);
+
+      // Check if it's a timeout error
+      const errorObj = error as { code?: string; message?: string };
+      const isTimeout =
+        errorObj?.code === "ECONNABORTED" ||
+        errorObj?.message?.includes("timeout");
+      const errorMessage = isTimeout
+        ? "Review timed out - PR reviews take longer due to GitHub/JIRA integration. Please try again."
+        : "Failed to review pull request";
+
       setState((prev) => ({
         ...prev,
         reviewingPRs: new Set(
@@ -563,8 +584,9 @@ function App() {
       }));
       addToast({
         type: "error",
-        title: "Review Failed",
-        message: "Failed to review pull request",
+        title: isTimeout ? "Review Timeout" : "Review Failed",
+        message: errorMessage,
+        duration: isTimeout ? 8000 : 5000, // Show timeout message longer
       });
     }
   };
@@ -722,15 +744,83 @@ function App() {
           state.progressModal.id && (
             <ReviewProgressModal
               isOpen={state.progressModal.show}
-              onClose={() =>
+              onClose={() => {
+                console.log("🚪 Progress modal manually closed by user");
+                console.log(
+                  "🚪 Current state - codeReview:",
+                  state.codeReview ? "EXISTS" : "NULL"
+                );
+                console.log(
+                  "🚪 Current state - showReviewModal:",
+                  state.showReviewModal
+                );
+
                 setState((prev) => ({
                   ...prev,
                   progressModal: { ...prev.progressModal, show: false },
-                }))
-              }
+                  // Show review modal if there's a review available
+                  showReviewModal: prev.codeReview
+                    ? true
+                    : prev.showReviewModal,
+                  reviewingCommits:
+                    prev.progressModal.type === "commit" &&
+                    prev.progressModal.id
+                      ? new Set(
+                          [...prev.reviewingCommits].filter(
+                            (id) => id !== prev.progressModal.id
+                          )
+                        )
+                      : prev.reviewingCommits,
+                  reviewingPRs:
+                    prev.progressModal.type === "pullrequest" &&
+                    prev.progressModal.id
+                      ? new Set(
+                          [...prev.reviewingPRs].filter(
+                            (id) => id !== prev.progressModal.id
+                          )
+                        )
+                      : prev.reviewingPRs,
+                }));
+
+                console.log(
+                  "🚪 After manual close - review modal should show if data exists"
+                );
+
+                // Start polling for review results in case API completes later
+                console.log("⏰ Starting polling for review results...");
+                const pollInterval = setInterval(() => {
+                  setState((prev) => {
+                    if (prev.codeReview && !prev.showReviewModal) {
+                      console.log(
+                        "🎯 Found review results - showing modal now!"
+                      );
+                      clearInterval(pollInterval);
+                      return {
+                        ...prev,
+                        showReviewModal: true,
+                      };
+                    }
+                    return prev;
+                  });
+                }, 2000);
+
+                // For PR reviews, poll for longer since they take more time
+                const reviewType = state.progressModal.type;
+                const pollDuration =
+                  reviewType === "pullrequest" ? 300000 : 60000; // 5 minutes for PRs, 1 minute for commits
+                setTimeout(() => {
+                  clearInterval(pollInterval);
+                  console.log(
+                    `⏰ Stopped polling for review results after ${
+                      pollDuration / 1000
+                    } seconds`
+                  );
+                }, pollDuration);
+              }}
               reviewType={state.progressModal.type}
               reviewId={state.progressModal.id}
               title={state.progressModal.title}
+              forceCompleted={false}
             />
           )}
       </MainLayout>
