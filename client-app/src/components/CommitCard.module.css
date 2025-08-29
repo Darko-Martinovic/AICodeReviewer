@@ -6,7 +6,7 @@
   padding: 1.5rem;
 }
 
-.card:global(.dark) {
+:global(.dark) .card {
   background-color: rgb(31 41 55);
 }
 
@@ -42,7 +42,7 @@
   margin: 0;
 }
 
-.title:global(.dark) {
+:global(.dark) .title {
   color: white;
 }
 
@@ -56,7 +56,7 @@
   border: 1px solid rgb(229 231 235);
 }
 
-.messageBody:global(.dark) {
+:global(.dark) .messageBody {
   background-color: rgb(30 41 59);
   border-color: rgb(51 65 85);
 }
@@ -82,7 +82,7 @@
   pointer-events: none;
 }
 
-.messageCollapsed:global(.dark)::after {
+:global(.dark) .messageCollapsed::after {
   background: linear-gradient(transparent, rgb(30 41 59));
 }
 
@@ -97,7 +97,7 @@
   line-height: 1.6;
 }
 
-.messagePreformatted:global(.dark) {
+:global(.dark) .messagePreformatted {
   color: rgb(209 213 219);
 }
 
@@ -119,11 +119,11 @@
   color: rgb(37 99 235);
 }
 
-.expandButton:global(.dark) {
+:global(.dark) .expandButton {
   color: rgb(96 165 250);
 }
 
-.expandButton:global(.dark):hover {
+:global(.dark) .expandButton:hover {
   color: rgb(147 197 253);
 }
 
@@ -142,7 +142,7 @@
   margin-bottom: 0.75rem;
 }
 
-.metadata:global(.dark) {
+:global(.dark) .metadata {
   color: rgb(156 163 175);
 }
 
@@ -167,6 +167,7 @@
 
 .shaCode {
   background-color: rgb(243 244 246);
+  color: rgb(31 41 55);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
@@ -174,8 +175,9 @@
     "Liberation Mono", "Courier New", monospace;
 }
 
-.shaCode:global(.dark) {
+:global(.dark) .shaCode {
   background-color: rgb(31 41 55);
+  color: rgb(209 213 219);
 }
 
 .externalLink {
@@ -187,7 +189,7 @@
   color: rgb(75 85 99);
 }
 
-.externalLink:global(.dark):hover {
+:global(.dark) .externalLink:hover {
   color: rgb(209 213 219);
 }
 

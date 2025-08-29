@@ -416,6 +416,17 @@
   color: rgb(209 213 219);
 }
 
+:global(.dark) .templateButton {
+  background-color: rgb(31 41 55);
+  border-color: rgb(75 85 99);
+  color: white;
+}
+
+:global(.dark) .templateButton:hover {
+  background-color: rgb(55 65 81);
+  border-color: rgb(96 165 250);
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

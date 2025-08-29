@@ -1,6 +1,7 @@
 import React from "react";
-import { Github, RefreshCw } from "lucide-react";
+import { Github, RefreshCw, Sun, Moon } from "lucide-react";
 import type { Repository } from "../services/api";
+import { useTheme } from "../hooks/useThemeHook";
 import styles from "./Header.module.css";
 
 interface HeaderProps {
@@ -12,6 +13,8 @@ export const Header: React.FC<HeaderProps> = ({
   currentRepository,
   onRefresh,
 }) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
@@ -33,6 +36,17 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </div>
             )}
+            <button
+              onClick={toggleTheme}
+              className={styles.themeButton}
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? (
+                <Moon className={styles.themeIcon} />
+              ) : (
+                <Sun className={styles.themeIcon} />
+              )}
+            </button>
             <button
               onClick={onRefresh}
               className={styles.refreshButton}

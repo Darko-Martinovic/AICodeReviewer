@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base body styling for theme support */
+body {
+  background-color: rgb(249 250 251);
+  color: rgb(17 24 39);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+body.dark {
+  background-color: rgb(17 24 39);
+  color: rgb(243 244 246);
+}
+
 /* Custom styles for AI Code Reviewer */
 .bg-gradient-main {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
