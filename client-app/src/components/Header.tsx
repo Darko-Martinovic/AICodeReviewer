@@ -23,7 +23,16 @@ export const Header: React.FC<HeaderProps> = ({
         <div className={styles.headerContent}>
           <div className={styles.logoSection}>
             <Github className={styles.logoIcon} />
-            <h1 className={styles.logoTitle}>AI Code Reviewer</h1>
+            <div className={styles.titleContainer}>
+              <h1 className={styles.logoTitle}>
+                <span className={styles.titlePrimary}>AI</span>
+                <span className={styles.titleSecondary}>Code</span>
+                <span className={styles.titleAccent}>Reviewer</span>
+              </h1>
+              <div className={styles.titleSubtext}>
+                Intelligent Code Analysis
+              </div>
+            </div>
           </div>
 
           <div className={styles.headerActions}>

@@ -1,9 +1,34 @@
 /* Header Component CSS Module */
 
+/* Import Google Fonts for special typography */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
 .header {
-  background-color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid rgb(229 231 235);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.98) 100%
+  );
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.3),
+    transparent
+  );
 }
 
 .headerContainer {
@@ -34,19 +59,123 @@
 .logoSection {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .logoIcon {
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   color: rgb(37 99 235);
+  filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.2));
+  transition: all 0.3s ease;
+}
+
+.logoIcon:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(37, 99, 235, 0.3));
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
 
 .logoTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: rgb(17 24 39);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  letter-spacing: -0.025em;
+}
+
+.titlePrimary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  animation: pulse-blue 3s ease-in-out infinite;
+}
+
+.titleSecondary {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+  animation: pulse-indigo 3s ease-in-out infinite 0.5s;
+}
+
+.titleAccent {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
+  animation: pulse-purple 3s ease-in-out infinite 1s;
+}
+
+@keyframes pulse-blue {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.1) saturate(1.2);
+  }
+}
+
+@keyframes pulse-indigo {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.1) saturate(1.2);
+  }
+}
+
+@keyframes pulse-purple {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.1) saturate(1.2);
+  }
+}
+
+.titleSubtext {
+  font-family: "JetBrains Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(100 116 139);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 640px) {
+  .logoTitle {
+    font-size: 1.5rem;
+  }
+
+  .titleSubtext {
+    font-size: 0.625rem;
+    display: none;
+  }
+
+  .logoIcon {
+    width: 2rem;
+    height: 2rem;
+  }
 }
 
 .headerActions {
@@ -152,12 +281,61 @@
 
 /* Dark mode styles */
 :global(.dark) .header {
-  background-color: rgb(31 41 55);
-  border-bottom-color: rgb(75 85 99);
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(30, 41, 59, 0.98) 100%
+  );
+  backdrop-filter: blur(10px);
+  border-bottom-color: rgba(71, 85, 105, 0.8);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
-:global(.dark) .logoTitle {
-  color: white;
+:global(.dark) .header::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(96, 165, 250, 0.3),
+    transparent
+  );
+}
+
+:global(.dark) .logoIcon {
+  color: rgb(96 165 250);
+  filter: drop-shadow(0 2px 4px rgba(96, 165, 250, 0.3));
+}
+
+:global(.dark) .logoIcon:hover {
+  filter: drop-shadow(0 4px 8px rgba(96, 165, 250, 0.4));
+}
+
+:global(.dark) .titlePrimary {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
+}
+
+:global(.dark) .titleSecondary {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(167, 139, 250, 0.2);
+}
+
+:global(.dark) .titleAccent {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #9333ea 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 4px rgba(192, 132, 252, 0.2);
+}
+
+:global(.dark) .titleSubtext {
+  color: rgb(148 163 184);
 }
 
 :global(.dark) .currentRepositoryIndicator {
