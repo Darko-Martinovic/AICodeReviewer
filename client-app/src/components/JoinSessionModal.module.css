@@ -1,0 +1,366 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+:global(.dark) .modal {
+  background-color: rgb(31 41 55);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:global(.dark) .header {
+  border-bottom-color: rgb(55 65 81);
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  color: #3b82f6;
+}
+
+:global(.dark) .icon {
+  color: rgb(59 130 246);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+:global(.dark) .title {
+  color: rgb(243 244 246);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+:global(.dark) .closeButton {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .closeButton:hover {
+  background-color: rgb(55 65 81);
+  color: rgb(209 213 219);
+}
+
+.content {
+  padding: 24px;
+}
+
+.currentSession {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+:global(.dark) .sectionTitle {
+  color: rgb(243 244 246);
+}
+
+.sessionIdContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sessionId {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 14px;
+  color: #374151;
+  flex: 1;
+  word-break: break-all;
+}
+
+:global(.dark) .sessionId {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: rgb(209 213 219);
+}
+
+.copyButton {
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyButton:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+:global(.dark) .copyButton {
+  background-color: rgb(17 24 39);
+  border-color: rgb(75 85 99);
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .copyButton:hover {
+  background-color: rgb(30 41 59);
+  border-color: rgb(107 114 128);
+  color: rgb(209 213 219);
+}
+
+.checkIcon {
+  color: #10b981;
+}
+
+.shareText {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+:global(.dark) .shareText {
+  color: rgb(156 163 175);
+}
+
+.divider {
+  height: 1px;
+  background-color: #e5e7eb;
+  margin: 20px 0;
+}
+
+:global(.dark) .divider {
+  background-color: rgb(55 65 81);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+:global(.dark) .label {
+  color: rgb(209 213 219);
+}
+
+.input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background-color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+:global(.dark) .input {
+  background-color: rgb(17 24 39);
+  border-color: rgb(75 85 99);
+  color: rgb(243 244 246);
+}
+
+:global(.dark) .input:focus {
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+:global(.dark) .input::placeholder {
+  color: rgb(107 114 128);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.cancelButton,
+.joinButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cancelButton {
+  background-color: white;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.cancelButton:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+:global(.dark) .cancelButton {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .cancelButton:hover {
+  background-color: rgb(75 85 99);
+  border-color: rgb(107 114 128);
+}
+
+.joinButton {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.joinButton:hover:not(:disabled) {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.joinButton:disabled {
+  background-color: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.instructions {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+}
+
+:global(.dark) .instructions {
+  background-color: rgb(12 74 110);
+  border-color: rgb(14 116 144);
+}
+
+.instructionsTitle {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+:global(.dark) .instructionsTitle {
+  color: rgb(186 230 253);
+}
+
+.instructionsList {
+  margin: 0;
+  padding-left: 16px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+:global(.dark) .instructionsList {
+  color: rgb(226 232 240);
+}
+
+.instructionsList li {
+  margin-bottom: 4px;
+}
+
+.instructionsList li:last-child {
+  margin-bottom: 0;
+}

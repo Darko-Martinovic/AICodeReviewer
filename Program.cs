@@ -2,6 +2,7 @@
 using AICodeReviewer.Services;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Plugins;
+using AICodeReviewer.Hubs;
 using Microsoft.SemanticKernel;
 
 namespace AICodeReviewer
@@ -61,7 +62,7 @@ namespace AICodeReviewer
                         "http://localhost:5175", "https://localhost:5175")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials();
+                          .AllowCredentials(); // Required for SignalR
                 });
             });
 
@@ -133,6 +134,17 @@ namespace AICodeReviewer
             services.AddSingleton<IJiraService, JiraService>();
             services.AddSingleton<ICacheService, CacheService>();
 
+            // Collaboration service for real-time code reviews
+            services.AddSingleton<ICollaborationService, CollaborationService>();
+
+            // Add SignalR for real-time communication
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+            });
+
             // Configure Semantic Kernel
             ConfigureSemanticKernel(services);
         }
@@ -201,6 +213,9 @@ namespace AICodeReviewer
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Map SignalR hub for real-time collaboration
+            app.MapHub<CollaborationHub>("/collaborationHub");
 
             // Add a simple health check endpoint
             app.MapGet("/api/health", () => new

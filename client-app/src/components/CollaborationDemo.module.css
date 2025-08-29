@@ -1,0 +1,268 @@
+.collaborationDemo {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark) .collaborationDemo {
+  background-color: rgb(31 41 55);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+:global(.dark) .header {
+  border-bottom-color: rgb(55 65 81);
+}
+
+.title {
+  margin: 0;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+:global(.dark) .title {
+  color: rgb(243 244 246);
+}
+
+.sessionInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessionLabel {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+:global(.dark) .sessionLabel {
+  color: rgb(156 163 175);
+}
+
+.sessionId {
+  background-color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 14px;
+  color: #7c3aed;
+  border: 1px solid #e5e7eb;
+}
+
+:global(.dark) .sessionId {
+  background-color: rgb(55 65 81);
+  color: rgb(167 139 250);
+  border-color: rgb(75 85 99);
+}
+
+.description {
+  margin-bottom: 24px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+:global(.dark) .description {
+  color: rgb(209 213 219);
+}
+
+.featureList {
+  margin: 16px 0;
+  padding-left: 20px;
+}
+
+.featureList li {
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+:global(.dark) .featureList li {
+  color: rgb(209 213 219);
+}
+
+.fileList {
+  margin-bottom: 24px;
+}
+
+.fileListTitle {
+  margin: 0 0 16px 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+:global(.dark) .fileListTitle {
+  color: rgb(243 244 246);
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  margin-bottom: 12px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.fileItem:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark) .fileItem {
+  background-color: rgb(17 24 39);
+  border-color: rgb(55 65 81);
+}
+
+:global(.dark) .fileItem:hover {
+  background-color: rgb(30 41 59);
+  border-color: rgb(75 85 99);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.fileName {
+  font-weight: 600;
+  color: #111827;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+}
+
+:global(.dark) .fileName {
+  color: rgb(243 244 246);
+}
+
+.fileStatus {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.fileStatus.added {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.fileStatus.modified {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.fileStatus.deleted {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+:global(.dark) .fileStatus.added {
+  background-color: rgb(4 120 87);
+  color: rgb(209 250 229);
+}
+
+:global(.dark) .fileStatus.modified {
+  background-color: rgb(217 119 6);
+  color: rgb(254 243 199);
+}
+
+:global(.dark) .fileStatus.deleted {
+  background-color: rgb(153 27 27);
+  color: rgb(254 226 226);
+}
+
+.fileLanguage {
+  background-color: #ddd6fe;
+  color: #7c3aed;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:global(.dark) .fileLanguage {
+  background-color: rgb(139 92 246);
+  color: white;
+}
+
+.collaborateButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.collaborateButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.collaborateButton:active {
+  transform: translateY(0);
+}
+
+.instructions {
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+:global(.dark) .instructions {
+  background-color: rgb(12 74 110);
+  border-color: rgb(14 116 144);
+}
+
+.instructionsHeader {
+  margin-bottom: 12px;
+}
+
+.instructionsHeader h4 {
+  margin: 0;
+  color: #0c4a6e;
+  font-weight: 600;
+}
+
+:global(.dark) .instructionsHeader h4 {
+  color: rgb(186 230 253);
+}
+
+.instructionsList {
+  margin: 0;
+  padding-left: 20px;
+  color: #0f172a;
+}
+
+:global(.dark) .instructionsList {
+  color: rgb(226 232 240);
+}
+
+.instructionsList li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}

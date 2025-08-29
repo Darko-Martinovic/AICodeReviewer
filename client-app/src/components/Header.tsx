@@ -1,5 +1,5 @@
 import React from "react";
-import { Github, RefreshCw, Sun, Moon } from "lucide-react";
+import { Github, RefreshCw, Sun, Moon, Users } from "lucide-react";
 import type { Repository } from "../services/api";
 import { useTheme } from "../hooks/useThemeHook";
 import styles from "./Header.module.css";
@@ -7,11 +7,13 @@ import styles from "./Header.module.css";
 interface HeaderProps {
   currentRepository: Repository | null;
   onRefresh: () => void;
+  onJoinSession?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentRepository,
   onRefresh,
+  onJoinSession,
 }) => {
   const { theme, toggleTheme } = useTheme();
 
@@ -35,6 +37,15 @@ export const Header: React.FC<HeaderProps> = ({
                   </span>
                 </div>
               </div>
+            )}
+            {onJoinSession && (
+              <button
+                onClick={onJoinSession}
+                className={styles.joinSessionButton}
+                title="Join Collaboration Session"
+              >
+                <Users className={styles.joinIcon} />
+              </button>
             )}
             <button
               onClick={toggleTheme}

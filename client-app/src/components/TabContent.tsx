@@ -36,6 +36,7 @@ interface TabContentProps {
   reviewingPRs: Set<number>;
   onRepositorySelect: (repository: Repository) => void;
   onCommitReview: (sha: string) => void;
+  onCommitCollaborate?: (commit: Commit) => void;
   onPullRequestReview: (number: number) => void;
   onBranchSelect: (branch: string) => void;
   onAddRepository: () => void;
@@ -55,6 +56,7 @@ export const TabContent: React.FC<TabContentProps> = ({
   reviewingPRs,
   onRepositorySelect,
   onCommitReview,
+  onCommitCollaborate,
   onPullRequestReview,
   onBranchSelect,
   onAddRepository,
@@ -142,6 +144,7 @@ export const TabContent: React.FC<TabContentProps> = ({
                   key={commit.sha}
                   commit={commit}
                   onReview={onCommitReview}
+                  onCollaborate={onCommitCollaborate}
                   isReviewing={reviewingCommits.has(commit.sha)}
                 />
               ))}

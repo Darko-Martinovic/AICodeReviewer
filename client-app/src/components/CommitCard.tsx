@@ -15,6 +15,7 @@ import styles from "./CommitCard.module.css";
 interface CommitCardProps {
   commit: Commit;
   onReview: (sha: string) => void;
+  onCollaborate?: (commit: Commit) => void;
   isReviewing: boolean;
 }
 
@@ -27,6 +28,7 @@ const mockSteps: ProgressStep[] = [
 export const CommitCard: React.FC<CommitCardProps> = ({
   commit,
   onReview,
+  onCollaborate,
   isReviewing,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -130,13 +132,24 @@ export const CommitCard: React.FC<CommitCardProps> = ({
         {isReviewing ? (
           <ProgressIndicator steps={mockSteps} compact={true} />
         ) : (
-          <button
-            onClick={handleReview}
-            disabled={isReviewing}
-            className={styles.reviewButton}
-          >
-            Review Code
-          </button>
+          <div className={styles.actionButtons}>
+            <button
+              onClick={handleReview}
+              disabled={isReviewing}
+              className={styles.reviewButton}
+            >
+              Review Code
+            </button>
+            {onCollaborate && (
+              <button
+                onClick={() => onCollaborate(commit)}
+                className={styles.collaborateButton}
+                title="Start collaborative review session"
+              >
+                🚀 Collaborate
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

@@ -20,6 +20,8 @@ import TabContent from "./components/TabContent";
 import AddRepositoryModal from "./components/AddRepositoryModal";
 import MainLayout from "./components/MainLayout";
 import ErrorDisplay from "./components/ErrorDisplay";
+import { CollaborationDemo } from "./components/CollaborationDemo";
+import { JoinSessionModal } from "./components/JoinSessionModal";
 import { ErrorBoundary, useToast } from "./components/UI";
 
 type TabType =
@@ -57,6 +59,13 @@ interface AppState {
     id: string | number | null;
     title: string;
   };
+  // Collaboration state
+  collaboration: {
+    isActive: boolean;
+    commit: Commit | null;
+  };
+  // Join session modal state
+  showJoinSessionModal: boolean;
 }
 
 function App() {
@@ -88,6 +97,11 @@ function App() {
       id: null,
       title: "",
     },
+    collaboration: {
+      isActive: false,
+      commit: null,
+    },
+    showJoinSessionModal: false,
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,7 +113,80 @@ function App() {
 
   useEffect(() => {
     loadInitialData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCommitCollaboration = (commit: Commit) => {
+    setState((prev) => ({
+      ...prev,
+      collaboration: {
+        isActive: true,
+        commit: commit,
+      },
+    }));
+    addToast({
+      type: "success",
+      title: "Collaboration Started",
+      message: "Starting collaborative review session...",
+    });
+  };
+
+  const handleEndCollaboration = () => {
+    setState((prev) => ({
+      ...prev,
+      collaboration: {
+        isActive: false,
+        commit: null,
+      },
+    }));
+    addToast({
+      type: "info",
+      title: "Collaboration Ended",
+      message: "Collaborative review session ended",
+    });
+  };
+
+  const handleOpenJoinSessionModal = () => {
+    setState((prev) => ({
+      ...prev,
+      showJoinSessionModal: true,
+    }));
+  };
+
+  const handleCloseJoinSessionModal = () => {
+    setState((prev) => ({
+      ...prev,
+      showJoinSessionModal: false,
+    }));
+  };
+
+  const handleJoinSession = async (sessionId: string, username: string) => {
+    try {
+      addToast({
+        type: "info",
+        title: "Joining Session",
+        message: `Joining collaboration session ${sessionId}...`,
+      });
+
+      // Here you would typically call the collaboration API to join the session
+      // For now, we'll just simulate success
+
+      addToast({
+        type: "success",
+        title: "Session Joined",
+        message: `Successfully joined collaboration session with username "${username}"`,
+      });
+
+      handleCloseJoinSessionModal();
+    } catch (error) {
+      console.error("Failed to join session:", error);
+      addToast({
+        type: "error",
+        title: "Join Failed",
+        message:
+          "Failed to join collaboration session. Please check the session ID and try again.",
+      });
+    }
+  };
 
   const loadInitialData = async () => {
     try {
@@ -712,6 +799,7 @@ function App() {
         <Header
           currentRepository={state.currentRepository}
           onRefresh={loadInitialData}
+          onJoinSession={handleOpenJoinSessionModal}
         />
 
         {/* Navigation */}
@@ -747,28 +835,105 @@ function App() {
           />
 
           {/* Tab Content */}
-          <TabContent
-            activeTab={state.activeTab}
-            currentRepository={state.currentRepository}
-            repositories={filteredRepositories}
-            commits={filteredCommits}
-            pullRequests={filteredPullRequests}
-            branches={state.branches}
-            selectedBranch={state.selectedBranch}
-            loading={state.loading}
-            reviewingCommits={state.reviewingCommits}
-            reviewingPRs={state.reviewingPRs}
-            onRepositorySelect={handleRepositorySelect}
-            onCommitReview={handleCommitReview}
-            onPullRequestReview={handlePullRequestReview}
-            onBranchSelect={handleBranchSelect}
-            onAddRepository={() =>
-              setNewRepoForm((prev) => ({ ...prev, show: true }))
-            }
-            onTabChange={(tab) =>
-              setState((prev) => ({ ...prev, activeTab: tab }))
-            }
-          />
+          {state.collaboration.isActive && state.collaboration.commit ? (
+            <div>
+              <div
+                style={{ padding: "16px", borderBottom: "1px solid #e5e7eb" }}
+              >
+                <button
+                  onClick={handleEndCollaboration}
+                  style={{
+                    background: "#6b7280",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                    marginBottom: "8px",
+                  }}
+                >
+                  ← Back to Repository
+                </button>
+              </div>
+              <CollaborationDemo
+                commitSha={state.collaboration.commit.sha}
+                repositoryFullName={state.currentRepository?.fullName || ""}
+                files={[
+                  {
+                    filename: "example.ts",
+                    content: `// Example TypeScript file
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const createUser = (userData: Partial<User>): User => {
+  return {
+    id: generateId(),
+    name: userData.name || 'Anonymous',
+    email: userData.email || '',
+  };
+};
+
+function generateId(): string {
+  return Math.random().toString(36).substr(2, 9);
+}`,
+                    language: "TypeScript",
+                    status: "modified" as const,
+                  },
+                  {
+                    filename: "utils.js",
+                    content: `// Utility functions
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+export { debounce };`,
+                    language: "JavaScript",
+                    status: "added" as const,
+                  },
+                ]}
+                currentUser={{
+                  id: "demo-user",
+                  name: "Demo User",
+                  avatarUrl: undefined,
+                }}
+              />
+            </div>
+          ) : (
+            <TabContent
+              activeTab={state.activeTab}
+              currentRepository={state.currentRepository}
+              repositories={filteredRepositories}
+              commits={filteredCommits}
+              pullRequests={filteredPullRequests}
+              branches={state.branches}
+              selectedBranch={state.selectedBranch}
+              loading={state.loading}
+              reviewingCommits={state.reviewingCommits}
+              reviewingPRs={state.reviewingPRs}
+              onRepositorySelect={handleRepositorySelect}
+              onCommitReview={handleCommitReview}
+              onCommitCollaborate={handleCommitCollaboration}
+              onPullRequestReview={handlePullRequestReview}
+              onBranchSelect={handleBranchSelect}
+              onAddRepository={() =>
+                setNewRepoForm((prev) => ({ ...prev, show: true }))
+              }
+              onTabChange={(tab) =>
+                setState((prev) => ({ ...prev, activeTab: tab }))
+              }
+            />
+          )}
         </main>
 
         {/* Add Repository Modal */}
@@ -780,6 +945,18 @@ function App() {
           onAddRepository={handleAddRepository}
           onClose={() => setNewRepoForm({ owner: "", name: "", show: false })}
         />
+
+        {/* Join Session Modal */}
+        {state.showJoinSessionModal && (
+          <JoinSessionModal
+            isOpen={state.showJoinSessionModal}
+            currentSessionId={
+              state.collaboration.isActive ? "current-session-id" : undefined
+            }
+            onClose={handleCloseJoinSessionModal}
+            onJoinSession={handleJoinSession}
+          />
+        )}
 
         {/* Code Review Modal */}
         {state.showReviewModal && state.codeReview && (

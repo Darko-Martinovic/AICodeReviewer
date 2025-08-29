@@ -1,0 +1,121 @@
+import React, { useState } from "react";
+import { CollaborativeCodeViewer } from "./CollaborativeCodeViewer";
+import styles from "./CollaborationDemo.module.css";
+
+interface CommitFile {
+  filename: string;
+  content: string;
+  language: string;
+  status: "added" | "modified" | "deleted";
+}
+
+interface CollaborationDemoProps {
+  commitSha: string;
+  repositoryFullName: string;
+  files: CommitFile[];
+  currentUser: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+  };
+}
+
+export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
+  commitSha,
+  repositoryFullName,
+  files,
+  currentUser,
+}) => {
+  const [selectedFile, setSelectedFile] = useState<CommitFile | null>(null);
+  const [isCollaborating, setIsCollaborating] = useState(false);
+
+  // Generate session ID from commit and repository
+  const sessionId = `${repositoryFullName.replace(
+    "/",
+    "-"
+  )}-${commitSha.substring(0, 8)}`;
+
+  const handleStartCollaboration = (file: CommitFile) => {
+    setSelectedFile(file);
+    setIsCollaborating(true);
+  };
+
+  const handleEndCollaboration = () => {
+    setIsCollaborating(false);
+    setSelectedFile(null);
+  };
+
+  if (isCollaborating && selectedFile) {
+    return (
+      <CollaborativeCodeViewer
+        sessionId={sessionId}
+        fileName={selectedFile.filename}
+        fileContent={selectedFile.content}
+        language={selectedFile.language}
+        currentUser={currentUser}
+        onClose={handleEndCollaboration}
+      />
+    );
+  }
+
+  return (
+    <div className={styles.collaborationDemo}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Real-time Collaboration Demo</h2>
+        <div className={styles.sessionInfo}>
+          <span className={styles.sessionLabel}>Session ID:</span>
+          <code className={styles.sessionId}>{sessionId}</code>
+        </div>
+      </div>
+
+      <div className={styles.description}>
+        <p>
+          Select a file below to start a collaborative code review session.
+          Multiple users can join the same session using the session ID to:
+        </p>
+        <ul className={styles.featureList}>
+          <li>💻 View live cursor positions of other participants</li>
+          <li>💬 Add and reply to line-specific comments</li>
+          <li>👥 See who else is actively reviewing the code</li>
+          <li>⚡ Get real-time updates as others type and navigate</li>
+          <li>✅ Resolve discussions and track progress</li>
+        </ul>
+      </div>
+
+      <div className={styles.fileList}>
+        <h3 className={styles.fileListTitle}>Files in this commit:</h3>
+        {files.map((file, index) => (
+          <div key={index} className={styles.fileItem}>
+            <div className={styles.fileInfo}>
+              <span className={styles.fileName}>{file.filename}</span>
+              <span className={`${styles.fileStatus} ${styles[file.status]}`}>
+                {file.status}
+              </span>
+              <span className={styles.fileLanguage}>{file.language}</span>
+            </div>
+            <button
+              className={styles.collaborateButton}
+              onClick={() => handleStartCollaboration(file)}
+            >
+              🚀 Start Collaboration
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.instructions}>
+        <div className={styles.instructionsHeader}>
+          <h4>How to collaborate:</h4>
+        </div>
+        <ol className={styles.instructionsList}>
+          <li>Share the session ID with other team members</li>
+          <li>Click "Start Collaboration" on any file</li>
+          <li>Others can join by entering the same session ID</li>
+          <li>Click on line numbers to select lines for commenting</li>
+          <li>Use the comment button to add feedback</li>
+          <li>See real-time cursors and typing indicators</li>
+        </ol>
+      </div>
+    </div>
+  );
+};
