@@ -51,6 +51,8 @@ export const commitsApi = {
     api.get("/commits/recent", { params: { count, branch } }),
   review: (sha: string) => longRunningApi.post(`/commits/review/${sha}`),
   getBySha: (sha: string) => api.get(`/commits/${sha}`),
+  getDetails: (sha: string): Promise<{ data: { commit: CommitDetails } }> =>
+    api.get(`/commits/${sha}`),
 };
 
 // Pull Requests API
@@ -96,6 +98,28 @@ export interface Commit {
   authorEmail: string;
   date: string;
   htmlUrl: string;
+}
+
+export interface CommitFile {
+  filename: string;
+  status: "added" | "modified" | "removed" | "renamed";
+  additions: number;
+  deletions: number;
+  changes: number;
+}
+
+export interface CommitDetails {
+  sha: string;
+  message: string;
+  author: string;
+  date: string;
+  url: string;
+  stats: {
+    additions: number;
+    deletions: number;
+    total: number;
+  };
+  files: CommitFile[];
 }
 
 export interface PullRequest {

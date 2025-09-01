@@ -67,6 +67,46 @@
   border-color: rgb(75 85 99);
 }
 
+.copyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.copyButton:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}
+
+:global(.dark) .copyButton {
+  background-color: rgb(17 24 39);
+  border-color: rgb(75 85 99);
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .copyButton:hover {
+  background-color: rgb(30 41 59);
+  border-color: rgb(107 114 128);
+  color: rgb(209 213 219);
+}
+
+.copyIcon {
+  width: 16px;
+  height: 16px;
+}
+
 .description {
   margin-bottom: 24px;
   color: #374151;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Copy, Check } from "lucide-react";
 import { CollaborativeCodeViewer } from "./CollaborativeCodeViewer";
 import styles from "./CollaborationDemo.module.css";
 
@@ -28,12 +29,32 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<CommitFile | null>(null);
   const [isCollaborating, setIsCollaborating] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Generate session ID from commit and repository
   const sessionId = `${repositoryFullName.replace(
     "/",
     "-"
   )}-${commitSha.substring(0, 8)}`;
+
+  const handleCopySessionId = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionId);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy session ID:", err);
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = sessionId;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
 
   const handleStartCollaboration = (file: CommitFile) => {
     setSelectedFile(file);
@@ -65,6 +86,17 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
         <div className={styles.sessionInfo}>
           <span className={styles.sessionLabel}>Session ID:</span>
           <code className={styles.sessionId}>{sessionId}</code>
+          <button
+            onClick={handleCopySessionId}
+            className={styles.copyButton}
+            title={copySuccess ? "Copied!" : "Copy Session ID"}
+          >
+            {copySuccess ? (
+              <Check className={styles.copyIcon} />
+            ) : (
+              <Copy className={styles.copyIcon} />
+            )}
+          </button>
         </div>
       </div>
 

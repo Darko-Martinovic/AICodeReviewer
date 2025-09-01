@@ -16,13 +16,6 @@ interface CollaborativeCodeViewerProps {
   onClose?: () => void;
 }
 
-interface LiveCursor {
-  userId: string;
-  userName: string;
-  userColor: string;
-  position: CursorPosition;
-}
-
 const USER_COLORS = [
   "#FF6B6B",
   "#4ECDC4",
@@ -42,10 +35,6 @@ export const CollaborativeCodeViewer: React.FC<
   const [selectedLines, setSelectedLines] = useState<Set<number>>(new Set());
   const [commentText, setCommentText] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
-  const [viewportCursor, setViewportCursor] = useState<{
-    line: number;
-    column: number;
-  }>({ line: 0, column: 0 });
 
   const collaboration = useCollaboration({
     sessionId,
@@ -75,8 +64,6 @@ export const CollaborativeCodeViewer: React.FC<
     const charWidth = 8; // Approximate character width
     const lineNum = Math.floor(y / lineHeight);
     const column = Math.floor(x / charWidth);
-
-    setViewportCursor({ line: lineNum, column });
 
     const position: CursorPosition = {
       fileName,

@@ -10,6 +10,7 @@ import type {
   Commit,
   PullRequest,
   CodeReview,
+  CommitFile,
 } from "./services/api";
 import { CodeReviewResult } from "./components/CodeReviewResult";
 import ReviewProgressModal from "./components/ReviewProgressModal";
@@ -63,6 +64,8 @@ interface AppState {
   collaboration: {
     isActive: boolean;
     commit: Commit | null;
+    files: CommitFile[];
+    loading: boolean;
   };
   // Join session modal state
   showJoinSessionModal: boolean;
@@ -100,6 +103,8 @@ function App() {
     collaboration: {
       isActive: false,
       commit: null,
+      files: [],
+      loading: false,
     },
     showJoinSessionModal: false,
   });
@@ -115,19 +120,63 @@ function App() {
     loadInitialData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleCommitCollaboration = (commit: Commit) => {
+  const handleCommitCollaboration = async (commit: Commit) => {
+    // Start loading state
     setState((prev) => ({
       ...prev,
       collaboration: {
         isActive: true,
         commit: commit,
+        files: [],
+        loading: true,
       },
     }));
+
     addToast({
-      type: "success",
-      title: "Collaboration Started",
-      message: "Starting collaborative review session...",
+      type: "info",
+      title: "Loading Collaboration",
+      message: "Fetching commit files...",
     });
+
+    try {
+      // Fetch the commit details with files
+      const response = await commitsApi.getDetails(commit.sha);
+      const commitDetails = response.data.commit;
+
+      // Update state with the fetched files
+      setState((prev) => ({
+        ...prev,
+        collaboration: {
+          isActive: true,
+          commit: commit,
+          files: commitDetails.files,
+          loading: false,
+        },
+      }));
+
+      addToast({
+        type: "success",
+        title: "Collaboration Started",
+        message: `Ready to collaborate on ${commitDetails.files.length} file(s)`,
+      });
+    } catch (error) {
+      console.error("Failed to fetch commit files:", error);
+      setState((prev) => ({
+        ...prev,
+        collaboration: {
+          isActive: false,
+          commit: null,
+          files: [],
+          loading: false,
+        },
+      }));
+
+      addToast({
+        type: "error",
+        title: "Collaboration Failed",
+        message: "Failed to load commit files. Please try again.",
+      });
+    }
   };
 
   const handleEndCollaboration = () => {
@@ -136,6 +185,8 @@ function App() {
       collaboration: {
         isActive: false,
         commit: null,
+        files: [],
+        loading: false,
       },
     }));
     addToast({
@@ -790,6 +841,93 @@ function App() {
       pr.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Helper function to detect language from filename
+  const getLanguageFromFilename = (filename: string): string => {
+    const extension = filename.split(".").pop()?.toLowerCase();
+    const languageMap: Record<string, string> = {
+      ts: "TypeScript",
+      tsx: "TypeScript",
+      js: "JavaScript",
+      jsx: "JavaScript",
+      py: "Python",
+      java: "Java",
+      cs: "CSharp",
+      cpp: "C++",
+      c: "C",
+      go: "Go",
+      rs: "Rust",
+      php: "PHP",
+      rb: "Ruby",
+      sql: "SQL",
+      json: "JSON",
+      xml: "XML",
+      html: "HTML",
+      css: "CSS",
+      md: "Markdown",
+      sh: "Shell",
+    };
+    return languageMap[extension || ""] || "Text";
+  };
+
+  // Helper function to generate simple content preview based on file info
+  const generateFilePreview = (file: CommitFile): string => {
+    const extension = file.filename.split(".").pop()?.toLowerCase();
+    const statusEmoji =
+      file.status === "added"
+        ? "🆕"
+        : file.status === "modified"
+        ? "✏️"
+        : file.status === "removed"
+        ? "🗑️"
+        : "📝";
+
+    return `// ${statusEmoji} ${file.filename} (${file.status})
+// Changes: +${file.additions} -${file.deletions}
+// Total lines affected: ${file.changes}
+
+// This is a preview of ${file.filename}
+// File extension: ${extension}
+// Language: ${getLanguageFromFilename(file.filename)}
+
+${
+  extension === "ts" || extension === "tsx"
+    ? `// TypeScript/React file
+interface Example {
+  id: string;
+  name: string;
+}
+
+export const process = (data: Example) => {
+  console.log('Processing:', data.name);
+  return data;
+};`
+    : extension === "js" || extension === "jsx"
+    ? `// JavaScript/React file
+function processData(data) {
+  console.log('Processing:', data.name);
+  return data;
+}
+
+module.exports = { processData };`
+    : extension === "py"
+    ? `# Python file
+def process_data(data):
+    print(f"Processing: {data['name']}")
+    return data
+
+if __name__ == "__main__":
+    process_data({"name": "example"})`
+    : `// ${getLanguageFromFilename(file.filename)} file
+// File: ${file.filename}
+// Status: ${file.status}
+console.log("File loaded successfully");`
+}
+
+// Changes in this commit:
+// +${file.additions} lines added
+// -${file.deletions} lines removed`;
+  };
+
   return (
     <ErrorBoundary>
       <MainLayout>
@@ -855,59 +993,35 @@ function App() {
                   ← Back to Repository
                 </button>
               </div>
-              <CollaborationDemo
-                commitSha={state.collaboration.commit.sha}
-                repositoryFullName={state.currentRepository?.fullName || ""}
-                files={[
-                  {
-                    filename: "example.ts",
-                    content: `// Example TypeScript file
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
-const createUser = (userData: Partial<User>): User => {
-  return {
-    id: generateId(),
-    name: userData.name || 'Anonymous',
-    email: userData.email || '',
-  };
-};
-
-function generateId(): string {
-  return Math.random().toString(36).substr(2, 9);
-}`,
-                    language: "TypeScript",
-                    status: "modified" as const,
-                  },
-                  {
-                    filename: "utils.js",
-                    content: `// Utility functions
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
-
-export { debounce };`,
-                    language: "JavaScript",
-                    status: "added" as const,
-                  },
-                ]}
-                currentUser={{
-                  id: "demo-user",
-                  name: "Demo User",
-                  avatarUrl: undefined,
-                }}
-              />
+              {state.collaboration.loading ? (
+                <div style={{ padding: "40px", textAlign: "center" }}>
+                  <div style={{ marginBottom: "16px" }}>
+                    Loading commit files...
+                  </div>
+                  <div className="spinner"></div>
+                </div>
+              ) : (
+                <CollaborationDemo
+                  commitSha={state.collaboration.commit.sha}
+                  repositoryFullName={state.currentRepository?.fullName || ""}
+                  files={state.collaboration.files.map((file) => ({
+                    filename: file.filename,
+                    content: generateFilePreview(file),
+                    language: getLanguageFromFilename(file.filename),
+                    status:
+                      file.status === "removed"
+                        ? "deleted"
+                        : file.status === "renamed"
+                        ? "modified"
+                        : file.status,
+                  }))}
+                  currentUser={{
+                    id: "demo-user",
+                    name: "Demo User",
+                    avatarUrl: undefined,
+                  }}
+                />
+              )}
             </div>
           ) : (
             <TabContent
