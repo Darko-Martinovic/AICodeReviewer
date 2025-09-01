@@ -67,6 +67,11 @@ interface AppState {
     files: CommitFile[];
     loading: boolean;
     fileContents: Map<string, string>; // Cache for loaded file contents
+    currentUser: {
+      id: string;
+      name: string;
+      avatarUrl?: string;
+    } | null;
   };
   // Join session modal state
   showJoinSessionModal: boolean;
@@ -107,6 +112,7 @@ function App() {
       files: [],
       loading: false,
       fileContents: new Map<string, string>(),
+      currentUser: null,
     },
     showJoinSessionModal: false,
   });
@@ -123,6 +129,12 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCommitCollaboration = async (commit: Commit) => {
+    // Generate a unique user for this session
+    const sessionUser = {
+      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      name: `User ${Math.random().toString(36).substr(2, 3).toUpperCase()}`,
+    };
+
     // Start loading state
     setState((prev) => ({
       ...prev,
@@ -132,6 +144,7 @@ function App() {
         files: [],
         loading: true,
         fileContents: new Map<string, string>(),
+        currentUser: sessionUser,
       },
     }));
 
@@ -155,6 +168,7 @@ function App() {
           files: commitDetails.files,
           loading: false,
           fileContents: new Map<string, string>(),
+          currentUser: sessionUser,
         },
       }));
 
@@ -173,6 +187,7 @@ function App() {
           files: [],
           loading: false,
           fileContents: new Map<string, string>(),
+          currentUser: null,
         },
       }));
 
@@ -193,6 +208,7 @@ function App() {
         files: [],
         loading: false,
         fileContents: new Map<string, string>(),
+        currentUser: null,
       },
     }));
     addToast({
@@ -224,8 +240,165 @@ function App() {
         message: `Joining collaboration session ${sessionId}...`,
       });
 
-      // Here you would typically call the collaboration API to join the session
-      // For now, we'll just simulate success
+      // Parse session ID to get commit SHA and repository info
+      // Session ID format: "{owner}-{repo}-{commitSha8chars}"
+      const sessionParts = sessionId.split("-");
+      if (sessionParts.length < 3) {
+        throw new Error("Invalid session ID format");
+      }
+
+      const commitSha = sessionParts[sessionParts.length - 1];
+      // Reconstruct repository full name: join all parts except the last one, then convert back to owner/repo format
+      const repoNameParts = sessionParts.slice(0, -1);
+      if (repoNameParts.length < 2) {
+        throw new Error("Invalid repository format in session ID");
+      }
+      const owner = repoNameParts[0];
+      const repositoryName = repoNameParts.slice(1).join("-"); // Handle repos with hyphens in name
+      const repoFullName = `${owner}/${repositoryName}`;
+
+      console.log("Parsed session:", {
+        sessionId,
+        commitSha,
+        owner,
+        repositoryName,
+        repoFullName,
+        sessionParts,
+      });
+
+      // Set current repository if not already set
+      const [repoOwner, repoName] = repoFullName.split("/");
+      console.log("🔧 Setting repository:", {
+        repoOwner,
+        repoName,
+        repoFullName,
+      });
+
+      if (
+        !state.currentRepository ||
+        state.currentRepository.fullName !== repoFullName
+      ) {
+        console.log("📝 Repository not set or different, updating...");
+        try {
+          await repositoryApi.setRepository(repoOwner, repoName);
+          console.log("✅ Repository set successfully");
+
+          const repoResponse = await repositoryApi.getCurrent();
+          console.log("📋 Current repository response:", repoResponse.data);
+          setState((prev) => ({
+            ...prev,
+            currentRepository: repoResponse.data.repository,
+          }));
+        } catch (repoError) {
+          console.warn(
+            "⚠️ Failed to set repository, creating basic repo object:",
+            repoError
+          );
+          // If repository setting fails, create a basic repository object for the session
+          setState((prev) => ({
+            ...prev,
+            currentRepository: {
+              id: 0,
+              name: repoName,
+              fullName: repoFullName,
+              owner: repoOwner,
+              description: `Repository from collaboration session`,
+              defaultBranch: "main",
+              private: false,
+              htmlUrl: `https://github.com/${repoFullName}`,
+              starCount: 0,
+              forkCount: 0,
+              isCurrent: true,
+            },
+          }));
+        }
+      } else {
+        console.log("✅ Repository already set correctly");
+      }
+
+      // Get commit details
+      console.log("🔍 Fetching commit details for:", commitSha);
+      let response;
+      let commitDetails;
+
+      try {
+        // Try with the provided commit SHA (might be short)
+        response = await commitsApi.getDetails(commitSha);
+        commitDetails = response.data.commit;
+        console.log("✅ Commit details response:", response.data);
+      } catch (shortShaError) {
+        console.log(
+          "⚠️ Short SHA failed, trying to find full SHA in recent commits...",
+          shortShaError
+        );
+
+        try {
+          // If short SHA fails, try to find the full SHA from recent commits
+          const commitsResponse = await commitsApi.getRecent(50);
+          const fullCommit = commitsResponse.data.commits.find((c: Commit) =>
+            c.sha.startsWith(commitSha)
+          );
+
+          if (!fullCommit) {
+            throw new Error(
+              `Commit not found with SHA starting with: ${commitSha}`
+            );
+          }
+
+          console.log("🔍 Found full commit SHA:", fullCommit.sha);
+          response = await commitsApi.getDetails(fullCommit.sha);
+          commitDetails = response.data.commit;
+          console.log("✅ Commit details response:", response.data);
+        } catch (detailsError) {
+          console.warn(
+            "⚠️ Failed to get commit details, creating basic commit object:",
+            detailsError
+          );
+          // Create a basic commit object if both methods fail
+          commitDetails = {
+            message: "Commit from collaboration session",
+            author: {
+              name: "Unknown",
+              email: "unknown@example.com",
+            },
+            date: new Date().toISOString(),
+            url: `https://github.com/${repoFullName}/commit/${commitSha}`,
+            files: [],
+          };
+        }
+      }
+
+      // Find the commit in our commits list or create a basic one
+      const commit = state.commits.find((c) => c.sha === commitSha) || {
+        sha: commitSha,
+        message: commitDetails.message,
+        author:
+          typeof commitDetails.author === "string"
+            ? commitDetails.author
+            : commitDetails.author.name,
+        authorEmail:
+          typeof commitDetails.author === "string"
+            ? ""
+            : commitDetails.author.email,
+        date: commitDetails.date,
+        htmlUrl: commitDetails.url,
+      };
+
+      // Set up collaboration state
+      setState((prev) => ({
+        ...prev,
+        collaboration: {
+          isActive: true,
+          commit: commit,
+          files: commitDetails.files || [],
+          loading: false,
+          fileContents: new Map<string, string>(),
+          currentUser: {
+            id: `${username.toLowerCase().replace(/\s+/g, "_")}_${Date.now()}`,
+            name: username,
+          },
+        },
+      }));
 
       addToast({
         type: "success",
@@ -235,12 +408,22 @@ function App() {
 
       handleCloseJoinSessionModal();
     } catch (error) {
-      console.error("Failed to join session:", error);
+      console.error("❌ Failed to join session:", error);
+      console.error("Error details:", {
+        sessionId,
+        username,
+        error: error instanceof Error ? error.message : String(error),
+        response:
+          error instanceof Error && "response" in error ? error.response : null,
+      });
+
       addToast({
         type: "error",
         title: "Join Failed",
         message:
-          "Failed to join collaboration session. Please check the session ID and try again.",
+          error instanceof Error
+            ? `Error: ${error.message}`
+            : "Failed to join collaboration session. Please check the session ID and try again.",
       });
     }
   };
@@ -1039,11 +1222,13 @@ console.log("File loaded successfully");`
                         ? "modified"
                         : file.status,
                   }))}
-                  currentUser={{
-                    id: "demo-user",
-                    name: "Demo User",
-                    avatarUrl: undefined,
-                  }}
+                  currentUser={
+                    state.collaboration.currentUser || {
+                      id: `fallback_user_${Date.now()}`,
+                      name: "Anonymous User",
+                      avatarUrl: undefined,
+                    }
+                  }
                   onFetchFileContent={fetchFileContentForCollaboration}
                 />
               )}

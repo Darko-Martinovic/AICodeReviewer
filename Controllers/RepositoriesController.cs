@@ -200,15 +200,22 @@ namespace AICodeReviewer.Controllers
         {
             try
             {
+                Console.WriteLine($"🔍 SetRepository called with: Owner='{request.Owner}', Name='{request.Name}', Description='{request.Description}'");
+
                 if (string.IsNullOrWhiteSpace(request.Owner) || string.IsNullOrWhiteSpace(request.Name))
                 {
+                    Console.WriteLine($"❌ Missing required fields: Owner='{request.Owner}', Name='{request.Name}'");
                     return BadRequest(new { Error = "Owner and name are required" });
                 }
 
                 // Validate repository first
+                Console.WriteLine($"🔍 Validating repository: {request.Owner}/{request.Name}");
                 var isValid = await _repositoryService.ValidateRepositoryAsync(request.Owner, request.Name);
+                Console.WriteLine($"✅ Repository validation result: {isValid}");
+
                 if (!isValid)
                 {
+                    Console.WriteLine($"❌ Repository validation failed for: {request.Owner}/{request.Name}");
                     return BadRequest(new { Error = "Repository not found or not accessible" });
                 }
 
@@ -217,6 +224,8 @@ namespace AICodeReviewer.Controllers
 
                 // Update GitHubService to use the new repository
                 _gitHubService.UpdateRepository(request.Owner, request.Name);
+
+                Console.WriteLine($"✅ Repository set successfully: {request.Owner}/{request.Name}");
 
                 return Ok(new
                 {
@@ -229,6 +238,7 @@ namespace AICodeReviewer.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error in SetRepository: {ex.Message}");
                 return BadRequest(new { Error = ex.Message });
             }
         }

@@ -43,6 +43,113 @@ export const CollaborativeCodeViewer: React.FC<
 
   const codeLines = useMemo(() => fileContent.split("\n"), [fileContent]);
 
+  // Simple syntax highlighting for better readability
+  const highlightLine = (line: string): React.ReactElement => {
+    if (!line) return <span> </span>;
+
+    // Use JSX elements instead of dangerouslySetInnerHTML
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+
+    // Keywords pattern
+    const keywordPattern =
+      /\b(class|interface|function|const|let|var|if|else|for|while|return|public|private|protected|static|async|await|new|this|super|extends|implements|namespace|using)\b/g;
+
+    // Comment pattern
+    const commentPattern = /(\/\/.*$)/g;
+
+    // String pattern
+    const stringPattern = /(["'`].*?["'`])/g;
+
+    // Number pattern
+    const numberPattern = /\b(\d+)\b/g;
+
+    // Collect all matches with their types
+    const matches: Array<{
+      start: number;
+      end: number;
+      type: string;
+      text: string;
+    }> = [];
+
+    let match;
+    while ((match = keywordPattern.exec(line)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: "keyword",
+        text: match[0],
+      });
+    }
+
+    keywordPattern.lastIndex = 0;
+    while ((match = commentPattern.exec(line)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: "comment",
+        text: match[0],
+      });
+    }
+
+    commentPattern.lastIndex = 0;
+    while ((match = stringPattern.exec(line)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: "string",
+        text: match[0],
+      });
+    }
+
+    stringPattern.lastIndex = 0;
+    while ((match = numberPattern.exec(line)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: "number",
+        text: match[0],
+      });
+    }
+
+    // Sort matches by start position and remove overlaps
+    matches.sort((a, b) => a.start - b.start);
+    const nonOverlappingMatches = [];
+    let lastEnd = 0;
+
+    for (const match of matches) {
+      if (match.start >= lastEnd) {
+        nonOverlappingMatches.push(match);
+        lastEnd = match.end;
+      }
+    }
+
+    // Build elements array
+    lastIndex = 0;
+    nonOverlappingMatches.forEach((match, index) => {
+      // Add text before this match
+      if (match.start > lastIndex) {
+        elements.push(line.substring(lastIndex, match.start));
+      }
+
+      // Add the highlighted element
+      elements.push(
+        <span key={`${index}-${match.type}`} className={styles[match.type]}>
+          {match.text}
+        </span>
+      );
+
+      lastIndex = match.end;
+    });
+
+    // Add remaining text
+    if (lastIndex < line.length) {
+      elements.push(line.substring(lastIndex));
+    }
+
+    return <span>{elements.length > 0 ? elements : line}</span>;
+  };
+
   // Map participant colors
   const participantColors = useMemo(() => {
     const colors = new Map<string, string>();
@@ -125,8 +232,15 @@ export const CollaborativeCodeViewer: React.FC<
 
   // Notify file change
   useEffect(() => {
+    console.log("🔄 File changed in CollaborativeCodeViewer:", fileName);
+    console.log("📊 Collaboration state:", {
+      sessionId,
+      isConnected: collaboration.isConnected,
+      participantsCount: collaboration.participants.length,
+      cursorsCount: collaboration.cursors.length,
+    });
     collaboration.changeFile(fileName);
-  }, [fileName, collaboration]);
+  }, [fileName, sessionId, collaboration]);
 
   return (
     <div className={styles.collaborativeViewer}>
@@ -184,6 +298,25 @@ export const CollaborativeCodeViewer: React.FC<
         </div>
       </div>
 
+      {/* Debug Panel */}
+      <div className={styles.debugPanel}>
+        <div className={styles.debugItem}>
+          <strong>Session:</strong> {sessionId}
+        </div>
+        <div className={styles.debugItem}>
+          <strong>Connected:</strong> {collaboration.isConnected ? "✅" : "❌"}
+        </div>
+        <div className={styles.debugItem}>
+          <strong>Participants:</strong> {collaboration.participants.length}
+        </div>
+        <div className={styles.debugItem}>
+          <strong>Cursors:</strong> {collaboration.cursors.length}
+        </div>
+        <div className={styles.debugItem}>
+          <strong>Current User:</strong> {currentUser.name} ({currentUser.id})
+        </div>
+      </div>
+
       {/* Connection Status */}
       {!collaboration.isConnected && (
         <div className={styles.connectionStatus}>
@@ -226,7 +359,7 @@ export const CollaborativeCodeViewer: React.FC<
                   }`}
                   onClick={() => handleLineClick(index)}
                 >
-                  <pre className={styles.code}>{line || " "}</pre>
+                  <pre className={styles.code}>{highlightLine(line)}</pre>
 
                   {/* Other users' cursors */}
                   {lineCursors.map((cursor) => (

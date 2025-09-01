@@ -41,7 +41,7 @@ export const repositoryApi = {
   getCurrent: () => api.get("/repositories/current"),
   getAll: () => api.get("/repositories"),
   setRepository: (owner: string, name: string) =>
-    api.post("/repositories/set", { owner, name }),
+    api.post("/repositories/set", { Owner: owner, Name: name }),
 };
 
 // Commits API

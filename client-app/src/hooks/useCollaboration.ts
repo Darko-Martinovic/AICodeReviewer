@@ -88,6 +88,13 @@ export const useCollaboration = ({
               error: null,
             }));
             try {
+              console.log("🔵 Reconnected - Calling JoinSession:", {
+                sessionId,
+                userId: currentUser.id,
+                userName: currentUser.name,
+                avatarUrl: currentUser.avatarUrl || "",
+              });
+
               await connection.invoke(
                 "JoinSession",
                 sessionId,
@@ -95,6 +102,8 @@ export const useCollaboration = ({
                 currentUser.name,
                 currentUser.avatarUrl || ""
               );
+
+              console.log("🔵 Reconnection JoinSession completed successfully");
             } catch (error) {
               console.error("Failed to rejoin session:", error);
             }
@@ -129,12 +138,19 @@ export const useCollaboration = ({
             comments: LiveComment[];
             cursors: CursorUpdateMessage[];
           }) => {
+            console.log("🔵 SessionState received:", {
+              participantsCount: sessionState.participants?.length || 0,
+              participants: sessionState.participants,
+              commentsCount: sessionState.comments?.length || 0,
+              cursorsCount: sessionState.cursors?.length || 0,
+            });
+
             if (isActive) {
               setState((prev) => ({
                 ...prev,
-                participants: sessionState.participants,
-                comments: sessionState.comments,
-                cursors: sessionState.cursors,
+                participants: sessionState.participants || [],
+                comments: sessionState.comments || [],
+                cursors: sessionState.cursors || [],
               }));
             }
           }
@@ -313,6 +329,13 @@ export const useCollaboration = ({
           }));
 
           try {
+            console.log("🔵 Calling JoinSession:", {
+              sessionId,
+              userId: currentUser.id,
+              userName: currentUser.name,
+              avatarUrl: currentUser.avatarUrl || "",
+            });
+
             await connection.invoke(
               "JoinSession",
               sessionId,
@@ -320,6 +343,8 @@ export const useCollaboration = ({
               currentUser.name,
               currentUser.avatarUrl || ""
             );
+
+            console.log("🔵 JoinSession call completed successfully");
           } catch (error) {
             console.error("Failed to join session:", error);
             setState((prev) => ({

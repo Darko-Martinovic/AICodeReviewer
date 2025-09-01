@@ -17,6 +17,9 @@ namespace AICodeReviewer.Hubs
 
         public async Task JoinSession(string sessionId, string userId, string userName, string avatarUrl = "")
         {
+            _logger.LogInformation("🔵 JoinSession called - SessionId: {SessionId}, UserId: {UserId}, UserName: {UserName}",
+                sessionId, userId, userName);
+
             try
             {
                 var participant = new SessionParticipant
@@ -27,7 +30,10 @@ namespace AICodeReviewer.Hubs
                     AvatarUrl = avatarUrl
                 };
 
+                _logger.LogInformation("🔵 Calling CollaborationService.JoinSessionAsync");
                 var success = await _collaborationService.JoinSessionAsync(sessionId, participant);
+                _logger.LogInformation("🔵 JoinSessionAsync result: {Success}", success);
+
                 if (success)
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
@@ -48,9 +54,12 @@ namespace AICodeReviewer.Hubs
                     var session = await _collaborationService.GetSessionAsync(sessionId);
                     if (session != null)
                     {
+                        _logger.LogInformation("🔵 Sending SessionState - Participants count: {Count}",
+                            session.Participants.Count);
+
                         await Clients.Caller.SendAsync("SessionState", new
                         {
-                            participants = session.Participants.Where(p => p.ConnectionId != Context.ConnectionId),
+                            participants = session.Participants, // Include all participants, including current user
                             comments = session.Comments,
                             cursors = session.Participants.Where(p => p.CurrentCursor != null).Select(p => new CursorUpdateMessage
                             {

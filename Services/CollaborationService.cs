@@ -71,8 +71,42 @@ namespace AICodeReviewer.Services
 
         public async Task<bool> JoinSessionAsync(string sessionId, SessionParticipant participant)
         {
+            _logger.LogInformation("🔵 JoinSessionAsync called - SessionId: {SessionId}, UserId: {UserId}",
+                sessionId, participant.UserId);
+
             if (!_sessions.TryGetValue(sessionId, out var session))
-                return false;
+            {
+                _logger.LogWarning("🔵 Session {SessionId} not found, attempting to create it", sessionId);
+
+                // Try to parse the sessionId to extract commit and repository info
+                // SessionId format should be: repositoryFullName-commitSha
+                var parts = sessionId.Split('-');
+                if (parts.Length >= 2)
+                {
+                    var commitSha = parts[^1]; // Last part is commit SHA
+                    var repositoryFullName = string.Join("-", parts[..^1]); // Everything before last part
+
+                    _logger.LogInformation("🔵 Creating session for commit {CommitSha} in repository {Repository}",
+                        commitSha, repositoryFullName);
+
+                    session = new ReviewSession
+                    {
+                        Id = sessionId,
+                        CommitSha = commitSha,
+                        RepositoryFullName = repositoryFullName,
+                        CreatedAt = DateTime.UtcNow,
+                        Status = "active"
+                    };
+
+                    _sessions.TryAdd(sessionId, session);
+                    _logger.LogInformation("🔵 Created new session {SessionId}", sessionId);
+                }
+                else
+                {
+                    _logger.LogError("🔵 Invalid sessionId format: {SessionId}", sessionId);
+                    return false;
+                }
+            }
 
             // Assign a color if not already assigned
             if (string.IsNullOrEmpty(participant.UserColor))
@@ -88,7 +122,8 @@ namespace AICodeReviewer.Services
             session.Participants.Add(participant);
             session.LastActivity = DateTime.UtcNow;
 
-            _logger.LogInformation("User {UserId} joined session {SessionId}", participant.UserId, sessionId);
+            _logger.LogInformation("🔵 User {UserId} joined session {SessionId}. Total participants: {Count}",
+                participant.UserId, sessionId, session.Participants.Count);
             return await Task.FromResult(true);
         }
 
