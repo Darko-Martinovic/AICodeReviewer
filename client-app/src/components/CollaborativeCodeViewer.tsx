@@ -53,67 +53,82 @@ export const CollaborativeCodeViewer: React.FC<
 
     // Keywords pattern
     const keywordPattern =
-      /\b(class|interface|function|const|let|var|if|else|for|while|return|public|private|protected|static|async|await|new|this|super|extends|implements|namespace|using)\b/g;
+      /\b(class|interface|function|const|let|var|if|else|for|while|return|public|private|protected|static|async|await|new|this|super|extends|implements|namespace|using|abstract|virtual|override|sealed)\b/g;
 
-    // Comment pattern
-    const commentPattern = /(\/\/.*$)/g;
+    // Comment pattern - improved to handle both single and multiline comments
+    const commentPattern = /(\/\/.*$|\/\*[\s\S]*?\*\/)/gm;
 
-    // String pattern
-    const stringPattern = /(["'`].*?["'`])/g;
+    // String pattern - improved to handle different quote types properly
+    const stringPattern = /(["'`])(?:[^\\]|\\.)*?\1/g;
 
-    // Number pattern
-    const numberPattern = /\b(\d+)\b/g;
+    // Number pattern - improved to handle decimals and hex
+    const numberPattern = /\b(?:0x[0-9a-fA-F]+|\d+\.?\d*)\b/g;
 
-    // Collect all matches with their types
+    // Collect all matches with their types and priorities
     const matches: Array<{
       start: number;
       end: number;
       type: string;
       text: string;
+      priority: number;
     }> = [];
 
     let match;
-    while ((match = keywordPattern.exec(line)) !== null) {
-      matches.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        type: "keyword",
-        text: match[0],
-      });
-    }
 
-    keywordPattern.lastIndex = 0;
+    // Comments (highest priority)
     while ((match = commentPattern.exec(line)) !== null) {
       matches.push({
         start: match.index,
         end: match.index + match[0].length,
         type: "comment",
         text: match[0],
+        priority: 1,
       });
     }
 
-    commentPattern.lastIndex = 0;
+    // Strings (second priority)
+    stringPattern.lastIndex = 0;
     while ((match = stringPattern.exec(line)) !== null) {
       matches.push({
         start: match.index,
         end: match.index + match[0].length,
         type: "string",
         text: match[0],
+        priority: 2,
       });
     }
 
-    stringPattern.lastIndex = 0;
+    // Keywords (third priority)
+    keywordPattern.lastIndex = 0;
+    while ((match = keywordPattern.exec(line)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        type: "keyword",
+        text: match[0],
+        priority: 3,
+      });
+    }
+
+    // Numbers (lowest priority)
+    numberPattern.lastIndex = 0;
     while ((match = numberPattern.exec(line)) !== null) {
       matches.push({
         start: match.index,
         end: match.index + match[0].length,
         type: "number",
         text: match[0],
+        priority: 4,
       });
     }
 
-    // Sort matches by start position and remove overlaps
-    matches.sort((a, b) => a.start - b.start);
+    // Sort matches by start position, then by priority (lower number = higher priority)
+    matches.sort((a, b) => {
+      if (a.start !== b.start) return a.start - b.start;
+      return a.priority - b.priority;
+    });
+
+    // Remove overlapping matches, keeping higher priority ones
     const nonOverlappingMatches = [];
     let lastEnd = 0;
 
@@ -132,9 +147,9 @@ export const CollaborativeCodeViewer: React.FC<
         elements.push(line.substring(lastIndex, match.start));
       }
 
-      // Add the highlighted element
+      // Add the highlighted element with proper CSS class structure
       elements.push(
-        <span key={`${index}-${match.type}`} className={styles[match.type]}>
+        <span key={`${index}-${match.type}`} className={`syntax-${match.type}`}>
           {match.text}
         </span>
       );
@@ -179,6 +194,14 @@ export const CollaborativeCodeViewer: React.FC<
       lastUpdated: new Date().toISOString(),
     };
 
+    // Debug cursor movement
+    console.log("🔵 Sending cursor position:", {
+      fileName,
+      lineNumber: lineNum,
+      column,
+      userId: currentUser.id,
+    });
+
     collaboration.sendCursorPosition(position);
   };
 
@@ -188,8 +211,14 @@ export const CollaborativeCodeViewer: React.FC<
       const newSet = new Set(prev);
       if (newSet.has(lineNumber)) {
         newSet.delete(lineNumber);
+        // If no lines selected, hide comment input
+        if (newSet.size === 0) {
+          setIsAddingComment(false);
+        }
       } else {
         newSet.add(lineNumber);
+        // Show comment input when lines are selected
+        setIsAddingComment(true);
       }
       return newSet;
     });
@@ -229,6 +258,19 @@ export const CollaborativeCodeViewer: React.FC<
     (cursor) =>
       cursor.position.fileName === fileName && cursor.userId !== currentUser.id
   );
+
+  console.log("🔵 Cursor filtering:", {
+    totalCursors: collaboration.cursors.length,
+    activeCursors: activeCursors.length,
+    currentFileName: fileName,
+    currentUserId: currentUser.id,
+    allCursors: collaboration.cursors.map((c) => ({
+      userId: c.userId,
+      fileName: c.position.fileName,
+      lineNumber: c.position.lineNumber,
+      column: c.position.column,
+    })),
+  });
 
   // Notify file change
   useEffect(() => {
@@ -283,6 +325,9 @@ export const CollaborativeCodeViewer: React.FC<
         </div>
 
         <div className={styles.actions}>
+          <div className={styles.instructionText}>
+            💡 Click line numbers to select lines for commenting
+          </div>
           <button
             className={styles.commentButton}
             onClick={() => setIsAddingComment(!isAddingComment)}
@@ -469,8 +514,8 @@ export const CollaborativeCodeViewer: React.FC<
         </div>
       </div>
 
-      {/* Comment Input */}
-      {isAddingComment && (
+      {/* Comment Input - Show when lines are selected OR when explicitly adding comment */}
+      {(selectedLines.size > 0 || isAddingComment) && (
         <div className={styles.commentInput}>
           <div className={styles.commentInputHeader}>
             <span>
