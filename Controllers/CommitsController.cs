@@ -443,5 +443,47 @@ namespace AICodeReviewer.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Gets the content of a specific file from a commit
+        /// </summary>
+        /// <param name="sha">Commit SHA hash</param>
+        /// <param name="filename">Path to the file</param>
+        /// <returns>File content</returns>
+        [HttpGet("{sha}/file")]
+        public async Task<IActionResult> GetCommitFileContent(string sha, [FromQuery] string filename)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(sha))
+                {
+                    return BadRequest(new { Error = "Commit SHA is required" });
+                }
+
+                if (string.IsNullOrWhiteSpace(filename))
+                {
+                    return BadRequest(new { Error = "Filename is required" });
+                }
+
+                var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+                _gitHubService.UpdateRepository(owner, name);
+
+                // Get the commit to ensure it exists and get the file content at that commit
+                var commit = await _gitHubService.GetCommitAsync(sha);
+                var content = await _gitHubService.GetFileContentFromBranchAsync(filename, sha);
+
+                return Ok(new
+                {
+                    Repository = $"{owner}/{name}",
+                    CommitSha = sha,
+                    Filename = filename,
+                    Content = content
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
     }
 }

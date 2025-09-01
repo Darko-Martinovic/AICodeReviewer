@@ -53,6 +53,8 @@ export const commitsApi = {
   getBySha: (sha: string) => api.get(`/commits/${sha}`),
   getDetails: (sha: string): Promise<{ data: { commit: CommitDetails } }> =>
     api.get(`/commits/${sha}`),
+  getFileContent: (sha: string, filename: string) =>
+    api.get(`/commits/${sha}/file`, { params: { filename } }),
 };
 
 // Pull Requests API

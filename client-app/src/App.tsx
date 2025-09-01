@@ -66,6 +66,7 @@ interface AppState {
     commit: Commit | null;
     files: CommitFile[];
     loading: boolean;
+    fileContents: Map<string, string>; // Cache for loaded file contents
   };
   // Join session modal state
   showJoinSessionModal: boolean;
@@ -105,6 +106,7 @@ function App() {
       commit: null,
       files: [],
       loading: false,
+      fileContents: new Map<string, string>(),
     },
     showJoinSessionModal: false,
   });
@@ -129,6 +131,7 @@ function App() {
         commit: commit,
         files: [],
         loading: true,
+        fileContents: new Map<string, string>(),
       },
     }));
 
@@ -151,6 +154,7 @@ function App() {
           commit: commit,
           files: commitDetails.files,
           loading: false,
+          fileContents: new Map<string, string>(),
         },
       }));
 
@@ -168,6 +172,7 @@ function App() {
           commit: null,
           files: [],
           loading: false,
+          fileContents: new Map<string, string>(),
         },
       }));
 
@@ -187,6 +192,7 @@ function App() {
         commit: null,
         files: [],
         loading: false,
+        fileContents: new Map<string, string>(),
       },
     }));
     addToast({
@@ -869,6 +875,24 @@ function App() {
     return languageMap[extension || ""] || "Text";
   };
 
+  // Helper function to fetch real file content when needed for collaboration
+  const fetchFileContentForCollaboration = async (
+    commitSha: string,
+    filename: string
+  ): Promise<string> => {
+    try {
+      const response = await commitsApi.getFileContent(commitSha, filename);
+      return (
+        response.data.content || `// Unable to fetch content for ${filename}`
+      );
+    } catch (error) {
+      console.error(`Failed to fetch content for ${filename}:`, error);
+      return `// Error loading ${filename}: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`;
+    }
+  };
+
   // Helper function to generate simple content preview based on file info
   const generateFilePreview = (file: CommitFile): string => {
     const extension = file.filename.split(".").pop()?.toLowerCase();
@@ -1020,6 +1044,7 @@ console.log("File loaded successfully");`
                     name: "Demo User",
                     avatarUrl: undefined,
                   }}
+                  onFetchFileContent={fetchFileContentForCollaboration}
                 />
               )}
             </div>

@@ -19,6 +19,7 @@ interface CollaborationDemoProps {
     name: string;
     avatarUrl?: string;
   };
+  onFetchFileContent: (commitSha: string, filename: string) => Promise<string>;
 }
 
 export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
@@ -26,10 +27,13 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
   repositoryFullName,
   files,
   currentUser,
+  onFetchFileContent,
 }) => {
   const [selectedFile, setSelectedFile] = useState<CommitFile | null>(null);
   const [isCollaborating, setIsCollaborating] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [loadingFileContent, setLoadingFileContent] = useState(false);
+  const [realFileContent, setRealFileContent] = useState<string>("");
 
   // Generate session ID from commit and repository
   const sessionId = `${repositoryFullName.replace(
@@ -56,22 +60,54 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
     }
   };
 
-  const handleStartCollaboration = (file: CommitFile) => {
+  const handleStartCollaboration = async (file: CommitFile) => {
     setSelectedFile(file);
-    setIsCollaborating(true);
+    setLoadingFileContent(true);
+
+    try {
+      // Fetch real file content
+      const content = await onFetchFileContent(commitSha, file.filename);
+      setRealFileContent(content);
+      setIsCollaborating(true);
+    } catch (error) {
+      console.error("Failed to fetch file content:", error);
+      // Use fallback content if fetch fails
+      setRealFileContent(`// Error loading ${file.filename}
+// Using fallback content for demo
+
+${file.content}`);
+      setIsCollaborating(true);
+    } finally {
+      setLoadingFileContent(false);
+    }
   };
 
   const handleEndCollaboration = () => {
     setIsCollaborating(false);
     setSelectedFile(null);
+    setRealFileContent("");
   };
+
+  if (loadingFileContent && selectedFile) {
+    return (
+      <div className={styles.collaborationDemo}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Loading File Content</h2>
+        </div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Fetching real content for {selectedFile.filename}...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isCollaborating && selectedFile) {
     return (
       <CollaborativeCodeViewer
         sessionId={sessionId}
         fileName={selectedFile.filename}
-        fileContent={selectedFile.content}
+        fileContent={realFileContent}
         language={selectedFile.language}
         currentUser={currentUser}
         onClose={handleEndCollaboration}
