@@ -298,7 +298,7 @@ namespace AICodeReviewer.Controllers
                     ["repository"] = name,
                     ["prNumber"] = number, // Add alternative key for plugins
                     ["content"] = "AI Code Review completed", // Add content for GitHub comment
-                    ["project"] = "OPS", // Use correct Jira project key from .env
+                    ["project"] = Environment.GetEnvironmentVariable("JIRA_PROJECT_KEY") ?? "KAN", // Use Jira project key from .env
                     ["issueType"] = "Task", // Use correct issue type for Jira
                     ["summary"] = $"Code Review Issues in PR #{number}",
                     ["description"] = "Issues found during AI code review",

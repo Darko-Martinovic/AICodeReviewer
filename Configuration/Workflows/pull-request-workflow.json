@@ -50,7 +50,7 @@
           "prNumber": "{{data.prNumber}}",
           "reviewSummary": "{{results.code_review.summary}}",
           "issueCount": "{{results.code_review.issueCount}}",
-          "project": "OPS",
+          "project": "KAN",
           "issueType": "Task",
           "priority": "High"
         }
