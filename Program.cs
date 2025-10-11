@@ -174,7 +174,7 @@ namespace AICodeReviewer
             kernelBuilder.Plugins.AddFromType<CodeReviewPlugin>("CodeReview");
             kernelBuilder.Plugins.AddFromType<GitHubPlugin>("GitHub");
             kernelBuilder.Plugins.AddFromType<TeamsPlugin>("Teams");
-            kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack");
+            // kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack"); // Disabled - Slack integration not configured
 
             Console.WriteLine("🔌 Semantic Kernel plugins configured for registration");
 
