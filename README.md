@@ -2,6 +2,12 @@
 
 AI-powered code review tool using Azure OpenAI with React frontend for managing system prompts.
 
+## 🎬 Demo Video
+
+See the AI Code Reviewer in action:
+
+https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
+
 ## ✨ Features
 
 - **🔍 AI Code Analysis**: Automated reviews using Azure OpenAI
