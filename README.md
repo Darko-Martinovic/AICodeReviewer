@@ -52,7 +52,7 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
    npm run dev
    ```
 
-4. **Access**: Frontend at `http://localhost:5173`, API at `https://localhost:7001`
+4. **Access**: Frontend at `http://localhost:5174`, API at `https://localhost:7001`
 
 ## ⚙️ Usage
 
