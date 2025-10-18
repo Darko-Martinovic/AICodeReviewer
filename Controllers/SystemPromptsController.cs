@@ -25,7 +25,7 @@ public class SystemPromptsController : ControllerBase
             var languagePrompts = _configuration.GetSection("AzureOpenAI:LanguagePrompts");
             var result = new Dictionary<string, SystemPromptData>();
 
-            foreach (var language in new[] { "CSharp", "VbNet", "Sql", "JavaScript", "TypeScript", "React" })
+            foreach (var language in new[] { "CSharp", "Java", "VbNet", "Sql", "JavaScript", "TypeScript", "React" })
             {
                 var section = languagePrompts.GetSection(language);
                 var systemPrompt = section["SystemPrompt"];

@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 
 - **🔍 AI Code Analysis**: Automated reviews using Azure OpenAI
 - **🌐 Web Interface**: React + TypeScript frontend
-- **🎯 Multi-Language Support**: C#, VB.NET, JavaScript, TypeScript, React, T-SQL
+- **🎯 Multi-Language Support**: C#, Java, VB.NET, JavaScript, TypeScript, React, T-SQL
 - **⚙️ System Prompts Management**: Customize AI behavior per language
 - **🤝 Real-Time Collaboration**: Live code review sessions with multiple participants
 - **💬 Live Comments**: Real-time commenting and discussions on code lines

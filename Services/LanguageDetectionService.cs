@@ -13,6 +13,9 @@ namespace AICodeReviewer.Services
             { ".cs", "CSharp" },
             { ".csx", "CSharp" },
             
+            // Java files
+            { ".java", "Java" },
+            
             // VB.NET files
             { ".vb", "VbNet" },
             { ".vbs", "VbNet" },
@@ -35,7 +38,6 @@ namespace AICodeReviewer.Services
             
             // Other common languages (not prioritized)
             { ".py", "Python" },
-            { ".java", "Java" },
             { ".cpp", "C++" },
             { ".c", "C" },
             { ".php", "PHP" },
@@ -69,6 +71,7 @@ namespace AICodeReviewer.Services
         private static readonly HashSet<string> _supportedLanguages = new(StringComparer.OrdinalIgnoreCase)
         {
             "CSharp",
+            "Java",
             "VbNet",
             "Sql",
             "JavaScript",

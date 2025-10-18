@@ -400,7 +400,21 @@
               "host": ["{{baseUrl}}"],
               "path": ["{{apiPath}}", "systemprompts", "CSharp"]
             },
-            "description": "Gets the system prompt for a specific language (CSharp, JavaScript, TypeScript, React, VBNet, TSQL)"
+            "description": "Gets the system prompt for a specific language (CSharp, Java, JavaScript, TypeScript, React, VBNet, TSQL)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Java System Prompt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/Java",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "Java"]
+            },
+            "description": "Gets the Java-specific system prompt and configuration"
           },
           "response": []
         },
@@ -416,14 +430,37 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customPrompt\": \"You are an expert C# code reviewer. Focus on performance, security, and best practices.\"\n}"
+              "raw": "{\n  \"customAdditions\": \"You are an expert C# code reviewer. Focus on performance, security, and best practices.\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}{{apiPath}}/systemprompts/CSharp/custom",
               "host": ["{{baseUrl}}"],
               "path": ["{{apiPath}}", "systemprompts", "CSharp", "custom"]
             },
-            "description": "Sets a custom system prompt for a specific language"
+            "description": "Sets custom additions to the C# system prompt"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Custom Java Prompt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customAdditions\": \"You are an expert Java code reviewer. Focus on Spring Framework best practices, JPA optimization, and enterprise patterns. Pay special attention to memory management and thread safety.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/Java/custom",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "Java", "custom"]
+            },
+            "description": "Sets custom additions to the Java system prompt"
           },
           "response": []
         },
@@ -446,7 +483,30 @@
               "host": ["{{baseUrl}}"],
               "path": ["{{apiPath}}", "systemprompts", "preview", "CSharp"]
             },
-            "description": "Previews how a system prompt will look with custom additions"
+            "description": "Previews how the C# system prompt will look with custom additions"
+          },
+          "response": []
+        },
+        {
+          "name": "Preview Java Language Prompt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customAdditions\": \"Focus on Spring Boot best practices, JPA optimization, and proper exception handling. Ensure thread safety in concurrent code.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/systemprompts/preview/Java",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "systemprompts", "preview", "Java"]
+            },
+            "description": "Previews how the Java system prompt will look with custom additions"
           },
           "response": []
         },

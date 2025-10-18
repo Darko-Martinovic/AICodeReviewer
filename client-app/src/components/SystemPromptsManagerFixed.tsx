@@ -42,6 +42,7 @@ const SystemPromptsManager: React.FC = () => {
 
   const languages = [
     { key: "CSharp", label: "C#", icon: "🟢" },
+    { key: "Java", label: "Java", icon: "☕" },
     { key: "VbNet", label: "VB.NET", icon: "🔵" },
     { key: "Sql", label: "T-SQL", icon: "🗄️" },
     { key: "JavaScript", label: "JavaScript", icon: "🟨" },
