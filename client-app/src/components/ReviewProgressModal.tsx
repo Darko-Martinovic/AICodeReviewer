@@ -82,10 +82,8 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isCached, setIsCached] = useState(false);
-  const [isCheckingCache, setIsCheckingCache] = useState(false);
 
   const checkCacheStatus = useCallback(async () => {
-    setIsCheckingCache(true);
     try {
       const response =
         reviewType === "commit"
@@ -101,8 +99,6 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
     } catch (error) {
       console.error("Error checking cache:", error);
       setIsCached(false);
-    } finally {
-      setIsCheckingCache(false);
     }
   }, [reviewType, reviewId]);
 

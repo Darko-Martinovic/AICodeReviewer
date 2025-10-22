@@ -5,6 +5,7 @@ import styles from "./SystemPromptsManagerFixed.module.css";
 interface SystemPrompt {
   language: string;
   systemPrompt: string;
+  userPromptTemplate: string;
   customAdditions: string;
   lastModified: string;
 }
@@ -21,7 +22,7 @@ interface Templates {
 const SystemPromptsManager: React.FC = () => {
   const [prompts, setPrompts] = useState<{ [key: string]: SystemPrompt }>({});
   const [templates, setTemplates] = useState<Templates | null>(null);
-  const [activeLanguage, setActiveLanguage] = useState<string>("CSharp");
+  const [activeLanguage, setActiveLanguage] = useState<string>("cSharp");
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<{ [key: string]: boolean }>(
@@ -41,28 +42,77 @@ const SystemPromptsManager: React.FC = () => {
   });
 
   const languages = [
-    { key: "CSharp", label: "C#", icon: "🟢" },
-    { key: "Java", label: "Java", icon: "☕" },
-    { key: "VbNet", label: "VB.NET", icon: "🔵" },
-    { key: "Sql", label: "T-SQL", icon: "🗄️" },
-    { key: "JavaScript", label: "JavaScript", icon: "🟨" },
-    { key: "TypeScript", label: "TypeScript", icon: "🔷" },
-    { key: "React", label: "React", icon: "⚛️" },
+    { key: "cSharp", label: "C#", icon: "🟢" },
+    { key: "java", label: "Java", icon: "☕" },
+    { key: "vbNet", label: "VB.NET", icon: "🔵" },
+    { key: "sql", label: "T-SQL", icon: "🗄️" },
+    { key: "javaScript", label: "JavaScript", icon: "🟨" },
+    { key: "typeScript", label: "TypeScript", icon: "🔷" },
+    { key: "react", label: "React", icon: "⚛️" },
   ];
 
   useEffect(() => {
+    console.log("🔍 DEBUG: Component mounted, loading prompts...");
     loadSystemPrompts();
     loadPromptTemplates();
   }, []);
 
+  useEffect(() => {
+    console.log("🔍 DEBUG: Prompts state changed:", {
+      promptsKeys: Object.keys(prompts),
+      promptsCount: Object.keys(prompts).length,
+      activeLanguage,
+      hasActiveLanguagePrompt: !!prompts[activeLanguage],
+      activeLanguageData: prompts[activeLanguage]
+        ? {
+            systemPromptLength:
+              prompts[activeLanguage].systemPrompt?.length || 0,
+            customAdditionsLength:
+              prompts[activeLanguage].customAdditions?.length || 0,
+            lastModified: prompts[activeLanguage].lastModified,
+          }
+        : null,
+    });
+  }, [prompts, activeLanguage]);
+
   const loadSystemPrompts = async () => {
     try {
       setLoading(true);
+      console.log("🔍 DEBUG: Starting to load system prompts...");
+
       const response = await fetch("https://localhost:7001/api/systemprompts");
+      console.log("🔍 DEBUG: Response status:", response.status);
+      console.log("🔍 DEBUG: Response ok:", response.ok);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log("🔍 DEBUG: Raw response data:", data);
+      console.log("🔍 DEBUG: Data type:", typeof data);
+      console.log("🔍 DEBUG: Data keys:", Object.keys(data || {}));
+
+      if (data && typeof data === "object") {
+        Object.entries(data).forEach(([key, value]) => {
+          const promptData = value as SystemPrompt;
+          console.log(`🔍 DEBUG: Language ${key}:`, {
+            hasValue: !!value,
+            type: typeof value,
+            systemPromptLength: promptData?.systemPrompt?.length || 0,
+            userPromptTemplateLength:
+              promptData?.userPromptTemplate?.length || 0,
+          });
+        });
+      }
+
       setPrompts(data);
+      console.log(
+        "🔍 DEBUG: Prompts state updated, data keys:",
+        Object.keys(data || {})
+      );
     } catch (error) {
-      console.error("Failed to load system prompts:", error);
+      console.error("❌ Failed to load system prompts:", error);
     } finally {
       setLoading(false);
     }
@@ -238,7 +288,16 @@ Would you like to be notified when it's ready?`;
       </div>
 
       {/* Main Content - Fixed Layout */}
-      {prompts[activeLanguage] && (
+      {(() => {
+        const hasActiveLanguagePrompt = !!prompts[activeLanguage];
+        console.log("🔍 DEBUG: Rendering check:", {
+          activeLanguage,
+          hasActiveLanguagePrompt,
+          availableLanguages: Object.keys(prompts),
+          promptsCount: Object.keys(prompts).length,
+        });
+        return hasActiveLanguagePrompt;
+      })() && (
         <div className={styles.contentLayout}>
           {/* Left Panel - Base System Prompt and Custom Additions */}
           <div className={styles.leftPanel}>

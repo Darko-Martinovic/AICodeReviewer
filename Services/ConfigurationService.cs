@@ -17,12 +17,58 @@ namespace AICodeReviewer.Services
             Console.WriteLine("🔧 LOADING CONFIGURATION - Starting initialization...");
             _appSettings = LoadConfiguration();
             Console.WriteLine($"🔧 CONFIGURATION COMPLETE - Temperature: {_appSettings.AzureOpenAI.Temperature}");
+
+            // Debug repository filter settings
+            var filterSettings = _appSettings.GitHub.RepositoryFilter;
+            Console.WriteLine($"🔍 DEBUG - Repository Filter Settings:");
+            Console.WriteLine($"    EnableFiltering: {filterSettings.EnableFiltering}");
+            Console.WriteLine($"    DefaultMode: {filterSettings.DefaultMode}");
+            Console.WriteLine($"    IncludePatterns Count: {filterSettings.IncludePatterns.Count}");
+            Console.WriteLine($"    ExcludePatterns Count: {filterSettings.ExcludePatterns.Count}");
+
+            if (filterSettings.IncludePatterns.Any())
+            {
+                foreach (var pattern in filterSettings.IncludePatterns)
+                {
+                    Console.WriteLine($"    Include Pattern: '{pattern.Pattern}' (Owner: {pattern.Owner}, Provider: {pattern.Provider})");
+                }
+            }
         }
 
         /// <summary>
         /// Gets the loaded application settings
         /// </summary>
         public AppSettings Settings => _appSettings;
+
+        /// <summary>
+        /// Saves the current settings back to appsettings.json
+        /// </summary>
+        public async Task SaveSettingsAsync()
+        {
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = null, // Use PascalCase (default C# naming)
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                };
+
+                var jsonContent = JsonSerializer.Serialize(_appSettings, options);
+                await File.WriteAllTextAsync("appsettings.json", jsonContent);
+
+                if (_appSettings.DebugLogging)
+                {
+                    Console.WriteLine("✅ Settings saved to appsettings.json");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️  Error saving settings: {ex.Message}");
+                throw;
+            }
+        }
 
         /// <summary>
         /// Loads configuration from multiple sources with proper precedence
@@ -78,18 +124,37 @@ namespace AICodeReviewer.Services
             try
             {
                 var jsonContent = File.ReadAllText(configFile);
+                Console.WriteLine($"📄 DEBUG - JSON file '{configFile}' content length: {jsonContent.Length}");
+
+                // Check if the JSON contains the expected sections
+                Console.WriteLine($"📄 DEBUG - JSON contains 'GitHub': {jsonContent.Contains("\"GitHub\"")}");
+                Console.WriteLine($"📄 DEBUG - JSON contains 'RepositoryFilter': {jsonContent.Contains("\"RepositoryFilter\"")}");
+                Console.WriteLine($"📄 DEBUG - JSON contains 'EnableFiltering': {jsonContent.Contains("\"EnableFiltering\"")}");
+
                 var jsonSettings = JsonSerializer.Deserialize<AppSettings>(
                     jsonContent,
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true,
                         AllowTrailingCommas = true,
-                        ReadCommentHandling = JsonCommentHandling.Skip
+                        ReadCommentHandling = JsonCommentHandling.Skip,
+                        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
                     }
                 );
 
                 if (jsonSettings != null)
                 {
+                    Console.WriteLine($"📄 DEBUG - Deserialized settings: GitHub section is null: {jsonSettings.GitHub == null}");
+                    if (jsonSettings.GitHub != null)
+                    {
+                        Console.WriteLine($"📄 DEBUG - GitHub.RepositoryFilter is null: {jsonSettings.GitHub.RepositoryFilter == null}");
+                        if (jsonSettings.GitHub.RepositoryFilter != null)
+                        {
+                            Console.WriteLine($"📄 DEBUG - Before CopySettings - EnableFiltering: {jsonSettings.GitHub.RepositoryFilter.EnableFiltering}");
+                            Console.WriteLine($"📄 DEBUG - Before CopySettings - IncludePatterns count: {jsonSettings.GitHub.RepositoryFilter.IncludePatterns.Count}");
+                        }
+                    }
+
                     // Copy values from JSON to our settings object
                     CopySettings(jsonSettings, settings);
                     if (settings.DebugLogging)
@@ -311,6 +376,62 @@ namespace AICodeReviewer.Services
             {
                 destination.GitHub.MaxCommitsToList = source.GitHub.MaxCommitsToList;
                 destination.GitHub.MaxPullRequestsToList = source.GitHub.MaxPullRequestsToList;
+            }
+
+            // GitHub
+            if (source.GitHub != null)
+            {
+                destination.GitHub.MaxCommitsToList = source.GitHub.MaxCommitsToList;
+                destination.GitHub.MaxPullRequestsToList = source.GitHub.MaxPullRequestsToList;
+
+                // Copy repository filter settings only if they contain non-default values
+                if (source.GitHub.RepositoryFilter != null && 
+                    (source.GitHub.RepositoryFilter.EnableFiltering || 
+                     source.GitHub.RepositoryFilter.IncludePatterns?.Any() == true ||
+                     source.GitHub.RepositoryFilter.ExcludePatterns?.Any() == true))
+                {
+                    destination.GitHub.RepositoryFilter = new RepositoryFilterSettings
+                    {
+                        EnableFiltering = source.GitHub.RepositoryFilter.EnableFiltering,
+                        DefaultMode = source.GitHub.RepositoryFilter.DefaultMode,
+                        IncludePatterns = source.GitHub.RepositoryFilter.IncludePatterns?.Select(p => new RepositoryFilterPattern
+                        {
+                            Pattern = p.Pattern,
+                            Provider = p.Provider,
+                            Owner = p.Owner,
+                            CaseSensitive = p.CaseSensitive,
+                            Description = p.Description
+                        }).ToList() ?? new List<RepositoryFilterPattern>(),
+                        ExcludePatterns = source.GitHub.RepositoryFilter.ExcludePatterns?.Select(p => new RepositoryFilterPattern
+                        {
+                            Pattern = p.Pattern,
+                            Provider = p.Provider,
+                            Owner = p.Owner,
+                            CaseSensitive = p.CaseSensitive,
+                            Description = p.Description
+                        }).ToList() ?? new List<RepositoryFilterPattern>()
+                    };
+                }
+
+                // Copy repository history and default repository
+                if (source.GitHub.RepositoryHistory?.Any() == true)
+                {
+                    destination.GitHub.RepositoryHistory = new List<RepositoryInfo>(source.GitHub.RepositoryHistory);
+                }
+
+                if (source.GitHub.DefaultRepository != null)
+                {
+                    destination.GitHub.DefaultRepository = new RepositoryInfo
+                    {
+                        Owner = source.GitHub.DefaultRepository.Owner,
+                        Name = source.GitHub.DefaultRepository.Name,
+                        Description = source.GitHub.DefaultRepository.Description,
+                        DefaultBranch = source.GitHub.DefaultRepository.DefaultBranch,
+                        IsPrivate = source.GitHub.DefaultRepository.IsPrivate,
+                        StarCount = source.GitHub.DefaultRepository.StarCount,
+                        ForkCount = source.GitHub.DefaultRepository.ForkCount
+                    };
+                }
             }
 
             // Jira

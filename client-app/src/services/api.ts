@@ -78,6 +78,19 @@ export const cacheApi = {
     api.delete(`/cache/pullrequest/${pullRequestNumber}`),
 };
 
+// Repository Filter API
+export const repositoryFilterApi = {
+  getSettings: () => api.get("/repositoryfilters"),
+  updateSettings: (settings: RepositoryFilterSettings) =>
+    api.post("/repositoryfilters", settings),
+  testPattern: (request: TestPatternRequest) =>
+    api.post("/repositoryfilters/test", request),
+  validatePattern: (pattern: RepositoryFilterPattern) =>
+    api.post("/repositoryfilters/validate", pattern),
+  getFilteredRepositories: () => api.get("/repositoryfilters/preview"),
+  resetSettings: () => api.delete("/repositoryfilters"),
+};
+
 // Types
 export interface Repository {
   id: number;
@@ -159,4 +172,28 @@ export interface SecurityIssue {
   type: string;
   description: string;
   recommendation: string;
+}
+
+// Repository Filter Types
+export interface RepositoryFilterPattern {
+  pattern: string;
+  provider?: string;
+  owner?: string;
+  caseSensitive: boolean;
+  description?: string;
+}
+
+export interface RepositoryFilterSettings {
+  includePatterns: RepositoryFilterPattern[];
+  excludePatterns: RepositoryFilterPattern[];
+  enableFiltering: boolean;
+  defaultMode: FilterMode;
+}
+
+export type FilterMode = "ShowAll" | "IncludeOnly" | "ExcludeMatching";
+
+export interface TestPatternRequest {
+  repositoryName: string;
+  owner?: string;
+  pattern: RepositoryFilterPattern;
 }

@@ -9,5 +9,6 @@ namespace AICodeReviewer.Services.Interfaces
     {
         AppSettings Settings { get; }
         void DisplayConfigurationSummary();
+        Task SaveSettingsAsync();
     }
 }

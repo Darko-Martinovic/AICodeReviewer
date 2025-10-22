@@ -839,6 +839,123 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Repository Filter Management",
+      "description": "Operations for managing repository filter settings to control which repositories are displayed",
+      "item": [
+        {
+          "name": "Get Repository Filter Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters"]
+            },
+            "description": "Retrieves the current repository filter settings including include/exclude patterns and filtering mode"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Repository Filter Settings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enableFiltering\": true,\n  \"defaultMode\": \"ShowAll\",\n  \"includePatterns\": [\n    {\n      \"pattern\": \"ai*\",\n      \"provider\": \"github\",\n      \"owner\": \"\",\n      \"caseSensitive\": false,\n      \"description\": \"Include all repositories starting with 'ai'\"\n    }\n  ],\n  \"excludePatterns\": [\n    {\n      \"pattern\": \"test*\",\n      \"provider\": \"\",\n      \"owner\": \"\",\n      \"caseSensitive\": false,\n      \"description\": \"Exclude all test repositories\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters"]
+            },
+            "description": "Updates the repository filter settings. Use this to configure which repositories are shown in the application."
+          },
+          "response": []
+        },
+        {
+          "name": "Test Repository Filter Pattern",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repositoryName\": \"AICodeReviewer\",\n  \"owner\": \"Darko-Martinovic\",\n  \"pattern\": {\n    \"pattern\": \"ai*\",\n    \"provider\": \"github\",\n    \"owner\": \"\",\n    \"caseSensitive\": false,\n    \"description\": \"Test pattern for repositories starting with 'ai'\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters", "test"]
+            },
+            "description": "Tests whether a repository name matches a specific filter pattern. Useful for validating patterns before applying them."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Repository Filter Pattern",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pattern\": \"ai*\",\n  \"provider\": \"github\",\n  \"owner\": \"\",\n  \"caseSensitive\": false,\n  \"description\": \"Validate pattern for repositories starting with 'ai'\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters", "validate"]
+            },
+            "description": "Validates a filter pattern without testing it against specific repositories. Checks for syntax errors and supported provider values."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Filtered Repositories Preview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters", "preview"]
+            },
+            "description": "Gets a preview of repositories that would be shown with the current filter settings. Includes total repository count and filter settings for comparison."
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Repository Filter Settings",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/repositoryfilters",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "repositoryfilters"]
+            },
+            "description": "Resets repository filter settings to default (show all repositories). This removes all include/exclude patterns and disables filtering."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [

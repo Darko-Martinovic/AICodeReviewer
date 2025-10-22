@@ -14,7 +14,8 @@ type TabType =
   | "commits"
   | "pullrequests"
   | "systemprompts"
-  | "workflows";
+  | "workflows"
+  | "repositoryfilters";
 
 interface NavigationProps {
   activeTab: TabType;
@@ -40,6 +41,12 @@ export const Navigation: React.FC<NavigationProps> = ({
     {
       id: "repositories" as TabType,
       label: "Repositories",
+      icon: Settings,
+      count: null,
+    },
+    {
+      id: "repositoryfilters" as TabType,
+      label: "Repository Filters",
       icon: Settings,
       count: null,
     },

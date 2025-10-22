@@ -15,11 +15,13 @@ namespace AICodeReviewer.Services
     {
         private readonly AppSettings _settings;
         private readonly GitHubClient _gitHubClient;
+        private readonly IRepositoryFilterService _filterService;
         private (string Owner, string Name) _currentRepository;
 
-        public RepositoryManagementService(AppSettings settings, string gitHubToken)
+        public RepositoryManagementService(AppSettings settings, string gitHubToken, IRepositoryFilterService filterService)
         {
             _settings = settings;
+            _filterService = filterService ?? throw new ArgumentNullException(nameof(filterService));
             _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
             _gitHubClient.Credentials = new Credentials(gitHubToken);
 
@@ -330,7 +332,7 @@ namespace AICodeReviewer.Services
             try
             {
                 var repos = await _gitHubClient.Repository.GetAllForCurrent();
-                return repos.Select(r => new RepositoryInfo
+                var repositoryList = repos.Select(r => new RepositoryInfo
                 {
                     Owner = r.Owner.Login,
                     Name = r.Name,
@@ -340,6 +342,11 @@ namespace AICodeReviewer.Services
                     StarCount = r.StargazersCount,
                     ForkCount = r.ForksCount
                 }).ToList();
+
+                // Apply filtering
+                var filteredRepositories = _filterService.FilterRepositories(repositoryList);
+
+                return filteredRepositories;
             }
             catch (Exception ex)
             {

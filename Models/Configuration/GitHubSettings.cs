@@ -9,5 +9,6 @@ namespace AICodeReviewer.Models.Configuration
         public int MaxPullRequestsToList { get; set; } = 5;
         public RepositoryInfo DefaultRepository { get; set; } = new();
         public List<RepositoryInfo> RepositoryHistory { get; set; } = new();
+        public RepositoryFilterSettings RepositoryFilter { get; set; } = new();
     }
 }

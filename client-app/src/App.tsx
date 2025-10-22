@@ -30,7 +30,8 @@ type TabType =
   | "commits"
   | "pullrequests"
   | "systemprompts"
-  | "workflows";
+  | "workflows"
+  | "repositoryfilters";
 
 interface AppState {
   currentRepository: Repository | null;
@@ -975,6 +976,34 @@ function App() {
     }
   };
 
+  const handleRepositoryFiltersChanged = async () => {
+    // Reload repositories when filters change
+    try {
+      console.log("🔄 Repository filters changed, reloading repositories...");
+      const repositoriesResponse = await repositoryApi.getAll();
+      setState((prev) => ({
+        ...prev,
+        repositories: repositoriesResponse.data,
+      }));
+      console.log("✅ Repositories reloaded after filter change");
+      addToast({
+        type: "success",
+        title: "Filters Applied",
+        message: "Repository list updated with new filter settings",
+      });
+    } catch (error) {
+      console.error(
+        "❌ Failed to reload repositories after filter change:",
+        error
+      );
+      addToast({
+        type: "error",
+        title: "Error",
+        message: "Failed to reload repositories after filter change",
+      });
+    }
+  };
+
   const handleAddRepository = async () => {
     if (!newRepoForm.owner || !newRepoForm.name) {
       addToast({
@@ -1256,6 +1285,7 @@ console.log("File loaded successfully");`
               onTabChange={(tab) =>
                 setState((prev) => ({ ...prev, activeTab: tab }))
               }
+              onRepositoryFiltersChanged={handleRepositoryFiltersChanged}
             />
           )}
         </main>

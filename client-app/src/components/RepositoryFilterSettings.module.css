@@ -1,0 +1,777 @@
+/* Container and Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark) .container {
+  background-color: rgb(31 41 55);
+  color: white;
+}
+
+/* Header */
+.header {
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgb(229 231 235);
+  padding-bottom: 24px;
+}
+
+:global(.dark) .header {
+  border-bottom-color: rgb(75 85 99);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: rgb(17 24 39);
+  margin-bottom: 8px;
+}
+
+:global(.dark) .title {
+  color: white;
+}
+
+.description {
+  font-size: 16px;
+  color: rgb(107 114 128);
+  line-height: 1.6;
+}
+
+:global(.dark) .description {
+  color: rgb(156 163 175);
+}
+
+/* Loading */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgb(229 231 235);
+  border-top: 4px solid rgb(59 130 246);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+:global(.dark) .loadingSpinner {
+  border-color: rgb(75 85 99);
+  border-top-color: rgb(59 130 246);
+}
+
+.loadingText {
+  color: rgb(107 114 128);
+  font-size: 16px;
+}
+
+:global(.dark) .loadingText {
+  color: rgb(156 163 175);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Settings Cards */
+.settingsCard {
+  background-color: rgb(249 250 251);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgb(229 231 235);
+}
+
+:global(.dark) .settingsCard {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+}
+
+.settingGroup {
+  margin-bottom: 24px;
+}
+
+.settingGroup:last-child {
+  margin-bottom: 0;
+}
+
+/* Toggle Switch */
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  font-size: 16px;
+}
+
+:global(.dark) .toggleLabel {
+  color: white;
+}
+
+.toggleInput {
+  display: none;
+}
+
+.toggleSlider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: rgb(209 213 219);
+  border-radius: 24px;
+  margin-right: 12px;
+  transition: background-color 0.3s;
+}
+
+.toggleSlider::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggleInput:checked + .toggleSlider {
+  background-color: rgb(59 130 246);
+}
+
+.toggleInput:checked + .toggleSlider::before {
+  transform: translateX(20px);
+}
+
+/* Select Input */
+.selectLabel {
+  display: block;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+:global(.dark) .selectLabel {
+  color: white;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .selectInput {
+  background-color: rgb(75 85 99);
+  border-color: rgb(107 114 128);
+  color: white;
+}
+
+.selectInput:focus {
+  outline: none;
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.settingDescription {
+  font-size: 14px;
+  color: rgb(107 114 128);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+:global(.dark) .settingDescription {
+  color: rgb(156 163 175);
+}
+
+/* Patterns Cards */
+.patternsCard {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgb(229 231 235);
+}
+
+:global(.dark) .patternsCard {
+  background-color: rgb(55 65 81);
+  border-color: rgb(75 85 99);
+}
+
+.patternsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.patternsTitle {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .patternsTitle {
+  color: white;
+}
+
+.includeIcon,
+.excludeIcon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.addPatternButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(59 130 246);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addPatternButton:hover {
+  background-color: rgb(37 99 235);
+}
+
+.patternsDescription {
+  font-size: 14px;
+  color: rgb(107 114 128);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+:global(.dark) .patternsDescription {
+  color: rgb(156 163 175);
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 48px 0;
+  color: rgb(107 114 128);
+}
+
+:global(.dark) .emptyState {
+  color: rgb(156 163 175);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.emptySubtext {
+  font-size: 14px;
+  color: rgb(156 163 175);
+  margin-top: 8px;
+}
+
+:global(.dark) .emptySubtext {
+  color: rgb(107 114 128);
+}
+
+/* Pattern List */
+.patternsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Pattern Card */
+.patternCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgb(229 231 235);
+  background-color: rgb(249 250 251);
+}
+
+:global(.dark) .patternCard {
+  border-color: rgb(75 85 99);
+  background-color: rgb(31 41 55);
+}
+
+.includeCard {
+  border-left: 4px solid rgb(34 197 94);
+}
+
+.excludeCard {
+  border-left: 4px solid rgb(239 68 68);
+}
+
+.patternContent {
+  flex: 1;
+}
+
+.patternMain {
+  margin-bottom: 8px;
+}
+
+.patternCode {
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
+  background-color: rgb(243 244 246);
+  color: rgb(17 24 39);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+:global(.dark) .patternCode {
+  background-color: rgb(75 85 99);
+  color: white;
+}
+
+.patternDescription {
+  font-size: 14px;
+  color: rgb(107 114 128);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+:global(.dark) .patternDescription {
+  color: rgb(156 163 175);
+}
+
+.patternMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.patternTag {
+  background-color: rgb(229 231 235);
+  color: rgb(55 65 81);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:global(.dark) .patternTag {
+  background-color: rgb(75 85 99);
+  color: rgb(209 213 219);
+}
+
+.patternActions {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.testActionButton,
+.editActionButton,
+.removeActionButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.testActionButton {
+  background-color: rgb(249 250 251);
+  color: rgb(107 114 128);
+}
+
+.testActionButton:hover {
+  background-color: rgb(243 244 246);
+}
+
+.editActionButton {
+  background-color: rgb(254 249 195);
+  color: rgb(146 64 14);
+}
+
+.editActionButton:hover {
+  background-color: rgb(254 240 138);
+}
+
+.removeActionButton {
+  background-color: rgb(254 226 226);
+  color: rgb(185 28 28);
+}
+
+.removeActionButton:hover {
+  background-color: rgb(252 165 165);
+}
+
+:global(.dark) .testActionButton {
+  background-color: rgb(75 85 99);
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .testActionButton:hover {
+  background-color: rgb(107 114 128);
+}
+
+:global(.dark) .editActionButton {
+  background-color: rgb(120 113 108);
+  color: rgb(251 191 36);
+}
+
+:global(.dark) .editActionButton:hover {
+  background-color: rgb(168 162 158);
+}
+
+:global(.dark) .removeActionButton {
+  background-color: rgb(127 29 29);
+  color: rgb(248 113 113);
+}
+
+:global(.dark) .removeActionButton:hover {
+  background-color: rgb(153 27 27);
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  padding-top: 24px;
+  border-top: 1px solid rgb(229 231 235);
+}
+
+:global(.dark) .actionButtons {
+  border-top-color: rgb(75 85 99);
+}
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(34 197 94);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: rgb(22 163 74);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.resetButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(107 114 128);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.resetButton:hover:not(:disabled) {
+  background-color: rgb(75 85 99);
+}
+
+.resetButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Pattern Editor */
+.patternEditor {
+  padding: 24px;
+}
+
+.editorForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.formLabel {
+  display: block;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+:global(.dark) .formLabel {
+  color: white;
+}
+
+.required {
+  color: rgb(239 68 68);
+}
+
+.formInput,
+.formSelect {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .formInput,
+:global(.dark) .formSelect {
+  background-color: rgb(75 85 99);
+  border-color: rgb(107 114 128);
+  color: white;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: rgb(59 130 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.fieldHelp {
+  font-size: 12px;
+  color: rgb(107 114 128);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+:global(.dark) .fieldHelp {
+  color: rgb(156 163 175);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .checkboxLabel {
+  color: white;
+}
+
+.checkboxInput {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.editorActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid rgb(229 231 235);
+  padding-top: 20px;
+}
+
+:global(.dark) .editorActions {
+  border-top-color: rgb(75 85 99);
+}
+
+.savePatternButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(59 130 246);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.savePatternButton:hover {
+  background-color: rgb(37 99 235);
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: rgb(107 114 128);
+  border: 1px solid rgb(209 213 219);
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: rgb(249 250 251);
+}
+
+:global(.dark) .cancelButton {
+  color: rgb(156 163 175);
+  border-color: rgb(75 85 99);
+}
+
+:global(.dark) .cancelButton:hover {
+  background-color: rgb(55 65 81);
+}
+
+/* Test Modal */
+.testModalContent {
+  padding: 24px;
+}
+
+.testForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.testButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgb(168 85 247);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.testButton:hover {
+  background-color: rgb(147 51 234);
+}
+
+.testResult {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.testMatch {
+  background-color: rgb(240 253 244);
+  border-color: rgb(34 197 94);
+}
+
+.testNoMatch {
+  background-color: rgb(254 242 242);
+  border-color: rgb(239 68 68);
+}
+
+:global(.dark) .testMatch {
+  background-color: rgb(20 83 45);
+  border-color: rgb(34 197 94);
+}
+
+:global(.dark) .testNoMatch {
+  background-color: rgb(127 29 29);
+  border-color: rgb(239 68 68);
+}
+
+.testResultIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.testResultMessage {
+  color: rgb(17 24 39);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:global(.dark) .testResultMessage {
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .patternsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .patternCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .patternActions {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+}

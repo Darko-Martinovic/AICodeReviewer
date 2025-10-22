@@ -4,6 +4,7 @@ using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Plugins;
 using AICodeReviewer.Hubs;
 using Microsoft.SemanticKernel;
+using System.Text.Json;
 
 namespace AICodeReviewer
 {
@@ -35,8 +36,13 @@ namespace AICodeReviewer
         /// </summary>
         private static void ConfigureServices(IServiceCollection services)
         {
-            // Add controllers
-            services.AddControllers();
+            // Add controllers with JSON configuration
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+                });
 
             // Add API Explorer for Swagger
             services.AddEndpointsApiExplorer();
@@ -90,13 +96,21 @@ namespace AICodeReviewer
             services.AddSingleton<ILanguageDetectionService, LanguageDetectionService>();
             services.AddSingleton<IPromptManagementService, PromptManagementService>();
 
+            // Repository filter service
+            services.AddSingleton<IRepositoryFilterService>(provider =>
+            {
+                var configService = provider.GetRequiredService<IConfigurationService>();
+                return new RepositoryFilterService(configService.Settings, configService);
+            });
+
             // Repository management service
             services.AddSingleton<IRepositoryManagementService>(provider =>
             {
                 var configService = provider.GetRequiredService<IConfigurationService>();
+                var filterService = provider.GetRequiredService<IRepositoryFilterService>();
                 var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
                     ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
-                return new RepositoryManagementService(configService.Settings, token);
+                return new RepositoryManagementService(configService.Settings, token, filterService);
             });
 
             // Core services (singletons for this web app)

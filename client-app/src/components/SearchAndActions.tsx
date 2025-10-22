@@ -7,7 +7,8 @@ type TabType =
   | "commits"
   | "pullrequests"
   | "systemprompts"
-  | "workflows";
+  | "workflows"
+  | "repositoryfilters";
 
 interface SearchAndActionsProps {
   searchQuery: string;
@@ -34,6 +35,8 @@ export const SearchAndActions: React.FC<SearchAndActionsProps> = ({
         return "Search prompts...";
       case "workflows":
         return "Search workflows...";
+      case "repositoryfilters":
+        return "Search filter patterns...";
       default:
         return "Search...";
     }
@@ -41,7 +44,9 @@ export const SearchAndActions: React.FC<SearchAndActionsProps> = ({
 
   const showAddRepositoryButton = activeTab === "repositories";
   const showSearchBox =
-    activeTab !== "systemprompts" && activeTab !== "workflows";
+    activeTab !== "systemprompts" &&
+    activeTab !== "workflows" &&
+    activeTab !== "repositoryfilters";
 
   return (
     <div className={styles.searchAndActions}>

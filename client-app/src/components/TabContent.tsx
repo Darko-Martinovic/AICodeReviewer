@@ -7,6 +7,7 @@ import { PullRequestCard } from "./PullRequestCard";
 import { BranchSelector } from "./BranchSelector";
 import SystemPromptsManager from "./SystemPromptsManagerFixed";
 import WorkflowManager from "./WorkflowManager";
+import RepositoryFilterSettings from "./RepositoryFilterSettings";
 import { LoadingSpinner, EmptyState } from "./UI";
 import styles from "./TabContent.module.css";
 
@@ -15,7 +16,8 @@ type TabType =
   | "commits"
   | "pullrequests"
   | "systemprompts"
-  | "workflows";
+  | "workflows"
+  | "repositoryfilters";
 
 interface TabContentProps {
   activeTab: TabType;
@@ -41,6 +43,7 @@ interface TabContentProps {
   onBranchSelect: (branch: string) => void;
   onAddRepository: () => void;
   onTabChange: (tab: TabType) => void;
+  onRepositoryFiltersChanged?: () => void;
 }
 
 export const TabContent: React.FC<TabContentProps> = ({
@@ -61,6 +64,7 @@ export const TabContent: React.FC<TabContentProps> = ({
   onBranchSelect,
   onAddRepository,
   onTabChange,
+  onRepositoryFiltersChanged,
 }) => {
   // Repositories Tab
   if (activeTab === "repositories") {
@@ -196,6 +200,13 @@ export const TabContent: React.FC<TabContentProps> = ({
   // System Prompts Tab
   if (activeTab === "systemprompts") {
     return <SystemPromptsManager />;
+  }
+
+  // Repository Filters Tab
+  if (activeTab === "repositoryfilters") {
+    return (
+      <RepositoryFilterSettings onFiltersChanged={onRepositoryFiltersChanged} />
+    );
   }
 
   // Workflows Tab
