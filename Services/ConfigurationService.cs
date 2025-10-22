@@ -385,8 +385,8 @@ namespace AICodeReviewer.Services
                 destination.GitHub.MaxPullRequestsToList = source.GitHub.MaxPullRequestsToList;
 
                 // Copy repository filter settings only if they contain non-default values
-                if (source.GitHub.RepositoryFilter != null && 
-                    (source.GitHub.RepositoryFilter.EnableFiltering || 
+                if (source.GitHub.RepositoryFilter != null &&
+                    (source.GitHub.RepositoryFilter.EnableFiltering ||
                      source.GitHub.RepositoryFilter.IncludePatterns?.Any() == true ||
                      source.GitHub.RepositoryFilter.ExcludePatterns?.Any() == true))
                 {
