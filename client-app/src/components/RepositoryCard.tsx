@@ -9,6 +9,7 @@ import {
   Star,
   GitFork,
 } from "lucide-react";
+import LanguageBadge from "./LanguageBadge";
 import styles from "./RepositoryCard.module.css";
 
 interface RepositoryCardProps {
@@ -50,6 +51,10 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({
               <GitBranch className={styles.branchIcon} />
               <span>{repository.defaultBranch}</span>
             </div>
+
+            {repository.language && (
+              <LanguageBadge language={repository.language} size="small" />
+            )}
 
             <div className={styles.statsContainer}>
               <div className={styles.statItem}>

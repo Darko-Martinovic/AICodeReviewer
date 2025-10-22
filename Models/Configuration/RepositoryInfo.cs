@@ -12,6 +12,7 @@ namespace AICodeReviewer.Models.Configuration
         public string DefaultBranch { get; set; } = "main";
         public int StarCount { get; set; }
         public int ForkCount { get; set; }
+        public string Language { get; set; } = string.Empty;
         public string FullName => $"{Owner}/{Name}";
         public string DisplayName => string.IsNullOrEmpty(Owner) || string.IsNullOrEmpty(Name)
             ? "Not configured"

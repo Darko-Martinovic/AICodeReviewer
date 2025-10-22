@@ -103,6 +103,7 @@ export interface Repository {
   htmlUrl: string;
   starCount: number;
   forkCount: number;
+  language: string;
   isCurrent?: boolean;
 }
 

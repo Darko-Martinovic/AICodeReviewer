@@ -340,7 +340,8 @@ namespace AICodeReviewer.Services
                     IsPrivate = r.Private,
                     DefaultBranch = r.DefaultBranch ?? "main",
                     StarCount = r.StargazersCount,
-                    ForkCount = r.ForksCount
+                    ForkCount = r.ForksCount,
+                    Language = r.Language ?? ""
                 }).ToList();
 
                 // Apply filtering

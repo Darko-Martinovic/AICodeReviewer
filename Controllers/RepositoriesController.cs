@@ -79,6 +79,7 @@ namespace AICodeReviewer.Controllers
                     HtmlUrl = $"https://github.com/{currentOwner}/{currentName}",
                     StarCount = currentRepoInfo?.StarCount ?? 0,
                     ForkCount = currentRepoInfo?.ForkCount ?? 0,
+                    Language = currentRepoInfo?.Language ?? "",
                     IsCurrent = true
                 });
 
@@ -99,6 +100,7 @@ namespace AICodeReviewer.Controllers
                             HtmlUrl = $"https://github.com/{repo.Owner}/{repo.Name}",
                             StarCount = repo.StarCount,
                             ForkCount = repo.ForkCount,
+                            Language = repo.Language,
                             IsCurrent = false
                         });
                     }
