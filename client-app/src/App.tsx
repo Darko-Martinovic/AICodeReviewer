@@ -782,20 +782,43 @@ function App() {
       const duration = Date.now() - startTime;
 
       console.log(`✅ API Response received in ${duration}ms:`, response);
-      console.log("📋 Response data:", response.data);
+      console.log(
+        "📋 Raw response data:",
+        JSON.stringify(response.data, null, 2)
+      );
+
+      // Extract review data from workflow response
+      const reviewData =
+        response.data.Review || response.data.review || response.data;
+
+      console.log(
+        "🎯 Extracted review data:",
+        JSON.stringify(reviewData, null, 2)
+      );
 
       // Log each property of the review data
-      if (response.data) {
+      if (reviewData) {
         console.log("🔍 Review data breakdown:");
-        console.log("  - Summary:", response.data.summary);
-        console.log("  - Issues length:", response.data.issues?.length);
+        console.log("  - Summary:", reviewData.summary);
+        console.log("  - Issues length:", reviewData.issues?.length);
+        console.log("  - Suggestions length:", reviewData.suggestions?.length);
+        console.log("  - Complexity:", reviewData.complexity);
+        console.log("  - Test Coverage:", reviewData.testCoverage);
+        console.log("  - Security length:", reviewData.security?.length);
+      } else {
+        console.log("❌ No review data found in response!");
+      }
+
+      // Log workflow execution info if available
+      if (response.data.WorkflowExecution) {
         console.log(
-          "  - Suggestions length:",
-          response.data.suggestions?.length
+          "🔄 Workflow execution info:",
+          response.data.WorkflowExecution
         );
-        console.log("  - Complexity:", response.data.complexity);
-        console.log("  - Test Coverage:", response.data.testCoverage);
-        console.log("  - Security length:", response.data.security?.length);
+        console.log(
+          "📋 Workflow steps executed:",
+          response.data.WorkflowResults
+        );
       }
 
       // Wait a bit to let the progress modal complete its animation (less time if cached)
@@ -803,7 +826,7 @@ function App() {
       setTimeout(() => {
         setState((prev) => ({
           ...prev,
-          codeReview: response.data,
+          codeReview: reviewData,
           showReviewModal: true,
           reviewingCommits: new Set(
             [...prev.reviewingCommits].filter((id) => id !== sha)

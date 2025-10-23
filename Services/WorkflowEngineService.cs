@@ -189,8 +189,79 @@ public class WorkflowEngineService : IWorkflowEngineService
                     var dependentResult = context.Results.FirstOrDefault(r => r.StepId == dependencyId);
                     if (dependentResult?.Result != null)
                     {
+                        // For the Slack notification step, extract info and review metrics
+                        if (step.Id == "slack_notification" && dependencyId == "code_review")
+                        {
+                            var reviewData = dependentResult.Result.ToString();
+
+                            // Extract issue count and severity from review results
+                            var (issueCount, severity) = ExtractReviewMetrics(reviewData ?? "");
+
+                            arguments["issuesCount"] = issueCount;
+                            arguments["severity"] = severity;
+
+                            // Check if this is a PR review or commit review based on context data
+                            if (context.Data.TryGetValue("pullRequestNumber", out var prNumberObj) ||
+                                context.Data.TryGetValue("prNumber", out prNumberObj))
+                            {
+                                // This is a PR review - set up PR-specific parameters
+                                if (int.TryParse(prNumberObj.ToString(), out var prNumber))
+                                {
+                                    arguments["prNumber"] = prNumber;
+
+                                    // Get PR title from context or use default
+                                    if (context.Data.TryGetValue("prTitle", out var prTitle))
+                                    {
+                                        arguments["prTitle"] = prTitle.ToString() ?? $"Pull Request #{prNumber}";
+                                    }
+                                    else
+                                    {
+                                        arguments["prTitle"] = $"Pull Request #{prNumber}";
+                                    }
+
+                                    _logger.LogInformation("  📱 PR Slack notification parameters: PR#{PrNumber}, Issues={Issues}, Severity={Severity}",
+                                        prNumber, issueCount, severity);
+                                }
+                            }
+                            else if (context.Data.TryGetValue("commitSha", out var commitSha))
+                            {
+                                // This is a commit review - set up commit-specific parameters
+                                arguments["commitSha"] = commitSha.ToString() ?? "";
+                                if (context.Data.TryGetValue("repository", out var repository))
+                                    arguments["repository"] = repository.ToString() ?? "";
+                                if (context.Data.TryGetValue("author", out var author))
+                                    arguments["author"] = author.ToString() ?? "";
+
+                                // Try to get commit message from GitHub step result, or use a default
+                                var githubStep = context.Results.FirstOrDefault(r => r.StepId == "github_commit");
+                                if (githubStep?.Result != null)
+                                {
+                                    try
+                                    {
+                                        var githubResult = githubStep.Result.ToString();
+                                        arguments["commitMessage"] = ExtractCommitMessage(githubResult ?? "");
+                                    }
+                                    catch
+                                    {
+                                        arguments["commitMessage"] = "AI code review completed";
+                                    }
+                                }
+                                else
+                                {
+                                    var shortSha = commitSha?.ToString()?.Length > 8 ? commitSha.ToString()!.Substring(0, 8) : commitSha?.ToString() ?? "unknown";
+                                    arguments["commitMessage"] = $"Code review for commit {shortSha}";
+                                }
+
+                                _logger.LogInformation("  📱 Commit Slack notification parameters: Commit={CommitSha}, Issues={Issues}, Severity={Severity}",
+                                    commitSha.ToString()?.Substring(0, 8), issueCount, severity);
+                            }
+
+                            // Add channel information
+                            if (context.Data.TryGetValue("channel", out var channel))
+                                arguments["channel"] = channel.ToString() ?? "@darko.martinovic";
+                        }
                         // For the GitHub comment step, if it depends on code_review, pass the review result as content
-                        if (step.Id == "github_comment" && dependencyId == "code_review")
+                        else if (step.Id == "github_comment" && dependencyId == "code_review")
                         {
                             arguments["content"] = dependentResult.Result.ToString();
                             arguments["reviewData"] = dependentResult.Result.ToString();
@@ -558,5 +629,120 @@ Please check the GitHub PR for detailed review results.";
     {
         var workflows = await GetAvailableWorkflowsAsync();
         return workflows.FirstOrDefault(w => w.WorkflowName.Equals(workflowName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private (int issueCount, string severity) ExtractReviewMetrics(string reviewData)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(reviewData))
+                return (0, "Low");
+
+            _logger.LogInformation("🔍 Extracting review metrics from: {ReviewDataPreview}...",
+                reviewData.Length > 200 ? reviewData.Substring(0, 200) + "..." : reviewData);
+
+            // Try to parse as JSON to extract metrics
+            using var doc = JsonDocument.Parse(reviewData);
+            var root = doc.RootElement;
+
+            int issueCount = 0;
+            string severity = "Low";
+
+            // Extract issue count - try different property names that the CodeReview plugin uses
+            if (root.TryGetProperty("IssuesFound", out var issuesFoundProp))
+            {
+                issueCount = issuesFoundProp.GetInt32();
+            }
+            else if (root.TryGetProperty("Issues", out var issuesProp) && issuesProp.ValueKind == JsonValueKind.Array)
+            {
+                issueCount = issuesProp.GetArrayLength();
+                _logger.LogInformation("📊 Found {IssueCount} issues in Issues array", issueCount);
+            }
+            else if (root.TryGetProperty("issues", out var issuesLowerProp) && issuesLowerProp.ValueKind == JsonValueKind.Array)
+            {
+                issueCount = issuesLowerProp.GetArrayLength();
+                _logger.LogInformation("📊 Found {IssueCount} issues in issues array", issueCount);
+            }
+            // Also check the Metrics object for issue count
+            else if (root.TryGetProperty("Metrics", out var metricsProp) && metricsProp.ValueKind == JsonValueKind.Object)
+            {
+                if (metricsProp.TryGetProperty("IssuesFound", out var metricsIssuesProp))
+                {
+                    issueCount = metricsIssuesProp.GetInt32();
+                    _logger.LogInformation("📊 Found {IssueCount} issues in Metrics.IssuesFound", issueCount);
+                }
+            }
+
+            // Extract highest severity - check both Issues and issues arrays
+            var issuesArray = root.TryGetProperty("Issues", out var capitalIssues) ? capitalIssues :
+                             root.TryGetProperty("issues", out var lowerIssues) ? lowerIssues : default;
+
+            if (issuesArray.ValueKind == JsonValueKind.Array && issuesArray.GetArrayLength() > 0)
+            {
+                var severities = new List<string>();
+                foreach (var issue in issuesArray.EnumerateArray())
+                {
+                    // Try both "Severity" and "severity" property names
+                    if (issue.TryGetProperty("Severity", out var issueSeverity) ||
+                        issue.TryGetProperty("severity", out issueSeverity))
+                    {
+                        var sev = issueSeverity.GetString() ?? "Low";
+                        severities.Add(sev);
+                        _logger.LogInformation("📊 Found issue with severity: {Severity}", sev);
+                    }
+                }
+
+                // Determine highest severity
+                if (severities.Any(s => s.Contains("Critical"))) severity = "Critical";
+                else if (severities.Any(s => s.Contains("High"))) severity = "High";
+                else if (severities.Any(s => s.Contains("Medium"))) severity = "Medium";
+                else if (severities.Any()) severity = "Low";
+
+                _logger.LogInformation("📊 Determined highest severity: {Severity}", severity);
+            }
+            else if (root.TryGetProperty("Complexity", out var complexityProp))
+            {
+                // If no issues but we have complexity, use that as a severity indicator
+                var complexity = complexityProp.GetString() ?? "Low";
+                severity = complexity;
+                _logger.LogInformation("📊 No issues found, using complexity as severity: {Severity}", severity);
+            }
+
+            _logger.LogInformation("📊 Final metrics - Issues: {IssueCount}, Severity: {Severity}", issueCount, severity);
+            return (issueCount, severity);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract review metrics from: {ReviewData}", reviewData.Length > 500 ? reviewData.Substring(0, 500) + "..." : reviewData);
+            return (0, "Low");
+        }
+    }
+
+    private string ExtractCommitMessage(string githubResult)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(githubResult))
+                return "Commit review completed";
+
+            // Try to parse as JSON to extract commit message
+            using var doc = JsonDocument.Parse(githubResult);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("message", out var messageProp))
+            {
+                var message = messageProp.GetString() ?? "Commit review completed";
+                // Return first line only for commit message
+                var lines = message.Split('\n');
+                return lines.Length > 0 ? lines[0] : message;
+            }
+
+            return "Commit review completed";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to extract commit message from: {GitHubResult}", githubResult);
+            return "Commit review completed";
+        }
     }
 }

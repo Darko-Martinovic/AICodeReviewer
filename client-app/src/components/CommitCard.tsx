@@ -19,10 +19,25 @@ interface CommitCardProps {
   isReviewing: boolean;
 }
 
-const mockSteps: ProgressStep[] = [
-  { id: "analyzing", name: "Analyzing", status: "pending" },
-  { id: "reviewing", name: "AI Review", status: "pending" },
-  { id: "finalizing", name: "Finalizing", status: "pending" },
+const workflowSteps: ProgressStep[] = [
+  {
+    id: "github-commit",
+    name: "GitHub Commit",
+    status: "pending",
+    description: "Fetch commit details and changes",
+  },
+  {
+    id: "ai-review",
+    name: "AI Review",
+    status: "pending",
+    description: "Analyze code with AI",
+  },
+  {
+    id: "slack-notification",
+    name: "Slack Notification",
+    status: "pending",
+    description: "Send notification to Slack",
+  },
 ];
 
 export const CommitCard: React.FC<CommitCardProps> = ({
@@ -130,7 +145,7 @@ export const CommitCard: React.FC<CommitCardProps> = ({
 
       <div className={styles.footer}>
         {isReviewing ? (
-          <ProgressIndicator steps={mockSteps} compact={true} />
+          <ProgressIndicator steps={workflowSteps} compact={true} />
         ) : (
           <div className={styles.actionButtons}>
             <button

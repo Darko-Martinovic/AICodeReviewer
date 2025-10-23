@@ -243,6 +243,54 @@ public class SlackPlugin
     }
 
     /// <summary>
+    /// Sends a commit review summary to Slack
+    /// </summary>
+    [KernelFunction, Description("Send a commit review summary to Slack")]
+    public async Task<string> SendCommitReviewSummaryAsync(
+        [Description("The commit SHA")] string commitSha,
+        [Description("The commit message")] string commitMessage,
+        [Description("The author name")] string author,
+        [Description("The repository name")] string repository,
+        [Description("Number of issues found")] int issuesCount,
+        [Description("Highest severity level")] string severity,
+        [Description("The channel to send to")] string? channel = null)
+    {
+        var color = severity.ToLower() switch
+        {
+            "critical" => "danger",
+            "high" => "warning",
+            "medium" => "warning",
+            "low" => "good",
+            _ => "good"
+        };
+
+        var emoji = severity.ToLower() switch
+        {
+            "critical" => ":red_circle:",
+            "high" => ":warning:",
+            "medium" => ":yellow_circle:",
+            "low" => ":green_circle:",
+            _ => ":white_circle:"
+        };
+
+        var shortSha = commitSha.Length > 8 ? commitSha.Substring(0, 8) : commitSha;
+        var shortMessage = commitMessage.Length > 60 ? $"{commitMessage.Substring(0, 60)}..." : commitMessage;
+
+        var message = $"{emoji} **Commit Review Complete**\n\n" +
+                     $"**Commit:** `{shortSha}`\n" +
+                     $"**Author:** {author}\n" +
+                     $"**Repository:** {repository}\n" +
+                     $"**Message:** {shortMessage}\n\n" +
+                     $"📊 **Issues Found:** {issuesCount}\n" +
+                     $"📈 **Severity:** {severity}\n\n" +
+                     (issuesCount > 0
+                         ? "⚠️ Please review the identified issues"
+                         : "✅ No issues found - great work!");
+
+        return await SendMessageAsync(message, channel ?? _slackSettings.DefaultChannel);
+    }
+
+    /// <summary>
     /// Checks if Slack integration is properly configured and available
     /// </summary>
     [KernelFunction, Description("Check if Slack integration is available")]

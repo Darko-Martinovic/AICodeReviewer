@@ -13,7 +13,7 @@
         "name": "GitHub Commit",
         "plugin": "GitHub",
         "function": "GetCommitDetails",
-        "required": true,
+        "required": false,
         "parameters": {
           "includeFiles": true,
           "includeDiff": true
@@ -25,7 +25,7 @@
         "plugin": "CodeReview",
         "function": "ReviewCommit",
         "required": true,
-        "dependsOn": ["github_commit"],
+        "dependsOn": [],
         "parameters": {
           "includeSecurityCheck": true,
           "includeComplexityAnalysis": true,
@@ -36,14 +36,13 @@
         "id": "slack_notification",
         "name": "Slack Notification",
         "plugin": "Slack",
-        "function": "SendCodeReviewSummary",
+        "function": "SendCommitReviewSummary",
         "required": false,
         "dependsOn": ["code_review"],
         "parameters": {
           "channel": "@darko.martinovic",
-          "template": "commit-review-template",
-          "includeMetrics": true,
-          "reviewData": "{{results.code_review.result}}"
+          "issuesCount": 0,
+          "severity": "Low"
         }
       }
     ]

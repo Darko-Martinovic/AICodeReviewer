@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Models;
 using AICodeReviewer.Services;
+using System.Text.Json;
 
 namespace AICodeReviewer.Controllers
 {
@@ -377,7 +378,7 @@ namespace AICodeReviewer.Controllers
                 // Get commit details for context
                 var commit = await _gitHubService.GetCommitAsync(sha);
 
-                // Execute the workflow
+                // Execute the workflow (for notifications, etc.)
                 var workflowData = new Dictionary<string, object>
                 {
                     ["commitSha"] = sha,
@@ -393,21 +394,57 @@ namespace AICodeReviewer.Controllers
                     "manual_review",
                     workflowData);
 
-                // Extract the code review result from workflow results
-                var codeReviewStep = workflowContext.Results.FirstOrDefault(r => r.StepId == "code_review");
-                object? reviewData = null;
-
-                if (codeReviewStep?.Result != null)
+                // Get the actual review using the service directly (same as PR approach)
+                CodeReviewResult review;
+                try
                 {
-                    try
-                    {
-                        reviewData = System.Text.Json.JsonSerializer.Deserialize<object>(codeReviewStep.Result.ToString() ?? "{}");
-                    }
-                    catch
-                    {
-                        reviewData = codeReviewStep.Result;
-                    }
+                    Console.WriteLine($"🔍 Getting actual commit review for {sha}");
+                    review = await _codeReviewService.ReviewCommitAsync(sha);
+                    Console.WriteLine($"✅ Successfully retrieved commit review for {sha}");
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Error reviewing commit {sha}: {ex.Message}");
+                    return BadRequest(new
+                    {
+                        Error = $"Failed to review commit {sha}",
+                        Details = ex.Message,
+                        Repository = $"{owner}/{name}"
+                    });
+                }
+
+                // Transform the review result to frontend format (same as regular endpoint)
+                var transformedReviewData = new
+                {
+                    summary = GenerateSummary(review),
+                    issues = review.DetailedIssues.Select(issue => new
+                    {
+                        severity = issue.Severity,
+                        file = issue.FileName,
+                        line = issue.LineNumber ?? 0,
+                        message = issue.Description,
+                        suggestion = issue.Recommendation
+                    }).ToList(),
+                    suggestions = ExtractSuggestions(review),
+                    complexity = DetermineComplexity(review),
+                    testCoverage = DetermineTestCoverage(review),
+                    security = review.DetailedIssues
+                        .Where(issue => issue.Category?.ToLower().Contains("security") == true)
+                        .Select(issue => new
+                        {
+                            severity = issue.Severity,
+                            type = issue.Category,
+                            description = issue.Description,
+                            recommendation = issue.Recommendation
+                        }).ToList()
+                };
+
+                Console.WriteLine($"🔍 Commit workflow review mapping:");
+                Console.WriteLine($"  - Issues count: {transformedReviewData.issues.Count}");
+                Console.WriteLine($"  - Summary: {transformedReviewData.summary}");
+                Console.WriteLine($"  - Suggestions count: {transformedReviewData.suggestions.Count}");
+                Console.WriteLine($"  - Security issues count: {transformedReviewData.security.Count}");
+                Console.WriteLine($"  - Workflow steps executed: {workflowContext.Results.Count}");
 
                 return Ok(new
                 {
@@ -426,7 +463,7 @@ namespace AICodeReviewer.Controllers
                         Author = commit.Commit.Author.Name,
                         Date = commit.Commit.Author.Date
                     },
-                    Review = reviewData,
+                    Review = transformedReviewData,
                     WorkflowResults = workflowContext.Results.Select(r => new
                     {
                         r.StepId,

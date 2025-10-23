@@ -49,7 +49,10 @@ export const commitsApi = {
   getBranches: () => api.get("/commits/branches"),
   getRecent: (count: number = 10, branch?: string) =>
     api.get("/commits/recent", { params: { count, branch } }),
-  review: (sha: string) => longRunningApi.post(`/commits/review/${sha}`),
+  review: (sha: string) => {
+    console.log(`🔗 API: Making request to /commits/review-workflow/${sha}`);
+    return longRunningApi.post(`/commits/review-workflow/${sha}`);
+  },
   getBySha: (sha: string) => api.get(`/commits/${sha}`),
   getDetails: (sha: string): Promise<{ data: { commit: CommitDetails } }> =>
     api.get(`/commits/${sha}`),

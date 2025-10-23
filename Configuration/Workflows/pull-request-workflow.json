@@ -57,34 +57,18 @@
         }
       },
       {
-        "id": "teams_notification",
-        "name": "Teams Notification",
-        "plugin": "Teams",
-        "function": "SendAdaptiveCard",
+        "id": "slack_notification",
+        "name": "Slack Notification",
+        "plugin": "Slack",
+        "function": "SendCodeReviewSummary",
         "required": false,
         "dependsOn": ["code_review"],
-        "conditions": {},
         "parameters": {
-          "channel": "dev-reviews",
-          "template": "critical-issues-alert",
-          "mentionTeam": true
-        }
-      },
-      {
-        "id": "approval_check",
-        "name": "Auto Approval Check",
-        "plugin": "GitHub",
-        "function": "SetPullRequestStatus",
-        "required": false,
-        "dependsOn": ["code_review"],
-        "conditions": {
-          "noHighSeverityIssues": true,
-          "hasTests": true,
-          "complexity": "Low|Medium"
-        },
-        "parameters": {
-          "status": "approved",
-          "message": "Auto-approved: No critical issues found"
+          "channel": "@darko.martinovic",
+          "prNumber": 0,
+          "prTitle": "Pull Request Review",
+          "issuesCount": 0,
+          "severity": "Low"
         }
       }
     ]

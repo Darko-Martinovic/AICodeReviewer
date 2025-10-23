@@ -16,34 +16,28 @@ interface ReviewProgressModalProps {
 
 const COMMIT_STEPS: ProgressStep[] = [
   {
-    id: "fetch",
-    name: "Fetching Code Changes",
-    description: "Retrieving commit files and diff information",
+    id: "github_commit",
+    name: "GitHub Commit",
+    description: "Fetch commit details and changes",
     status: "pending",
   },
   {
-    id: "ai_analysis",
-    name: "AI Code Analysis",
-    description: "Running AI-powered code review analysis",
+    id: "code_review",
+    name: "AI Review",
+    description: "Analyze code with AI",
     status: "pending",
   },
   {
-    id: "generate_report",
-    name: "Generating Report",
-    description: "Creating detailed review report with findings",
+    id: "slack_notification",
+    name: "Slack Notification",
+    description: "Send notification to Slack",
     status: "pending",
   },
 ];
 
 const PR_STEPS: ProgressStep[] = [
   {
-    id: "fetch_pr",
-    name: "Fetching Pull Request",
-    description: "Retrieving PR files and change information",
-    status: "pending",
-  },
-  {
-    id: "ai_review",
+    id: "code_review",
     name: "AI Code Review",
     description: "Analyzing code changes with AI review engine",
     status: "pending",
@@ -55,15 +49,15 @@ const PR_STEPS: ProgressStep[] = [
     status: "pending",
   },
   {
-    id: "jira_integration",
+    id: "jira_smart_ticket",
     name: "JIRA Integration",
     description: "Creating or updating JIRA tickets based on findings",
     status: "pending",
   },
   {
-    id: "finalize",
-    name: "Finalizing Review",
-    description: "Completing the review workflow",
+    id: "slack_notification",
+    name: "Slack Notification",
+    description: "Sending notification to Slack",
     status: "pending",
   },
 ];
@@ -107,7 +101,7 @@ export const ReviewProgressModal: React.FC<ReviewProgressModalProps> = ({
     const stepDurations =
       reviewType === "commit"
         ? [3000, 15000, 5000] // Commit: 3s, 15s, 5s (total ~23s)
-        : [5000, 120000, 30000, 20000, 5000]; // PR: 5s, 2min, 30s, 20s, 5s (total ~3min)
+        : [120000, 30000, 20000, 10000]; // PR: 2min, 30s, 20s, 10s (total ~3min)
 
     let currentIndex = 0;
     let startStepTime = Date.now();
