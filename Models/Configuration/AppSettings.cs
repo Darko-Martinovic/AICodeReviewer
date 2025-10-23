@@ -13,5 +13,6 @@ namespace AICodeReviewer.Models.Configuration
         public TeamsSettings Teams { get; set; } = new();
         public GitHubSettings GitHub { get; set; } = new();
         public JiraSettings Jira { get; set; } = new();
+        public SlackSettings Slack { get; set; } = new();
     }
 }

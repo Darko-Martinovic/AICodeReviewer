@@ -1,73 +1,54 @@
 {
   "workflowName": "CommitReview",
-  "description": "Lightweight workflow for commit reviews with optional integrations",
-  "version": "1.0",
+  "description": "Simplified commit review workflow with AI analysis and Slack notifications",
+  "version": "2.0",
+  "fileName": "commit-workflow.json",
   "triggers": {
     "events": ["push", "manual_review"]
   },
   "workflow": {
     "steps": [
       {
+        "id": "github_commit",
+        "name": "GitHub Commit",
+        "plugin": "GitHub",
+        "function": "GetCommitDetails",
+        "required": true,
+        "parameters": {
+          "includeFiles": true,
+          "includeDiff": true
+        }
+      },
+      {
         "id": "code_review",
         "name": "AI Code Review",
         "plugin": "CodeReview",
         "function": "ReviewCommit",
         "required": true,
+        "dependsOn": ["github_commit"],
         "parameters": {
           "includeSecurityCheck": true,
-          "includeComplexityAnalysis": false,
+          "includeComplexityAnalysis": true,
           "includeTestCoverage": false
         }
       },
       {
-        "id": "github_status",
-        "name": "Update Commit Status",
-        "plugin": "GitHub",
-        "function": "SetCommitStatus",
+        "id": "slack_notification",
+        "name": "Slack Notification",
+        "plugin": "Slack",
+        "function": "SendCodeReviewSummary",
         "required": false,
         "dependsOn": ["code_review"],
         "parameters": {
-          "context": "ai-code-review",
-          "description": "AI code review completed"
-        }
-      },
-      {
-        "id": "teams_summary",
-        "name": "Daily Summary",
-        "plugin": "Teams",
-        "function": "SendMessage",
-        "required": false,
-        "dependsOn": ["code_review"],
-        "conditions": {
-          "isMainBranch": true,
-          "timeOfDay": "17:00"
-        },
-        "parameters": {
-          "channel": "dev-summary",
-          "template": "commit-summary",
-          "aggregate": true
-        }
-      },
-      {
-        "id": "security_alert",
-        "name": "Security Alert",
-        "plugin": "Teams",
-        "function": "SendUrgentMessage",
-        "required": false,
-        "dependsOn": ["code_review"],
-        "conditions": {
-          "securityIssues": ">= 1"
-        },
-        "parameters": {
-          "channel": "security-alerts",
-          "template": "security-issue-alert",
-          "mentionSecurityTeam": true
+          "channel": "@darko.martinovic",
+          "template": "commit-review-template",
+          "includeMetrics": true,
+          "reviewData": "{{results.code_review.result}}"
         }
       }
     ]
   },
   "templates": {
-    "commit-summary": "📊 **Daily Commit Summary**\n\nCommit: {{commitSha}}\nAuthor: {{author}}\nIssues: {{issueCount}}\nComplexity: {{complexity}}",
-    "security-issue-alert": "🔒 **Security Issue Detected**\n\nCommit: {{commitSha}}\nRepository: {{repository}}\nIssues: {{securityIssues}}"
+    "commit-review-template": "� **Commit Review Complete**\n\nCommit: {{commitSha}}\nAuthor: {{author}}\nRepository: {{repository}}\n\n📊 **Issues Found**: {{issueCount}}\n📈 **Severity**: {{highestSeverity}}\n\n{{#if hasIssues}}� Please review the identified issues{{else}}✅ No issues found - great work!{{/if}}"
   }
 }

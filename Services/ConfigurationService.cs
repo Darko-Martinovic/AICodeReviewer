@@ -130,6 +130,8 @@ namespace AICodeReviewer.Services
                 Console.WriteLine($"📄 DEBUG - JSON contains 'GitHub': {jsonContent.Contains("\"GitHub\"")}");
                 Console.WriteLine($"📄 DEBUG - JSON contains 'RepositoryFilter': {jsonContent.Contains("\"RepositoryFilter\"")}");
                 Console.WriteLine($"📄 DEBUG - JSON contains 'EnableFiltering': {jsonContent.Contains("\"EnableFiltering\"")}");
+                Console.WriteLine($"📄 DEBUG - JSON contains 'Slack': {jsonContent.Contains("\"Slack\"")}");
+                Console.WriteLine($"📄 DEBUG - JSON contains 'WebhookUrl': {jsonContent.Contains("\"WebhookUrl\"")}");
 
                 var jsonSettings = JsonSerializer.Deserialize<AppSettings>(
                     jsonContent,
@@ -145,6 +147,13 @@ namespace AICodeReviewer.Services
                 if (jsonSettings != null)
                 {
                     Console.WriteLine($"📄 DEBUG - Deserialized settings: GitHub section is null: {jsonSettings.GitHub == null}");
+                    Console.WriteLine($"📄 DEBUG - Deserialized settings: Slack section is null: {jsonSettings.Slack == null}");
+                    if (jsonSettings.Slack != null)
+                    {
+                        Console.WriteLine($"📄 DEBUG - Slack.WebhookUrl: '{jsonSettings.Slack.WebhookUrl}'");
+                        Console.WriteLine($"📄 DEBUG - Slack.BotToken: '{jsonSettings.Slack.BotToken}'");
+                        Console.WriteLine($"📄 DEBUG - Slack.EnableNotifications: {jsonSettings.Slack.EnableNotifications}");
+                    }
                     if (jsonSettings.GitHub != null)
                     {
                         Console.WriteLine($"📄 DEBUG - GitHub.RepositoryFilter is null: {jsonSettings.GitHub.RepositoryFilter == null}");
@@ -446,6 +455,33 @@ namespace AICodeReviewer.Services
                     destination.Jira.SeverityLabels = new Dictionary<string, string>(
                         source.Jira.SeverityLabels
                     );
+                }
+            }
+
+            // Slack
+            if (source.Slack != null)
+            {
+                destination.Slack.WebhookUrl = source.Slack.WebhookUrl ?? "";
+                destination.Slack.BotToken = source.Slack.BotToken ?? "";
+                destination.Slack.AppToken = source.Slack.AppToken ?? "";
+                destination.Slack.AppId = source.Slack.AppId ?? "";
+                destination.Slack.WorkspaceId = source.Slack.WorkspaceId ?? "";
+                destination.Slack.DefaultChannel = source.Slack.DefaultChannel ?? "#code-reviews";
+                destination.Slack.EnableNotifications = source.Slack.EnableNotifications;
+
+                if (source.Slack.MessageOptions != null)
+                {
+                    destination.Slack.MessageOptions.Username = source.Slack.MessageOptions.Username ?? "AI Code Reviewer";
+                    destination.Slack.MessageOptions.IconEmoji = source.Slack.MessageOptions.IconEmoji ?? ":robot_face:";
+                    destination.Slack.MessageOptions.ThreadReplies = source.Slack.MessageOptions.ThreadReplies;
+                }
+
+                if (source.Slack.ErrorHandling != null)
+                {
+                    destination.Slack.ErrorHandling.RetryAttempts = source.Slack.ErrorHandling.RetryAttempts;
+                    destination.Slack.ErrorHandling.RetryDelayMs = source.Slack.ErrorHandling.RetryDelayMs;
+                    destination.Slack.ErrorHandling.FailSilently = source.Slack.ErrorHandling.FailSilently;
+                    destination.Slack.ErrorHandling.LogErrors = source.Slack.ErrorHandling.LogErrors;
                 }
             }
         }

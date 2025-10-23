@@ -93,6 +93,13 @@
   color: rgb(75 85 99);
 }
 
+.workflowFileName {
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+  font-family: monospace;
+  margin-top: 0.25rem;
+}
+
 .workflowMeta {
   display: flex;
   align-items: center;
@@ -167,6 +174,10 @@
   position: relative;
 }
 
+.stepDisabled {
+  opacity: 0.5;
+}
+
 .stepCardInner {
   background-color: white;
   border: 2px solid rgb(229 231 235);
@@ -218,6 +229,48 @@
 
 .stepConfigButton:hover {
   color: rgb(75 85 99);
+}
+
+.stepToggleButton {
+  padding: 0.25rem;
+  color: rgb(156 163 175);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.stepToggleButton:hover {
+  color: rgb(75 85 99);
+}
+
+.workflowToggleButton {
+  padding: 0.25rem;
+  color: rgb(156 163 175);
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.workflowToggleButton:hover {
+  color: rgb(75 85 99);
+}
+
+/* Status colors */
+.statusCompleted {
+  background-color: rgb(240 253 244);
+  color: rgb(21 128 61);
+}
+
+.statusRunning {
+  background-color: rgb(239 246 255);
+  color: rgb(37 99 235);
+}
+
+.statusPending {
+  background-color: rgb(249 250 251);
+  color: rgb(107 114 128);
 }
 
 /* Workflow connectors */
@@ -483,6 +536,10 @@
   color: rgb(156 163 175);
 }
 
+:global(.dark) .workflowFileName {
+  color: rgb(107 114 128);
+}
+
 :global(.dark) .stepCardInner {
   background-color: rgb(31 41 55);
   border-color: rgb(75 85 99);
@@ -506,6 +563,41 @@
 
 :global(.dark) .stepConfigButton:hover {
   color: rgb(209 213 219);
+}
+
+:global(.dark) .stepToggleButton {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .stepToggleButton:hover {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .workflowToggleButton {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .workflowToggleButton:hover {
+  color: rgb(209 213 219);
+}
+
+:global(.dark) .stepDisabled {
+  opacity: 0.4;
+}
+
+:global(.dark) .statusCompleted {
+  background-color: rgb(6 78 59);
+  color: rgb(134 239 172);
+}
+
+:global(.dark) .statusRunning {
+  background-color: rgb(30 58 138);
+  color: rgb(147 197 253);
+}
+
+:global(.dark) .statusPending {
+  background-color: rgb(55 65 81);
+  color: rgb(156 163 175);
 }
 
 :global(.dark) .addStepSection {

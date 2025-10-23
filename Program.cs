@@ -188,12 +188,13 @@ namespace AICodeReviewer
             kernelBuilder.Plugins.AddFromType<CodeReviewPlugin>("CodeReview");
             kernelBuilder.Plugins.AddFromType<GitHubPlugin>("GitHub");
             kernelBuilder.Plugins.AddFromType<TeamsPlugin>("Teams");
-            // kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack"); // Disabled - Slack integration not configured
+            kernelBuilder.Plugins.AddFromType<SlackPlugin>("Slack"); // Now properly configured with error handling
 
             Console.WriteLine("🔌 Semantic Kernel plugins configured for registration");
 
-            // Register Jira plugin with dependency injection
+            // Register plugins as singleton services for dependency injection
             services.AddSingleton<JiraPlugin>();
+            services.AddSingleton<SlackPlugin>();
 
             // Register workflow engine service
             services.AddSingleton<IWorkflowEngineService, WorkflowEngineService>();

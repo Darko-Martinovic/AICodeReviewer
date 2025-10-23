@@ -309,6 +309,7 @@ function App() {
               htmlUrl: `https://github.com/${repoFullName}`,
               starCount: 0,
               forkCount: 0,
+              language: "",
               isCurrent: true,
             },
           }));

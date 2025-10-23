@@ -1,7 +1,8 @@
 {
   "workflowName": "PullRequestReview",
   "description": "Comprehensive workflow for pull request reviews with integrations",
-  "version": "1.0",
+  "version": "2.0",
+  "fileName": "pull-request-workflow.json",
   "triggers": {
     "events": [
       "pull_request.opened",

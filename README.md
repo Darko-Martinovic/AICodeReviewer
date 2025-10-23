@@ -38,13 +38,27 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
    GITHUB_TOKEN=your-github-token
    ```
 
-2. **Start backend**:
+2. **Slack Configuration** (optional - in `appsettings.Development.json`):
+
+   ```json
+   {
+     "Slack": {
+       "BotToken": "xoxe.xoxp-1-your-slack-bot-token",
+       "AppId": "A098AFQS547",
+       "WorkspaceId": "your-workspace",
+       "DefaultChannel": "#code-reviews",
+       "EnableNotifications": true
+     }
+   }
+   ```
+
+3. **Start backend**:
 
    ```bash
    dotnet run --launch-profile https --environment Development
    ```
 
-3. **Start frontend**:
+4. **Start frontend**:
 
    ```bash
    cd client-app
@@ -52,7 +66,7 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
    npm run dev
    ```
 
-4. **Access**: Frontend at `http://localhost:5174`, API at `https://localhost:7001`
+5. **Access**: Frontend at `http://localhost:5174`, API at `https://localhost:7001`
 
 ## ⚙️ Usage
 
