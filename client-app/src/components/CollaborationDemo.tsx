@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { CollaborativeCodeViewer } from "./CollaborativeCodeViewer";
+import { useSessionAutoJoin } from "../hooks/useSessionAutoJoin";
 import styles from "./CollaborationDemo.module.css";
 
 interface CommitFile {
@@ -40,6 +41,48 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
     "/",
     "-"
   )}-${commitSha.substring(0, 8)}`;
+
+  // Handle when receiving current file info from session (auto-join feature)
+  const handleCurrentFileReceived = React.useCallback(
+    async (fileInfo: {
+      fileName: string;
+      fileContent: string;
+      fileLanguage: string;
+    }) => {
+      console.log("🔍 handleCurrentFileReceived called:", {
+        fileName: fileInfo.fileName,
+        hasContent: !!fileInfo.fileContent,
+        filesCount: files.length,
+        isCollaborating,
+      });
+
+      const matchingFile = files.find((f) => f.filename === fileInfo.fileName);
+
+      console.log("🔍 Matching file:", matchingFile);
+
+      if (matchingFile && !isCollaborating) {
+        console.log("✅ Auto-opening file from session:", fileInfo.fileName);
+        setSelectedFile(matchingFile);
+        setRealFileContent(fileInfo.fileContent);
+        setIsCollaborating(true);
+      } else {
+        console.log("❌ Cannot auto-open file:", {
+          hasMatchingFile: !!matchingFile,
+          isCollaborating,
+        });
+      }
+    },
+    [files, isCollaborating]
+  );
+
+  // Check if there's an active file in the session and auto-open it
+  // This doesn't permanently join the session - just checks and disconnects
+  useSessionAutoJoin({
+    sessionId,
+    currentUser,
+    onCurrentFileReceived: handleCurrentFileReceived,
+    enabled: !isCollaborating, // Only check when not already collaborating
+  });
 
   const handleCopySessionId = async () => {
     try {

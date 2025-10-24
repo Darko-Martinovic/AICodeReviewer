@@ -22,6 +22,11 @@ interface UseCollaborationProps {
     name: string;
     avatarUrl?: string;
   };
+  onCurrentFileReceived?: (fileInfo: {
+    fileName: string;
+    fileContent: string;
+    fileLanguage: string;
+  }) => void;
 }
 
 interface CollaborationState {
@@ -37,6 +42,7 @@ interface CollaborationState {
 export const useCollaboration = ({
   sessionId,
   currentUser,
+  onCurrentFileReceived,
 }: UseCollaborationProps) => {
   const [state, setState] = useState<CollaborationState>({
     participants: [],
@@ -137,12 +143,17 @@ export const useCollaboration = ({
             participants: SessionParticipant[];
             comments: LiveComment[];
             cursors: CursorUpdateMessage[];
+            currentFileName?: string;
+            currentFileContent?: string;
+            currentFileLanguage?: string;
           }) => {
             console.log("🔵 SessionState received:", {
               participantsCount: sessionState.participants?.length || 0,
               participants: sessionState.participants,
               commentsCount: sessionState.comments?.length || 0,
               cursorsCount: sessionState.cursors?.length || 0,
+              currentFileName: sessionState.currentFileName,
+              hasFileContent: !!sessionState.currentFileContent,
             });
 
             if (isActive) {
@@ -152,6 +163,21 @@ export const useCollaboration = ({
                 comments: sessionState.comments || [],
                 cursors: sessionState.cursors || [],
               }));
+
+              // If there's a current file in the session, trigger callback
+              if (
+                sessionState.currentFileName &&
+                sessionState.currentFileContent
+              ) {
+                // We'll handle this with a callback
+                if (onCurrentFileReceived) {
+                  onCurrentFileReceived({
+                    fileName: sessionState.currentFileName,
+                    fileContent: sessionState.currentFileContent,
+                    fileLanguage: sessionState.currentFileLanguage || "text",
+                  });
+                }
+              }
             }
           }
         );
@@ -379,7 +405,13 @@ export const useCollaboration = ({
         connectionRef.current.stop();
       }
     };
-  }, [sessionId, currentUser.id, currentUser.name, currentUser.avatarUrl]);
+  }, [
+    sessionId,
+    currentUser.id,
+    currentUser.name,
+    currentUser.avatarUrl,
+    onCurrentFileReceived,
+  ]);
 
   const joinSession = useCallback(async () => {
     if (connectionRef.current?.state === HubConnectionState.Connected) {
@@ -567,6 +599,25 @@ export const useCollaboration = ({
     [sessionId, currentUser.id]
   );
 
+  const setCurrentFile = useCallback(
+    async (fileName: string, fileContent: string, fileLanguage: string) => {
+      if (connectionRef.current?.state === HubConnectionState.Connected) {
+        try {
+          await connectionRef.current.invoke(
+            "SetCurrentFile",
+            sessionId,
+            fileName,
+            fileContent,
+            fileLanguage
+          );
+        } catch (error) {
+          console.error("Failed to set current file:", error);
+        }
+      }
+    },
+    [sessionId]
+  );
+
   return {
     ...state,
     joinSession,
@@ -579,5 +630,6 @@ export const useCollaboration = ({
     addCommentReply,
     notifyTyping,
     changeFile,
+    setCurrentFile,
   };
 };

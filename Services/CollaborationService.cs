@@ -290,5 +290,19 @@ namespace AICodeReviewer.Services
 
             return await Task.FromResult(cursors);
         }
+
+        public async Task<bool> SetCurrentFileAsync(string sessionId, string fileName, string fileContent, string fileLanguage)
+        {
+            if (!_sessions.TryGetValue(sessionId, out var session))
+                return false;
+
+            session.CurrentFileName = fileName;
+            session.CurrentFileContent = fileContent;
+            session.CurrentFileLanguage = fileLanguage;
+            session.LastActivity = DateTime.UtcNow;
+
+            _logger.LogInformation("Session {SessionId} current file set to {FileName}", sessionId, fileName);
+            return await Task.FromResult(true);
+        }
     }
 }

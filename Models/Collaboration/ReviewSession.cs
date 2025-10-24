@@ -12,6 +12,11 @@ namespace AICodeReviewer.Models.Collaboration
         public List<LiveComment> Comments { get; set; } = new();
         public string Status { get; set; } = "active"; // active, completed, archived
         public DateTime LastActivity { get; set; } = DateTime.UtcNow;
+
+        // Track the currently active file in the session
+        public string? CurrentFileName { get; set; }
+        public string? CurrentFileContent { get; set; }
+        public string? CurrentFileLanguage { get; set; }
     }
 
     public class SessionParticipant

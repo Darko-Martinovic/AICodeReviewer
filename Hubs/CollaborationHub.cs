@@ -67,7 +67,10 @@ namespace AICodeReviewer.Hubs
                                 UserName = p.UserName,
                                 UserColor = p.UserColor,
                                 Position = p.CurrentCursor!
-                            })
+                            }),
+                            currentFileName = session.CurrentFileName,
+                            currentFileContent = session.CurrentFileContent,
+                            currentFileLanguage = session.CurrentFileLanguage
                         });
                     }
 
@@ -248,6 +251,30 @@ namespace AICodeReviewer.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error notifying file change for user {UserId} in session {SessionId}", userId, sessionId);
+            }
+        }
+
+        public async Task SetCurrentFile(string sessionId, string fileName, string fileContent, string fileLanguage)
+        {
+            try
+            {
+                var success = await _collaborationService.SetCurrentFileAsync(sessionId, fileName, fileContent, fileLanguage);
+                if (success)
+                {
+                    // Notify all participants about the current file change
+                    await Clients.Group(sessionId).SendAsync("CurrentFileChanged", new
+                    {
+                        fileName,
+                        fileContent,
+                        fileLanguage
+                    });
+
+                    _logger.LogInformation("Current file set for session {SessionId}: {FileName}", sessionId, fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error setting current file for session {SessionId}", sessionId);
             }
         }
 

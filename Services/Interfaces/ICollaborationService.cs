@@ -21,5 +21,6 @@ namespace AICodeReviewer.Services.Interfaces
         Task CleanupInactiveSessionsAsync();
         Task<bool> UpdateSessionActivityAsync(string sessionId);
         Task<List<CursorPosition>> GetActiveCursorsAsync(string sessionId);
+        Task<bool> SetCurrentFileAsync(string sessionId, string fileName, string fileContent, string fileLanguage);
     }
 }

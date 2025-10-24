@@ -43,6 +43,29 @@ export const CollaborativeCodeViewer: React.FC<
 
   const codeLines = useMemo(() => fileContent.split("\n"), [fileContent]);
 
+  // Set the current file in the session when component mounts or file changes
+  useEffect(() => {
+    console.log("🔧 CollaborativeCodeViewer: Attempting to set current file:", {
+      fileName,
+      hasSetCurrentFile: !!collaboration.setCurrentFile,
+      isConnected: collaboration.isConnected,
+    });
+
+    if (collaboration.setCurrentFile && collaboration.isConnected) {
+      console.log("✅ Setting current file in session:", fileName);
+      collaboration.setCurrentFile(fileName, fileContent, language);
+    } else {
+      console.log("⏳ Waiting for collaboration connection...");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    fileName,
+    fileContent,
+    language,
+    collaboration.setCurrentFile,
+    collaboration.isConnected,
+  ]);
+
   // Simple syntax highlighting for better readability
   const highlightLine = (line: string): React.ReactElement => {
     if (!line) return <span> </span>;
