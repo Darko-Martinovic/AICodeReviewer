@@ -117,16 +117,16 @@ The AI Code Reviewer includes powerful real-time collaboration features for team
 - In-memory session storage for fast real-time updates
 - WebSocket endpoint: `/collaborationHub`
 
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create feature branch
 3. Make changes and add tests
 4. Submit pull request
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
 
 ## ⚠️ Disclaimer
 
