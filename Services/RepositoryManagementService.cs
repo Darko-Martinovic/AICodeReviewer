@@ -14,14 +14,20 @@ namespace AICodeReviewer.Services
     public class RepositoryManagementService : IRepositoryManagementService
     {
         private readonly AppSettings _settings;
-        private readonly GitHubClient _gitHubClient;
+        private GitHubClient _gitHubClient;
         private readonly IRepositoryFilterService _filterService;
+        private readonly IGitHubAppService? _gitHubAppService;
         private (string Owner, string Name) _currentRepository;
+        private readonly string? _personalAccessToken;
 
-        public RepositoryManagementService(AppSettings settings, string gitHubToken, IRepositoryFilterService filterService)
+        public RepositoryManagementService(AppSettings settings, string gitHubToken, IRepositoryFilterService filterService, IGitHubAppService? gitHubAppService = null)
         {
             _settings = settings;
             _filterService = filterService ?? throw new ArgumentNullException(nameof(filterService));
+            _gitHubAppService = gitHubAppService;
+            _personalAccessToken = gitHubToken;
+
+            // Initialize GitHub client with personal access token by default
             _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
             _gitHubClient.Credentials = new Credentials(gitHubToken);
 
@@ -38,6 +44,18 @@ namespace AICodeReviewer.Services
             if (_settings.DebugLogging)
             {
                 Console.WriteLine($"🔍 Debug: Initialized with repository: {_currentRepository.Owner}/{_currentRepository.Name}");
+                Console.WriteLine($"🤖 GitHub App Service available: {_gitHubAppService != null}");
+                Console.WriteLine($"🔑 App authentication enabled: {_gitHubAppService?.IsAppAuthenticationEnabled}");
+
+                if (_gitHubAppService != null)
+                {
+                    Console.WriteLine($"🔍 GitHub App settings:");
+                    Console.WriteLine($"   UseAppAuth: {_settings.GitHub.GitHubApp.UseAppAuthentication}");
+                    Console.WriteLine($"   AppId: {_settings.GitHub.GitHubApp.AppId}");
+                    Console.WriteLine($"   InstallationId: {_settings.GitHub.GitHubApp.InstallationId}");
+                    Console.WriteLine($"   PrivateKeyPath: {_settings.GitHub.GitHubApp.PrivateKeyPath}");
+                    Console.WriteLine($"   Private key exists: {System.IO.File.Exists(_settings.GitHub.GitHubApp.PrivateKeyPath)}");
+                }
             }
         }
 
@@ -331,7 +349,35 @@ namespace AICodeReviewer.Services
         {
             try
             {
-                var repos = await _gitHubClient.Repository.GetAllForCurrent();
+                IReadOnlyList<Repository> repos;
+
+                // Use GitHub App repositories if available, otherwise use personal repositories
+                if (_gitHubAppService?.IsAppAuthenticationEnabled == true)
+                {
+                    try
+                    {
+                        Console.WriteLine("🤖 Fetching repositories from GitHub App installation...");
+                        _gitHubClient = await _gitHubAppService.CreateAppAuthenticatedClientAsync();
+                        repos = await _gitHubAppService.GetInstallationRepositoriesAsync();
+                        Console.WriteLine($"✅ Retrieved {repos.Count} repositories from GitHub App installation");
+                    }
+                    catch (Exception appEx)
+                    {
+                        Console.WriteLine($"⚠️  GitHub App repository fetch failed: {appEx.Message}");
+                        Console.WriteLine("🔄 Falling back to personal access token repositories...");
+
+                        // Fall back to personal repositories
+                        _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
+                        _gitHubClient.Credentials = new Credentials(_personalAccessToken ?? throw new InvalidOperationException("No personal access token available"));
+                        repos = await _gitHubClient.Repository.GetAllForCurrent();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("🔑 Fetching repositories using personal access token...");
+                    repos = await _gitHubClient.Repository.GetAllForCurrent();
+                }
+
                 var repositoryList = repos.Select(r => new RepositoryInfo
                 {
                     Owner = r.Owner.Login,
@@ -346,6 +392,8 @@ namespace AICodeReviewer.Services
 
                 // Apply filtering
                 var filteredRepositories = _filterService.FilterRepositories(repositoryList);
+
+                Console.WriteLine($"📚 Found {repositoryList.Count} total repositories, {filteredRepositories.Count} after filtering");
 
                 return filteredRepositories;
             }

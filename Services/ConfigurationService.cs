@@ -393,6 +393,19 @@ namespace AICodeReviewer.Services
                 destination.GitHub.MaxCommitsToList = source.GitHub.MaxCommitsToList;
                 destination.GitHub.MaxPullRequestsToList = source.GitHub.MaxPullRequestsToList;
 
+                // Copy GitHub App settings
+                if (source.GitHub.GitHubApp != null)
+                {
+                    destination.GitHub.GitHubApp = new GitHubAppSettings
+                    {
+                        AppId = source.GitHub.GitHubApp.AppId,
+                        ClientId = source.GitHub.GitHubApp.ClientId,
+                        InstallationId = source.GitHub.GitHubApp.InstallationId,
+                        PrivateKeyPath = source.GitHub.GitHubApp.PrivateKeyPath,
+                        UseAppAuthentication = source.GitHub.GitHubApp.UseAppAuthentication
+                    };
+                }
+
                 // Copy repository filter settings only if they contain non-default values
                 if (source.GitHub.RepositoryFilter != null &&
                     (source.GitHub.RepositoryFilter.EnableFiltering ||

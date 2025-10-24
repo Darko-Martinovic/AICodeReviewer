@@ -676,6 +676,82 @@
       ]
     },
     {
+      "name": "GitHub App Integration",
+      "description": "Operations for testing GitHub App authentication and configuration",
+      "item": [
+        {
+          "name": "Get GitHub App Configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/GitHubAppDebug/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "GitHubAppDebug", "config"]
+            },
+            "description": "Gets the current GitHub App configuration including App ID, Client ID, Installation ID, and private key status"
+          },
+          "response": []
+        },
+        {
+          "name": "Test GitHub App Authentication",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/GitHubAppDebug/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "GitHubAppDebug", "test"]
+            },
+            "description": "Tests GitHub App authentication by validating configuration and attempting to fetch installation repositories. Returns validation status and repository count if successful."
+          },
+          "response": []
+        },
+        {
+          "name": "Get JWT Token Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/GitHubAppDebug/jwt",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "GitHubAppDebug", "jwt"]
+            },
+            "description": "Generates and returns a JWT token for GitHub App authentication with detailed token information including header, claims, and timestamps. Useful for debugging authentication issues."
+          },
+          "response": []
+        },
+        {
+          "name": "Check System Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/GitHubAppDebug/check-time",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "GitHubAppDebug", "check-time"]
+            },
+            "description": "Checks system time and timezone information. Returns UTC time, local time, Unix timestamp, and system information. Useful for debugging JWT token timestamp issues."
+          },
+          "response": []
+        },
+        {
+          "name": "Get GitHub Server Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiPath}}/GitHubAppDebug/github-time",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{apiPath}}", "GitHubAppDebug", "github-time"]
+            },
+            "description": "Gets GitHub server time for synchronization testing. Compares system time with GitHub server time to detect clock skew issues that might affect JWT token validation."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Error Testing Scenarios",
       "description": "Test cases for error handling and edge cases",
       "item": [

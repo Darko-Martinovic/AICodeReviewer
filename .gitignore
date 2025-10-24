@@ -26,6 +26,10 @@ presentation/
 appsettings.json
 appsettings.*.json
 secrets.json
+secrets/
+*.pem
+*.key
+*.p12
 
 # NuGet
 *.nupkg

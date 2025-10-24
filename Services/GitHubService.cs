@@ -9,17 +9,22 @@ namespace AICodeReviewer.Services
     /// </summary>
     public class GitHubService : IGitHubService
     {
-        private readonly GitHubClient _gitHubClient;
+        private GitHubClient _gitHubClient;
         private readonly IConfigurationService _configurationService;
+        private readonly IGitHubAppService? _gitHubAppService;
         private string _repoOwner;
         private string _repoName;
+        private readonly string? _personalAccessToken;
 
-        public GitHubService(string token, string repoOwner, string repoName, IConfigurationService configurationService)
+        public GitHubService(string token, string repoOwner, string repoName, IConfigurationService configurationService, IGitHubAppService? gitHubAppService = null)
         {
             _repoOwner = repoOwner ?? throw new ArgumentNullException(nameof(repoOwner));
             _repoName = repoName ?? throw new ArgumentNullException(nameof(repoName));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _gitHubAppService = gitHubAppService;
+            _personalAccessToken = token;
 
+            // Initialize with personal access token by default
             _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
             _gitHubClient.Credentials = new Credentials(token);
         }
@@ -38,11 +43,32 @@ namespace AICodeReviewer.Services
         /// </summary>
         public async Task InitializeAsync()
         {
+            // Try GitHub App authentication first if available
+            if (_gitHubAppService?.IsAppAuthenticationEnabled == true)
+            {
+                try
+                {
+                    Console.WriteLine("🤖 Attempting GitHub App authentication...");
+                    _gitHubClient = await _gitHubAppService.CreateAppAuthenticatedClientAsync();
+
+                    var installation = await _gitHubAppService.GetInstallationAsync();
+                    Console.WriteLine($"✅ Connected to GitHub via App as: {installation.Account.Login}");
+                    Console.WriteLine($"🏢 Installation ID: {installation.Id}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️  GitHub App authentication failed: {ex.Message}");
+                    Console.WriteLine("🔄 Falling back to personal access token...");
+
+                    // Fall back to personal access token
+                    _gitHubClient = new GitHubClient(new ProductHeaderValue("AICodeReviewer"));
+                    _gitHubClient.Credentials = new Credentials(_personalAccessToken ?? throw new InvalidOperationException("No personal access token available"));
+                }
+            }
+
             try
             {
-                var user = await _gitHubClient.User.Current();
-                Console.WriteLine($"✅ Connected to GitHub as: {user.Login}");
-
+                // Test repository access
                 if (_configurationService.Settings.DebugLogging)
                 {
                     Console.WriteLine($"🔍 Attempting to access repository: {_repoOwner}/{_repoName}");
@@ -59,24 +85,38 @@ namespace AICodeReviewer.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Repository access failed: {ex.Message}");
-                Console.WriteLine($"🔍 Trying to list your repositories...");
+                Console.WriteLine($"🔍 Trying to list available repositories...");
 
                 try
                 {
-                    var currentUser = await _gitHubClient.User.Current();
-                    var repos = await _gitHubClient.Repository.GetAllForCurrent();
-                    Console.WriteLine($"📚 Found {repos.Count} repositories in your account:");
-
-                    foreach (var r in repos.Take(10))
+                    // Try to list repositories based on authentication type
+                    if (_gitHubAppService?.IsAppAuthenticationEnabled == true)
                     {
-                        Console.WriteLine($"  - {r.Name} ({(r.Private ? "private" : "public")})");
-                    }
+                        var appRepos = await _gitHubAppService.GetInstallationRepositoriesAsync();
+                        Console.WriteLine($"📚 Found {appRepos.Count} repositories in GitHub App installation:");
 
-                    Console.WriteLine(
-                        $"\n💡 Make sure your .env file has the correct repository name:"
-                    );
-                    Console.WriteLine($"   GITHUB_REPO_OWNER={currentUser.Login}");
-                    Console.WriteLine($"   GITHUB_REPO_NAME=<exact-repository-name>");
+                        foreach (var r in appRepos.Take(10))
+                        {
+                            Console.WriteLine($"  - {r.Name} ({(r.Private ? "private" : "public")})");
+                        }
+                    }
+                    else
+                    {
+                        var currentUser = await _gitHubClient.User.Current();
+                        var repos = await _gitHubClient.Repository.GetAllForCurrent();
+                        Console.WriteLine($"📚 Found {repos.Count} repositories in your account:");
+
+                        foreach (var r in repos.Take(10))
+                        {
+                            Console.WriteLine($"  - {r.Name} ({(r.Private ? "private" : "public")})");
+                        }
+
+                        Console.WriteLine(
+                            $"\n💡 Make sure your .env file has the correct repository name:"
+                        );
+                        Console.WriteLine($"   GITHUB_REPO_OWNER={currentUser.Login}");
+                        Console.WriteLine($"   GITHUB_REPO_NAME=<exact-repository-name>");
+                    }
                     Console.WriteLine();
                 }
                 catch (Exception listEx)

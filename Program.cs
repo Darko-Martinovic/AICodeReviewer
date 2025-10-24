@@ -103,14 +103,23 @@ namespace AICodeReviewer
                 return new RepositoryFilterService(configService.Settings, configService);
             });
 
+            // GitHub App service (optional)
+            services.AddSingleton<IGitHubAppService>(provider =>
+            {
+                var configService = provider.GetRequiredService<IConfigurationService>();
+                var logger = provider.GetService<ILogger<GitHubAppService>>();
+                return new GitHubAppService(configService.Settings.GitHub.GitHubApp, configService, logger);
+            });
+
             // Repository management service
             services.AddSingleton<IRepositoryManagementService>(provider =>
             {
                 var configService = provider.GetRequiredService<IConfigurationService>();
                 var filterService = provider.GetRequiredService<IRepositoryFilterService>();
+                var gitHubAppService = provider.GetRequiredService<IGitHubAppService>();
                 var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
                     ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
-                return new RepositoryManagementService(configService.Settings, token, filterService);
+                return new RepositoryManagementService(configService.Settings, token, filterService, gitHubAppService);
             });
 
             // Core services (singletons for this web app)
@@ -139,8 +148,9 @@ namespace AICodeReviewer
                 var name = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
                     ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
                 var configService = provider.GetRequiredService<IConfigurationService>();
+                var gitHubAppService = provider.GetRequiredService<IGitHubAppService>();
 
-                return new GitHubService(token, owner, name, configService);
+                return new GitHubService(token, owner, name, configService, gitHubAppService);
             });
 
             services.AddSingleton<ICodeReviewService, CodeReviewService>();
