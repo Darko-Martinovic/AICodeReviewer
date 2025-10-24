@@ -17,7 +17,9 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 - **🤝 Real-Time Collaboration**: Live code review sessions with multiple participants
 - **💬 Live Comments**: Real-time commenting and discussions on code lines
 - **👥 User Presence**: See who's actively reviewing with live cursor tracking
-- **🔗 Integrations**: GitHub, Jira, Microsoft Teams
+- **� GitHub App Integration**: Enterprise-grade authentication with GitHub Apps for secure, scoped repository access
+- **🎛️ Repository Filtering**: Flexible pattern-based filtering to control visible repositories (application-level, future: user preferences)
+- **🔗 Integrations**: GitHub, Jira, Slack
 
 ## 🚀 Quick Start
 
