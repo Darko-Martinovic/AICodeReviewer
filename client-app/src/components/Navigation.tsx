@@ -5,12 +5,14 @@ import {
   GitPullRequest,
   Workflow,
   ArrowLeft,
+  Brain,
 } from "lucide-react";
 import type { Repository, Commit, PullRequest } from "../services/api";
 import styles from "./Navigation.module.css";
 
 type TabType =
   | "repositories"
+  | "trainai"
   | "commits"
   | "pullrequests"
   | "systemprompts"
@@ -42,6 +44,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       id: "repositories" as TabType,
       label: "Repositories",
       icon: Settings,
+      count: null,
+    },
+    {
+      id: "trainai" as TabType,
+      label: "Train AI",
+      icon: Brain,
       count: null,
     },
     {

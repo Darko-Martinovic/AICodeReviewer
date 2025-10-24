@@ -14,7 +14,8 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 - **🌐 Web Interface**: React + TypeScript frontend
 - **🎯 Multi-Language Support**: C#, Java, VB.NET, JavaScript, TypeScript, React, T-SQL
 - **⚙️ System Prompts Management**: Customize AI behavior per language
-- **🤝 Real-Time Collaboration**: Live code review sessions with multiple participants
+- **� Train AI**: Interactive testing and feedback system to iteratively improve AI prompts through code validation, review testing, and prompt refinement based on feedback
+- **�🤝 Real-Time Collaboration**: Live code review sessions with multiple participants
 - **💬 Live Comments**: Real-time commenting and discussions on code lines
 - **👥 User Presence**: See who's actively reviewing with live cursor tracking
 - **� GitHub App Integration**: Enterprise-grade authentication with GitHub Apps for secure, scoped repository access

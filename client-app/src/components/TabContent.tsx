@@ -8,11 +8,13 @@ import { BranchSelector } from "./BranchSelector";
 import SystemPromptsManager from "./SystemPromptsManagerFixed";
 import WorkflowManager from "./WorkflowManager";
 import RepositoryFilterSettings from "./RepositoryFilterSettings";
+import { AITrainer } from "./AITrainer";
 import { LoadingSpinner, EmptyState } from "./UI";
 import styles from "./TabContent.module.css";
 
 type TabType =
   | "repositories"
+  | "trainai"
   | "commits"
   | "pullrequests"
   | "systemprompts"
@@ -96,6 +98,11 @@ export const TabContent: React.FC<TabContentProps> = ({
         )}
       </div>
     );
+  }
+
+  // Train AI Tab
+  if (activeTab === "trainai") {
+    return <AITrainer />;
   }
 
   // Commits Tab

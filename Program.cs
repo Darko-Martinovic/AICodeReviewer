@@ -157,6 +157,7 @@ namespace AICodeReviewer
             services.AddSingleton<INotificationService, NotificationService>();
             services.AddSingleton<IJiraService, JiraService>();
             services.AddSingleton<ICacheService, CacheService>();
+            services.AddSingleton<ICodeValidationService, CodeValidationService>();
 
             // Collaboration service for real-time code reviews
             services.AddSingleton<ICollaborationService, CollaborationService>();

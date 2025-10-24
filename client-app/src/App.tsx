@@ -27,6 +27,7 @@ import { ErrorBoundary, useToast } from "./components/UI";
 
 type TabType =
   | "repositories"
+  | "trainai"
   | "commits"
   | "pullrequests"
   | "systemprompts"

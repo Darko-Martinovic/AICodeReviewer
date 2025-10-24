@@ -94,6 +94,32 @@ export const repositoryFilterApi = {
   resetSettings: () => api.delete("/repositoryfilters"),
 };
 
+// Training API
+export const trainingApi = {
+  validateCode: (code: string, language: string) =>
+    api.post("/training/validate-code", { code, language }),
+  reviewCode: (code: string, language: string, reviewAnyway: boolean = false) =>
+    longRunningApi.post("/training/review-code", {
+      code,
+      language,
+      reviewAnyway,
+    }),
+  suggestPromptImprovement: (
+    language: string,
+    feedbackType: string,
+    reviewedCode: string,
+    reviewSummary: string
+  ) =>
+    api.post("/training/suggest-prompt-improvement", {
+      language,
+      feedbackType,
+      reviewedCode,
+      reviewSummary,
+    }),
+  updateCustomPrompt: (language: string, addition: string) =>
+    api.post("/training/update-custom-prompt", { language, addition }),
+};
+
 // Types
 export interface Repository {
   id: number;
