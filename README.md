@@ -40,27 +40,13 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
    GITHUB_TOKEN=your-github-token
    ```
 
-2. **Slack Configuration** (optional - in `appsettings.Development.json`):
-
-   ```json
-   {
-     "Slack": {
-       "BotToken": "xoxe.xoxp-1-your-slack-bot-token",
-       "AppId": "A098AFQS547",
-       "WorkspaceId": "your-workspace",
-       "DefaultChannel": "#code-reviews",
-       "EnableNotifications": true
-     }
-   }
-   ```
-
-3. **Start backend**:
+2. **Start backend**:
 
    ```bash
    dotnet run --launch-profile https --environment Development
    ```
 
-4. **Start frontend**:
+3. **Start frontend**:
 
    ```bash
    cd client-app
@@ -80,42 +66,13 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 
 ## 🤝 Real-Time Collaboration
 
-The AI Code Reviewer includes powerful real-time collaboration features for team code reviews:
+Create collaborative review sessions where multiple team members can review code simultaneously:
 
-### **Live Review Sessions**
-
-- Create collaborative review sessions for any commit or pull request
-- Multiple team members can join the same review session simultaneously
-- Real-time synchronization of all review activities
-
-### **Interactive Features**
-
-- **👥 Live User Presence**: See who's currently reviewing with real-time participant lists
+- **👥 Live Presence**: See who's currently reviewing with real-time participant lists
 - **🖱️ Cursor Tracking**: Track where team members are looking in the code
-- **💬 Live Comments**: Add comments on specific code lines that appear instantly for all participants
-- **🎨 User Colors**: Each participant gets a unique color for easy identification
-- **🔄 Real-Time Updates**: All actions (comments, cursor movements, joins/leaves) sync in real-time
-
-### **Comment System**
-
-- Add comments directly on code lines during live sessions
-- Comment types: General, Suggestion, Question, Issue
-- Reply to comments with threaded discussions
-- Mark comments as resolved when addressed
-
-### **Session Management**
-
-- Sessions are automatically created for commits and pull requests
-- Participants can join/leave sessions at any time
-- Session cleanup removes inactive sessions automatically
-- Session history is maintained for reference
-
-### **Technical Implementation**
-
-- Built with **SignalR** for WebSocket-based real-time communication
-- RESTful API endpoints for session management
-- In-memory session storage for fast real-time updates
-- WebSocket endpoint: `/collaborationHub`
+- **💬 Live Comments**: Add comments on specific code lines with instant synchronization
+- **🎨 Comment Types**: General, Suggestion, Question, Issue with threaded discussions
+- **🔄 WebSocket Communication**: Built with SignalR at `/collaborationHub` endpoint
 
 ## 📄 License
 
