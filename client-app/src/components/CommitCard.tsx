@@ -49,14 +49,6 @@ export const CommitCard: React.FC<CommitCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Debug: Log commit data to see filesChanged value
-  console.log("📊 CommitCard - Commit data:", {
-    sha: commit.sha.substring(0, 8),
-    filesChanged: commit.filesChanged,
-    hasFilesChanged: commit.filesChanged !== undefined,
-    filesChangedType: typeof commit.filesChanged,
-  });
-
   const handleReview = () => {
     onReview(commit.sha);
   };
