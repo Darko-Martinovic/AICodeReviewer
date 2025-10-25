@@ -72,20 +72,47 @@ namespace AICodeReviewer.Controllers
                 _gitHubService.UpdateRepository(owner, name);
                 var commits = await _gitHubService.GetRecentCommitsAsync(count, branch);
 
+                // Fetch detailed commit info to get file counts (done in parallel for performance)
+                var commitDetailsTask = commits.Select(async c =>
+                {
+                    try
+                    {
+                        var details = await _gitHubService.GetCommitDetailAsync(c.Sha);
+                        return new
+                        {
+                            sha = c.Sha,
+                            message = c.Commit.Message,
+                            author = c.Commit.Author.Name,
+                            authorEmail = c.Commit.Author.Email ?? "",
+                            date = c.Commit.Author.Date,
+                            htmlUrl = c.HtmlUrl,
+                            filesChanged = details.Files?.Count ?? 0
+                        };
+                    }
+                    catch
+                    {
+                        // If fetching details fails, return commit without file count
+                        return new
+                        {
+                            sha = c.Sha,
+                            message = c.Commit.Message,
+                            author = c.Commit.Author.Name,
+                            authorEmail = c.Commit.Author.Email ?? "",
+                            date = c.Commit.Author.Date,
+                            htmlUrl = c.HtmlUrl,
+                            filesChanged = 0
+                        };
+                    }
+                }).ToList();
+
+                var commitDetails = await Task.WhenAll(commitDetailsTask);
+
                 return Ok(new
                 {
                     Repository = $"{owner}/{name}",
                     Branch = branch ?? "default",
                     Count = commits.Count,
-                    Commits = commits.Select(c => new
-                    {
-                        sha = c.Sha,
-                        message = c.Commit.Message,
-                        author = c.Commit.Author.Name,
-                        authorEmail = c.Commit.Author.Email ?? "",
-                        date = c.Commit.Author.Date,
-                        htmlUrl = c.HtmlUrl
-                    })
+                    Commits = commitDetails
                 });
             }
             catch (Exception ex)

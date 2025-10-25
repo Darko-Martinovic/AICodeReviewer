@@ -148,6 +148,7 @@ export interface Commit {
   authorEmail: string;
   date: string;
   htmlUrl: string;
+  filesChanged?: number;
 }
 
 export interface CommitFile {
@@ -183,6 +184,7 @@ export interface PullRequest {
   body: string;
   headBranch: string;
   baseBranch: string;
+  filesChanged?: number;
 }
 
 export interface CodeReview {

@@ -182,6 +182,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px;
   margin-bottom: 12px;
   background-color: #f9fafb;
@@ -208,17 +209,31 @@
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
 
+.fileContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
 .fileInfo {
   display: flex;
   align-items: center;
+}
+
+.fileMeta {
+  display: flex;
+  align-items: center;
   gap: 12px;
-  flex: 1;
+  flex-wrap: wrap;
 }
 
 .fileName {
   font-weight: 600;
   color: #111827;
   font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  word-break: break-all;
 }
 
 :global(.dark) .fileName {
@@ -281,12 +296,20 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  min-width: 180px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
 }
 
 .collaborateButton:hover {

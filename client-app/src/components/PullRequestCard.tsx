@@ -6,6 +6,7 @@ import {
   Calendar,
   User,
   GitBranch,
+  FileText,
 } from "lucide-react";
 import { ProgressIndicator } from "./ProgressIndicator";
 import type { ProgressStep } from "./ProgressIndicator";
@@ -80,6 +81,15 @@ export const PullRequestCard: React.FC<PullRequestCardProps> = ({
               <Calendar className={styles.metadataIcon} />
               <span>{formatDate(pullRequest.createdAt)}</span>
             </div>
+            {pullRequest.filesChanged !== undefined && (
+              <div className={styles.metadataItem}>
+                <FileText className={styles.metadataIcon} />
+                <span>
+                  {pullRequest.filesChanged} file
+                  {pullRequest.filesChanged !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className={styles.branchSection}>

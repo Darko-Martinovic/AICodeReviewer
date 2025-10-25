@@ -7,6 +7,7 @@ import {
   User,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from "lucide-react";
 import { ProgressIndicator } from "./ProgressIndicator";
 import type { ProgressStep } from "./ProgressIndicator";
@@ -47,6 +48,14 @@ export const CommitCard: React.FC<CommitCardProps> = ({
   isReviewing,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Debug: Log commit data to see filesChanged value
+  console.log("📊 CommitCard - Commit data:", {
+    sha: commit.sha.substring(0, 8),
+    filesChanged: commit.filesChanged,
+    hasFilesChanged: commit.filesChanged !== undefined,
+    filesChangedType: typeof commit.filesChanged,
+  });
 
   const handleReview = () => {
     onReview(commit.sha);
@@ -127,6 +136,15 @@ export const CommitCard: React.FC<CommitCardProps> = ({
               <Calendar className={styles.metaIcon} />
               <span>{formatDate(commit.date)}</span>
             </div>
+            {commit.filesChanged !== undefined && (
+              <div className={styles.metaItem}>
+                <FileText className={styles.metaIcon} />
+                <span>
+                  {commit.filesChanged} file
+                  {commit.filesChanged !== 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className={styles.commitInfo}>

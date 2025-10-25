@@ -826,22 +826,19 @@ function App() {
         );
       }
 
-      // Wait a bit to let the progress modal complete its animation (less time if cached)
-      const delayMs = isCached ? 1000 : 2000;
-      setTimeout(() => {
-        setState((prev) => ({
-          ...prev,
-          codeReview: reviewData,
-          showReviewModal: true,
-          reviewingCommits: new Set(
-            [...prev.reviewingCommits].filter((id) => id !== sha)
-          ),
-          progressModal: {
-            ...prev.progressModal,
-            show: false,
-          },
-        }));
-      }, delayMs);
+      // Set review data immediately - no delay needed
+      setState((prev) => ({
+        ...prev,
+        codeReview: reviewData,
+        showReviewModal: true,
+        reviewingCommits: new Set(
+          [...prev.reviewingCommits].filter((id) => id !== sha)
+        ),
+        progressModal: {
+          ...prev.progressModal,
+          show: false,
+        },
+      }));
 
       console.log("✅ State updated, modal should show");
     } catch (error) {
@@ -937,41 +934,38 @@ function App() {
         console.log("  - Security length:", response.data.security?.length);
       }
 
-      // Wait a bit to let the progress modal complete its animation (less time if cached)
-      const delayMs = isCached ? 1000 : 2000;
-      setTimeout(() => {
-        console.log(
-          "🔄 About to set PR review state with response:",
-          response.data
-        );
+      // Set review data immediately - no delay needed
+      console.log(
+        "🔄 About to set PR review state with response:",
+        response.data
+      );
 
-        setState((prev) => ({
-          ...prev,
-          codeReview: response.data,
-          showReviewModal: true,
-          reviewingPRs: new Set(
-            [...prev.reviewingPRs].filter((id) => id !== number)
-          ),
-          progressModal: {
-            ...prev.progressModal,
-            show: false,
-          },
-        }));
+      setState((prev) => ({
+        ...prev,
+        codeReview: response.data,
+        showReviewModal: true,
+        reviewingPRs: new Set(
+          [...prev.reviewingPRs].filter((id) => id !== number)
+        ),
+        progressModal: {
+          ...prev.progressModal,
+          show: false,
+        },
+      }));
 
-        console.log("✅ PR review state updated - modal should show now");
+      console.log("✅ PR review state updated - modal should show now");
 
-        // Show workflow completion notification
-        addToast({
-          type: "success",
-          title: isCached
-            ? "Cached Review Loaded"
-            : "Integration Workflow Complete",
-          message: isCached
-            ? `Cached review for PR #${number} loaded successfully`
-            : "AI Review → JIRA Update → GitHub PR Comment completed",
-          duration: 5000,
-        });
-      }, delayMs);
+      // Show workflow completion notification
+      addToast({
+        type: "success",
+        title: isCached
+          ? "Cached Review Loaded"
+          : "Integration Workflow Complete",
+        message: isCached
+          ? `Cached review for PR #${number} loaded successfully`
+          : "AI Review → JIRA Update → GitHub PR Comment completed",
+        duration: 5000,
+      });
 
       console.log("✅ State updated, modal should show");
     } catch (error) {
@@ -1205,18 +1199,20 @@ console.log("File loaded successfully");`
           onJoinSession={handleOpenJoinSessionModal}
         />
 
-        {/* Navigation */}
-        <Navigation
-          activeTab={state.activeTab}
-          onTabChange={(tab) =>
-            setState((prev) => ({ ...prev, activeTab: tab }))
-          }
-          currentRepository={state.currentRepository}
-          commits={state.commits}
-          pullRequests={state.pullRequests}
-          isInRepositoryView={state.isInRepositoryView}
-          onExitRepository={handleExitRepository}
-        />
+        {/* Navigation - Hide when in collaboration mode */}
+        {!state.collaboration.isActive && (
+          <Navigation
+            activeTab={state.activeTab}
+            onTabChange={(tab) =>
+              setState((prev) => ({ ...prev, activeTab: tab }))
+            }
+            currentRepository={state.currentRepository}
+            commits={state.commits}
+            pullRequests={state.pullRequests}
+            isInRepositoryView={state.isInRepositoryView}
+            onExitRepository={handleExitRepository}
+          />
+        )}
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1227,15 +1223,17 @@ console.log("File loaded successfully");`
             />
           )}
 
-          {/* Search and Actions */}
-          <SearchAndActions
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            activeTab={state.activeTab}
-            onAddRepository={() =>
-              setNewRepoForm((prev) => ({ ...prev, show: true }))
-            }
-          />
+          {/* Search and Actions - Hide when in collaboration mode */}
+          {!state.collaboration.isActive && (
+            <SearchAndActions
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              activeTab={state.activeTab}
+              onAddRepository={() =>
+                setNewRepoForm((prev) => ({ ...prev, show: true }))
+              }
+            />
+          )}
 
           {/* Tab Content */}
           {state.collaboration.isActive && state.collaboration.commit ? (

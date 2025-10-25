@@ -76,27 +76,53 @@ namespace AICodeReviewer.Controllers
 
                 Console.WriteLine($"📋 Found {pullRequests.Count} pull requests in {owner}/{name}");
 
-                return Ok(
-                    pullRequests
-                        .Select(
-                            pr =>
-                                new
-                                {
-                                    Number = pr.Number,
-                                    Title = pr.Title,
-                                    Author = pr.User.Login,
-                                    CreatedAt = pr.CreatedAt,
-                                    UpdatedAt = pr.UpdatedAt,
-                                    State = pr.State.ToString(),
-                                    BaseBranch = pr.Base.Ref,
-                                    HeadBranch = pr.Head.Ref,
-                                    HtmlUrl = pr.HtmlUrl,
-                                    Body = pr.Body ?? "",
-                                    IsDraft = pr.Draft
-                                }
-                        )
-                        .ToList()
-                );
+                // Fetch file counts for each PR in parallel
+                var prDetailsTask = pullRequests.Select(async pr =>
+                {
+                    try
+                    {
+                        var files = await _gitHubService.GetPullRequestFilesAsync(pr.Number);
+                        return new
+                        {
+                            Number = pr.Number,
+                            Title = pr.Title,
+                            Author = pr.User.Login,
+                            CreatedAt = pr.CreatedAt,
+                            UpdatedAt = pr.UpdatedAt,
+                            State = pr.State.ToString(),
+                            BaseBranch = pr.Base.Ref,
+                            HeadBranch = pr.Head.Ref,
+                            HtmlUrl = pr.HtmlUrl,
+                            Body = pr.Body ?? "",
+                            IsDraft = pr.Draft,
+                            FilesChanged = files?.Count ?? 0
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠️ Failed to get files for PR #{pr.Number}: {ex.Message}");
+                        // If fetching files fails, return PR without file count
+                        return new
+                        {
+                            Number = pr.Number,
+                            Title = pr.Title,
+                            Author = pr.User.Login,
+                            CreatedAt = pr.CreatedAt,
+                            UpdatedAt = pr.UpdatedAt,
+                            State = pr.State.ToString(),
+                            BaseBranch = pr.Base.Ref,
+                            HeadBranch = pr.Head.Ref,
+                            HtmlUrl = pr.HtmlUrl,
+                            Body = pr.Body ?? "",
+                            IsDraft = pr.Draft,
+                            FilesChanged = 0
+                        };
+                    }
+                }).ToList();
+
+                var prDetails = await Task.WhenAll(prDetailsTask);
+
+                return Ok(prDetails.ToList());
             }
             catch (Exception ex)
             {

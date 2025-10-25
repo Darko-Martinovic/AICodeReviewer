@@ -197,12 +197,18 @@ ${file.content}`);
         <h3 className={styles.fileListTitle}>Files in this commit:</h3>
         {files.map((file, index) => (
           <div key={index} className={styles.fileItem}>
-            <div className={styles.fileInfo}>
-              <span className={styles.fileName}>{file.filename}</span>
-              <span className={`${styles.fileStatus} ${styles[file.status]}`}>
-                {file.status}
-              </span>
-              <span className={styles.fileLanguage}>{file.language}</span>
+            <div className={styles.fileContent}>
+              <div className={styles.fileInfo}>
+                <span className={styles.fileName}>{file.filename}</span>
+              </div>
+              <div className={styles.fileMeta}>
+                <span className={`${styles.fileStatus} ${styles[file.status]}`}>
+                  {file.status}
+                </span>
+                <span className={styles.fileLanguage}>
+                  Language: {file.language}
+                </span>
+              </div>
             </div>
             <button
               className={styles.collaborateButton}
