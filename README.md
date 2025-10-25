@@ -57,6 +57,26 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 
 4. **Access**: Frontend at `http://localhost:5174`, API at `https://localhost:7001`
 
+## ⚙️ Configuration
+
+### Token Metrics Display
+
+Control the visibility of token usage and cost information in code review results by editing `appsettings.json`:
+
+```json
+"CodeReview": {
+  "MaxFilesToReview": 3,
+  "MaxIssuesInSummary": 3,
+  "ShowTokenMetrics": true  // Set to false to hide token/cost info
+}
+```
+
+When enabled, token usage and estimated cost are displayed at the top of review summaries for:
+
+- 🧠 Train AI reviews
+- 📝 Commit reviews
+- 🔀 Pull request reviews
+
 ## ⚙️ Usage
 
 1. Open web interface
@@ -64,6 +84,7 @@ https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 3. Browse commits and pull requests
 4. Customize AI prompts in **System Prompts** tab
 5. Run automated code reviews
+6. View token usage and cost metrics (configurable via `appsettings.json`)
 
 ## 🤝 Real-Time Collaboration
 

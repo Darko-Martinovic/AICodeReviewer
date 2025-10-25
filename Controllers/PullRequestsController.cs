@@ -382,7 +382,9 @@ namespace AICodeReviewer.Controllers
                             type = issue.Category,
                             description = issue.Description,
                             recommendation = issue.Recommendation
-                        }).ToList() ?? new List<object>()
+                        }).ToList() ?? new List<object>(),
+                    tokensUsed = review.Metrics.TokensUsed,
+                    estimatedCost = review.Metrics.EstimatedCost
                 };
 
                 Console.WriteLine($"🔍 Backend PR review workflow completed:");

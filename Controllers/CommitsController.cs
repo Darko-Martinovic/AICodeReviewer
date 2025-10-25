@@ -177,7 +177,9 @@ namespace AICodeReviewer.Controllers
                             type = issue.Category,
                             description = issue.Description,
                             recommendation = issue.Recommendation
-                        }).ToList()
+                        }).ToList(),
+                    tokensUsed = review.Metrics.TokensUsed,
+                    estimatedCost = review.Metrics.EstimatedCost
                 };
 
                 Console.WriteLine($"🔍 Backend review mapping:");
@@ -186,6 +188,8 @@ namespace AICodeReviewer.Controllers
                 Console.WriteLine($"  - Summary: {mappedReview.summary}");
                 Console.WriteLine($"  - Suggestions count: {mappedReview.suggestions.Count}");
                 Console.WriteLine($"  - Security issues count: {mappedReview.security.Count}");
+                Console.WriteLine($"  - Tokens Used: {mappedReview.tokensUsed}");
+                Console.WriteLine($"  - Estimated Cost: ${mappedReview.estimatedCost:F4}");
 
                 return Ok(mappedReview);
             }
@@ -436,7 +440,9 @@ namespace AICodeReviewer.Controllers
                             type = issue.Category,
                             description = issue.Description,
                             recommendation = issue.Recommendation
-                        }).ToList()
+                        }).ToList(),
+                    tokensUsed = review.Metrics.TokensUsed,
+                    estimatedCost = review.Metrics.EstimatedCost
                 };
 
                 Console.WriteLine($"🔍 Commit workflow review mapping:");
@@ -444,6 +450,8 @@ namespace AICodeReviewer.Controllers
                 Console.WriteLine($"  - Summary: {transformedReviewData.summary}");
                 Console.WriteLine($"  - Suggestions count: {transformedReviewData.suggestions.Count}");
                 Console.WriteLine($"  - Security issues count: {transformedReviewData.security.Count}");
+                Console.WriteLine($"  - Tokens Used: {transformedReviewData.tokensUsed}");
+                Console.WriteLine($"  - Estimated Cost: ${transformedReviewData.estimatedCost:F4}");
                 Console.WriteLine($"  - Workflow steps executed: {workflowContext.Results.Count}");
 
                 return Ok(new

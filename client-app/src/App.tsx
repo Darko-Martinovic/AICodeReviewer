@@ -24,6 +24,7 @@ import ErrorDisplay from "./components/ErrorDisplay";
 import { CollaborationDemo } from "./components/CollaborationDemo";
 import { JoinSessionModal } from "./components/JoinSessionModal";
 import { ErrorBoundary, useToast } from "./components/UI";
+import { useCodeReviewConfig } from "./hooks/useCodeReviewConfig";
 
 type TabType =
   | "repositories"
@@ -81,6 +82,7 @@ interface AppState {
 
 function App() {
   const { addToast, ToastContainer } = useToast();
+  const { config: codeReviewConfig } = useCodeReviewConfig();
   const [state, setState] = useState<AppState>({
     currentRepository: null,
     repositories: [],
@@ -806,6 +808,8 @@ function App() {
         console.log("  - Complexity:", reviewData.complexity);
         console.log("  - Test Coverage:", reviewData.testCoverage);
         console.log("  - Security length:", reviewData.security?.length);
+        console.log("  - Tokens Used:", reviewData.tokensUsed);
+        console.log("  - Estimated Cost:", reviewData.estimatedCost);
       } else {
         console.log("❌ No review data found in response!");
       }
@@ -1348,6 +1352,7 @@ console.log("File loaded successfully");`
                 codeReview: null,
               }))
             }
+            showTokenMetrics={codeReviewConfig.showTokenMetrics}
           />
         )}
 

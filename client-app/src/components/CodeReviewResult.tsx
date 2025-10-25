@@ -15,11 +15,13 @@ import styles from "./CodeReviewResult.module.css";
 interface CodeReviewResultProps {
   review: CodeReview;
   onClose: () => void;
+  showTokenMetrics?: boolean;
 }
 
 export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
   review,
   onClose,
+  showTokenMetrics = true,
 }) => {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
@@ -273,6 +275,35 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
           {review?.summary && (
             <div className={styles.card}>
               <h3 className={styles.sectionTitle}>Summary</h3>
+
+              {/* Token and Cost Metrics */}
+              {showTokenMetrics &&
+                (review.tokensUsed !== undefined ||
+                  review.estimatedCost !== undefined) && (
+                  <div className={styles.tokenMetrics}>
+                    {review.tokensUsed !== undefined && (
+                      <div className={styles.tokenMetricItem}>
+                        <span className={styles.tokenMetricLabel}>
+                          🎯 Tokens Used:
+                        </span>
+                        <span className={styles.tokenMetricValue}>
+                          {review.tokensUsed.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {review.estimatedCost !== undefined && (
+                      <div className={styles.tokenMetricItem}>
+                        <span className={styles.tokenMetricLabel}>
+                          💰 Cost:
+                        </span>
+                        <span className={styles.tokenMetricValue}>
+                          ${review.estimatedCost.toFixed(4)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
               <p className={styles.summaryText}>{review.summary}</p>
 
               <div className={styles.summaryMetrics}>

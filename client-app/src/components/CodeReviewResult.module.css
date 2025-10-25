@@ -347,6 +347,49 @@
   color: rgb(209 213 219);
 }
 
+/* Token and Cost Metrics */
+.tokenMetrics {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgb(243 244 246);
+  border-radius: 0.375rem;
+  border-left: 4px solid rgb(59 130 246);
+  margin-bottom: 1rem;
+}
+
+:global(.dark) .tokenMetrics {
+  background-color: rgb(31 41 55);
+  border-left-color: rgb(96 165 250);
+}
+
+.tokenMetricItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tokenMetricLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(55 65 81);
+}
+
+:global(.dark) .tokenMetricLabel {
+  color: rgb(209 213 219);
+}
+
+.tokenMetricValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: rgb(59 130 246);
+}
+
+:global(.dark) .tokenMetricValue {
+  color: rgb(96 165 250);
+}
+
 .summaryMetrics {
   display: flex;
   align-items: center;

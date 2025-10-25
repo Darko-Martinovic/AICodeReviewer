@@ -120,6 +120,11 @@ export const trainingApi = {
     api.post("/training/update-custom-prompt", { language, addition }),
 };
 
+// Config API
+export const configApi = {
+  getCodeReviewConfig: () => api.get("/config/code-review"),
+};
+
 // Types
 export interface Repository {
   id: number;
@@ -187,6 +192,8 @@ export interface CodeReview {
   complexity: "Low" | "Medium" | "High";
   testCoverage: string;
   security: SecurityIssue[];
+  tokensUsed?: number;
+  estimatedCost?: number;
 }
 
 export interface CodeIssue {
@@ -226,4 +233,10 @@ export interface TestPatternRequest {
   repositoryName: string;
   owner?: string;
   pattern: RepositoryFilterPattern;
+}
+
+export interface CodeReviewConfig {
+  maxFilesToReview: number;
+  maxIssuesInSummary: number;
+  showTokenMetrics: boolean;
 }
