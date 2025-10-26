@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { CodeReview } from "../services/api";
+import type { CodeReview, CodeIssue, SecurityIssue } from "../services/api";
 import {
   AlertTriangle,
   CheckCircle,
@@ -78,14 +78,15 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
   };
 
   const formatIssue = (
-    issue: any,
-    type: "code" | "security",
-    _index: number
+    issue: CodeIssue | SecurityIssue,
+    type: "code" | "security"
   ) => {
     if (type === "code") {
-      return `${issue.severity} Issue - ${issue.file}:${issue.line}\n\nProblem: ${issue.message}\n\nSuggestion: ${issue.suggestion}`;
+      const codeIssue = issue as CodeIssue;
+      return `${codeIssue.severity} Issue - ${codeIssue.file}:${codeIssue.line}\n\nProblem: ${codeIssue.message}\n\nSuggestion: ${codeIssue.suggestion}`;
     } else {
-      return `${issue.severity} Security Issue - ${issue.type}\n\nDescription: ${issue.description}\n\nRecommendation: ${issue.recommendation}`;
+      const securityIssue = issue as SecurityIssue;
+      return `${securityIssue.severity} Security Issue - ${securityIssue.type}\n\nDescription: ${securityIssue.description}\n\nRecommendation: ${securityIssue.recommendation}`;
     }
   };
 
@@ -364,7 +365,7 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
                           <button
                             onClick={() =>
                               copyToClipboard(
-                                formatIssue(issue, "code", index),
+                                formatIssue(issue, "code"),
                                 `code-issue-${index}`
                               )
                             }
@@ -427,7 +428,7 @@ export const CodeReviewResult: React.FC<CodeReviewResultProps> = ({
                           <button
                             onClick={() =>
                               copyToClipboard(
-                                formatIssue(issue, "security", index),
+                                formatIssue(issue, "security"),
                                 `security-issue-${index}`
                               )
                             }
