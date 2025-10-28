@@ -15,6 +15,7 @@ See the newest features and improvements:
 https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 
 **New features showcased:**
+
 1. **🧠 Train AI** - Interactive testing and feedback system for prompt improvement
 2. **🤝 Better Collaboration** - Enhanced real-time code review capabilities
 3. **⚡ Better Workflow Management** - Streamlined development processes
