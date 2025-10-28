@@ -8,6 +8,19 @@ See the AI Code Reviewer in action:
 
 https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 
+### 🆕 Latest Features Update
+
+See the newest features and improvements:
+
+https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
+
+**New features showcased:**
+1. **🧠 Train AI** - Interactive testing and feedback system for prompt improvement
+2. **🤝 Better Collaboration** - Enhanced real-time code review capabilities
+3. **⚡ Better Workflow Management** - Streamlined development processes
+4. **🤖 Support for GitHub App** - Enterprise-grade authentication and security
+5. **🎛️ Repository Filters** - Advanced filtering and repository management
+
 ## ✨ Features
 
 - **🔍 AI Code Analysis**: Automated reviews using Azure OpenAI
