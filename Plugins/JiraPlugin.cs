@@ -85,7 +85,7 @@ public class JiraPlugin
         [Description("Pull request number")] string prNumber,
         [Description("Code review summary")] string reviewSummary,
         [Description("Number of issues found")] string issueCount,
-        [Description("Project key for new tickets")] string project = "OPS",
+        [Description("Project key for new tickets")] string project = "ARV",
         [Description("Issue type for new tickets")] string issueType = "Task",
         [Description("Priority for new tickets")] string priority = "Medium")
     {
