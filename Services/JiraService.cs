@@ -134,28 +134,9 @@ namespace AICodeReviewer.Services
                     {
                         project = new { key = project },
                         summary = summary,
-                        description = new
-                        {
-                            type = "doc",
-                            version = 1,
-                            content = new[]
-                            {
-                                new
-                                {
-                                    type = "paragraph",
-                                    content = new[]
-                                    {
-                                        new
-                                        {
-                                            type = "text",
-                                            text = description
-                                        }
-                                    }
-                                }
-                            }
-                        },
+                        description = description, // Use plain text instead of ADF
                         issuetype = new { name = issueType },
-                        priority = new { name = priority },
+                        priority = string.IsNullOrEmpty(priority) ? null : new { name = priority },
                         assignee = string.IsNullOrEmpty(assignee) ? null : new { name = assignee }
                     }
                 };

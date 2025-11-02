@@ -51,7 +51,7 @@
           "prNumber": "{{data.prNumber}}",
           "reviewSummary": "{{results.code_review.summary}}",
           "issueCount": "{{results.code_review.issueCount}}",
-          "project": "KAN",
+          "project": "ARV",
           "issueType": "Task",
           "priority": "High"
         }
