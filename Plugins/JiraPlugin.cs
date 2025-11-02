@@ -87,10 +87,19 @@ public class JiraPlugin
         [Description("Number of issues found")] string issueCount,
         [Description("Project key for new tickets")] string project = "ARV",
         [Description("Issue type for new tickets")] string issueType = "Task",
-        [Description("Priority for new tickets")] string priority = "Medium")
+        [Description("Priority for new tickets")] string priority = "")
     {
         try
         {
+            Console.WriteLine($"🔍 DEBUG: HandleCodeReviewTicket called with parameters:");
+            Console.WriteLine($"   prTitle: {prTitle ?? "NULL"}");
+            Console.WriteLine($"   prNumber: {prNumber ?? "NULL"}");
+            Console.WriteLine($"   reviewSummary: {reviewSummary ?? "NULL"}");
+            Console.WriteLine($"   issueCount: {issueCount ?? "NULL"}");
+            Console.WriteLine($"   project: {project ?? "NULL"}");
+            Console.WriteLine($"   issueType: {issueType ?? "NULL"}");
+            Console.WriteLine($"   priority: {priority ?? "NULL"}");
+            
             Console.WriteLine($"🎫 Processing JIRA tickets for PR #{prNumber}...");
             Console.WriteLine($"   PR Title: {prTitle}");
 

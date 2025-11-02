@@ -116,7 +116,23 @@ namespace AICodeReviewer.Services
         {
             try
             {
-                if (!IsJiraConfigured())
+                Console.WriteLine($"🔍 DEBUG: CreateIssueAsync called with:");
+                Console.WriteLine($"   Project: {project}");
+                Console.WriteLine($"   IssueType: {issueType}");
+                Console.WriteLine($"   Priority: {priority}");
+                Console.WriteLine($"   Summary: {summary}");
+                Console.WriteLine($"   Description length: {description?.Length ?? 0}");
+                Console.WriteLine($"   Assignee: {assignee ?? "None"}");
+                
+                Console.WriteLine($"🔍 DEBUG: Environment variables:");
+                Console.WriteLine($"   JIRA_BASE_URL: {(_jiraBaseUrl != null ? "SET" : "NOT SET")} - {_jiraBaseUrl}");
+                Console.WriteLine($"   JIRA_API_TOKEN: {(_jiraApiToken != null ? "SET" : "NOT SET")} - Length: {_jiraApiToken?.Length ?? 0}");
+                Console.WriteLine($"   JIRA_USER_EMAIL: {(_jiraUserEmail != null ? "SET" : "NOT SET")} - {_jiraUserEmail}");
+                
+                var isConfigured = IsJiraConfigured();
+                Console.WriteLine($"🔍 DEBUG: IsJiraConfigured() = {isConfigured}");
+                
+                if (!isConfigured)
                 {
                     var ticketId = $"{project}-{Random.Shared.Next(1000, 9999)}";
                     Console.WriteLine($"⚠️ Jira not configured - simulating ticket creation");
@@ -128,26 +144,66 @@ namespace AICodeReviewer.Services
                     return ticketId;
                 }
 
-                var requestBody = new
+                // Create request body with minimal required fields
+                var fields = new Dictionary<string, object>
                 {
-                    fields = new
-                    {
-                        project = new { key = project },
-                        summary = summary,
-                        description = description, // Use plain text instead of ADF
-                        issuetype = new { name = issueType },
-                        priority = string.IsNullOrEmpty(priority) ? null : new { name = priority },
-                        assignee = string.IsNullOrEmpty(assignee) ? null : new { name = assignee }
-                    }
+                    ["project"] = new { key = project },
+                    ["summary"] = summary,
+                    ["issuetype"] = new { name = issueType }
                 };
+
+                // Add description in ADF format if provided
+                if (!string.IsNullOrEmpty(description))
+                {
+                    fields["description"] = new
+                    {
+                        type = "doc",
+                        version = 1,
+                        content = new[]
+                        {
+                            new
+                            {
+                                type = "paragraph",
+                                content = new[]
+                                {
+                                    new
+                                    {
+                                        type = "text",
+                                        text = description
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
+
+                // Only add assignee if specified
+                if (!string.IsNullOrEmpty(assignee))
+                {
+                    fields["assignee"] = new { name = assignee };
+                }
+
+                var requestBody = new { fields = fields };
 
                 var json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
+                Console.WriteLine($"🔍 DEBUG: JIRA API Request:");
+                Console.WriteLine($"   URL: {_jiraBaseUrl}/rest/api/3/issue");
+                Console.WriteLine($"   Method: POST");
+                Console.WriteLine($"   Content-Type: application/json");
+                Console.WriteLine($"   Request Body: {json}");
+
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                Console.WriteLine($"🔍 DEBUG: Making HTTP request to JIRA API...");
                 var response = await _httpClient.PostAsync($"{_jiraBaseUrl}/rest/api/3/issue", content);
+                
+                Console.WriteLine($"🔍 DEBUG: JIRA API Response:");
+                Console.WriteLine($"   Status Code: {response.StatusCode}");
+                Console.WriteLine($"   Success: {response.IsSuccessStatusCode}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -166,22 +222,35 @@ namespace AICodeReviewer.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Failed to create Jira ticket. Status: {response.StatusCode}");
-                    Console.WriteLine($"Error: {errorContent}");
+                    Console.WriteLine($"❌ JIRA API ERROR - Failed to create ticket");
+                    Console.WriteLine($"   Status Code: {response.StatusCode} ({(int)response.StatusCode})");
+                    Console.WriteLine($"   Reason Phrase: {response.ReasonPhrase}");
+                    Console.WriteLine($"   Error Response Body: {errorContent}");
+                    Console.WriteLine($"   Request URL: {_jiraBaseUrl}/rest/api/3/issue");
+                    Console.WriteLine($"   Request Project: {project}");
+                    Console.WriteLine($"   Request Issue Type: {issueType}");
+                    Console.WriteLine($"   Request Priority: {priority}");
 
                     // Fallback to simulation
                     var ticketId = $"{project}-SIM{Random.Shared.Next(1000, 9999)}";
-                    Console.WriteLine($"🎫 Fallback: Simulated ticket {ticketId}");
+                    Console.WriteLine($"🎫 Fallback: Creating simulated ticket {ticketId}");
                     return ticketId;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Exception creating Jira ticket: {ex.Message}");
+                Console.WriteLine($"❌ EXCEPTION in CreateIssueAsync:");
+                Console.WriteLine($"   Exception Type: {ex.GetType().Name}");
+                Console.WriteLine($"   Message: {ex.Message}");
+                Console.WriteLine($"   Stack Trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"   Inner Exception: {ex.InnerException.Message}");
+                }
 
                 // Fallback to simulation
                 var ticketId = $"{project}-ERR{Random.Shared.Next(1000, 9999)}";
-                Console.WriteLine($"🎫 Error fallback: Simulated ticket {ticketId}");
+                Console.WriteLine($"🎫 Error fallback: Creating simulated ticket {ticketId}");
                 return ticketId;
             }
         }
