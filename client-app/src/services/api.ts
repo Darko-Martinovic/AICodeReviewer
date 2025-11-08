@@ -1,10 +1,9 @@
 import axios from "axios";
-
-const API_BASE_URL = "https://localhost:7001/api";
+import { config } from "../config";
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000, // Default timeout for quick operations
+  baseURL: config.api.baseUrl,
+  timeout: config.api.timeout,
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,8 +11,8 @@ const api = axios.create({
 
 // Create a separate instance for long-running operations like reviews
 const longRunningApi = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 180000, // 3 minutes for reviews and heavy operations (was 60 seconds)
+  baseURL: config.api.baseUrl,
+  timeout: config.api.longTimeout,
   headers: {
     "Content-Type": "application/json",
   },

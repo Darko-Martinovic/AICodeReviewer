@@ -1,4 +1,5 @@
 import axios from "axios";
+import { config } from "../config";
 import type {
   ReviewSession,
   LiveComment,
@@ -6,11 +7,9 @@ import type {
   CreateSessionRequest,
 } from "../types/collaboration";
 
-const API_BASE_URL = "https://localhost:7001/api";
-
 const collaborationApiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
+  baseURL: config.api.baseUrl,
+  timeout: config.api.timeout,
   headers: {
     "Content-Type": "application/json",
   },
