@@ -1,5 +1,4 @@
-﻿using DotNetEnv;
-using AICodeReviewer.Services;
+﻿using AICodeReviewer.Services;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Plugins;
 using AICodeReviewer.Hubs;
@@ -15,13 +14,10 @@ namespace AICodeReviewer
     {
         public static void Main(string[] args)
         {
-            // Load environment variables
-            Env.Load();
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Configure services
-            ConfigureServices(builder.Services);
+            ConfigureServices(builder.Services, builder.Configuration);
 
             var app = builder.Build();
 
@@ -34,7 +30,7 @@ namespace AICodeReviewer
         /// <summary>
         /// Configures all services for dependency injection
         /// </summary>
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             // Add controllers with JSON configuration
             services.AddControllers()
@@ -62,6 +58,7 @@ namespace AICodeReviewer
                 options.AddPolicy("AllowReactApp", policy =>
                 {
                     policy.WithOrigins(
+                        "http://localhost", "https://localhost",
                         "http://localhost:3000", "https://localhost:3000",
                         "http://localhost:5173", "https://localhost:5173",
                         "http://localhost:5174", "https://localhost:5174",
@@ -117,8 +114,9 @@ namespace AICodeReviewer
                 var configService = provider.GetRequiredService<IConfigurationService>();
                 var filterService = provider.GetRequiredService<IRepositoryFilterService>();
                 var gitHubAppService = provider.GetRequiredService<IGitHubAppService>();
-                var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
-                    ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var token = configuration["GitHub:Token"]
+                    ?? throw new InvalidOperationException("GitHub:Token not set in configuration");
                 return new RepositoryManagementService(configService.Settings, token, filterService, gitHubAppService);
             });
 
@@ -128,25 +126,27 @@ namespace AICodeReviewer
                 var httpClient = provider.GetRequiredService<HttpClient>();
                 var configService = provider.GetRequiredService<IConfigurationService>();
                 var promptManagementService = provider.GetRequiredService<IPromptManagementService>();
+                var configuration = provider.GetRequiredService<IConfiguration>();
 
-                var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
-                    ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
-                var apiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
-                    ?? throw new InvalidOperationException("AOAI_APIKEY not set");
-                var deployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
-                    ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
+                var endpoint = configuration["AzureOpenAI:Endpoint"]
+                    ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not set in configuration");
+                var apiKey = configuration["AzureOpenAI:ApiKey"]
+                    ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not set in configuration");
+                var deployment = configuration["AzureOpenAI:DeploymentName"]
+                    ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName not set in configuration");
 
                 return new AzureOpenAIService(httpClient, endpoint, apiKey, deployment, configService, promptManagementService);
             });
 
             services.AddSingleton<IGitHubService>(provider =>
             {
-                var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN")
-                    ?? throw new InvalidOperationException("GITHUB_TOKEN not set");
-                var owner = Environment.GetEnvironmentVariable("GITHUB_REPO_OWNER")
-                    ?? throw new InvalidOperationException("GITHUB_REPO_OWNER not set");
-                var name = Environment.GetEnvironmentVariable("GITHUB_REPO_NAME")
-                    ?? throw new InvalidOperationException("GITHUB_REPO_NAME not set");
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var token = configuration["GitHub:Token"]
+                    ?? throw new InvalidOperationException("GitHub:Token not set in configuration");
+                var owner = configuration["GitHub:Owner"]
+                    ?? throw new InvalidOperationException("GitHub:Owner not set in configuration");
+                var name = configuration["GitHub:Name"]
+                    ?? throw new InvalidOperationException("GitHub:Name not set in configuration");
                 var configService = provider.GetRequiredService<IConfigurationService>();
                 var gitHubAppService = provider.GetRequiredService<IGitHubAppService>();
 
@@ -171,24 +171,24 @@ namespace AICodeReviewer
             });
 
             // Configure Semantic Kernel
-            ConfigureSemanticKernel(services);
+            ConfigureSemanticKernel(services, configuration);
         }
 
         /// <summary>
         /// Configures Semantic Kernel with plugins and workflow engine
         /// </summary>
-        private static void ConfigureSemanticKernel(IServiceCollection services)
+        private static void ConfigureSemanticKernel(IServiceCollection services, IConfiguration configuration)
         {
             // Configure Semantic Kernel
             var kernelBuilder = services.AddKernel();
 
             // Add Azure OpenAI chat completion
-            var endpoint = Environment.GetEnvironmentVariable("AOAI_ENDPOINT")
-                ?? throw new InvalidOperationException("AOAI_ENDPOINT not set");
-            var apiKey = Environment.GetEnvironmentVariable("AOAI_APIKEY")
-                ?? throw new InvalidOperationException("AOAI_APIKEY not set");
-            var deployment = Environment.GetEnvironmentVariable("CHATCOMPLETION_DEPLOYMENTNAME")
-                ?? throw new InvalidOperationException("CHATCOMPLETION_DEPLOYMENTNAME not set");
+            var endpoint = configuration["AzureOpenAI:Endpoint"]
+                ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not set in configuration");
+            var apiKey = configuration["AzureOpenAI:ApiKey"]
+                ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not set in configuration");
+            var deployment = configuration["AzureOpenAI:DeploymentName"]
+                ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName not set in configuration");
 
             kernelBuilder.AddAzureOpenAIChatCompletion(
                 deploymentName: deployment,

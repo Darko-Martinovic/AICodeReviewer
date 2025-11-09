@@ -2,7 +2,8 @@
 bin/
 obj/
 out/
-
+publish/
+deploy/
 presentation/
 # User-specific files
 *.user
