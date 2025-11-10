@@ -1,11 +1,13 @@
 using AICodeReviewer.Models;
 using AICodeReviewer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 
 namespace AICodeReviewer.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[EnableCors("AllowReactApp")]
 public class TrainingController : ControllerBase
 {
     private readonly ICodeValidationService _validationService;

@@ -52,36 +52,41 @@ namespace AICodeReviewer
                 });
             });
 
-            // Add CORS
+            // Add CORS - Configure with specific origins for SignalR compatibility
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
                     policy.WithOrigins(
-                        "http://localhost", "https://localhost",
-                        "http://localhost:3000", "https://localhost:3000",
-                        "http://localhost:5173", "https://localhost:5173",
-                        "http://localhost:5174", "https://localhost:5174",
-                        "http://localhost:5175", "https://localhost:5175")
+                              "http://localhost",           // Frontend on default HTTP port (80)
+                              "http://localhost:3000",      // React dev server
+                              "http://localhost:5000",      // Python HTTP server (no admin)
+                              "http://localhost:5173",      // Vite dev server
+                              "http://localhost:5174",      // Alternative Vite port
+                              "http://localhost:5175",      // Alternative Vite port
+                              "http://localhost:8001",      // Backend HTTP
+                              "https://localhost:7001"      // Backend HTTPS
+                          )
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials(); // Required for SignalR
+                          .AllowCredentials()              // Required for SignalR
+                          .SetIsOriginAllowedToAllowWildcardSubdomains();
                 });
             });
 
-            // Configure HTTPS redirection and HSTS
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-                options.HttpsPort = 7001;
-            });
+            // Configure HTTPS redirection and HSTS - DISABLED for HTTP development
+            // services.AddHttpsRedirection(options =>
+            // {
+            //     options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+            //     options.HttpsPort = 7001;
+            // });
 
-            services.AddHsts(options =>
-            {
-                options.Preload = true;
-                options.IncludeSubDomains = true;
-                options.MaxAge = TimeSpan.FromDays(365);
-            });
+            // services.AddHsts(options =>
+            // {
+            //     options.Preload = true;
+            //     options.IncludeSubDomains = true;
+            //     options.MaxAge = TimeSpan.FromDays(365);
+            // });
 
             // Configuration service (singleton)
             services.AddSingleton<IConfigurationService, ConfigurationService>();
@@ -228,11 +233,28 @@ namespace AICodeReviewer
             }
             else
             {
-                // Enable HSTS for production
-                app.UseHsts();
+                // Enable HSTS for production - DISABLED for HTTP development
+                // app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // HTTPS redirection disabled for HTTP development
+            // app.UseHttpsRedirection();
+
+            // Handle OPTIONS preflight requests explicitly
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+                    context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+                    context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+                    context.Response.Headers.Append("Access-Control-Max-Age", "3600");
+                    context.Response.StatusCode = 200;
+                    await context.Response.CompleteAsync();
+                    return;
+                }
+                await next();
+            });
 
             app.UseCors("AllowReactApp");
 
@@ -240,24 +262,25 @@ namespace AICodeReviewer
 
             app.MapControllers();
 
-            // Map SignalR hub for real-time collaboration
-            app.MapHub<CollaborationHub>("/collaborationHub");
+            // Map SignalR hub for real-time collaboration with CORS
+            app.MapHub<CollaborationHub>("/collaborationHub")
+               .RequireCors("AllowReactApp");
 
-            // Add a simple health check endpoint
+            // Add a simple health check endpoint with CORS
             app.MapGet("/api/health", () => new
             {
                 Status = "Healthy",
                 Timestamp = DateTime.UtcNow,
                 Version = "1.0.0"
-            });
+            }).RequireCors("AllowReactApp");
 
-            // Root endpoint with API information
+            // Root endpoint with API information with CORS
             app.MapGet("/", () => new
             {
                 Message = "AI Code Reviewer API",
                 Documentation = "/api/docs",
                 Health = "/api/health"
-            });
+            }).RequireCors("AllowReactApp");
         }
     }
 }

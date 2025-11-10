@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 using AICodeReviewer.Services;
 using AICodeReviewer.Models.Workflows;
 
@@ -10,6 +11,7 @@ namespace AICodeReviewer.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[EnableCors("AllowReactApp")]
 public class WorkflowsController : ControllerBase
 {
     private readonly IWorkflowEngineService _workflowEngineService;

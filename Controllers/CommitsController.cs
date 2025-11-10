@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Models;
 using AICodeReviewer.Services;
@@ -13,6 +14,7 @@ namespace AICodeReviewer.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [EnableCors("AllowReactApp")]
     public class CommitsController : ControllerBase
     {
         private readonly IGitHubService _gitHubService;

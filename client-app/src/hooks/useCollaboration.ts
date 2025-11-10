@@ -4,6 +4,7 @@ import {
   HubConnectionBuilder,
   HubConnectionState,
 } from "@microsoft/signalr";
+import { config } from "../config";
 import type {
   SessionParticipant,
   CursorPosition,
@@ -68,9 +69,12 @@ export const useCollaboration = ({
         }
 
         const connection = new HubConnectionBuilder()
-          .withUrl(`https://localhost:7001/collaborationHub`, {
-            withCredentials: false,
-          })
+          .withUrl(
+            `${config.api.baseUrl.replace("/api", "")}/collaborationHub`,
+            {
+              withCredentials: false,
+            }
+          )
           .withAutomaticReconnect([0, 2000, 10000, 30000])
           .build();
 

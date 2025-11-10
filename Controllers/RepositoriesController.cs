@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Controllers
@@ -10,6 +11,7 @@ namespace AICodeReviewer.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [EnableCors("AllowReactApp")]
     public class RepositoriesController : ControllerBase
     {
         private readonly IRepositoryManagementService _repositoryService;

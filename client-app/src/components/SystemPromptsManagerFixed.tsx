@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Alert } from "./UI";
 import styles from "./SystemPromptsManagerFixed.module.css";
+import axios from "axios";
+import { config } from "../config";
 
 interface SystemPrompt {
   language: string;
@@ -80,15 +82,14 @@ const SystemPromptsManager: React.FC = () => {
       setLoading(true);
       console.log("🔍 DEBUG: Starting to load system prompts...");
 
-      const response = await fetch("https://localhost:7001/api/systemprompts");
+      const response = await axios.get(`${config.api.baseUrl}/systemprompts`);
       console.log("🔍 DEBUG: Response status:", response.status);
-      console.log("🔍 DEBUG: Response ok:", response.ok);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = response.data;
       console.log("🔍 DEBUG: Raw response data:", data);
       console.log("🔍 DEBUG: Data type:", typeof data);
       console.log("🔍 DEBUG: Data keys:", Object.keys(data || {}));
@@ -120,10 +121,10 @@ const SystemPromptsManager: React.FC = () => {
 
   const loadPromptTemplates = async () => {
     try {
-      const response = await fetch(
-        "https://localhost:7001/api/systemprompts/templates"
+      const response = await axios.get(
+        `${config.api.baseUrl}/systemprompts/templates`
       );
-      const data = await response.json();
+      const data = response.data;
       setTemplates(data);
     } catch (error) {
       console.error("Failed to load prompt templates:", error);
@@ -136,14 +137,11 @@ const SystemPromptsManager: React.FC = () => {
   ) => {
     try {
       setSaving(language);
-      await fetch(
-        `https://localhost:7001/api/systemprompts/${language}/custom`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ customAdditions }),
-        }
-      );
+      await fetch(`${config.api.baseUrl}/systemprompts/${language}/custom`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customAdditions }),
+      });
 
       setPrompts((prev) => ({
         ...prev,
@@ -163,7 +161,7 @@ const SystemPromptsManager: React.FC = () => {
   const previewCombinedPrompt = async (language: string) => {
     try {
       const response = await fetch(
-        `https://localhost:7001/api/systemprompts/preview/${language}`,
+        `${config.api.baseUrl}/systemprompts/preview/${language}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

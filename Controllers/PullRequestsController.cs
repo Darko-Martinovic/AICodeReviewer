@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Cors;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Services;
 using AICodeReviewer.Models;
@@ -13,6 +14,7 @@ namespace AICodeReviewer.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [EnableCors("AllowReactApp")]
     public class PullRequestsController : ControllerBase
     {
         private readonly IGitHubService _gitHubService;

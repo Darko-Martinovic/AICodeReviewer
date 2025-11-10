@@ -5,6 +5,7 @@ out/
 publish/
 deploy/
 presentation/
+Deploy/
 # User-specific files
 *.user
 *.suo
