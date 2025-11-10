@@ -52,25 +52,16 @@ namespace AICodeReviewer
                 });
             });
 
-            // Add CORS - Configure with specific origins for SignalR compatibility
+            // Add CORS - Allow all origins for development (SIMPLE VERSION)
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins(
-                              "http://localhost",           // Frontend on default HTTP port (80)
-                              "http://localhost:3000",      // React dev server
-                              "http://localhost:5000",      // Python HTTP server (no admin)
-                              "http://localhost:5173",      // Vite dev server
-                              "http://localhost:5174",      // Alternative Vite port
-                              "http://localhost:5175",      // Alternative Vite port
-                              "http://localhost:8001",      // Backend HTTP
-                              "https://localhost:7001"      // Backend HTTPS
-                          )
+                    Console.WriteLine("🔧 CORS: Configured to allow all origins");
+                    policy.AllowAnyOrigin()
                           .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials()              // Required for SignalR
-                          .SetIsOriginAllowedToAllowWildcardSubdomains();
+                          .AllowAnyMethod();
+                    // Note: Cannot use AllowCredentials() with AllowAnyOrigin()
                 });
             });
 
