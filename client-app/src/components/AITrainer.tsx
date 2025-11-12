@@ -246,6 +246,7 @@ export const AITrainer: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isUpdatingPrompt, setIsUpdatingPrompt] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
+  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
 
   const loadExample = (exampleType: "snippet" | "complete") => {
     const example = CODE_EXAMPLES[selectedLanguage];
@@ -302,6 +303,8 @@ export const AITrainer: React.FC = () => {
       );
       setReviewResult(result.data);
       setShowFeedback(true);
+      // Collapse left panel after successful review
+      setIsLeftPanelCollapsed(true);
     } catch (error) {
       console.error("Review error:", error);
 
@@ -431,7 +434,16 @@ export const AITrainer: React.FC = () => {
 
       <div className={styles.content}>
         {/* Left Panel - Code Input */}
-        <div className={styles.leftPanel}>
+        <div className={`${styles.leftPanel} ${isLeftPanelCollapsed ? styles.collapsed : ''}`}>
+          {isLeftPanelCollapsed && (
+            <button 
+              onClick={() => setIsLeftPanelCollapsed(false)}
+              className={styles.expandButton}
+              title="Expand code panel"
+            >
+              ⬅️ Show Code
+            </button>
+          )}
           <div className={styles.controls}>
             <div className={styles.languageSelector}>
               <label htmlFor="language" className={styles.label}>
@@ -566,18 +578,8 @@ export const AITrainer: React.FC = () => {
         </div>
 
         {/* Right Panel - Review Results */}
-        <div className={styles.rightPanel}>
-          {!reviewResult && (
-            <div className={styles.placeholder}>
-              <p>Select a language, paste your code, and click "Review Code"</p>
-              <p className={styles.placeholderHint}>
-                The AI will review your code and you can provide feedback to
-                improve its behavior
-              </p>
-            </div>
-          )}
-
-          {reviewResult && (
+        {reviewResult && (
+          <div className={`${styles.rightPanel} ${isLeftPanelCollapsed ? styles.expanded : ''}`}>
             <div className={styles.reviewResults}>
               <h2 className={styles.reviewTitle}>Review Results</h2>
 
@@ -679,7 +681,11 @@ export const AITrainer: React.FC = () => {
                   </div>
                 )}
 
-              {showFeedback && !promptSuggestion && (
+            </div>
+
+            {/* Sticky Action Bar at Bottom */}
+            {showFeedback && !promptSuggestion && (
+              <div className={styles.stickyActionBar}>
                 <div className={styles.feedbackSection}>
                   <h3>How was the AI's review?</h3>
                   <div className={styles.feedbackButtons}>
@@ -703,9 +709,11 @@ export const AITrainer: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {promptSuggestion && showConfirmation && (
+            {promptSuggestion && showConfirmation && (
+              <div className={styles.stickyActionBar}>
                 <div className={styles.promptSuggestion}>
                   <h3>Suggested Prompt Addition</h3>
                   <div className={styles.suggestionContent}>
@@ -742,10 +750,10 @@ export const AITrainer: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -31,9 +31,17 @@
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 2rem;
   height: calc(100vh - 200px);
+}
+
+.content:has(.rightPanel) {
+  grid-template-columns: 1fr 1fr;
+}
+
+.content:has(.leftPanel.collapsed) {
+  grid-template-columns: 80px 1fr;
 }
 
 @media (max-width: 1024px) {
@@ -864,4 +872,114 @@
 :global(.dark) .exampleCode {
   background: rgb(31 41 55);
   color: rgb(229 231 235);
+}
+
+/* Collapsed/Expanded States */
+.leftPanel.collapsed {
+  grid-column: auto;
+  max-width: 80px;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.5rem;
+}
+
+.leftPanel.collapsed > *:not(.expandButton) {
+  display: none;
+}
+
+.rightPanel.expanded {
+  grid-column: 1 / -1;
+}
+
+.expandButton {
+  background: rgb(59 130 246);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.expandButton:hover {
+  background: rgb(37 99 235);
+  transform: translateX(-2px);
+}
+
+/* Sticky Action Bar */
+.stickyActionBar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 2px solid rgb(229 231 235);
+  padding: 1rem 1.5rem;
+  margin: 0 -1.5rem -1.5rem;
+  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+  z-index: 10;
+}
+
+:global(.dark) .stickyActionBar {
+  background: rgb(31 41 55);
+  border-top-color: rgb(75 85 99);
+}
+
+.stickyActionBar .feedbackSection,
+.stickyActionBar .promptSuggestion {
+  margin: 0;
+}
+
+.stickyActionBar h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+}
+
+/* Adjust right panel to have space for sticky footer */
+.rightPanel.expanded {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 0;
+}
+
+.rightPanel.expanded .reviewResults {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+  margin-bottom: 0;
+}
+
+/* Better spacing for issues list */
+.issues {
+  margin-bottom: 1rem;
+  max-height: none;
+}
+
+@media (max-width: 1024px) {
+  .leftPanel.collapsed {
+    max-width: 100%;
+    min-width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .expandButton {
+    writing-mode: horizontal-tb;
+    text-orientation: unset;
+  }
+
+  .stickyActionBar {
+    position: relative;
+    margin: 1rem -1.5rem -1.5rem;
+  }
 }

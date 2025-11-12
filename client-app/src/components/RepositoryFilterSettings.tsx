@@ -261,6 +261,36 @@ const RepositoryFilterSettings: React.FC<RepositoryFilterSettingsProps> = ({
         />
       )}
 
+      {/* Action Buttons - Top */}
+      <div className={styles.actionButtons}>
+        <button
+          onClick={saveSettings}
+          disabled={saving}
+          className={styles.saveButton}
+        >
+          {saving ? (
+            <>
+              <div className={styles.buttonSpinner}></div>
+              Saving...
+            </>
+          ) : (
+            <>
+              <span>💾</span>
+              Save Settings
+            </>
+          )}
+        </button>
+
+        <button
+          onClick={resetSettings}
+          disabled={saving}
+          className={styles.resetButton}
+        >
+          <span>🔄</span>
+          Reset to Default
+        </button>
+      </div>
+
       {/* Main Settings */}
       <div className={styles.settingsCard}>
         <div className={styles.settingGroup}>
@@ -394,7 +424,7 @@ const RepositoryFilterSettings: React.FC<RepositoryFilterSettingsProps> = ({
         )}
       </div>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Bottom */}
       <div className={styles.actionButtons}>
         <button
           onClick={saveSettings}
