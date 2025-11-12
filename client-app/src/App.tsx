@@ -571,15 +571,24 @@ function App() {
 
       // Handle different error types more gracefully
       let errorMessage = "Failed to load commits";
+      let errorDetails = "";
+      
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { status: number } };
+        const axiosError = error as { response?: { status: number; data?: any } };
         if (axiosError.response?.status === 400) {
-          errorMessage =
-            "Repository has no accessible commits or default branch not found";
+          errorMessage = "Repository has no accessible commits";
+          errorDetails = "The default branch (main or master) may not exist or be accessible. Try selecting a specific branch from the dropdown.";
         } else if (axiosError.response?.status === 404) {
           errorMessage = "Repository not found or not accessible";
+          errorDetails = "Please check your repository access permissions.";
         } else if (axiosError.response?.status === 403) {
           errorMessage = "Access denied to repository commits";
+          errorDetails = "Your GitHub token may not have sufficient permissions.";
+        }
+        
+        // Log the actual error response for debugging
+        if (axiosError.response?.data) {
+          console.error("❌ API Error Response:", axiosError.response.data);
         }
       }
 
@@ -592,8 +601,9 @@ function App() {
 
       addToast({
         type: "warning",
-        title: "Commits Unavailable",
-        message: errorMessage,
+        title: errorMessage,
+        message: errorDetails || "Please check the console for more details",
+        duration: 10000, // Show longer for important errors
       });
     }
   };
@@ -623,15 +633,24 @@ function App() {
 
       // Handle different error types more gracefully
       let errorMessage = "Failed to load pull requests";
+      let errorDetails = "";
+      
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { status: number } };
+        const axiosError = error as { response?: { status: number; data?: any } };
         if (axiosError.response?.status === 400) {
-          errorMessage =
-            "Repository has no accessible pull requests or not found";
+          errorMessage = "Repository has no accessible pull requests";
+          errorDetails = "The repository may not exist or you don't have access to it.";
         } else if (axiosError.response?.status === 404) {
           errorMessage = "Repository not found or not accessible";
+          errorDetails = "Please check your repository access permissions.";
         } else if (axiosError.response?.status === 403) {
           errorMessage = "Access denied to repository pull requests";
+          errorDetails = "Your GitHub token may not have sufficient permissions.";
+        }
+        
+        // Log the actual error response for debugging
+        if (axiosError.response?.data) {
+          console.error("❌ API Error Response:", axiosError.response.data);
         }
       }
 
@@ -644,8 +663,9 @@ function App() {
 
       addToast({
         type: "warning",
-        title: "Pull Requests Unavailable",
-        message: errorMessage,
+        title: errorMessage,
+        message: errorDetails || "Please check the console for more details",
+        duration: 10000, // Show longer for important errors
       });
     }
   };

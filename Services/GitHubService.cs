@@ -135,20 +135,29 @@ namespace AICodeReviewer.Services
         {
             try
             {
+                Console.WriteLine($"🌿 Getting default branch for {_repoOwner}/{_repoName}...");
                 var repo = await _gitHubClient.Repository.Get(_repoOwner, _repoName);
+                Console.WriteLine($"✅ Default branch from repo info: {repo.DefaultBranch}");
                 return repo.DefaultBranch;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"⚠️ Could not get repository info: {ex.Message}");
+                Console.WriteLine($"🔍 Attempting to detect branch by checking if master/main exists...");
+                
                 // Fallback: try to detect if master or main exists
                 try
                 {
                     // Try master first (common in older repos)
+                    Console.WriteLine($"🔍 Checking if 'master' branch exists...");
                     await _gitHubClient.Repository.Branch.Get(_repoOwner, _repoName, "master");
+                    Console.WriteLine($"✅ Found 'master' branch");
                     return "master";
                 }
-                catch
+                catch (Exception masterEx)
                 {
+                    Console.WriteLine($"⚠️ 'master' branch not found: {masterEx.Message}");
+                    Console.WriteLine($"🔍 Defaulting to 'main' branch");
                     // Default to main
                     return "main";
                 }

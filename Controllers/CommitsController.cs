@@ -70,9 +70,16 @@ namespace AICodeReviewer.Controllers
         {
             try
             {
+                Console.WriteLine($"📝 GetRecentCommits called: count={count}, branch={branch ?? "null (will use default)"}");
+                
                 var (owner, name) = await _repositoryService.GetCurrentRepositoryAsync();
+                Console.WriteLine($"📝 Current repository: {owner}/{name}");
+                
                 _gitHubService.UpdateRepository(owner, name);
+                Console.WriteLine($"📝 Getting commits from GitHub API...");
+                
                 var commits = await _gitHubService.GetRecentCommitsAsync(count, branch);
+                Console.WriteLine($"📝 Retrieved {commits.Count} commits successfully");
 
                 // Fetch detailed commit info to get file counts (done in parallel for performance)
                 var commitDetailsTask = commits.Select(async c =>
@@ -119,7 +126,20 @@ namespace AICodeReviewer.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Error = ex.Message });
+                Console.WriteLine($"❌ Error in GetRecentCommits: {ex.Message}");
+                Console.WriteLine($"❌ Exception Type: {ex.GetType().Name}");
+                Console.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
+                
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"❌ Inner Exception: {ex.InnerException.Message}");
+                }
+                
+                return BadRequest(new { 
+                    Error = ex.Message,
+                    Type = ex.GetType().Name,
+                    Details = "Check backend console for full stack trace"
+                });
             }
         }
 
