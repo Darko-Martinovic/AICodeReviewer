@@ -8,6 +8,10 @@ export interface ReviewSession {
   comments: LiveComment[];
   status: "active" | "completed" | "archived";
   lastActivity: string;
+  // Optional file state properties
+  currentFileName?: string;
+  currentFileContent?: string;
+  currentFileLanguage?: string;
 }
 
 export interface SessionParticipant {

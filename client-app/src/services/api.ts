@@ -46,8 +46,9 @@ export const repositoryApi = {
 // Commits API
 export const commitsApi = {
   getBranches: () => api.get("/commits/branches"),
+  // Use longRunningApi for getRecent since it can take 10+ seconds for repos with many commits
   getRecent: (count: number = 10, branch?: string) =>
-    api.get("/commits/recent", { params: { count, branch } }),
+    longRunningApi.get("/commits/recent", { params: { count, branch } }),
   review: (sha: string) => {
     console.log(`🔗 API: Making request to /commits/review-workflow/${sha}`);
     return longRunningApi.post(`/commits/review-workflow/${sha}`);

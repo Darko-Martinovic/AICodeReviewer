@@ -572,20 +572,24 @@ function App() {
       // Handle different error types more gracefully
       let errorMessage = "Failed to load commits";
       let errorDetails = "";
-      
+
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { status: number; data?: any } };
+        const axiosError = error as {
+          response?: { status: number; data?: any };
+        };
         if (axiosError.response?.status === 400) {
           errorMessage = "Repository has no accessible commits";
-          errorDetails = "The default branch (main or master) may not exist or be accessible. Try selecting a specific branch from the dropdown.";
+          errorDetails =
+            "The default branch (main or master) may not exist or be accessible. Try selecting a specific branch from the dropdown.";
         } else if (axiosError.response?.status === 404) {
           errorMessage = "Repository not found or not accessible";
           errorDetails = "Please check your repository access permissions.";
         } else if (axiosError.response?.status === 403) {
           errorMessage = "Access denied to repository commits";
-          errorDetails = "Your GitHub token may not have sufficient permissions.";
+          errorDetails =
+            "Your GitHub token may not have sufficient permissions.";
         }
-        
+
         // Log the actual error response for debugging
         if (axiosError.response?.data) {
           console.error("❌ API Error Response:", axiosError.response.data);
@@ -634,20 +638,24 @@ function App() {
       // Handle different error types more gracefully
       let errorMessage = "Failed to load pull requests";
       let errorDetails = "";
-      
+
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { status: number; data?: any } };
+        const axiosError = error as {
+          response?: { status: number; data?: any };
+        };
         if (axiosError.response?.status === 400) {
           errorMessage = "Repository has no accessible pull requests";
-          errorDetails = "The repository may not exist or you don't have access to it.";
+          errorDetails =
+            "The repository may not exist or you don't have access to it.";
         } else if (axiosError.response?.status === 404) {
           errorMessage = "Repository not found or not accessible";
           errorDetails = "Please check your repository access permissions.";
         } else if (axiosError.response?.status === 403) {
           errorMessage = "Access denied to repository pull requests";
-          errorDetails = "Your GitHub token may not have sufficient permissions.";
+          errorDetails =
+            "Your GitHub token may not have sufficient permissions.";
         }
-        
+
         // Log the actual error response for debugging
         if (axiosError.response?.data) {
           console.error("❌ API Error Response:", axiosError.response.data);
