@@ -133,6 +133,41 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCommitCollaboration = async (commit: Commit) => {
+    // Check if there's already an active collaboration session
+    if (state.collaboration.isActive && state.collaboration.commit) {
+      const currentCommit = state.collaboration.commit;
+
+      // If trying to start collaboration on the same commit, just switch to it
+      if (currentCommit.sha === commit.sha) {
+        addToast({
+          type: "info",
+          title: "Already in Session",
+          message: "You're already in a collaboration session for this commit.",
+        });
+        return;
+      }
+
+      // If it's a different commit, confirm leaving the current session
+      const confirmed = window.confirm(
+        `You're currently in a collaboration session for commit "${currentCommit.message
+          .split("\n")[0]
+          .substring(
+            0,
+            50
+          )}..."\n\nDo you want to leave that session and start a new one for this commit?`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      // End the current session before starting a new one
+      handleEndCollaboration();
+
+      // Wait a bit for cleanup
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
     // Generate a unique user for this session
     const sessionUser = {
       id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -1314,6 +1349,7 @@ console.log("File loaded successfully");`
                     }
                   }
                   onFetchFileContent={fetchFileContentForCollaboration}
+                  onEndCollaboration={handleEndCollaboration}
                 />
               )}
             </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Copy, Check } from "lucide-react";
 import { useCollaboration } from "../hooks/useCollaboration";
 import type { LiveComment, CursorPosition } from "../types/collaboration";
 import styles from "./CollaborativeCodeViewer.module.css";
@@ -35,11 +36,22 @@ export const CollaborativeCodeViewer: React.FC<
   const [selectedLines, setSelectedLines] = useState<Set<number>>(new Set());
   const [commentText, setCommentText] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const collaboration = useCollaboration({
     sessionId,
     currentUser,
   });
+
+  const handleCopySessionId = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionId);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy session ID:", err);
+    }
+  };
 
   const codeLines = useMemo(() => fileContent.split("\n"), [fileContent]);
 
@@ -314,6 +326,22 @@ export const CollaborativeCodeViewer: React.FC<
         <div className={styles.fileInfo}>
           <span className={styles.fileName}>{fileName}</span>
           <span className={styles.language}>{language}</span>
+        </div>
+
+        <div className={styles.sessionInfo}>
+          <span className={styles.sessionLabel}>Session:</span>
+          <code className={styles.sessionId}>{sessionId}</code>
+          <button
+            onClick={handleCopySessionId}
+            className={styles.copyButton}
+            title={copySuccess ? "Copied!" : "Copy Session ID"}
+          >
+            {copySuccess ? (
+              <Check className={styles.copyIcon} size={14} />
+            ) : (
+              <Copy className={styles.copyIcon} size={14} />
+            )}
+          </button>
         </div>
 
         <div className={styles.participants}>

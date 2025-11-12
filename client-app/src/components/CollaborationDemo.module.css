@@ -36,6 +36,12 @@
   color: rgb(243 244 246);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .sessionInfo {
   display: flex;
   align-items: center;
@@ -360,4 +366,43 @@
 .instructionsList li {
   margin-bottom: 8px;
   line-height: 1.5;
+}
+
+/* Leave Session Button */
+.leaveButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.leaveButton:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.leaveButton:active {
+  transform: translateY(0);
+}
+
+:global(.dark) .leaveButton {
+  background-color: #dc2626;
+}
+
+:global(.dark) .leaveButton:hover {
+  background-color: #b91c1c;
+}
+
+.leaveIcon {
+  width: 16px;
+  height: 16px;
 }

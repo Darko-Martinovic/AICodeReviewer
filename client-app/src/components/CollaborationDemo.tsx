@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, LogOut } from "lucide-react";
 import { CollaborativeCodeViewer } from "./CollaborativeCodeViewer";
 import { useSessionAutoJoin } from "../hooks/useSessionAutoJoin";
 import styles from "./CollaborationDemo.module.css";
@@ -21,6 +21,7 @@ interface CollaborationDemoProps {
     avatarUrl?: string;
   };
   onFetchFileContent: (commitSha: string, filename: string) => Promise<string>;
+  onEndCollaboration?: () => void;
 }
 
 export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
@@ -29,6 +30,7 @@ export const CollaborationDemo: React.FC<CollaborationDemoProps> = ({
   files,
   currentUser,
   onFetchFileContent,
+  onEndCollaboration,
 }) => {
   const [selectedFile, setSelectedFile] = useState<CommitFile | null>(null);
   const [isCollaborating, setIsCollaborating] = useState(false);
@@ -161,36 +163,34 @@ ${file.content}`);
   return (
     <div className={styles.collaborationDemo}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Real-time Collaboration Demo</h2>
-        <div className={styles.sessionInfo}>
-          <span className={styles.sessionLabel}>Session ID:</span>
-          <code className={styles.sessionId}>{sessionId}</code>
-          <button
-            onClick={handleCopySessionId}
-            className={styles.copyButton}
-            title={copySuccess ? "Copied!" : "Copy Session ID"}
-          >
-            {copySuccess ? (
-              <Check className={styles.copyIcon} />
-            ) : (
-              <Copy className={styles.copyIcon} />
-            )}
-          </button>
+        <h2 className={styles.title}>Collaborative Review</h2>
+        <div className={styles.headerActions}>
+          <div className={styles.sessionInfo}>
+            <span className={styles.sessionLabel}>Session ID:</span>
+            <code className={styles.sessionId}>{sessionId}</code>
+            <button
+              onClick={handleCopySessionId}
+              className={styles.copyButton}
+              title={copySuccess ? "Copied!" : "Copy Session ID"}
+            >
+              {copySuccess ? (
+                <Check className={styles.copyIcon} />
+              ) : (
+                <Copy className={styles.copyIcon} />
+              )}
+            </button>
+          </div>
+          {onEndCollaboration && (
+            <button
+              onClick={onEndCollaboration}
+              className={styles.leaveButton}
+              title="Leave this collaboration session"
+            >
+              <LogOut className={styles.leaveIcon} />
+              Leave Session
+            </button>
+          )}
         </div>
-      </div>
-
-      <div className={styles.description}>
-        <p>
-          Select a file below to start a collaborative code review session.
-          Multiple users can join the same session using the session ID to:
-        </p>
-        <ul className={styles.featureList}>
-          <li>💻 View live cursor positions of other participants</li>
-          <li>💬 Add and reply to line-specific comments</li>
-          <li>👥 See who else is actively reviewing the code</li>
-          <li>⚡ Get real-time updates as others type and navigate</li>
-          <li>✅ Resolve discussions and track progress</li>
-        </ul>
       </div>
 
       <div className={styles.fileList}>
