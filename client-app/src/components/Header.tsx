@@ -1,5 +1,5 @@
 import React from "react";
-import { Github, RefreshCw, Sun, Moon, Users } from "lucide-react";
+import { Github, RefreshCw, Sun, Moon, Users, Settings } from "lucide-react";
 import type { Repository } from "../services/api";
 import { useTheme } from "../hooks/useThemeHook";
 import styles from "./Header.module.css";
@@ -8,12 +8,14 @@ interface HeaderProps {
   currentRepository: Repository | null;
   onRefresh: () => void;
   onJoinSession?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentRepository,
   onRefresh,
   onJoinSession,
+  onOpenSettings,
 }) => {
   const { theme, toggleTheme } = useTheme();
 
@@ -54,6 +56,15 @@ export const Header: React.FC<HeaderProps> = ({
                 title="Join Collaboration Session"
               >
                 <Users className={styles.joinIcon} />
+              </button>
+            )}
+            {onOpenSettings && (
+              <button
+                onClick={onOpenSettings}
+                className={styles.settingsButton}
+                title="Azure OpenAI Settings"
+              >
+                <Settings className={styles.settingsIcon} />
               </button>
             )}
             <button

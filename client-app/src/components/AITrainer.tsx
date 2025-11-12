@@ -52,16 +52,6 @@ interface PromptSuggestion {
   reasoning: string;
 }
 
-interface AzureOpenAIConfig {
-  endpoint: string;
-  apiKey: string;
-  deploymentName: string;
-  apiVersion: string;
-  temperature: number;
-  maxTokens: number;
-  contentLimit: number;
-}
-
 const LANGUAGES = [
   { value: "csharp", label: "C#" },
   { value: "vbnet", label: "VB.NET" },
@@ -259,16 +249,12 @@ export const AITrainer: React.FC = () => {
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const [temperature, setTemperature] = useState(0.1);
-  const [showSettings, setShowSettings] = useState(false);
-  const [config, setConfig] = useState<AzureOpenAIConfig | null>(null);
-  const [isSavingConfig, setIsSavingConfig] = useState(false);
 
-  // Load Azure OpenAI config on mount
+  // Load Azure OpenAI temperature on mount
   useEffect(() => {
     const loadConfig = async () => {
       try {
         const response = await configApi.getAzureOpenAIConfig();
-        setConfig(response.data);
         setTemperature(response.data.temperature);
       } catch (error) {
         console.error("Failed to load Azure OpenAI config:", error);
@@ -284,26 +270,6 @@ export const AITrainer: React.FC = () => {
       console.log(`✅ Temperature updated to ${newTemp}`);
     } catch (error) {
       console.error("Failed to update temperature:", error);
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    if (!config) return;
-    
-    try {
-      setIsSavingConfig(true);
-      await configApi.updateAzureOpenAIConfig({
-        temperature: config.temperature,
-        maxTokens: config.maxTokens,
-        contentLimit: config.contentLimit,
-      });
-      alert("Settings saved successfully! Note: Changes to Endpoint, ApiKey, DeploymentName, and ApiVersion require app restart.");
-      setShowSettings(false);
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-      alert("Failed to save settings. Check console for details.");
-    } finally {
-      setIsSavingConfig(false);
     }
   };
 
@@ -485,21 +451,10 @@ export const AITrainer: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <div>
-            <h1 className={styles.title}>Train AI Code Reviewer</h1>
-            <p className={styles.subtitle}>
-              Test AI behavior, provide feedback, and improve custom prompts
-            </p>
-          </div>
-          <button
-            onClick={() => setShowSettings(true)}
-            className={styles.settingsButton}
-            title="Azure OpenAI Settings"
-          >
-            ⚙️
-          </button>
-        </div>
+        <h1 className={styles.title}>Train AI Code Reviewer</h1>
+        <p className={styles.subtitle}>
+          Test AI behavior, provide feedback, and improve custom prompts
+        </p>
       </div>
 
       <div className={styles.content}>
@@ -870,154 +825,6 @@ export const AITrainer: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Settings Modal */}
-      {showSettings && config && (
-        <div className={styles.modal} onClick={() => setShowSettings(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h2>Azure OpenAI Settings</h2>
-              <button
-                onClick={() => setShowSettings(false)}
-                className={styles.closeButton}
-                title="Close settings"
-              >
-                ✕
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.settingsSection}>
-                <h3>Connection Settings</h3>
-                <p className={styles.settingsNote}>
-                  ⚠️ Changes to these settings require app restart
-                </p>
-                
-                <div className={styles.settingField}>
-                  <label>Endpoint</label>
-                  <input
-                    type="text"
-                    value={config.endpoint}
-                    readOnly
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.settingField}>
-                  <label>API Key</label>
-                  <input
-                    type="text"
-                    value={config.apiKey}
-                    readOnly
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.settingField}>
-                  <label>Deployment Name</label>
-                  <input
-                    type="text"
-                    value={config.deploymentName}
-                    readOnly
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.settingField}>
-                  <label>API Version</label>
-                  <input
-                    type="text"
-                    value={config.apiVersion}
-                    readOnly
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.settingsSection}>
-                <h3>Runtime Settings</h3>
-                <p className={styles.settingsNote}>
-                  ✅ Changes take effect immediately
-                </p>
-
-                <div className={styles.settingField}>
-                  <label>
-                    Temperature: {config.temperature.toFixed(2)}
-                    <span className={styles.hint}>(0-2, lower = more focused)</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={config.temperature}
-                    onChange={(e) =>
-                      setConfig({
-                        ...config,
-                        temperature: parseFloat(e.target.value),
-                      })
-                    }
-                    className={styles.slider}
-                  />
-                </div>
-
-                <div className={styles.settingField}>
-                  <label>
-                    Max Tokens
-                    <span className={styles.hint}>(1-128000)</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="128000"
-                    value={config.maxTokens}
-                    onChange={(e) =>
-                      setConfig({
-                        ...config,
-                        maxTokens: parseInt(e.target.value) || 4000,
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-
-                <div className={styles.settingField}>
-                  <label>
-                    Content Limit
-                    <span className={styles.hint}>(minimum 1000)</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1000"
-                    value={config.contentLimit}
-                    onChange={(e) =>
-                      setConfig({
-                        ...config,
-                        contentLimit: parseInt(e.target.value) || 15000,
-                      })
-                    }
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className={styles.modalFooter}>
-              <button
-                onClick={() => setShowSettings(false)}
-                className={styles.cancelButton}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveSettings}
-                disabled={isSavingConfig}
-                className={styles.saveButton}
-              >
-                {isSavingConfig ? "Saving..." : "Save Runtime Settings"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -279,6 +279,25 @@
   height: 1.25rem;
 }
 
+.settingsButton {
+  padding: 0.5rem;
+  color: rgb(107 114 128);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: color 0.2s;
+}
+
+.settingsButton:hover {
+  color: rgb(55 65 81);
+}
+
+.settingsIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 /* Dark mode styles */
 :global(.dark) .header {
   background: linear-gradient(
@@ -372,6 +391,14 @@
 }
 
 :global(.dark) .joinSessionButton:hover {
+  color: rgb(229 231 235);
+}
+
+:global(.dark) .settingsButton {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .settingsButton:hover {
   color: rgb(229 231 235);
 }
 

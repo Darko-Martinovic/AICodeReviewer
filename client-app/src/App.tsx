@@ -4,6 +4,7 @@ import {
   commitsApi,
   pullRequestsApi,
   cacheApi,
+  configApi,
 } from "./services/api";
 import type {
   Repository,
@@ -23,6 +24,7 @@ import MainLayout from "./components/MainLayout";
 import ErrorDisplay from "./components/ErrorDisplay";
 import { CollaborationDemo } from "./components/CollaborationDemo";
 import { JoinSessionModal } from "./components/JoinSessionModal";
+import { AzureOpenAISettingsModal } from "./components/AzureOpenAISettingsModal";
 import { ErrorBoundary, useToast } from "./components/UI";
 import { useCodeReviewConfig } from "./hooks/useCodeReviewConfig";
 
@@ -128,9 +130,35 @@ function App() {
     show: false,
   });
 
+  // Azure OpenAI Settings state
+  const [showSettings, setShowSettings] = useState(false);
+  const [azureConfig, setAzureConfig] = useState<{
+    endpoint: string;
+    apiKey: string;
+    deploymentName: string;
+    apiVersion: string;
+    temperature: number;
+    maxTokens: number;
+    contentLimit: number;
+  } | null>(null);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+
   useEffect(() => {
     loadInitialData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load Azure OpenAI config on mount
+  useEffect(() => {
+    const loadAzureConfig = async () => {
+      try {
+        const response = await configApi.getAzureOpenAIConfig();
+        setAzureConfig(response.data);
+      } catch (error) {
+        console.error("Failed to load Azure OpenAI config:", error);
+      }
+    };
+    loadAzureConfig();
+  }, []);
 
   const handleCommitCollaboration = async (commit: Commit) => {
     // Check if there's already an active collaboration session
@@ -269,6 +297,43 @@ function App() {
       ...prev,
       showJoinSessionModal: false,
     }));
+  };
+
+  const handleOpenSettings = () => {
+    setShowSettings(true);
+  };
+
+  const handleCloseSettings = () => {
+    setShowSettings(false);
+  };
+
+  const handleSaveSettings = async () => {
+    if (!azureConfig) return;
+
+    try {
+      setIsSavingConfig(true);
+      await configApi.updateAzureOpenAIConfig({
+        temperature: azureConfig.temperature,
+        maxTokens: azureConfig.maxTokens,
+        contentLimit: azureConfig.contentLimit,
+      });
+      addToast({
+        type: "success",
+        title: "Settings Saved",
+        message:
+          "Runtime settings updated successfully. Note: Connection settings require app restart.",
+      });
+      setShowSettings(false);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      addToast({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save settings. Check console for details.",
+      });
+    } finally {
+      setIsSavingConfig(false);
+    }
   };
 
   const handleJoinSession = async (sessionId: string, username: string) => {
@@ -1260,6 +1325,7 @@ console.log("File loaded successfully");`
           currentRepository={state.currentRepository}
           onRefresh={loadInitialData}
           onJoinSession={handleOpenJoinSessionModal}
+          onOpenSettings={handleOpenSettings}
         />
 
         {/* Navigation - Hide when in collaboration mode */}
@@ -1402,6 +1468,16 @@ console.log("File loaded successfully");`
             onJoinSession={handleJoinSession}
           />
         )}
+
+        {/* Azure OpenAI Settings Modal */}
+        <AzureOpenAISettingsModal
+          show={showSettings}
+          config={azureConfig}
+          isSaving={isSavingConfig}
+          onClose={handleCloseSettings}
+          onSave={handleSaveSettings}
+          onConfigChange={setAzureConfig}
+        />
 
         {/* Code Review Modal */}
         {state.showReviewModal && state.codeReview && (
