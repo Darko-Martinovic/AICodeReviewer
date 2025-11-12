@@ -123,6 +123,12 @@ export const trainingApi = {
 // Config API
 export const configApi = {
   getCodeReviewConfig: () => api.get("/config/code-review"),
+  getAzureOpenAIConfig: () => api.get("/config/azure-openai"),
+  updateAzureOpenAIConfig: (settings: {
+    temperature?: number;
+    maxTokens?: number;
+    contentLimit?: number;
+  }) => api.post("/config/azure-openai", settings),
 };
 
 // Workflows API
