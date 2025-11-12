@@ -24,4 +24,10 @@ dist-ssr
 *.sw?
 
 # Environment files
+# Personal overrides (not committed)
 .env.local
+.env*.local
+
+# Environment templates are committed:
+# .env.development - development configuration
+# .env.production - production configuration

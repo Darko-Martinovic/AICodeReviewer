@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { config } from "../config";
+import { collaborationApi } from "../services/collaborationApi";
 
 interface UseSessionAutoJoinProps {
   sessionId: string;
@@ -49,19 +48,13 @@ export const useSessionAutoJoin = ({
         console.log("🔍 Checking session state for:", sessionId);
 
         // Use REST API to check session state without joining
-        const response = await axios.get(
-          `${config.api.baseUrl.replace(
-            "/api",
-            ""
-          )}/api/collaboration/sessions/${sessionId}`
-        );
+        const session = await collaborationApi.getSession(sessionId);
 
-        console.log("✅ Session found:", response.data);
-        console.log("🔍 Step 1: Checking if response has data...");
+        console.log("✅ Session found:", session);
+        console.log("🔍 Step 1: Checking if session exists...");
 
-        if (response.data) {
-          console.log("🔍 Step 2: Response has data, extracting session...");
-          const session = response.data;
+        if (session) {
+          console.log("🔍 Step 2: Session exists, checking current file...");
 
           console.log("🔍 Step 3: Session object type:", typeof session);
           console.log(

@@ -124,6 +124,26 @@ export const configApi = {
   getCodeReviewConfig: () => api.get("/config/code-review"),
 };
 
+// Workflows API
+export const workflowsApi = {
+  executePullRequestWorkflow: (prNumber: number) =>
+    longRunningApi.post(`/workflows/execute/pullrequest/${prNumber}`),
+  executeCommitWorkflow: (commitSha: string) =>
+    longRunningApi.post(`/workflows/execute/commit/${commitSha}`),
+};
+
+// System Prompts API
+export const systemPromptsApi = {
+  getAll: () => api.get("/systemprompts"),
+  getTemplates: () => api.get("/systemprompts/templates"),
+  updateCustomAdditions: (language: string, customAdditions: string) =>
+    api.post(`/systemprompts/${language}/custom`, { customAdditions }),
+  previewCombined: (language: string, customAdditions: string) =>
+    api.post(`/systemprompts/preview/${language}`, { customAdditions }),
+  resetToDefault: (language: string) =>
+    api.delete(`/systemprompts/${language}/custom`),
+};
+
 // Types
 export interface Repository {
   id: number;

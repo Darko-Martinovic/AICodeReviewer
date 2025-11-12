@@ -16,6 +16,7 @@ import {
   ToggleRight,
 } from "lucide-react";
 import { Modal, Alert } from "./UI";
+import { workflowsApi } from "../services/api";
 import styles from "./WorkflowManager.module.css";
 
 interface WorkflowStep {
@@ -226,31 +227,9 @@ const WorkflowManager: React.FC = () => {
 
       // Call the actual API endpoint based on workflow type
       if (workflowId === "pr-review" && prNumber) {
-        const response = await fetch(
-          `/api/workflows/execute/pullrequest/${prNumber}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Failed to execute PR workflow: ${response.statusText}`
-          );
-        }
+        await workflowsApi.executePullRequestWorkflow(prNumber);
       } else if (workflowId === "commit-review" && commitSha) {
-        const response = await fetch(
-          `/api/workflows/execute/commit/${commitSha}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Failed to execute commit workflow: ${response.statusText}`
-          );
-        }
+        await workflowsApi.executeCommitWorkflow(commitSha);
       }
     } catch (error) {
       console.error("Workflow execution failed:", error);
