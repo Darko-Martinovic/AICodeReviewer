@@ -913,6 +913,69 @@
   transform: translateX(-2px);
 }
 
+.collapseButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgb(107 114 128);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.collapseButton:hover {
+  background: rgb(75 85 99);
+  transform: scale(1.05);
+}
+
+:global(.dark) .collapseButton {
+  background: rgb(75 85 99);
+}
+
+:global(.dark) .collapseButton:hover {
+  background: rgb(55 65 81);
+}
+
+.rightPanel.collapsed {
+  max-width: 80px;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.5rem;
+}
+
+.rightPanel.collapsed > *:not(.expandButton) {
+  display: none;
+}
+
+/* Grid adjustments for collapsed panels */
+.content:has(.rightPanel.collapsed) {
+  grid-template-columns: 1fr 80px;
+}
+
+.content:has(.leftPanel.collapsed):has(.rightPanel.collapsed) {
+  grid-template-columns: 80px 1fr 80px;
+}
+
+.content:has(.leftPanel.collapsed):has(.rightPanel:not(.collapsed)) {
+  grid-template-columns: 80px 1fr;
+}
+
+.content:has(.leftPanel:not(.collapsed)):has(.rightPanel.collapsed) {
+  grid-template-columns: 1fr 80px;
+}
+
 /* Sticky Action Bar */
 .stickyActionBar {
   position: sticky;

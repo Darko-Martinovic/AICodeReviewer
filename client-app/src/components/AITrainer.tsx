@@ -247,6 +247,7 @@ export const AITrainer: React.FC = () => {
   const [isUpdatingPrompt, setIsUpdatingPrompt] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
 
   const loadExample = (exampleType: "snippet" | "complete") => {
     const example = CODE_EXAMPLES[selectedLanguage];
@@ -435,13 +436,21 @@ export const AITrainer: React.FC = () => {
       <div className={styles.content}>
         {/* Left Panel - Code Input */}
         <div className={`${styles.leftPanel} ${isLeftPanelCollapsed ? styles.collapsed : ''}`}>
-          {isLeftPanelCollapsed && (
+          {isLeftPanelCollapsed ? (
             <button 
               onClick={() => setIsLeftPanelCollapsed(false)}
               className={styles.expandButton}
               title="Expand code panel"
             >
               ⬅️ Show Code
+            </button>
+          ) : (
+            <button 
+              onClick={() => setIsLeftPanelCollapsed(true)}
+              className={styles.collapseButton}
+              title="Collapse code panel"
+            >
+              ➡️
             </button>
           )}
           <div className={styles.controls}>
@@ -579,9 +588,26 @@ export const AITrainer: React.FC = () => {
 
         {/* Right Panel - Review Results */}
         {reviewResult && (
-          <div className={`${styles.rightPanel} ${isLeftPanelCollapsed ? styles.expanded : ''}`}>
-            <div className={styles.reviewResults}>
-              <h2 className={styles.reviewTitle}>Review Results</h2>
+          <div className={`${styles.rightPanel} ${isLeftPanelCollapsed ? styles.expanded : ''} ${isRightPanelCollapsed ? styles.collapsed : ''}`}>
+            {isRightPanelCollapsed ? (
+              <button 
+                onClick={() => setIsRightPanelCollapsed(false)}
+                className={styles.expandButton}
+                title="Expand results panel"
+              >
+                ⬅️ Show Results
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => setIsRightPanelCollapsed(true)}
+                  className={styles.collapseButton}
+                  title="Collapse results panel"
+                >
+                  ➡️
+                </button>
+                <div className={styles.reviewResults}>
+                  <h2 className={styles.reviewTitle}>Review Results</h2>
 
               {reviewResult.review.metrics && (
                 <div className={styles.metrics}>
@@ -681,8 +707,6 @@ export const AITrainer: React.FC = () => {
                   </div>
                 )}
 
-            </div>
-
             {/* Sticky Action Bar at Bottom */}
             {showFeedback && !promptSuggestion && (
               <div className={styles.stickyActionBar}>
@@ -751,6 +775,9 @@ export const AITrainer: React.FC = () => {
                   </div>
                 </div>
               </div>
+            )}
+              </div>
+              </>
             )}
           </div>
         )}
