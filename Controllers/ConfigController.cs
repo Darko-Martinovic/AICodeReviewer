@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [ApiController]
     [EnableCors("AllowReactApp")]
     public class ConfigController : ControllerBase

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Services;
 using AICodeReviewer.Models;
@@ -12,7 +13,8 @@ namespace AICodeReviewer.Controllers
     /// Mirrors the console menu options 4, 5
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [Produces("application/json")]
     [EnableCors("AllowReactApp")]
     public class PullRequestsController : ControllerBase

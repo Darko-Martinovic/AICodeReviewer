@@ -2,11 +2,13 @@ using AICodeReviewer.Models;
 using AICodeReviewer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 
 namespace AICodeReviewer.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("1.0")]
 [EnableCors("AllowReactApp")]
 public class TrainingController : ControllerBase
 {

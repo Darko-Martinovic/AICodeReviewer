@@ -70,7 +70,7 @@ export const useCollaboration = ({
 
         const connection = new HubConnectionBuilder()
           .withUrl(
-            `${config.api.baseUrl.replace("/api", "")}/collaborationHub`,
+            `${config.api.baseUrl.replace("/api/v1", "").replace("/api", "")}/collaborationHub`,
             {
               withCredentials: false,
             }

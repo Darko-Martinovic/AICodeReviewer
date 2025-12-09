@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
 using AICodeReviewer.Models.Collaboration;
 using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     public class CollaborationController : ControllerBase
     {
         private readonly ICollaborationService _collaborationService;

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 using AICodeReviewer.Services.Interfaces;
 
 namespace AICodeReviewer.Controllers
@@ -9,7 +10,8 @@ namespace AICodeReviewer.Controllers
     /// Mirrors the console menu option 6
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [Produces("application/json")]
     [EnableCors("AllowReactApp")]
     public class RepositoriesController : ControllerBase

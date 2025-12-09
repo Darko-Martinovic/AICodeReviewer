@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Asp.Versioning;
 using System.Text.Json;
 
 namespace AICodeReviewer.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("1.0")]
 public class SystemPromptsController : ControllerBase
 {
     private readonly IConfiguration _configuration;

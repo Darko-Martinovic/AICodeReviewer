@@ -1,6 +1,7 @@
 using AICodeReviewer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 
 namespace AICodeReviewer.Controllers
 {
@@ -8,7 +9,8 @@ namespace AICodeReviewer.Controllers
     /// Controller for managing code review cache
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [EnableCors("AllowReactApp")]
     public class CacheController : ControllerBase
     {

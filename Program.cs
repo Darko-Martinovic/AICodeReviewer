@@ -4,6 +4,8 @@ using AICodeReviewer.Plugins;
 using AICodeReviewer.Hubs;
 using Microsoft.SemanticKernel;
 using System.Text.Json;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 
 namespace AICodeReviewer
 {
@@ -32,6 +34,22 @@ namespace AICodeReviewer
         /// </summary>
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            // Add API versioning
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = ApiVersionReader.Combine(
+                    new UrlSegmentApiVersionReader()
+                );
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
             // Add controllers with JSON configuration
             services.AddControllers()
                 .AddJsonOptions(options =>
@@ -42,15 +60,7 @@ namespace AICodeReviewer
 
             // Add API Explorer for Swagger
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new()
-                {
-                    Title = "AI Code Reviewer API",
-                    Version = "v1",
-                    Description = "AI-powered code review tool for GitHub repositories using Azure OpenAI"
-                });
-            });
+            services.AddSwaggerGen();
 
             // Add CORS - Allow all origins for development (SIMPLE VERSION)
             services.AddCors(options =>
@@ -215,10 +225,17 @@ namespace AICodeReviewer
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
+                var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+                
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AI Code Reviewer API v1");
+                    foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+                    {
+                        c.SwaggerEndpoint(
+                            $"/swagger/{description.GroupName}/swagger.json",
+                            $"AI Code Reviewer API {description.ApiVersion}");
+                    }
                     c.RoutePrefix = "api/docs"; // Swagger will be available at /api/docs
                 });
             }
@@ -257,8 +274,8 @@ namespace AICodeReviewer
             app.MapHub<CollaborationHub>("/collaborationHub")
                .RequireCors("AllowReactApp");
 
-            // Add a simple health check endpoint with CORS
-            app.MapGet("/api/health", () => new
+            // Add a simple health check endpoint with CORS (versioned)
+            app.MapGet("/api/v1/health", () => new
             {
                 Status = "Healthy",
                 Timestamp = DateTime.UtcNow,

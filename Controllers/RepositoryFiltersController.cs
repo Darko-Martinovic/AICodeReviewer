@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Asp.Versioning;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Models.Configuration;
 
@@ -9,7 +10,8 @@ namespace AICodeReviewer.Controllers
     /// API controller for managing repository filter settings
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [Produces("application/json")]
     [EnableCors("AllowReactApp")]
     public class RepositoryFiltersController : ControllerBase
