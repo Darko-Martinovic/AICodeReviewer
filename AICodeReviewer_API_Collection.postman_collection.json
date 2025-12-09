@@ -63,10 +63,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/current",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositories", "current"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositories",
+                "current"
+              ]
             },
             "description": "Retrieves the currently configured repository"
           },
@@ -78,6 +84,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -93,10 +100,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/history",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositories", "history"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositories",
+                "history"
+              ]
             },
             "description": "Gets the history of recently accessed repositories"
           },
@@ -108,10 +121,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/available",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositories", "available"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositories",
+                "available"
+              ]
             },
             "description": "Gets available repositories for the configured user"
           },
@@ -123,6 +142,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/validate/{{currentOwner}}/{{currentRepo}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -154,10 +174,16 @@
               "raw": "{\n  \"owner\": \"{{currentOwner}}\",\n  \"name\": \"{{currentRepo}}\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/current",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositories", "current"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositories",
+                "current"
+              ]
             },
             "description": "Sets the current repository context"
           },
@@ -178,6 +204,7 @@
               "raw": "{\n  \"owner\": \"{{currentOwner}}\",\n  \"name\": \"{{currentRepo}}\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/set",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -199,6 +226,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -223,6 +251,7 @@
               "raw": ""
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/repository/{{currentOwner}}/{{currentRepo}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -245,10 +274,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/open",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "pullrequests", "open"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "pullrequests",
+                "open"
+              ]
             },
             "description": "Gets all open pull requests for the current repository"
           },
@@ -269,10 +304,17 @@
               "raw": ""
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/review/{{prNumber}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "pullrequests", "review", "{{prNumber}}"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "pullrequests",
+                "review",
+                "{{prNumber}}"
+              ]
             },
             "description": "Performs AI-powered review of a specific pull request"
           },
@@ -284,10 +326,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/{{prNumber}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "pullrequests", "{{prNumber}}"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "pullrequests",
+                "{{prNumber}}"
+              ]
             },
             "description": "Gets detailed information about a specific pull request"
           },
@@ -299,10 +347,17 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/{{prNumber}}/files",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "pullrequests", "{{prNumber}}", "files"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "pullrequests",
+                "{{prNumber}}",
+                "files"
+              ]
             },
             "description": "Gets the list of files changed in a pull request"
           },
@@ -320,6 +375,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/commits/branches",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -335,6 +391,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/commits/recent?count=10&branch=main",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -371,10 +428,16 @@
               "raw": ""
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/commits/review-latest",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "commits", "review-latest"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "commits",
+                "review-latest"
+              ]
             },
             "description": "Performs AI review of the latest commit"
           },
@@ -395,10 +458,17 @@
               "raw": ""
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/commits/review/{{commitSha}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "commits", "review", "{{commitSha}}"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "commits",
+                "review",
+                "{{commitSha}}"
+              ]
             },
             "description": "Performs AI review of a specific commit by SHA"
           },
@@ -416,6 +486,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -431,10 +502,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/CSharp",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "CSharp"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "CSharp"
+              ]
             },
             "description": "Gets the system prompt for a specific language (CSharp, Java, JavaScript, TypeScript, React, VBNet, TSQL)"
           },
@@ -446,10 +523,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/Java",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "Java"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "Java"
+              ]
             },
             "description": "Gets the Java-specific system prompt and configuration"
           },
@@ -470,10 +553,17 @@
               "raw": "{\n  \"customAdditions\": \"You are an expert C# code reviewer. Focus on performance, security, and best practices.\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/CSharp/custom",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "CSharp", "custom"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "CSharp",
+                "custom"
+              ]
             },
             "description": "Sets custom additions to the C# system prompt"
           },
@@ -494,10 +584,17 @@
               "raw": "{\n  \"customAdditions\": \"You are an expert Java code reviewer. Focus on Spring Framework best practices, JPA optimization, and enterprise patterns. Pay special attention to memory management and thread safety.\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/Java/custom",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "Java", "custom"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "Java",
+                "custom"
+              ]
             },
             "description": "Sets custom additions to the Java system prompt"
           },
@@ -518,10 +615,17 @@
               "raw": "{\n  \"customAdditions\": \"Focus on async/await patterns and dispose patterns.\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/preview/CSharp",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "preview", "CSharp"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "preview",
+                "CSharp"
+              ]
             },
             "description": "Previews how the C# system prompt will look with custom additions"
           },
@@ -542,10 +646,17 @@
               "raw": "{\n  \"customAdditions\": \"Focus on Spring Boot best practices, JPA optimization, and proper exception handling. Ensure thread safety in concurrent code.\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/preview/Java",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "preview", "Java"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "preview",
+                "Java"
+              ]
             },
             "description": "Previews how the Java system prompt will look with custom additions"
           },
@@ -557,10 +668,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/templates",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "templates"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "templates"
+              ]
             },
             "description": "Gets available prompt templates for different scenarios"
           },
@@ -578,10 +695,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/testcommits/recent",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "testcommits", "recent"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "testcommits",
+                "recent"
+              ]
             },
             "description": "Gets recent commits for testing purposes"
           },
@@ -593,6 +716,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/testcommits/test",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -614,6 +738,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/workflows",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -629,10 +754,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/workflows/pull-request-workflow",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "workflows", "pull-request-workflow"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "workflows",
+                "pull-request-workflow"
+              ]
             },
             "description": "Gets configuration for a specific workflow"
           },
@@ -653,6 +784,7 @@
               "raw": "{\n  \"workflowName\": \"pull-request-workflow\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/workflows/execute/pullrequest/{{prNumber}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -684,6 +816,7 @@
               "raw": "{\n  \"workflowName\": \"commit-workflow\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/workflows/execute/commit/{{commitSha}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -715,10 +848,16 @@
               "raw": "{\n  \"workflowName\": \"custom-workflow\",\n  \"context\": {\n    \"entityType\": \"pullrequest\",\n    \"entityId\": \"{{prNumber}}\",\n    \"repository\": \"{{currentOwner}}/{{currentRepo}}\"\n  }\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/workflows/execute",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "workflows", "execute"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "workflows",
+                "execute"
+              ]
             },
             "description": "Executes a custom workflow with specific context"
           },
@@ -736,10 +875,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/GitHubAppDebug/config",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "GitHubAppDebug", "config"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "GitHubAppDebug",
+                "config"
+              ]
             },
             "description": "Gets the current GitHub App configuration including App ID, Client ID, Installation ID, and private key status"
           },
@@ -751,10 +896,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/GitHubAppDebug/test",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "GitHubAppDebug", "test"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "GitHubAppDebug",
+                "test"
+              ]
             },
             "description": "Tests GitHub App authentication by validating configuration and attempting to fetch installation repositories. Returns validation status and repository count if successful."
           },
@@ -766,10 +917,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/GitHubAppDebug/jwt",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "GitHubAppDebug", "jwt"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "GitHubAppDebug",
+                "jwt"
+              ]
             },
             "description": "Generates and returns a JWT token for GitHub App authentication with detailed token information including header, claims, and timestamps. Useful for debugging authentication issues."
           },
@@ -781,10 +938,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/GitHubAppDebug/check-time",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "GitHubAppDebug", "check-time"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "GitHubAppDebug",
+                "check-time"
+              ]
             },
             "description": "Checks system time and timezone information. Returns UTC time, local time, Unix timestamp, and system information. Useful for debugging JWT token timestamp issues."
           },
@@ -796,10 +959,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/GitHubAppDebug/github-time",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "GitHubAppDebug", "github-time"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "GitHubAppDebug",
+                "github-time"
+              ]
             },
             "description": "Gets GitHub server time for synchronization testing. Compares system time with GitHub server time to detect clock skew issues that might affect JWT token validation."
           },
@@ -817,6 +986,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositories/validate/nonexistent/repository",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -839,10 +1009,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/pullrequests/99999",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "pullrequests", "99999"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "pullrequests",
+                "99999"
+              ]
             },
             "description": "Tests getting a non-existent pull request (should return 404)"
           },
@@ -863,10 +1039,17 @@
               "raw": ""
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/commits/review/invalid-sha-12345",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "commits", "review", "invalid-sha-12345"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "commits",
+                "review",
+                "invalid-sha-12345"
+              ]
             },
             "description": "Tests reviewing an invalid commit SHA (should return error)"
           },
@@ -878,10 +1061,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/systemprompts/UnsupportedLanguage",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "systemprompts", "UnsupportedLanguage"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "systemprompts",
+                "UnsupportedLanguage"
+              ]
             },
             "description": "Tests getting prompt for unsupported language (should return error or default)"
           },
@@ -899,6 +1088,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/cache/commit/{{commitSha}}/exists",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -921,6 +1111,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/cache/pullrequest/{{prNumber}}/exists",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -943,6 +1134,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/cache/clear",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -958,10 +1150,17 @@
             "method": "DELETE",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/cache/commit/{{commitSha}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "cache", "commit", "{{commitSha}}"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "cache",
+                "commit",
+                "{{commitSha}}"
+              ]
             },
             "description": "Clear cached review for a specific commit SHA."
           },
@@ -973,10 +1172,17 @@
             "method": "DELETE",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/cache/pullrequest/{{prNumber}}",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "cache", "pullrequest", "{{prNumber}}"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "cache",
+                "pullrequest",
+                "{{prNumber}}"
+              ]
             },
             "description": "Clear cached review for a specific pull request number."
           },
@@ -994,6 +1200,7 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -1018,6 +1225,7 @@
               "raw": "{\n  \"enableFiltering\": true,\n  \"defaultMode\": \"ShowAll\",\n  \"includePatterns\": [\n    {\n      \"pattern\": \"ai*\",\n      \"provider\": \"github\",\n      \"owner\": \"\",\n      \"caseSensitive\": false,\n      \"description\": \"Include all repositories starting with 'ai'\"\n    }\n  ],\n  \"excludePatterns\": [\n    {\n      \"pattern\": \"test*\",\n      \"provider\": \"\",\n      \"owner\": \"\",\n      \"caseSensitive\": false,\n      \"description\": \"Exclude all test repositories\"\n    }\n  ]\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters",
               "host": ["{{host}}"],
               "port": "{{port}}",
@@ -1042,10 +1250,16 @@
               "raw": "{\n  \"repositoryName\": \"AICodeReviewer\",\n  \"owner\": \"Darko-Martinovic\",\n  \"pattern\": {\n    \"pattern\": \"ai*\",\n    \"provider\": \"github\",\n    \"owner\": \"\",\n    \"caseSensitive\": false,\n    \"description\": \"Test pattern for repositories starting with 'ai'\"\n  }\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters/test",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositoryfilters", "test"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositoryfilters",
+                "test"
+              ]
             },
             "description": "Tests whether a repository name matches a specific filter pattern. Useful for validating patterns before applying them."
           },
@@ -1066,10 +1280,16 @@
               "raw": "{\n  \"pattern\": \"ai*\",\n  \"provider\": \"github\",\n  \"owner\": \"\",\n  \"caseSensitive\": false,\n  \"description\": \"Validate pattern for repositories starting with 'ai'\"\n}"
             },
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters/validate",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositoryfilters", "validate"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositoryfilters",
+                "validate"
+              ]
             },
             "description": "Validates a filter pattern without testing it against specific repositories. Checks for syntax errors and supported provider values."
           },
@@ -1081,10 +1301,16 @@
             "method": "GET",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters/preview",
               "host": ["{{host}}"],
               "port": "{{port}}",
-              "path": ["{{apiPrefix}}", "{{apiVersion}}", "repositoryfilters", "preview"]
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "repositoryfilters",
+                "preview"
+              ]
             },
             "description": "Gets a preview of repositories that would be shown with the current filter settings. Includes total repository count and filter settings for comparison."
           },
@@ -1096,6 +1322,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
+              "protocol": "{{protocol}}",
               "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/repositoryfilters",
               "host": ["{{host}}"],
               "port": "{{port}}",
