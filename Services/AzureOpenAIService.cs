@@ -13,6 +13,7 @@ namespace AICodeReviewer.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
+        private readonly string _apiKey;
         private readonly string _deploymentName;
         private readonly AzureOpenAISettings _settings;
         private readonly IPromptManagementService _promptManagementService;
@@ -28,6 +29,7 @@ namespace AICodeReviewer.Services
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
             _deploymentName =
                 deploymentName ?? throw new ArgumentNullException(nameof(deploymentName));
 
@@ -40,10 +42,6 @@ namespace AICodeReviewer.Services
             {
                 _settings.SystemPrompt = GetDefaultSystemPrompt();
             }
-
-            // Setup HTTP client headers for Azure OpenAI
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
         }
 
         /// <summary>
@@ -79,7 +77,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -91,7 +89,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         /// <summary>
@@ -112,20 +110,6 @@ Only respond with 'No issues found' if the code is truly exemplary.";
 
                 // Get language-specific prompts
                 var systemPrompt = _promptManagementService.GetSystemPrompt(fileName);
-
-                // ENHANCED: Add additional strictness to force critical analysis
-                systemPrompt += "\n\n🚨 CRITICAL ANALYSIS REQUIREMENT:\n" +
-                    "You MUST find AT LEAST 2-3 specific improvement opportunities in this code. " +
-                    "Even if the code appears well-written, look for:\n" +
-                    "- Missing error handling, validation, or edge cases\n" +
-                    "- Performance optimizations (async patterns, caching, efficiency)\n" +
-                    "- Security improvements (input validation, data exposure)\n" +
-                    "- Code quality issues (naming, complexity, maintainability)\n" +
-                    "- Modern language features not being used\n" +
-                    "- Documentation or testing gaps\n" +
-                    "- Architecture or design pattern improvements\n\n" +
-                    "DO NOT respond with 'No issues found' unless you have thoroughly examined ALL " +
-                    "aspects and can provide detailed justification for why the code is absolutely perfect.";
 
                 var userPrompt = _promptManagementService.FormatUserPrompt(fileName, fileContent, _settings.ContentLimit);
 
@@ -171,9 +155,15 @@ Only respond with 'No issues found' if the code is truly exemplary.";
                     var snippet = jsonRequest.Substring(Math.Max(0, tempIndex - 20), Math.Min(60, jsonRequest.Length - Math.Max(0, tempIndex - 20)));
                     Console.WriteLine($"🔍 DEBUG - JSON snippet: {snippet}");
                 }
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                // The HttpClient is shared with other services (Slack), so the key goes on
+                // this request only, never on the client's default headers
+                using var httpRequest = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new StringContent(jsonRequest, Encoding.UTF8, "application/json")
+                };
+                httpRequest.Headers.Add("api-key", _apiKey);
 
-                var response = await _httpClient.PostAsync(url, content);
+                var response = await _httpClient.SendAsync(httpRequest);
 
                 if (!response.IsSuccessStatusCode)
                 {

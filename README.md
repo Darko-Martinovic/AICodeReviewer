@@ -1,67 +1,90 @@
-# 🤖 AI Code Reviewer
+# 🧪 AI Code Reviewer: a code review lab
 
-AI-powered code review tool using Azure OpenAI with React frontend for managing system prompts.
+AI Code Reviewer started in 2025 as an AI-powered code review tool for GitHub repositories, built on Azure OpenAI with a React frontend. It was written before GitHub Copilot code review became part of GitHub itself.
 
-## 🎬 Demo Video
+Today Copilot reviews pull requests where they live: it can run on every PR, comment on the changed lines and follow the instructions kept in the repository. This project doesn't try to compete with that. It is kept as a **lab for AI code review**: a place to try prompts, models and workflows, and to find out how good an AI reviewer really is.
 
-See the AI Code Reviewer in action:
+## 🎬 Demo videos
+
+The tool as it was built:
 
 https://github.com/user-attachments/assets/f1a3a6c9-41dd-441f-9e88-4f968f057006
 
-### 🆕 Latest Features Update
-
-See the newest features and improvements:
+The later features (Train AI, collaboration, workflows, GitHub App, repository filters):
 
 https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 
-**New features showcased:**
+## 🔬 What the lab has today
 
-1. **🧠 Train AI** - Interactive testing and feedback system for prompt improvement
-2. **🤝 Better Collaboration** - Enhanced real-time code review capabilities
-3. **⚡ Better Workflow Management** - Streamlined development processes
-4. **🤖 Support for GitHub App** - Enterprise-grade authentication and security
-5. **🎛️ Repository Filters** - Advanced filtering and repository management
+- **AI reviews of commits and pull requests** with Azure OpenAI
+- **System prompts per language**: C#, VB.NET, Java, JavaScript, TypeScript, React and T-SQL, editable in the UI
+- **Train AI**: try a prompt on a piece of code, give feedback and refine the prompt
+- **Workflows**: JSON-defined steps after a review (a PR comment, a Jira ticket, Slack or Teams notifications) run through Semantic Kernel plugins
+- **Real-time collaboration**: shared review sessions with live comments and presence over SignalR
+- **GitHub App authentication** and **repository filters**
+- **Token and cost figures** for each review
 
-## ✨ Features
+## 🧭 Where the lab is going
 
-- **🔍 AI Code Analysis**: Automated reviews using Azure OpenAI
-- **🌐 Web Interface**: React + TypeScript frontend
-- **🎯 Multi-Language Support**: C#, Java, VB.NET, JavaScript, TypeScript, React, T-SQL
-- **⚙️ System Prompts Management**: Customize AI behavior per language
-- **� Train AI**: Interactive testing and feedback system to iteratively improve AI prompts through code validation, review testing, and prompt refinement based on feedback
-- **�🤝 Real-Time Collaboration**: Live code review sessions with multiple participants
-- **💬 Live Comments**: Real-time commenting and discussions on code lines
-- **👥 User Presence**: See who's actively reviewing with live cursor tracking
-- **� GitHub App Integration**: Enterprise-grade authentication with GitHub Apps for secure, scoped repository access
-- **🎛️ Repository Filtering**: Flexible pattern-based filtering to control visible repositories (application-level, future: user preferences)
-- **🔗 Integrations**: GitHub, Jira, Slack
+Copilot answers "can AI review my PR?". The lab is meant to answer "how good is the review?":
 
-## 🚀 Quick Start
+1. A labelled set of files with seeded bugs, each bug written down with its file, line and category
+2. Structured JSON output from the model in place of free-text parsing
+3. A judge that scores each review against the labels: bugs found, bugs missed and false alarms
+4. Runs that compare prompts, models and Copilot's own comments on the same changes
+5. A scoreboard of prompt versions, keeping a change only when the scores improve
+
+## ⚠️ Known limits
+
+- Reviews read whole files, cut off at `ContentLimit`, and at most `MaxFilesToReview` files per review, not the diff
+- A pull request review is posted as one comment, not as comments on the changed lines
+- The API has no authentication and allows any origin, so run it locally only
+- Collaboration sessions and cached reviews are held in memory and are lost on restart
+
+## 🚀 Quick start
 
 ### Prerequisites
 
 - .NET 9.0 SDK
 - Node.js 18+
-- Azure OpenAI Service access
+- An Azure OpenAI deployment and a GitHub token
 
 ### Setup
 
-1. **Environment variables** (create `.env` file):
+1. **Backend settings** go in `appsettings.json` in the repository root (ignored by git, so your keys stay local):
 
-   ```env
-   AZURE_OPENAI_ENDPOINT=your-endpoint
-   AZURE_OPENAI_API_KEY=your-api-key
-   AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4
-   GITHUB_TOKEN=your-github-token
+   ```json
+   {
+     "AzureOpenAI": {
+       "Endpoint": "https://your-resource.openai.azure.com",
+       "ApiKey": "your-api-key",
+       "DeploymentName": "your-deployment"
+     },
+     "GitHub": {
+       "Token": "your-github-token",
+       "Owner": "repository-owner",
+       "Name": "repository-name"
+     }
+   }
    ```
 
-2. **Start backend**:
+   The same keys can come from environment variables instead, such as `AzureOpenAI__ApiKey`.
+
+2. **Start the backend**:
 
    ```bash
    dotnet run --launch-profile https --environment Development
    ```
 
-3. **Start frontend**:
+   The API listens on `https://localhost:7001`, with Swagger at `/api/docs`.
+
+3. **Point the frontend at it** with `client-app/.env.development`:
+
+   ```env
+   VITE_API_BASE_URL=https://localhost:7001/api/v1
+   ```
+
+4. **Start the frontend**:
 
    ```bash
    cd client-app
@@ -69,57 +92,23 @@ https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
    npm run dev
    ```
 
-4. **Access**: Frontend at `http://localhost:5174`, API at `https://localhost:7001`
+   Open `http://localhost:5174`.
 
-## ⚙️ Configuration
+### Token metrics
 
-### Token Metrics Display
-
-Control the visibility of token usage and cost information in code review results by editing `appsettings.json`:
+Token usage and estimated cost are shown at the top of each review summary. Turn them off in `appsettings.json`:
 
 ```json
 "CodeReview": {
   "MaxFilesToReview": 3,
   "MaxIssuesInSummary": 3,
-  "ShowTokenMetrics": true  // Set to false to hide token/cost info
+  "ShowTokenMetrics": false
 }
 ```
 
-When enabled, token usage and estimated cost are displayed at the top of review summaries for:
-
-- 🧠 Train AI reviews
-- 📝 Commit reviews
-- 🔀 Pull request reviews
-
-## ⚙️ Usage
-
-1. Open web interface
-2. Connect GitHub repositories in **Repositories** tab
-3. Browse commits and pull requests
-4. Customize AI prompts in **System Prompts** tab
-5. Run automated code reviews
-6. View token usage and cost metrics (configurable via `appsettings.json`)
-
-## 🤝 Real-Time Collaboration
-
-Create collaborative review sessions where multiple team members can review code simultaneously:
-
-- **👥 Live Presence**: See who's currently reviewing with real-time participant lists
-- **🖱️ Cursor Tracking**: Track where team members are looking in the code
-- **💬 Live Comments**: Add comments on specific code lines with instant synchronization
-- **🎨 Comment Types**: General, Suggestion, Question, Issue with threaded discussions
-- **🔄 WebSocket Communication**: Built with SignalR at `/collaborationHub` endpoint
-
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch
-3. Make changes and add tests
-4. Submit pull request
+MIT License, see the [LICENSE](LICENSE) file.
 
 ## ⚠️ Disclaimer
 
