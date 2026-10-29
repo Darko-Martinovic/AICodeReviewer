@@ -1,6 +1,7 @@
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Services.Reviewing;
 using System.Text.Json;
 
 namespace AICodeReviewer.Plugins;
@@ -35,6 +36,8 @@ public class GitHubPlugin
 
             // Create a comprehensive review comment with actual review data
             var reviewComment = "";
+            // The same issues, kept for comments on their lines of the diff
+            var reviewIssues = new List<ReviewIssue>();
 
             if (!string.IsNullOrEmpty(reviewData))
             {
@@ -74,6 +77,8 @@ public class GitHubPlugin
 
                             // Clean severity - remove brackets if present
                             var cleanSeverity = severity?.Trim('[', ']').ToLower();
+                            reviewIssues.Add(new ReviewIssue(file ?? "", int.TryParse(line, out var lineNumber) ? lineNumber : null,
+                                severity?.Trim('[', ']') ?? "", message ?? "", suggestion ?? ""));
                             Console.WriteLine($"📊 Processing issue: Severity='{severity}' -> '{cleanSeverity}', File='{file}'");
 
                             var issueText = $"**📁 {file}** {(line != "N/A" ? $"(Line {line})" : "")}\n{message}\n💡 *{suggestion}*";
@@ -183,8 +188,21 @@ Please review the findings and address any issues identified in the code review.
             Console.WriteLine($"📝 Attempting to post REAL GitHub Comment on PR #{prNumber}:");
             Console.WriteLine($"Content Length: {reviewComment.Length} characters");
 
+            // Issues on lines of the diff become comments on those lines, with the summary as the review's body;
+            // when none can be placed, or GitHub refuses the review, the summary goes out as a plain comment
+            if (reviewIssues.Count > 0)
+            {
+                var files = await _gitHubService.GetPullRequestFilesAsync(prNumber);
+                var patches = files.Where(f => !string.IsNullOrEmpty(f.Patch)).ToDictionary(f => f.FileName, f => f.Patch);
+                var (inline, _) = ReviewComments.Place(reviewIssues, patches);
+                if (inline.Count > 0 && await _gitHubService.PostPullRequestReviewAsync(prNumber, reviewComment, inline))
+                {
+                    return $"Successfully posted a review with {inline.Count} line comments on PR #{prNumber}";
+                }
+            }
+
             await _gitHubService.PostPullRequestCommentAsync(prNumber, reviewComment);
-            
+
             Console.WriteLine($"✅ Successfully posted REAL comment to GitHub PR #{prNumber}");
             return $"Successfully posted comment on PR #{prNumber}";
         }

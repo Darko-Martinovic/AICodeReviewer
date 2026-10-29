@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 // dotnet run --project lab/AICodeReviewer.Lab -- list [dataset]
 // dotnet run --project lab/AICodeReviewer.Lab -- labels [dataset] [case id]
 // dotnet run --project lab/AICodeReviewer.Lab -- run [--dataset v1] [--model key] [--judge key] [--cases prefix]
-//                                                    [--prompt Language=version]... [--repeat n] [--max-cost dollars] [--estimate]
+//                                                    [--prompt Language=version]... [--mode file|diff] [--repeat n] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- scoreboard [--dataset v1]
 // dotnet run --project lab/AICodeReviewer.Lab -- rejudge [--dataset v1] [--judge key] [--cases prefix] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt list
@@ -75,7 +75,7 @@ static async Task<int> Run(Options options)
     var runOptions = new RunOptions(
         options.Model ?? catalog.DefaultReviewer, options.Judge ?? catalog.DefaultJudge,
         options.Repeat, options.MaxCost, options.Cases,
-        Languages: options.Prompts.Count == 0 ? null : options.Prompts.Keys.ToList());
+        Languages: options.Prompts.Count == 0 ? null : options.Prompts.Keys.ToList(), Mode: options.Mode);
     var runner = new Runner(
         lab.Dataset,
         new Reviewer(catalog, clients, lab.Prompts, lab.ConfigService, lab.Configuration),
@@ -84,7 +84,7 @@ static async Task<int> Run(Options options)
     var estimate = runner.EstimateCost(runOptions);
     var versions = string.Join(", ", options.Prompts.Select(p => $"{p.Key} v{p.Value}"));
     Console.WriteLine($"{estimate.Cases} reviews of {options.Dataset} with {runOptions.Model}, judged by {runOptions.JudgeModel}" +
-        (versions.Length > 0 ? $", trying {versions}" : ""));
+        (versions.Length > 0 ? $", trying {versions}" : "") + (options.Mode == "diff" ? ", reviewing the change" : ""));
     Console.WriteLine($"Estimate: {estimate.InputTokens:N0} input and {estimate.OutputTokens:N0} output tokens, " +
         $"${estimate.ReviewerCost:F2} reviewing + ${estimate.JudgeCost:F2} judging = ${estimate.Total:F2} (budget ${runOptions.MaxCost:F2})");
     if (options.EstimateOnly)
@@ -161,12 +161,12 @@ static void Scoreboard(Options options)
 {
     var lab = Open(options.Dataset);
     var promptLab = new PromptLab(Path.Combine(lab.RepoRoot, "lab", "results"), lab.Dataset, lab.Prompts);
-    PrintMetricsHeader("Prompt", extra: $" {"Runs",4}  Reviewer / judge");
+    PrintMetricsHeader("Prompt", extra: $" {"Runs",4}  {"Mode",-5} Reviewer / judge");
     foreach (var score in promptLab.Scoreboard())
     {
         var active = lab.Store.ActiveVersion(score.Language) == score.Version ? "*" : " ";
         PrintMetrics($"{score.Language} v{score.Version}{active}", score.Metrics,
-            extra: $" {score.Runs,4}  {score.Model} / {score.JudgeModel}");
+            extra: $" {score.Runs,4}  {score.Mode,-5} {score.Model} / {score.JudgeModel}");
     }
     Console.WriteLine("* the active version");
     RefreshScoreboard(lab);
@@ -204,7 +204,7 @@ static int PromptCommand(string[] args)
             var baseline = lab.Store.ActiveVersion(language);
             var promptLab = new PromptLab(Path.Combine(lab.RepoRoot, "lab", "results"), lab.Dataset, lab.Prompts);
             var verdict = promptLab.Decide(language, candidate, baseline,
-                options.Model ?? catalog.DefaultReviewer, options.Judge ?? catalog.DefaultJudge, options.Margin);
+                options.Model ?? catalog.DefaultReviewer, options.Judge ?? catalog.DefaultJudge, options.Margin, options.Mode);
 
             PrintMetricsHeader("Version");
             PrintMetrics($"{language} v{baseline}", verdict.Baseline);
@@ -269,11 +269,11 @@ record Lab(string RepoRoot, Dataset Dataset, IConfiguration Configuration, Confi
 
 record Options(
     string Dataset, string? Model, string? Judge, string? Cases, int Repeat, decimal MaxCost, bool EstimateOnly,
-    Dictionary<string, int> Prompts, string? Notes, int? From, double Margin)
+    Dictionary<string, int> Prompts, string? Notes, int? From, double Margin, string Mode)
 {
     public static Options Parse(string[] args)
     {
-        var options = new Options("v1", null, null, null, 1, 2.00m, false, new(), null, null, PromptLab.DefaultMargin);
+        var options = new Options("v1", null, null, null, 1, 2.00m, false, new(), null, null, PromptLab.DefaultMargin, "file");
         for (var i = 0; i < args.Length; i++)
         {
             string Value() => i + 1 < args.Length ? args[++i] : throw new ArgumentException($"{args[i]} needs a value");
@@ -289,6 +289,10 @@ record Options(
                 case "--notes": options = options with { Notes = Value() }; break;
                 case "--from": options = options with { From = int.Parse(Value(), CultureInfo.InvariantCulture) }; break;
                 case "--margin": options = options with { Margin = double.Parse(Value(), CultureInfo.InvariantCulture) }; break;
+                case "--mode":
+                    var mode = Value();
+                    options = mode is "file" or "diff" ? options with { Mode = mode } : throw new ArgumentException("--mode is file or diff");
+                    break;
                 case "--prompt":
                     var parts = Value().Split('=', 2);
                     if (parts.Length != 2 || !int.TryParse(parts[1], out var version))

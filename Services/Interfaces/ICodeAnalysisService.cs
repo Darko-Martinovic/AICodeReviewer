@@ -5,6 +5,8 @@ namespace AICodeReviewer.Services.Interfaces
     /// </summary>
     public interface ICodeAnalysisService
     {
-        Task<(List<string> issues, List<Models.DetailedIssue> detailedIssues, Models.Usage usage)> AnalyzeCodeAsync(string fileName, string fileContent);
+        /// <param name="patch">The file's unified diff, to review only what it changed; null reviews the whole file</param>
+        Task<(List<string> issues, List<Models.DetailedIssue> detailedIssues, Models.Usage usage)> AnalyzeCodeAsync(
+            string fileName, string fileContent, string? patch = null);
     }
 }

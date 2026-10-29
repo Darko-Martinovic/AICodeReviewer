@@ -193,9 +193,15 @@ namespace AICodeReviewer.Services
                         Console.Write($"    🤖 Sending to AI for analysis...");
 
                         // Send to AI for review with usage tracking
+                        // In diff mode the reviewer is told which lines the change touched; without a patch
+                        // (binary or very large files) it reviews the whole file
+                        var patch = _configurationService.Settings.CodeReview.ReviewMode == "diff"
+                            ? FileUtils.GetFilePatch(file)
+                            : null;
                         var (issues, detailedIssues, usage) = await _aiService.AnalyzeCodeAsync(
                             fileName,
-                            fileContent
+                            fileContent,
+                            patch
                         );
 
                         // Track token usage and cost

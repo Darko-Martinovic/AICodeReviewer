@@ -1,6 +1,6 @@
 {
   "dataset": "v1",
-  "updated_at": "2026-10-29T13:27:01.7074122+00:00",
+  "updated_at": "2026-10-29T13:49:59.7412351+00:00",
   "rows": [
     {
       "language": "CSharp",
@@ -30,6 +30,7 @@
         "reviewer_cost": 0.0262148,
         "judge_cost": 0.232838
       },
+      "mode": "file",
       "notes": "The built-in prompt from before the lab",
       "decision": null
     },
@@ -61,6 +62,7 @@
         "reviewer_cost": 0.0222748,
         "judge_cost": 0.193046
       },
+      "mode": "file",
       "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
       "decision": {
         "result": "rolled_back",
@@ -78,6 +80,55 @@
         ],
         "candidate_runs": [
           "20261029-124919-claude-haiku-5-5.json"
+        ]
+      }
+    },
+    {
+      "language": "CSharp",
+      "version": 3,
+      "active": true,
+      "model": "claude-haiku-5-5",
+      "judge_model": "claude-sonnet-5-5",
+      "runs": 1,
+      "metrics": {
+        "cases": 12,
+        "errors": 0,
+        "labels": 35,
+        "found": 35,
+        "findings": 40,
+        "matched": 33,
+        "duplicates": 1,
+        "real": 4,
+        "false_alarms": 2,
+        "outside_window": 1,
+        "clean_cases": 3,
+        "false_alarms_on_clean": 1,
+        "recall": 1,
+        "precision": 0.95,
+        "strict_precision": 0.85,
+        "f1": 0.9744,
+        "false_alarms_per_clean_case": 0.3333,
+        "reviewer_cost": 0.0105807,
+        "judge_cost": 0.093240
+      },
+      "mode": "diff",
+      "notes": "v2 plus two kinds of defect v2 let through: code that contradicts its own comments or names, and whole streams buffered in memory or synchronous I/O in request code",
+      "decision": {
+        "result": "kept",
+        "date": "2026-10-29",
+        "reason": "F1 rose from 0.76 to 0.96 (precision 61% to 95%, recall 98% to 97%)",
+        "recall_before": 0.9815,
+        "recall_after": 0.9714,
+        "precision_before": 0.6149,
+        "precision_after": 0.9529,
+        "f1_before": 0.7561,
+        "f1_after": 0.9621,
+        "baseline_runs": [
+          "20261029-123041-claude-haiku-5-5.json",
+          "20261029-123614-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-125313-claude-haiku-5-5.json"
         ]
       }
     },
@@ -109,6 +160,7 @@
         "reviewer_cost": 0.0218621,
         "judge_cost": 0.192726
       },
+      "mode": "file",
       "notes": "v2 plus two kinds of defect v2 let through: code that contradicts its own comments or names, and whole streams buffered in memory or synchronous I/O in request code",
       "decision": {
         "result": "kept",
@@ -140,6 +192,38 @@
         "cases": 3,
         "errors": 0,
         "labels": 18,
+        "found": 18,
+        "findings": 21,
+        "matched": 15,
+        "duplicates": 0,
+        "real": 2,
+        "false_alarms": 4,
+        "outside_window": 0,
+        "clean_cases": 1,
+        "false_alarms_on_clean": 1,
+        "recall": 1,
+        "precision": 0.8095,
+        "strict_precision": 0.7143,
+        "f1": 0.8947,
+        "false_alarms_per_clean_case": 1,
+        "reviewer_cost": 0.0026991,
+        "judge_cost": 0.03372
+      },
+      "mode": "diff",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "React",
+      "version": 1,
+      "active": true,
+      "model": "claude-haiku-5-5",
+      "judge_model": "claude-sonnet-5-5",
+      "runs": 1,
+      "metrics": {
+        "cases": 3,
+        "errors": 0,
+        "labels": 18,
         "found": 17,
         "findings": 28,
         "matched": 15,
@@ -157,6 +241,7 @@
         "reviewer_cost": 0.0040803,
         "judge_cost": 0.039784
       },
+      "mode": "file",
       "notes": "The built-in prompt from before the lab",
       "decision": null
     },
@@ -188,8 +273,60 @@
         "reviewer_cost": 0.0245421,
         "judge_cost": 0.187722
       },
+      "mode": "file",
       "notes": "The built-in prompt from before the lab",
       "decision": null
+    },
+    {
+      "language": "Sql",
+      "version": 2,
+      "active": true,
+      "model": "claude-haiku-5-5",
+      "judge_model": "claude-sonnet-5-5",
+      "runs": 1,
+      "metrics": {
+        "cases": 6,
+        "errors": 0,
+        "labels": 7,
+        "found": 7,
+        "findings": 8,
+        "matched": 7,
+        "duplicates": 0,
+        "real": 1,
+        "false_alarms": 0,
+        "outside_window": 0,
+        "clean_cases": 2,
+        "false_alarms_on_clean": 0,
+        "recall": 1,
+        "precision": 1,
+        "strict_precision": 0.875,
+        "f1": 1,
+        "false_alarms_per_clean_case": 0,
+        "reviewer_cost": 0.0046132,
+        "judge_cost": 0.028230
+      },
+      "mode": "diff",
+      "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
+      "decision": {
+        "result": "kept",
+        "date": "2026-10-29",
+        "reason": "F1 rose from 0.64 to 0.97 (precision 48% to 98%, recall 96% to 96%)",
+        "recall_before": 0.9643,
+        "recall_after": 0.9643,
+        "precision_before": 0.48,
+        "precision_after": 0.975,
+        "f1_before": 0.6409,
+        "f1_after": 0.9696,
+        "baseline_runs": [
+          "20261029-123614-claude-haiku-5-5.json",
+          "20261029-124819-claude-haiku-5-5.json",
+          "20261029-132614-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-124919-claude-haiku-5-5.json",
+          "20261029-125313-claude-haiku-5-5.json"
+        ]
+      }
     },
     {
       "language": "Sql",
@@ -219,6 +356,7 @@
         "reviewer_cost": 0.0186160,
         "judge_cost": 0.116818
       },
+      "mode": "file",
       "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
       "decision": {
         "result": "kept",
@@ -269,8 +407,58 @@
         "reviewer_cost": 0.0137337,
         "judge_cost": 0.119146
       },
+      "mode": "file",
       "notes": "The built-in prompt from before the lab",
       "decision": null
+    },
+    {
+      "language": "TypeScript",
+      "version": 2,
+      "active": true,
+      "model": "claude-haiku-5-5",
+      "judge_model": "claude-sonnet-5-5",
+      "runs": 1,
+      "metrics": {
+        "cases": 7,
+        "errors": 0,
+        "labels": 11,
+        "found": 10,
+        "findings": 12,
+        "matched": 10,
+        "duplicates": 0,
+        "real": 1,
+        "false_alarms": 1,
+        "outside_window": 1,
+        "clean_cases": 2,
+        "false_alarms_on_clean": 1,
+        "recall": 0.9091,
+        "precision": 0.9167,
+        "strict_precision": 0.8333,
+        "f1": 0.9129,
+        "false_alarms_per_clean_case": 0.5,
+        "reviewer_cost": 0.0040191,
+        "judge_cost": 0.033856
+      },
+      "mode": "diff",
+      "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
+      "decision": {
+        "result": "kept",
+        "date": "2026-10-29",
+        "reason": "F1 rose from 0.60 to 0.94 (precision 45% to 97%, recall 91% to 91%)",
+        "recall_before": 0.9091,
+        "recall_after": 0.9091,
+        "precision_before": 0.4533,
+        "precision_after": 0.9655,
+        "f1_before": 0.605,
+        "f1_after": 0.9365,
+        "baseline_runs": [
+          "20261029-123614-claude-haiku-5-5.json",
+          "20261029-124819-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-124919-claude-haiku-5-5.json"
+        ]
+      }
     },
     {
       "language": "TypeScript",
@@ -300,6 +488,7 @@
         "reviewer_cost": 0.0098741,
         "judge_cost": 0.070140
       },
+      "mode": "file",
       "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
       "decision": {
         "result": "kept",

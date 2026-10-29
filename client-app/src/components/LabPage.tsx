@@ -155,11 +155,14 @@ const LanguageCard: React.FC<{
       </div>
       {rows.map((row) => (
         <div
-          key={`${row.version}-${row.model}`}
+          key={`${row.version}-${row.model}-${row.mode}`}
           className={row.active ? styles.versionActive : styles.version}
         >
           <div className={styles.versionHeader}>
             <span className={styles.versionName}>v{row.version}</span>
+            <span className={styles.modeChip}>
+              {row.mode === "diff" ? "change review" : "whole file"}
+            </span>
             <DecisionBadge row={row} />
             <span className={styles.versionFalseAlarms}>
               {row.metrics.false_alarms_per_clean_case.toFixed(2)} false alarms
@@ -383,7 +386,8 @@ export const LabPage: React.FC = () => {
   }, [rows]);
 
   const headline = useMemo(() => {
-    const all = rows ?? [];
+    // Whole-file reviews, the way the built-in prompts were measured
+    const all = (rows ?? []).filter((r) => r.mode !== "diff");
     const active = all.filter((r) => r.active);
     const languagesWithResults = new Set(active.map((r) => r.language));
     const builtIn = all.filter(
@@ -447,7 +451,9 @@ export const LabPage: React.FC = () => {
         <>
           {headline && (
             <section>
-              <h3 className={styles.sectionTitle}>Active prompts</h3>
+              <h3 className={styles.sectionTitle}>
+                Active prompts, whole-file reviews
+              </h3>
               <div className={styles.tiles}>
                 <StatTile
                   label="Recall"
@@ -533,7 +539,12 @@ export const LabPage: React.FC = () => {
                             {selected?.file === run.file ? "▾" : "▸"}
                           </span>
                           {shortDate(run.started_at)}
-                          <div className={styles.muted}>{run.model}</div>
+                          <div className={styles.muted}>
+                            {run.model} ·{" "}
+                            {run.mode === "diff"
+                              ? "change review"
+                              : "whole file"}
+                          </div>
                         </td>
                         <td>
                           {Object.entries(run.prompts ?? {}).map(

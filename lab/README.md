@@ -24,6 +24,7 @@ dotnet run --project lab/AICodeReviewer.Lab -- run --model claude-sonnet-5-5 --r
 | `--model` | `defaultReviewer` in models.json | the reviewing model, a key from models.json |
 | `--judge` | `defaultJudge` in models.json | the judging model; keep it the same across runs you compare |
 | `--cases` | all | only cases whose id starts with this |
+| `--mode` | `file` | `file` reviews each file whole; `diff` reviews the change from the case's `before` version, as a pull request would, with added lines marked + and removed lines shown marked - |
 | `--repeat` | 1 | review every case this many times, to see how much the scores move between runs |
 | `--max-cost` | 2.00 | dollars; the run refuses to start when the estimate is over it, and stops before a case would go over it |
 | `--estimate` | | print the estimate and stop |

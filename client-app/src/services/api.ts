@@ -202,6 +202,7 @@ export interface LabScoreboardRow {
   model: string;
   judge_model: string;
   runs: number;
+  mode: "file" | "diff";
   metrics: LabMetrics;
   notes: string;
   decision: LabDecision | null;
@@ -225,6 +226,7 @@ export interface LabRunSummary {
   summary: LabMetrics;
   groups: Record<string, LabMetrics>;
   rejudged_at?: string | null;
+  mode?: "file" | "diff";
 }
 
 export interface LabFinding {

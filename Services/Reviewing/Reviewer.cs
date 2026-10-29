@@ -12,7 +12,9 @@ namespace AICodeReviewer.Services.Reviewing
     public interface IReviewer
     {
         /// <param name="modelKey">A key from models.json; the configured reviewer when null</param>
-        Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null, CancellationToken cancellationToken = default);
+        /// <param name="change">For the review of a change, what it added and removed; null reviews the whole file</param>
+        Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null,
+            ChangeView? change = null, CancellationToken cancellationToken = default);
     }
 
     public class Reviewer(
@@ -37,6 +39,17 @@ namespace AICodeReviewer.Services.Reviewing
             Use one category: Security, Bug, Performance, Maintainability, Quality or Design.
             Use one severity: Critical, High, Medium or Low.
             If you find no real issues, return an empty list of findings.
+            """;
+
+        /// <summary>
+        /// Appended when the review is of a change rather than a whole file
+        /// </summary>
+        public const string ChangeInstructions = """
+            This review is of a change. Lines marked + in the margin were added or changed. Lines marked - were
+            removed: they are shown where they used to be, have no line number and are no longer in the file. The other
+            lines are unchanged context. Report only defects that the change introduces: in the + lines, or caused by a
+            removal, or caused elsewhere in the file by the change. Give a defect caused by a removal the number of the
+            nearest line that is still in the file. Do not report problems the change did not introduce.
             """;
 
         public static readonly JsonElement Schema = JsonSerializer.SerializeToElement(new Dictionary<string, object>
@@ -72,10 +85,16 @@ namespace AICodeReviewer.Services.Reviewing
         public string ModelKey(string? modelKey) =>
             modelKey ?? configuration["Review:Model"] ?? catalog.DefaultReviewer;
 
-        public async Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null, CancellationToken cancellationToken = default)
+        public async Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null,
+            ChangeView? change = null, CancellationToken cancellationToken = default)
         {
             var model = catalog.Get(ModelKey(modelKey));
-            var request = BuildRequest(fileName, content);
+            if (change is { IsEmpty: true })
+            {
+                // A change that leaves this file as it was has nothing to review
+                return new ReviewOutput { FileName = fileName, Model = model.Key };
+            }
+            var request = BuildRequest(fileName, content, change);
 
             var stopwatch = Stopwatch.StartNew();
             var answer = await clients.Create(model).CompleteJsonAsync(request, cancellationToken);
@@ -93,12 +112,17 @@ namespace AICodeReviewer.Services.Reviewing
             };
         }
 
-        public ModelRequest BuildRequest(string fileName, string content)
+        public ModelRequest BuildRequest(string fileName, string content, ChangeView? change = null)
         {
             var user = prompts.FormatUserPrompt(
-                fileName, NumberLines(content), configurationService.Settings.AzureOpenAI.ContentLimit);
+                fileName, NumberLines(content, change), configurationService.Settings.AzureOpenAI.ContentLimit);
+            var system = SystemPromptFor(prompts.GetSystemPrompt(fileName));
+            if (change is not null)
+            {
+                system = $"{system}\n\n{ChangeInstructions}";
+            }
 
-            return new ModelRequest(SystemPromptFor(prompts.GetSystemPrompt(fileName)), user, "review_findings", Schema, MaxOutputTokens);
+            return new ModelRequest(system, user, "review_findings", Schema, MaxOutputTokens);
         }
 
         /// <summary>
@@ -106,15 +130,38 @@ namespace AICodeReviewer.Services.Reviewing
         /// </summary>
         public static string SystemPromptFor(string languagePrompt) => $"{languagePrompt.TrimEnd()}\n\n{OutputInstructions}";
 
-        public static string NumberLines(string content)
+        /// <summary>
+        /// The file with its line numbers in a margin. For a change, a + beside each line it added or changed, and
+        /// each removed line shown where it was, marked - and without a number
+        /// </summary>
+        public static string NumberLines(string content, ChangeView? change = null)
         {
             var lines = content.Replace("\r\n", "\n").Split('\n');
             var width = lines.Length.ToString().Length;
             var numbered = new StringBuilder();
+
+            void AppendRemoved(int beforeLine)
+            {
+                if (change is not null && change.RemovedBefore.TryGetValue(beforeLine, out var removed))
+                {
+                    foreach (var line in removed)
+                    {
+                        numbered.Append(new string(' ', width)).Append(" - | ").Append(line).Append('\n');
+                    }
+                }
+            }
+
             for (var i = 0; i < lines.Length; i++)
             {
-                numbered.Append((i + 1).ToString().PadLeft(width)).Append(" | ").Append(lines[i]).Append('\n');
+                AppendRemoved(i + 1);
+                numbered.Append((i + 1).ToString().PadLeft(width));
+                if (change is not null)
+                {
+                    numbered.Append(change.Added.Contains(i + 1) ? " +" : "  ");
+                }
+                numbered.Append(" | ").Append(lines[i]).Append('\n');
             }
+            AppendRemoved(lines.Length + 1);
             return numbered.ToString().TrimEnd('\n');
         }
 
