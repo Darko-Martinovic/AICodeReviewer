@@ -70,15 +70,18 @@ namespace AICodeReviewer.Lab
             return (reviewIn, reviewOut, judgeIn, judgeOut);
         }
 
+        private static bool Matches(string caseId, string? prefix) =>
+            prefix is null || caseId.StartsWith(prefix, StringComparison.Ordinal);
+
         /// <summary>
         /// What grading a saved run again would cost: what the same judge cost last time plus a quarter, or an estimate
         /// from the size of each file and its findings when the judge is another model
         /// </summary>
-        public decimal EstimateRejudge(RunResult run, string judgeModel)
+        public decimal EstimateRejudge(RunResult run, string judgeModel, string? casePrefix = null)
         {
             var model = catalog.Get(judgeModel);
             var cases = dataset.Cases.ToDictionary(c => c.Info.Id);
-            return run.Cases.Where(c => c.Error is null && c.Findings.Count > 0 && cases.ContainsKey(c.Id)).Sum(c =>
+            return run.Cases.Where(c => c.Error is null && c.Findings.Count > 0 && cases.ContainsKey(c.Id) && Matches(c.Id, casePrefix)).Sum(c =>
             {
                 if (run.JudgeModel == judgeModel && c.JudgeCost > 0)
                 {
@@ -94,13 +97,13 @@ namespace AICodeReviewer.Lab
         /// Grades the reviews saved in a run again with the given judge and the dataset's current labels, without
         /// asking the reviewer again. Cases that failed or are no longer in the dataset are left as they were
         /// </summary>
-        public async Task<RunResult> RejudgeAsync(RunResult run, string judgeModel, Action<string>? progress = null, CancellationToken ct = default)
+        public async Task<RunResult> RejudgeAsync(RunResult run, string judgeModel, Action<string>? progress = null, string? casePrefix = null, CancellationToken ct = default)
         {
             var cases = dataset.Cases.ToDictionary(c => c.Info.Id);
             var gate = new SemaphoreSlim(4);
             var rejudged = await Task.WhenAll(run.Cases.Select(async c =>
             {
-                if (c.Error is not null || !cases.TryGetValue(c.Id, out var datasetCase))
+                if (c.Error is not null || !Matches(c.Id, casePrefix) || !cases.TryGetValue(c.Id, out var datasetCase))
                 {
                     return c;
                 }

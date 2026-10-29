@@ -46,3 +46,7 @@ dotnet run --project lab/AICodeReviewer.Lab -- list
 dotnet run --project lab/AICodeReviewer.Lab -- labels
 dotnet run --project lab/AICodeReviewer.Lab -- labels v1 cs-04-document-upload
 ```
+
+## Changes
+
+- 2026-10-29: `sql-02-transfer-funds#2` (the transaction left open on failure) now covers the whole transaction, lines 12-40, instead of only `BEGIN TRANSACTION` on line 12. The defect is a missing `SET XACT_ABORT ON`, which has no line of its own, and reviewers rightly pointed at the statements that can fail. Every saved review of that case was graded again with `rejudge --cases sql-02`, so all results match the current labels.

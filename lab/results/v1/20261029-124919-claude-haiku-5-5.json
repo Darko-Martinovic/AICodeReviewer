@@ -39,7 +39,7 @@
     "f1": 0.9371,
     "false_alarms_per_clean_case": 0.2857,
     "reviewer_cost": 0.0409644,
-    "judge_cost": 0.318434
+    "judge_cost": 0.318624
   },
   "groups": {
     "clean": {
@@ -82,7 +82,7 @@
       "f1": 0.9525,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0276780,
-      "judge_cost": 0.209426
+      "judge_cost": 0.209616
     },
     "seeded-dense": {
       "cases": 2,
@@ -1133,7 +1133,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the same unlocked read-then-write race where the stale balance is written back, causing a lost debit or overdraft."
+          "reason": "Describes the unlocked read followed by a write computed from the stale variable, which allows lost debits and overdrafts under concurrency. This is the same defect as label 1."
         },
         {
           "line": 12,
@@ -1146,7 +1146,7 @@
           "label_ids": [
             "sql-02-transfer-funds#2"
           ],
-          "reason": "Identifies the missing XACT_ABORT/TRY-CATCH so a runtime error leaves the transaction open with the debit applied."
+          "reason": "Describes the missing XACT_ABORT/TRY-CATCH, which lets a runtime error leave the transaction open with the debit applied. This is the same defect as label 2."
         }
       ],
       "found": [
@@ -1159,8 +1159,8 @@
       "reviewer_output_tokens": 1573,
       "reviewer_cost": 0.0009742,
       "judge_input_tokens": 2090,
-      "judge_output_tokens": 179,
-      "judge_cost": 0.00597,
+      "judge_output_tokens": 206,
+      "judge_cost": 0.00624,
       "seconds": 12.5,
       "error": null
     },
@@ -2656,7 +2656,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows concurrent overdraw and a lost debit. This is the same defect as label 1."
+          "reason": "Describes the unlocked read-then-write race on the balance that lets concurrent transfers overdraw and lose a debit, which is the same defect as label #1."
         },
         {
           "line": 12,
@@ -2669,7 +2669,7 @@
           "label_ids": [
             "sql-02-transfer-funds#2"
           ],
-          "reason": "Describes the missing XACT_ABORT and TRY/CATCH, which leaves the transaction open with the debit applied when the second UPDATE or another statement fails. This is the same defect as label 2."
+          "reason": "Describes the missing XACT_ABORT/TRY-CATCH, so a failure in the second UPDATE leaves the transaction open with the debit applied, matching label #2."
         }
       ],
       "found": [
@@ -2682,8 +2682,8 @@
       "reviewer_output_tokens": 1832,
       "reviewer_cost": 0.0011037,
       "judge_input_tokens": 2053,
-      "judge_output_tokens": 211,
-      "judge_cost": 0.006216,
+      "judge_output_tokens": 203,
+      "judge_cost": 0.006136,
       "seconds": 13.1,
       "error": null
     },
@@ -3225,5 +3225,5 @@
       "error": null
     }
   ],
-  "rejudged_at": "2026-10-29T13:10:16.191153+00:00"
+  "rejudged_at": "2026-10-29T13:25:51.4835852+00:00"
 }

@@ -23,22 +23,22 @@
     "cases": 36,
     "errors": 0,
     "labels": 84,
-    "found": 81,
+    "found": 82,
     "findings": 107,
-    "matched": 76,
+    "matched": 77,
     "duplicates": 3,
-    "real": 24,
+    "real": 23,
     "false_alarms": 4,
-    "outside_window": 2,
+    "outside_window": 1,
     "clean_cases": 10,
     "false_alarms_on_clean": 2,
-    "recall": 0.9643,
+    "recall": 0.9762,
     "precision": 0.9626,
-    "strict_precision": 0.7383,
-    "f1": 0.9635,
+    "strict_precision": 0.7477,
+    "f1": 0.9694,
     "false_alarms_per_clean_case": 0.2,
     "reviewer_cost": 0.0316626,
-    "judge_cost": 0.254086
+    "judge_cost": 0.254106
   },
   "groups": {
     "clean": {
@@ -66,22 +66,22 @@
       "cases": 24,
       "errors": 0,
       "labels": 52,
-      "found": 50,
+      "found": 51,
       "findings": 67,
-      "matched": 50,
+      "matched": 51,
       "duplicates": 2,
-      "real": 15,
+      "real": 14,
       "false_alarms": 0,
-      "outside_window": 2,
+      "outside_window": 1,
       "clean_cases": 0,
       "false_alarms_on_clean": 0,
-      "recall": 0.9615,
+      "recall": 0.9808,
       "precision": 1,
-      "strict_precision": 0.7761,
-      "f1": 0.9804,
+      "strict_precision": 0.791,
+      "f1": 0.9903,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0207787,
-      "judge_cost": 0.156212
+      "judge_cost": 0.156232
     },
     "seeded-dense": {
       "cases": 2,
@@ -1099,7 +1099,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows concurrent overdraft and lost debits, the same defect as label 1."
+          "reason": "Describes the unlocked read followed by a write from the variable, which allows concurrent overdraft and lost debit. This is the same defect as label #1."
         },
         {
           "line": 12,
@@ -1112,7 +1112,7 @@
           "label_ids": [
             "sql-02-transfer-funds#2"
           ],
-          "reason": "Describes the missing XACT_ABORT/TRY-CATCH that lets a runtime error leave the transaction open with partial work, the same defect as label 2."
+          "reason": "Describes the missing XACT_ABORT/TRY-CATCH, which leaves the transaction open with partial work after a runtime error. This is the same defect as label #2."
         }
       ],
       "found": [
@@ -1125,8 +1125,8 @@
       "reviewer_output_tokens": 2009,
       "reviewer_cost": 0.0011922,
       "judge_input_tokens": 2172,
-      "judge_output_tokens": 195,
-      "judge_cost": 0.006294,
+      "judge_output_tokens": 198,
+      "judge_cost": 0.006324,
       "seconds": 16.4,
       "error": null
     },
@@ -2286,7 +2286,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the unlocked read-then-write race under READ COMMITTED, where the stale balance is written back and a debit is lost, the same as label #1."
+          "reason": "Describes the unlocked read-then-write race under READ COMMITTED, the stale-value overwrite, lost debit and overdraft, which is exactly label #1."
         },
         {
           "line": 37,
@@ -2295,24 +2295,25 @@
           "severity": "Medium",
           "title": "Failure in the insert does not stop the procedure, so partial work is committed",
           "explanation": "There is no TRY/CATCH and SET XACT_ABORT is not ON. If the INSERT into dbo.Transfers at line 37 fails with a statement-level error (for example a constraint violation), SQL Server rolls back only that statement and execution continues to line 40. COMMIT TRANSACTION then commits both account updates without the matching transfer record, which breaks the invariant that every balance change has a transfer row.",
-          "verdict": "real",
-          "label_ids": [],
-          "reason": "Describes sql-02-transfer-funds#2 but at lines 37-40, outside the window. Describes the missing XACT_ABORT/TRY-CATCH, so a statement-level error does not roll back the transaction and partial work is committed. This is the same defect as label #2, with the INSERT as the failure example."
+          "verdict": "match",
+          "label_ids": [
+            "sql-02-transfer-funds#2"
+          ],
+          "reason": "Identifies the missing XACT_ABORT/TRY-CATCH so a statement-level error leaves the transaction in a partial state, which is label #2\u0027s defect, shown here through a failing INSERT."
         }
       ],
       "found": [
-        "sql-02-transfer-funds#1"
-      ],
-      "missed": [
+        "sql-02-transfer-funds#1",
         "sql-02-transfer-funds#2"
       ],
-      "outside_window": 1,
+      "missed": [],
+      "outside_window": 0,
       "reviewer_input_tokens": 1877,
       "reviewer_output_tokens": 2148,
       "reviewer_cost": 0.0012617,
       "judge_input_tokens": 2045,
-      "judge_output_tokens": 215,
-      "judge_cost": 0.00624,
+      "judge_output_tokens": 214,
+      "judge_cost": 0.00623,
       "seconds": 14.3,
       "error": null
     },
@@ -2494,5 +2495,5 @@
       "error": null
     }
   ],
-  "rejudged_at": "2026-10-29T13:10:49.9645189+00:00"
+  "rejudged_at": "2026-10-29T13:25:53.8962941+00:00"
 }

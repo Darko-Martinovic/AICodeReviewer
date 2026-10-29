@@ -2,7 +2,7 @@
   "active": {
     "CSharp": 3,
     "VbNet": 1,
-    "Sql": 1,
+    "Sql": 2,
     "JavaScript": 1,
     "TypeScript": 2,
     "React": 1,
@@ -106,18 +106,19 @@
       "created": "2026-10-29",
       "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
       "decision": {
-        "result": "rolled_back",
+        "result": "kept",
         "date": "2026-10-29",
-        "reason": "recall fell from 100% to 93%",
-        "recall_before": 1,
-        "recall_after": 0.9286,
-        "precision_before": 0.4727,
+        "reason": "F1 rose from 0.64 to 0.97 (precision 48% to 98%, recall 96% to 96%)",
+        "recall_before": 0.9643,
+        "recall_after": 0.9643,
+        "precision_before": 0.48,
         "precision_after": 0.975,
-        "f1_before": 0.642,
-        "f1_after": 0.9512,
+        "f1_before": 0.6409,
+        "f1_after": 0.9696,
         "baseline_runs": [
           "20261029-123614-claude-haiku-5-5.json",
-          "20261029-124819-claude-haiku-5-5.json"
+          "20261029-124819-claude-haiku-5-5.json",
+          "20261029-132614-claude-haiku-5-5.json"
         ],
         "candidate_runs": [
           "20261029-124919-claude-haiku-5-5.json",

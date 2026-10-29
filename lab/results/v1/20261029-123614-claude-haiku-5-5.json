@@ -40,7 +40,7 @@
     "f1": 0.7268,
     "false_alarms_per_clean_case": 3,
     "reviewer_cost": 0.0318648,
-    "judge_cost": 0.271982
+    "judge_cost": 0.271662
   },
   "groups": {
     "clean": {
@@ -83,7 +83,7 @@
       "f1": 0.7412,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0190237,
-      "judge_cost": 0.163374
+      "judge_cost": 0.163054
     },
     "seeded-dense": {
       "cases": 2,
@@ -1913,7 +1913,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the unlocked read-then-write race that allows overdrafts and lost debits, same as label 1."
+          "reason": "Describes the unlocked read-then-write race that allows overdrafts and lost debits, the same as label 1."
         },
         {
           "line": 9,
@@ -1924,7 +1924,7 @@
           "explanation": "The check IF @Amount \u003C= 0 evaluates to UNKNOWN when @Amount is NULL, so the THROW is skipped. Execution continues, the balance check at line 17 also evaluates to UNKNOWN for NULL comparisons, and the UPDATE at line 24 sets Balance = @Balance - NULL, which is NULL. This can wipe out the source account balance and insert a NULL-amount transfer record.",
           "verdict": "false_alarm",
           "label_ids": [],
-          "reason": "With a NULL @Amount, the check on line 17 evaluates UNKNOWN, but \u0060@Balance IS NULL OR UNKNOWN\u0060 is not true, so it proceeds. However, the UPDATE would set Balance to NULL only if the Balance column allows NULL; the claim is speculative and the INSERT/Balance column likely NOT NULL. The finding is plausible, but NULL parameter handling is not the labeled defect. Actually, in T-SQL a NULL @Amount does skip validation and would null the balance, so this is a genuine defect."
+          "reason": "A NULL @Amount does not null out balances. The check @Balance \u003C NULL is UNKNOWN, so the IF is not true and the code proceeds to the UPDATE, which sets Balance to NULL. That part is plausible, but the claim is overstated: with a NULL parameter the debit would write NULL, so this is actually a real validation gap. The finding as described is therefore valid, not wrong."
         },
         {
           "line": 12,
@@ -1937,7 +1937,7 @@
           "label_ids": [
             "sql-02-transfer-funds#2"
           ],
-          "reason": "Reports the missing TRY/CATCH and XACT_ABORT leaving the transaction open on runtime errors, matching label 2."
+          "reason": "Identifies the missing TRY/CATCH or XACT_ABORT, which leaves the transaction open after a runtime error, as label 2 says."
         },
         {
           "line": 17,
@@ -1948,7 +1948,7 @@
           "explanation": "The same error (50011) is raised when the source account does not exist (NULL balance) and when funds are insufficient. Callers cannot distinguish between a bad account ID and a balance problem, which makes troubleshooting and client handling harder.",
           "verdict": "false_alarm",
           "label_ids": [],
-          "reason": "Merging two error conditions into one message is a minor design preference, not a defect."
+          "reason": "Using one error for unknown account and insufficient funds is a design preference, not a defect. The message already names both cases."
         },
         {
           "line": 23,
@@ -1959,7 +1959,7 @@
           "explanation": "The source account is debited at line 23-25 before the destination is verified via @@ROWCOUNT at line 31. This works only because of the rollback, but it does unnecessary write work and relies on the rollback path for correctness.",
           "verdict": "false_alarm",
           "label_ids": [],
-          "reason": "The ordering is handled correctly by the rollback; this is a style or efficiency remark rather than a bug."
+          "reason": "The order of operations is correct because the rollback handles a failed destination check. It is a minor efficiency or style remark, not a defect."
         }
       ],
       "found": [
@@ -1972,8 +1972,8 @@
       "reviewer_output_tokens": 2281,
       "reviewer_cost": 0.0013346,
       "judge_input_tokens": 2448,
-      "judge_output_tokens": 512,
-      "judge_cost": 0.010016,
+      "judge_output_tokens": 480,
+      "judge_cost": 0.009696,
       "seconds": 17.2,
       "error": null
     },
@@ -3064,5 +3064,5 @@
       "error": null
     }
   ],
-  "rejudged_at": "2026-10-29T13:09:12.9237437+00:00"
+  "rejudged_at": "2026-10-29T13:25:45.9489635+00:00"
 }

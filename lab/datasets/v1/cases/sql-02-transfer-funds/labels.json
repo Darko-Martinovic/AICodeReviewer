@@ -11,7 +11,7 @@
   {
     "id": "sql-02-transfer-funds#2",
     "line": 12,
-    "end_line": 12,
+    "end_line": 40,
     "category": "Bug",
     "severity": "Medium",
     "title": "The transaction is left open when a statement fails",
