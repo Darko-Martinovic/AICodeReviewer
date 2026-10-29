@@ -1,0 +1,8 @@
+{
+  "id": "sql-01-search-products",
+  "language": "sql",
+  "file": "SearchProducts.sql",
+  "group": "realistic",
+  "description": "Product search with a caller-chosen sort column",
+  "kind": "buggy"
+}

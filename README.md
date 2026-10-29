@@ -29,11 +29,17 @@ https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 
 Copilot answers "can AI review my PR?". The lab is meant to answer "how good is the review?":
 
-1. A labelled set of files with seeded bugs, each bug written down with its file, line and category
+1. A labelled set of files with seeded bugs, each bug written down with its file, line and category (done: [`lab/datasets/v1`](lab/datasets/v1/README.md), 28 files and 71 labels)
 2. Structured JSON output from the model instead of parsing free text (done)
 3. A judge that scores each review against the labels: bugs found, bugs missed and false alarms
 4. Runs that compare prompts, models and Copilot's own comments on the same changes
 5. A scoreboard of prompt versions, keeping a change only when the scores improve
+
+The lab's own tool lives in `lab/AICodeReviewer.Lab`. For now it lists the dataset:
+
+```bash
+dotnet run --project lab/AICodeReviewer.Lab -- list
+```
 
 ## Known limits
 

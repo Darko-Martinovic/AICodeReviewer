@@ -1,0 +1,8 @@
+{
+  "id": "sql-04-import-price-changes",
+  "language": "sql",
+  "file": "ImportPriceChanges.sql",
+  "group": "realistic",
+  "description": "Applying a staged batch of price changes",
+  "kind": "buggy"
+}

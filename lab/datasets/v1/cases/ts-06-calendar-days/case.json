@@ -1,0 +1,8 @@
+{
+  "id": "ts-06-calendar-days",
+  "language": "typescript",
+  "file": "calendarDay.ts",
+  "group": "realistic",
+  "description": "Calendar day helpers with months numbered 1-12",
+  "kind": "buggy"
+}

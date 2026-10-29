@@ -1,0 +1,8 @@
+{
+  "id": "cs-04-document-upload",
+  "language": "csharp",
+  "file": "DocumentUploadController.cs",
+  "group": "realistic",
+  "description": "Uploading and downloading documents",
+  "kind": "buggy"
+}

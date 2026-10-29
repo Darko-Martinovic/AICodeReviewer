@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sql-03-customers-without-orders#1",
+    "line": 9,
+    "end_line": 10,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "NOT IN returns nothing when any order has a NULL CustomerId",
+    "description": "If the subquery yields a NULL (for example a guest order), NOT IN is never true and the procedure returns no customers; NOT EXISTS does not have this problem."
+  },
+  {
+    "id": "sql-03-customers-without-orders#2",
+    "line": 12,
+    "end_line": 12,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "YEAR() on the column prevents an index seek",
+    "description": "Wrapping OrderDate in a function makes the filter non-sargable, so every order is scanned; a half-open date range can use an index."
+  }
+]

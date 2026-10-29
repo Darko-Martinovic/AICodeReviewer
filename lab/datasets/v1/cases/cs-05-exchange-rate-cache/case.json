@@ -1,0 +1,8 @@
+{
+  "id": "cs-05-exchange-rate-cache",
+  "language": "csharp",
+  "file": "ExchangeRateCache.cs",
+  "group": "realistic",
+  "description": "Converting amounts with cached exchange rates",
+  "kind": "buggy"
+}

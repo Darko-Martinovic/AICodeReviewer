@@ -1,0 +1,8 @@
+{
+  "id": "ts-01-product-search",
+  "language": "typescript",
+  "file": "useProductSearch.ts",
+  "group": "realistic",
+  "description": "A React hook that searches products as the user types",
+  "kind": "buggy"
+}

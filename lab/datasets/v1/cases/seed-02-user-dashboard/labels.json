@@ -1,0 +1,146 @@
+[
+  {
+    "id": "seed-02-user-dashboard#1",
+    "line": 18,
+    "end_line": 18,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The interval is never cleared",
+    "description": "The effect returns no cleanup, so the interval keeps running after the component unmounts."
+  },
+  {
+    "id": "seed-02-user-dashboard#2",
+    "line": 25,
+    "end_line": 25,
+    "category": "Security",
+    "severity": "High",
+    "title": "Cross-site scripting through dangerouslySetInnerHTML",
+    "description": "Unsanitised text is rendered as HTML."
+  },
+  {
+    "id": "seed-02-user-dashboard#3",
+    "line": 32,
+    "end_line": 32,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "API key hardcoded in front-end code",
+    "description": "Anything in the bundle is visible to every user."
+  },
+  {
+    "id": "seed-02-user-dashboard#4",
+    "line": 34,
+    "end_line": 34,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "Sensitive data requested over plain HTTP",
+    "description": "Credentials and user data travel unencrypted."
+  },
+  {
+    "id": "seed-02-user-dashboard#5",
+    "line": 37,
+    "end_line": 37,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Admin password hardcoded and sent from the browser",
+    "description": "The admin password is in the bundle and in every request."
+  },
+  {
+    "id": "seed-02-user-dashboard#6",
+    "line": 51,
+    "end_line": 52,
+    "category": "Security",
+    "severity": "High",
+    "title": "User passwords stored in localStorage",
+    "description": "localStorage is readable by any script on the page."
+  },
+  {
+    "id": "seed-02-user-dashboard#7",
+    "line": 54,
+    "end_line": 54,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "API key stored in localStorage",
+    "description": "localStorage is readable by any script on the page."
+  },
+  {
+    "id": "seed-02-user-dashboard#8",
+    "line": 71,
+    "end_line": 71,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "Searching replaces the user list",
+    "description": "The filtered list overwrites users, so each search narrows the previous result and cleared searches never bring users back."
+  },
+  {
+    "id": "seed-02-user-dashboard#9",
+    "line": 76,
+    "end_line": 80,
+    "category": "Bug",
+    "severity": "High",
+    "title": "Infinite loop when a user has no name",
+    "description": "processed only advances for users with a name, so the loop never ends at the first user without one."
+  },
+  {
+    "id": "seed-02-user-dashboard#10",
+    "line": 94,
+    "end_line": 94,
+    "category": "Bug",
+    "severity": "High",
+    "title": "The wrong users are updated",
+    "description": "The response index (0-2) is used as the position in the users array, so the first three users change instead of the user with userId, and failed responses are ignored."
+  },
+  {
+    "id": "seed-02-user-dashboard#11",
+    "line": 102,
+    "end_line": 102,
+    "category": "Performance",
+    "severity": "High",
+    "title": "A million large objects put into state",
+    "description": "Each click builds a million objects with 1,000-character strings and adds them to state, freezing the page and exhausting memory."
+  },
+  {
+    "id": "seed-02-user-dashboard#12",
+    "line": 116,
+    "end_line": 116,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "eval of user-supplied script",
+    "description": "Running arbitrary text with eval allows script injection."
+  },
+  {
+    "id": "seed-02-user-dashboard#13",
+    "line": 126,
+    "end_line": 126,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "Prototype pollution in mergeUserSettings",
+    "description": "Copying every key, including __proto__, from untrusted input can modify Object.prototype."
+  },
+  {
+    "id": "seed-02-user-dashboard#14",
+    "line": 144,
+    "end_line": 145,
+    "category": "Bug",
+    "severity": "Low",
+    "title": "List items have no key",
+    "description": "React needs a stable key per item to update the list correctly."
+  },
+  {
+    "id": "seed-02-user-dashboard#15",
+    "line": 149,
+    "end_line": 150,
+    "category": "Security",
+    "severity": "High",
+    "title": "Passwords and card numbers shown on screen",
+    "description": "Sensitive fields are rendered in the page."
+  },
+  {
+    "id": "seed-02-user-dashboard#16",
+    "line": 172,
+    "end_line": 172,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Text typed in the search box is executed",
+    "description": "Pressing Enter passes the input to eval."
+  }
+]

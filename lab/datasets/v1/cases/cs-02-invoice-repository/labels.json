@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cs-02-invoice-repository#1",
+    "line": 28,
+    "end_line": 28,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "SQL injection through the sort column",
+    "description": "sortBy comes from the caller and is put into the SQL text unchecked; the allow-list of columns is no longer applied."
+  },
+  {
+    "id": "cs-02-invoice-repository#2",
+    "line": 48,
+    "end_line": 48,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The connection in DeleteOlderThanAsync is never disposed",
+    "description": "Without using, the connection is not returned to the pool, so repeated calls exhaust it."
+  }
+]

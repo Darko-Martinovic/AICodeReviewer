@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cs-05-exchange-rate-cache#1",
+    "line": 11,
+    "end_line": 11,
+    "category": "Bug",
+    "severity": "High",
+    "title": "A static Dictionary is read and written by concurrent requests",
+    "description": "Dictionary is not thread-safe; concurrent writes from different requests can corrupt it or throw."
+  },
+  {
+    "id": "cs-05-exchange-rate-cache#2",
+    "line": 20,
+    "end_line": 20,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "Blocking on .Result inside an async method",
+    "description": "Waiting synchronously on the task blocks a thread-pool thread, risks deadlock under a synchronization context and wraps errors in AggregateException."
+  }
+]

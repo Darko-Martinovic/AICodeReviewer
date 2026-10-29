@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ts-05-orders-router#1",
+    "line": 15,
+    "end_line": 15,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "SQL injection through the order id",
+    "description": "The raw path parameter is concatenated into the SQL; parseInt('1 OR 1=1') passes the validation above, so the check does not protect the query."
+  },
+  {
+    "id": "ts-05-orders-router#2",
+    "line": 15,
+    "end_line": 15,
+    "category": "Security",
+    "severity": "High",
+    "title": "Any signed-in user can read any order",
+    "description": "The customer_id condition was dropped, so the order is returned without checking that it belongs to the caller."
+  },
+  {
+    "id": "ts-05-orders-router#3",
+    "line": 40,
+    "end_line": 40,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "Error details and stack traces are sent to the client",
+    "description": "The 500 response exposes internal messages and the stack trace, which can reveal queries, paths and libraries."
+  }
+]

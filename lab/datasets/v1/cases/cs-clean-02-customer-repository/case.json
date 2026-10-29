@@ -1,0 +1,8 @@
+{
+  "id": "cs-clean-02-customer-repository",
+  "language": "csharp",
+  "file": "CustomerRepository.cs",
+  "group": "clean",
+  "description": "Reading and updating customers with parameterized SQL",
+  "kind": "clean"
+}

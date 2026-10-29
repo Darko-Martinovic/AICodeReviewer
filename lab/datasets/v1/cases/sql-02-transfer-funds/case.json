@@ -1,0 +1,8 @@
+{
+  "id": "sql-02-transfer-funds",
+  "language": "sql",
+  "file": "TransferFunds.sql",
+  "group": "realistic",
+  "description": "Moving money between two accounts",
+  "kind": "buggy"
+}

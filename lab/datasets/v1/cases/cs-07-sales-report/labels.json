@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cs-07-sales-report#1",
+    "line": 15,
+    "end_line": 15,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The last day of the range is left out",
+    "description": "end is midnight at the start of the last day and the filter is < end, so that day's sales are missing although the summary says both days are included."
+  },
+  {
+    "id": "cs-07-sales-report#2",
+    "line": 24,
+    "end_line": 24,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "One database query per customer (N+1)",
+    "description": "The loop queries Customers once per group after loading every order into memory; grouping in the database query does it in one round trip."
+  },
+  {
+    "id": "cs-07-sales-report#3",
+    "line": 37,
+    "end_line": 37,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "Average fails for a customer with no orders",
+    "description": "Enumerable.Average throws InvalidOperationException on an empty sequence."
+  }
+]

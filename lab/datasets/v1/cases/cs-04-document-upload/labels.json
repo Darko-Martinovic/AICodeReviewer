@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cs-04-document-upload#1",
+    "line": 29,
+    "end_line": 29,
+    "category": "Security",
+    "severity": "High",
+    "title": "Uploads are stored under the name the client sent",
+    "description": "A file name such as ../../appsettings.pdf escapes the uploads folder, and two uploads with the same name overwrite each other."
+  },
+  {
+    "id": "cs-04-document-upload#2",
+    "line": 32,
+    "end_line": 34,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "The whole upload is copied into memory synchronously",
+    "description": "CopyTo blocks a thread and buffers up to 10 MB per request before writing, instead of streaming to the file."
+  },
+  {
+    "id": "cs-04-document-upload#3",
+    "line": 43,
+    "end_line": 43,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Path traversal in Download",
+    "description": "id is combined into a path without any check, so ..\\ sequences or an absolute path read any file the process can read."
+  }
+]

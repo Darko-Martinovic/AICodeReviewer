@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ts-02-cart-math#1",
+    "line": 26,
+    "end_line": 26,
+    "category": "Bug",
+    "severity": "Low",
+    "title": "Tax is not rounded to whole cents",
+    "description": "Every other amount is an integer number of cents; an unrounded tax produces fractional cents that drift when added up."
+  },
+  {
+    "id": "ts-02-cart-math#2",
+    "line": 31,
+    "end_line": 31,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "Non-numeric and fractional quantities pass validation",
+    "description": "Number('abc') is NaN and NaN fails both comparisons, so it is returned as a quantity; 2.5 is accepted too."
+  }
+]

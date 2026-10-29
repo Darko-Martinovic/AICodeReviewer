@@ -1,0 +1,8 @@
+{
+  "id": "ts-03-sign-in",
+  "language": "typescript",
+  "file": "signIn.ts",
+  "group": "realistic",
+  "description": "Signing in and returning to the page the user came from",
+  "kind": "buggy"
+}

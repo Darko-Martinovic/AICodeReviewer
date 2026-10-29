@@ -1,0 +1,8 @@
+{
+  "id": "cs-07-sales-report",
+  "language": "csharp",
+  "file": "SalesReportService.cs",
+  "group": "realistic",
+  "description": "Sales by customer for a date range",
+  "kind": "buggy"
+}

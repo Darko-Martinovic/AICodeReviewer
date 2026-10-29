@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cs-08-jwt-setup#1",
+    "line": 23,
+    "end_line": 23,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Token lifetime is not validated",
+    "description": "Expired tokens are accepted, so a leaked token works forever."
+  },
+  {
+    "id": "cs-08-jwt-setup#2",
+    "line": 11,
+    "end_line": 11,
+    "category": "Security",
+    "severity": "High",
+    "title": "A hardcoded fallback signing key",
+    "description": "When the setting is missing the app silently signs and accepts tokens with a key that is in the source code."
+  },
+  {
+    "id": "cs-08-jwt-setup#3",
+    "line": 35,
+    "end_line": 35,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "Rejected bearer tokens are written to the log",
+    "description": "The Authorization header goes into the log, exposing tokens to anyone who can read the logs."
+  }
+]

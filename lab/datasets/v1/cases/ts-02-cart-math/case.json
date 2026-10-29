@@ -1,0 +1,8 @@
+{
+  "id": "ts-02-cart-math",
+  "language": "typescript",
+  "file": "cart.ts",
+  "group": "realistic",
+  "description": "Cart subtotal, coupon, tax and quantity parsing in cents",
+  "kind": "buggy"
+}

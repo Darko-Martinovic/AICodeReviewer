@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sql-04-import-price-changes#1",
+    "line": 12,
+    "end_line": 23,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "A cursor updates prices one row at a time",
+    "description": "The row-by-row loop does one UPDATE per staged row inside the transaction; a single set-based UPDATE with a join is far faster and holds locks for less time."
+  },
+  {
+    "id": "sql-04-import-price-changes#2",
+    "line": 28,
+    "end_line": 28,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "@@IDENTITY can return another table's identity",
+    "description": "If a trigger on ImportLog inserts into a table with an identity column, @@IDENTITY returns that value; SCOPE_IDENTITY() returns the log row's id."
+  }
+]
