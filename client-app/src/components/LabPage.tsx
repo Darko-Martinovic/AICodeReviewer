@@ -124,6 +124,9 @@ const Meter: React.FC<{ label: string; rate: number; asScore?: boolean }> = ({
 };
 
 const DecisionBadge: React.FC<{ row: LabScoreboardRow }> = ({ row }) => {
+  if (row.version === 0) {
+    return <span className={styles.baselineBadge}>Imported from GitHub</span>;
+  }
   if (!row.decision) {
     return <span className={styles.baselineBadge}>Baseline</span>;
   }
@@ -159,7 +162,9 @@ const LanguageCard: React.FC<{
           className={row.active ? styles.versionActive : styles.version}
         >
           <div className={styles.versionHeader}>
-            <span className={styles.versionName}>v{row.version}</span>
+            <span className={styles.versionName}>
+              {row.version === 0 ? row.model : `v${row.version}`}
+            </span>
             <span className={styles.modeChip}>
               {row.mode === "diff" ? "change review" : "whole file"}
             </span>

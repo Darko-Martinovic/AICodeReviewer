@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 //                                                    [--prompt Language=version]... [--mode file|diff] [--repeat n] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- scoreboard [--dataset v1]
 // dotnet run --project lab/AICodeReviewer.Lab -- rejudge [--dataset v1] [--judge key] [--cases prefix] [--max-cost dollars] [--estimate]
+// dotnet run --project lab/AICodeReviewer.Lab -- sandbox push --repo owner/name | sandbox review [--model key] | sandbox request-copilot
+// dotnet run --project lab/AICodeReviewer.Lab -- import [--author Copilot] [--name copilot] [--judge key]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt list
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt new <Language> --notes "what changes" [--from version]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt decide <Language> <version> [--model key] [--judge key] [--margin 0.02]
@@ -31,10 +33,14 @@ try
             return 0;
         case "rejudge":
             return await Rejudge(Options.Parse(args.Skip(1).ToArray()));
+        case "sandbox":
+            return await SandboxCommand(args.Skip(1).FirstOrDefault() ?? "", Options.Parse(args.Skip(2).ToArray()));
+        case "import":
+            return await Import(Options.Parse(args.Skip(1).ToArray()));
         case "prompt":
             return PromptCommand(args.Skip(1).ToArray());
         default:
-            Console.Error.WriteLine($"Unknown command '{command}'. Commands: list, labels, run, scoreboard, rejudge, prompt");
+            Console.Error.WriteLine($"Unknown command '{command}'. Commands: list, labels, run, scoreboard, rejudge, sandbox, import, prompt");
             return 1;
     }
 }
@@ -114,6 +120,108 @@ static async Task<int> Run(Options options)
     Console.WriteLine($"Saved {Path.GetRelativePath(lab.RepoRoot, path)}");
     RefreshScoreboard(lab);
     return s.Errors == 0 ? 0 : 3;
+}
+
+static async Task<int> SandboxCommand(string sub, Options options)
+{
+    var lab = Open(options.Dataset);
+    switch (sub)
+    {
+        case "push":
+        {
+            var repo = options.Repo ?? throw new ArgumentException("sandbox push needs --repo owner/name (an empty repository)");
+            var map = new Sandbox(repo, Console.WriteLine).Push(lab.Dataset, Path.Combine(Path.GetTempPath(), $"sandbox-{Guid.NewGuid():N}"));
+            map.Save(lab.RepoRoot);
+            Console.WriteLine($"{map.PullRequests.Count} pull requests in {repo}; saved {Path.GetRelativePath(lab.RepoRoot, SandboxMap.PathFor(lab.RepoRoot, map.Dataset))}");
+            return 0;
+        }
+        case "review":
+        {
+            // Our reviewer on the sandbox pull requests, posting the same GitHub review the app posts
+            var map = SandboxMap.Load(lab.RepoRoot, options.Dataset);
+            var sandbox = new Sandbox(map.Repo);
+            var catalog = ModelCatalog.LoadDefault();
+            var clients = new ModelClientFactory(lab.Configuration, new HttpClient { Timeout = TimeSpan.FromMinutes(5) });
+            var reviewer = new Reviewer(catalog, clients, lab.Prompts, lab.ConfigService, lab.Configuration);
+            var model = options.Model ?? catalog.DefaultReviewer;
+            decimal spent = 0;
+            foreach (var c in lab.Dataset.Cases.Where(c => map.PullRequests.ContainsKey(c.Info.Id)
+                && (options.Cases is null || c.Info.Id.StartsWith(options.Cases, StringComparison.Ordinal))))
+            {
+                var number = map.PullRequests[c.Info.Id];
+                var patch = sandbox.Patch(number);
+                var file = c.ForReview();
+                var review = await reviewer.ReviewFileAsync(file.FileName, file.Content, model, LineDiff.FromPatch(patch));
+                spent += review.Cost;
+                if (spent > options.MaxCost)
+                {
+                    throw new InvalidOperationException($"Stopped at {c.Info.Id}: ${spent:F4} is over the budget");
+                }
+                var issues = review.Findings.Select(f => new ReviewIssue(file.FileName, f.Line, f.Severity, f.Title,
+                    $"{f.Explanation}\n\n{f.Suggestion}".Trim())).ToList();
+                var (inline, elsewhere) = ReviewComments.Place(issues, new Dictionary<string, string> { [file.FileName] = patch });
+                var body = $"Review by {model}: {review.Findings.Count} findings, {inline.Count} on lines of the diff." +
+                    string.Concat(elsewhere.Select(i => $"\n\n- line {i.Line}: **{i.Severity}** {i.Title}"));
+                sandbox.PostReview(number, body, inline);
+                Console.WriteLine($"{c.Info.Id} (#{number}): {review.Findings.Count} findings, {inline.Count} as line comments, ${review.Cost:F4}");
+            }
+            Console.WriteLine($"Spent ${spent:F4} reviewing");
+            return 0;
+        }
+        case "request-copilot":
+        {
+            var map = SandboxMap.Load(lab.RepoRoot, options.Dataset);
+            var sandbox = new Sandbox(map.Repo);
+            foreach (var (id, number) in map.PullRequests.Where(p => options.Cases is null || p.Key.StartsWith(options.Cases, StringComparison.Ordinal)))
+            {
+                sandbox.RequestCopilot(number);
+                Console.WriteLine($"Asked Copilot to review {id} (#{number})");
+            }
+            return 0;
+        }
+        default:
+            Console.Error.WriteLine($"Unknown sandbox command '{sub}'. Commands: push, review, request-copilot");
+            return 1;
+    }
+}
+
+static async Task<int> Import(Options options)
+{
+    // Grades the line comments one author left on the sandbox pull requests and saves them as a run
+    var lab = Open(options.Dataset);
+    var map = SandboxMap.Load(lab.RepoRoot, options.Dataset);
+    var author = options.Author ?? "Copilot";
+    var name = options.Name ?? author.ToLowerInvariant();
+    var sandbox = new Sandbox(map.Repo);
+    var catalog = ModelCatalog.LoadDefault();
+    var judgeModel = options.Judge ?? catalog.DefaultJudge;
+    var judge = new Judge(catalog, new ModelClientFactory(lab.Configuration, new HttpClient { Timeout = TimeSpan.FromMinutes(5) }));
+    var startedAt = DateTimeOffset.UtcNow;
+    var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+    var cases = new List<CaseResult>();
+    foreach (var c in lab.Dataset.Cases.Where(c => map.PullRequests.ContainsKey(c.Info.Id)
+        && (options.Cases is null || c.Info.Id.StartsWith(options.Cases, StringComparison.Ordinal))))
+    {
+        var labels = c.Labels();
+        var findings = Sandbox.ToFindings(sandbox.Comments(map.PullRequests[c.Info.Id]), author);
+        var judged = await judge.JudgeAsync(judgeModel, c.ForReview(), labels, findings);
+        var score = Scoring.Score(labels, findings, judged.Verdicts, 3);
+        cases.Add(new CaseResult(c.Info.Id, c.Info.Group, c.Info.Kind, lab.Prompts.PromptLanguage(c.Info.File), 0, 1, "",
+            labels.Select(l => l.Id).ToList(), score.Findings, score.Found, score.Missed, score.OutsideWindow,
+            0, 0, 0m, judged.InputTokens, judged.OutputTokens, judged.Cost, 0, null));
+        Console.WriteLine($"{c.Info.Id}: {findings.Count} comments by {author}, {score.Found.Count}/{labels.Count} found");
+    }
+
+    var groups = cases.GroupBy(r => r.Group).OrderBy(g => g.Key, StringComparer.Ordinal).ToDictionary(g => g.Key, g => Metrics.Of(g.ToList()));
+    var result = new RunResult(lab.Dataset.Name, name, judgeModel, new Dictionary<string, int>(), 1, 3, startedAt,
+        Math.Round(stopwatch.Elapsed.TotalSeconds, 1), false, new Estimate(cases.Count, 0, 0, 0m, 0m), Metrics.Of(cases), groups, cases,
+        null, "diff");
+    var path = Runner.Save(result, Path.Combine(lab.RepoRoot, "lab", "results"));
+    RefreshScoreboard(lab);
+    var s = result.Summary;
+    Console.WriteLine($"{name}: recall {s.Recall:P0}, precision {s.Precision:P0}, F1 {s.F1:F2}, judging ${s.JudgeCost:F4}; saved {Path.GetRelativePath(lab.RepoRoot, path)}");
+    return 0;
 }
 
 static async Task<int> Rejudge(Options options)
@@ -269,11 +377,13 @@ record Lab(string RepoRoot, Dataset Dataset, IConfiguration Configuration, Confi
 
 record Options(
     string Dataset, string? Model, string? Judge, string? Cases, int Repeat, decimal MaxCost, bool EstimateOnly,
-    Dictionary<string, int> Prompts, string? Notes, int? From, double Margin, string Mode)
+    Dictionary<string, int> Prompts, string? Notes, int? From, double Margin, string Mode,
+    string? Repo, string? Author, string? Name)
 {
     public static Options Parse(string[] args)
     {
-        var options = new Options("v1", null, null, null, 1, 2.00m, false, new(), null, null, PromptLab.DefaultMargin, "file");
+        var options = new Options("v1", null, null, null, 1, 2.00m, false, new(), null, null, PromptLab.DefaultMargin, "file",
+            null, null, null);
         for (var i = 0; i < args.Length; i++)
         {
             string Value() => i + 1 < args.Length ? args[++i] : throw new ArgumentException($"{args[i]} needs a value");
@@ -289,6 +399,9 @@ record Options(
                 case "--notes": options = options with { Notes = Value() }; break;
                 case "--from": options = options with { From = int.Parse(Value(), CultureInfo.InvariantCulture) }; break;
                 case "--margin": options = options with { Margin = double.Parse(Value(), CultureInfo.InvariantCulture) }; break;
+                case "--repo": options = options with { Repo = Value() }; break;
+                case "--author": options = options with { Author = Value() }; break;
+                case "--name": options = options with { Name = Value() }; break;
                 case "--mode":
                     var mode = Value();
                     options = mode is "file" or "diff" ? options with { Mode = mode } : throw new ArgumentException("--mode is file or diff");
