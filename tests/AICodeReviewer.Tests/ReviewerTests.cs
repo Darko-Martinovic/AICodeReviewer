@@ -1,4 +1,3 @@
-using AICodeReviewer.Models.Configuration;
 using AICodeReviewer.Services.Reviewing;
 
 namespace AICodeReviewer.Tests;
@@ -73,16 +72,6 @@ public class ReviewerTests
 
         Assert.Equal("claude-sonnet-5-5", Assert.Single(factory.Created).Key);
         Assert.Equal("claude-sonnet-5-5", review.Model);
-    }
-
-    [Fact]
-    public async Task A_language_without_a_prompt_gets_the_general_prompt()
-    {
-        var (reviewer, model, _) = NewReviewer(new ModelAnswer("""{"findings": []}""", 10, 5, "end_turn"), systemPrompt: "");
-
-        await reviewer.ReviewFileAsync("notes.txt", "hello");
-
-        Assert.StartsWith(GeneralPrompt.Default, model.LastRequest!.System);
     }
 
     [Theory]

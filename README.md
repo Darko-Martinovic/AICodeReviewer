@@ -33,7 +33,7 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
 2. Structured JSON output from the model instead of parsing free text (done)
 3. A judge that scores each review against the labels: bugs found, bugs missed and false alarms (done: `dotnet run --project lab/AICodeReviewer.Lab -- run`)
 4. Runs that compare prompts, models and Copilot's own comments on the same changes
-5. A scoreboard of prompt versions, keeping a change only when the scores improve
+5. A scoreboard of prompt versions, keeping a change only when the scores improve (done in the lab tool: `prompt` and `scoreboard`; a page in the app comes next)
 
 How to run the lab and how a review is scored: [`lab/README.md`](lab/README.md).
 

@@ -128,10 +128,11 @@ namespace AICodeReviewer.Lab
     }
 
     /// <summary>
-    /// One case of a run, as saved in the results file
+    /// One case of a run, as saved in the results file. Runs saved before prompt versions existed have no language
+    /// and version 0; they used version 1 of every prompt
     /// </summary>
     public record CaseResult(
-        string Id, string Group, string Kind, int Repeat, string PromptHash,
+        string Id, string Group, string Kind, string Language, int PromptVersion, int Repeat, string PromptHash,
         IReadOnlyList<string> Labels, IReadOnlyList<ScoredFinding> Findings, IReadOnlyList<string> Found, IReadOnlyList<string> Missed,
         int OutsideWindow, int ReviewerInputTokens, int ReviewerOutputTokens, decimal ReviewerCost,
         int JudgeInputTokens, int JudgeOutputTokens, decimal JudgeCost, double Seconds, string? Error);

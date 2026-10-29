@@ -1,0 +1,179 @@
+{
+  "active": {
+    "CSharp": 1,
+    "VbNet": 1,
+    "Sql": 1,
+    "JavaScript": 1,
+    "TypeScript": 2,
+    "React": 1,
+    "Java": 1,
+    "General": 1
+  },
+  "versions": [
+    {
+      "language": "CSharp",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "VbNet",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "Sql",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "JavaScript",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "TypeScript",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "React",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "Java",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "General",
+      "version": 1,
+      "based_on": null,
+      "created": "2026-10-29",
+      "notes": "The built-in prompt from before the lab",
+      "decision": null
+    },
+    {
+      "language": "CSharp",
+      "version": 2,
+      "based_on": 1,
+      "created": "2026-10-29",
+      "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
+      "decision": {
+        "result": "rolled_back",
+        "date": "2026-10-29",
+        "reason": "recall fell from 96% to 93%",
+        "recall_before": 0.963,
+        "recall_after": 0.9286,
+        "precision_before": 0.5743,
+        "precision_after": 0.954,
+        "f1_before": 0.7195,
+        "f1_after": 0.9411,
+        "baseline_runs": [
+          "20261029-123041-claude-haiku-5-5.json",
+          "20261029-123614-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-124919-claude-haiku-5-5.json"
+        ]
+      }
+    },
+    {
+      "language": "Sql",
+      "version": 2,
+      "based_on": 1,
+      "created": "2026-10-29",
+      "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
+      "decision": {
+        "result": "rolled_back",
+        "date": "2026-10-29",
+        "reason": "recall fell from 100% to 93%",
+        "recall_before": 1,
+        "recall_after": 0.9286,
+        "precision_before": 0.4364,
+        "precision_after": 0.9,
+        "f1_before": 0.6076,
+        "f1_after": 0.9141,
+        "baseline_runs": [
+          "20261029-123614-claude-haiku-5-5.json",
+          "20261029-124819-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-124919-claude-haiku-5-5.json",
+          "20261029-125313-claude-haiku-5-5.json"
+        ]
+      }
+    },
+    {
+      "language": "TypeScript",
+      "version": 2,
+      "based_on": 1,
+      "created": "2026-10-29",
+      "notes": "Defects only: drop the mandatory style and best-practice checklist, say what not to report, and ask for each finding to be checked against this exact code",
+      "decision": {
+        "result": "kept",
+        "date": "2026-10-29",
+        "reason": "F1 rose from 0.60 to 0.94 (precision 45% to 97%, recall 91% to 91%)",
+        "recall_before": 0.9091,
+        "recall_after": 0.9091,
+        "precision_before": 0.4533,
+        "precision_after": 0.9655,
+        "f1_before": 0.605,
+        "f1_after": 0.9365,
+        "baseline_runs": [
+          "20261029-123614-claude-haiku-5-5.json",
+          "20261029-124819-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-124919-claude-haiku-5-5.json"
+        ]
+      }
+    },
+    {
+      "language": "CSharp",
+      "version": 3,
+      "based_on": 2,
+      "created": "2026-10-29",
+      "notes": "v2 plus two kinds of defect v2 let through: code that contradicts its own comments or names, and whole streams buffered in memory or synchronous I/O in request code",
+      "decision": {
+        "result": "rolled_back",
+        "date": "2026-10-29",
+        "reason": "recall fell from 96% to 90%",
+        "recall_before": 0.963,
+        "recall_after": 0.9,
+        "precision_before": 0.5743,
+        "precision_after": 0.9412,
+        "f1_before": 0.7195,
+        "f1_after": 0.9201,
+        "baseline_runs": [
+          "20261029-123041-claude-haiku-5-5.json",
+          "20261029-123614-claude-haiku-5-5.json"
+        ],
+        "candidate_runs": [
+          "20261029-125313-claude-haiku-5-5.json"
+        ]
+      }
+    }
+  ]
+}

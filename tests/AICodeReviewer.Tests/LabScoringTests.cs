@@ -74,6 +74,6 @@ public class LabScoringTests
     private static ScoredFinding Scored(string verdict) => new(1, 1, "Bug", "Low", "t", "e", verdict, null, "r");
 
     private static CaseResult Case(string kind, string group, string[] labels, string[] found, ScoredFinding[] findings) =>
-        new($"{kind}-case", group, kind, 1, "hash", labels, findings, found, labels.Except(found).ToList(), 0,
+        new($"{kind}-case", group, kind, "CSharp", 1, 1, "hash", labels, findings, found, labels.Except(found).ToList(), 0,
             100, 50, 0.015m, 200, 100, 0.01m, 1.0, null);
 }

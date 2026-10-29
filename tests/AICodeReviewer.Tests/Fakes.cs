@@ -41,6 +41,7 @@ public sealed class FakeConfiguration : IConfigurationService
 public sealed class FakePrompts(string systemPrompt = "You review code.") : IPromptManagementService
 {
     public string GetSystemPrompt(string fileName) => systemPrompt;
+    public string PromptLanguage(string fileName) => "CSharp";
     public string GetUserPromptTemplate(string fileName) => "{fileContent}";
     public string FormatUserPrompt(string fileName, string fileContent, int contentLimit) => fileContent;
     public bool HasLanguageSpecificPrompts(string fileName) => false;

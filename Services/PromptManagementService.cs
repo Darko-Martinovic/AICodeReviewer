@@ -1,5 +1,6 @@
 using AICodeReviewer.Models.Configuration;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Services.Reviewing;
 
 namespace AICodeReviewer.Services
 {
@@ -10,13 +11,20 @@ namespace AICodeReviewer.Services
     {
         private readonly ILanguageDetectionService _languageDetectionService;
         private readonly IConfigurationService _configurationService;
+        private readonly PromptStore _promptStore;
+        private readonly bool _useCustomPrompts;
 
+        /// <param name="useCustomPrompts">Whether a prompt saved in settings overrides the versioned prompt; the lab turns this off</param>
         public PromptManagementService(
             ILanguageDetectionService languageDetectionService,
-            IConfigurationService configurationService)
+            IConfigurationService configurationService,
+            PromptStore promptStore,
+            bool useCustomPrompts = true)
         {
             _languageDetectionService = languageDetectionService ?? throw new ArgumentNullException(nameof(languageDetectionService));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _promptStore = promptStore ?? throw new ArgumentNullException(nameof(promptStore));
+            _useCustomPrompts = useCustomPrompts;
         }
 
         /// <summary>
@@ -26,24 +34,43 @@ namespace AICodeReviewer.Services
         /// <returns>The system prompt for the file's language</returns>
         public string GetSystemPrompt(string fileName)
         {
-            if (!_languageDetectionService.IsLanguageSupported(fileName))
+            var languageKey = PromptLanguage(fileName);
+            if (_useCustomPrompts)
             {
-                // Fall back to default system prompt
-                return _configurationService.Settings.AzureOpenAI.SystemPrompt;
+                var custom = CustomSystemPrompt(languageKey);
+                if (!string.IsNullOrWhiteSpace(custom))
+                {
+                    return custom;
+                }
             }
+            return _promptStore.ActiveText(languageKey);
+        }
 
-            var languageKey = _languageDetectionService.GetLanguageKey(fileName);
-            var languagePrompts = _configurationService.Settings.AzureOpenAI.LanguagePrompts;
+        /// <summary>
+        /// The prompt language of a file: its language key, or General for languages without prompts of their own
+        /// </summary>
+        public string PromptLanguage(string fileName) =>
+            _languageDetectionService.IsLanguageSupported(fileName)
+                ? _languageDetectionService.GetLanguageKey(fileName)
+                : PromptStore.General;
 
+        /// <summary>
+        /// A prompt saved in settings (appsettings.json or Train AI), which overrides the versioned one
+        /// </summary>
+        private string CustomSystemPrompt(string languageKey)
+        {
+            var settings = _configurationService.Settings.AzureOpenAI;
+            var languagePrompts = settings.LanguagePrompts;
             return languageKey switch
             {
                 "CSharp" => languagePrompts.CSharp.SystemPrompt,
+                "Java" => languagePrompts.Java.SystemPrompt,
                 "VbNet" => languagePrompts.VbNet.SystemPrompt,
                 "Sql" => languagePrompts.Sql.SystemPrompt,
                 "JavaScript" => languagePrompts.JavaScript.SystemPrompt,
                 "TypeScript" => languagePrompts.TypeScript.SystemPrompt,
                 "React" => languagePrompts.React.SystemPrompt,
-                _ => _configurationService.Settings.AzureOpenAI.SystemPrompt
+                _ => settings.SystemPrompt
             };
         }
 
