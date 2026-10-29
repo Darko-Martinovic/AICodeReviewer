@@ -44,6 +44,7 @@ namespace AICodeReviewer
                     new UrlSegmentApiVersionReader()
                 );
             })
+            .AddMvc()
             .AddApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'VVV";
@@ -225,12 +226,12 @@ namespace AICodeReviewer
             // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
-                var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-                
+                var apiVersionDescriptions = app.DescribeApiVersions();
+
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+                    foreach (var description in apiVersionDescriptions)
                     {
                         c.SwaggerEndpoint(
                             $"/swagger/{description.GroupName}/swagger.json",

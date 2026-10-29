@@ -2,15 +2,15 @@
 
 ## Project Architecture
 
-This is a **full-stack .NET 9 + React/TypeScript application** for AI-powered code reviews using Azure OpenAI. The system follows a clean architecture with clear separation between backend API and frontend client.
+This is a **full-stack .NET 10 + React/TypeScript application** for AI-powered code reviews using Azure OpenAI. The system follows a clean architecture with clear separation between backend API and frontend client.
 
-### Backend (.NET 9 Web API)
+### Backend (.NET 10 Web API)
 
 - **Entry Point**: `Program.cs` - Service registration, middleware configuration, CORS setup
 - **Controllers**: REST API endpoints in `/Controllers/` (repositories, commits, pull requests, system prompts)
 - **Services**: Business logic in `/Services/` with interface-based dependency injection
 - **Models**: DTOs and configuration models in `/Models/`
-- **Key Dependencies**: Azure OpenAI SDK, Octokit (GitHub API), DotNetEnv
+- **Key Dependencies**: Semantic Kernel (Azure OpenAI), Octokit (GitHub API)
 
 ### Frontend (React + TypeScript + Vite)
 
@@ -177,7 +177,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=your_deployment
 ### Build Configuration
 
 - **Frontend**: Vite with SWC for fast React compilation
-- **Backend**: .NET 9 with AOT-ready configuration
+- **Backend**: .NET 10
 - **Proxy Setup**: Vite proxies `/api` calls to backend automatically
 
 ### Code Quality Tools

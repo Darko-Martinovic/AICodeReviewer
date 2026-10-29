@@ -25,7 +25,8 @@ import ErrorDisplay from "./components/ErrorDisplay";
 import { CollaborationDemo } from "./components/CollaborationDemo";
 import { JoinSessionModal } from "./components/JoinSessionModal";
 import { AzureOpenAISettingsModal } from "./components/AzureOpenAISettingsModal";
-import { ErrorBoundary, useToast } from "./components/UI";
+import { ErrorBoundary } from "./components/UI";
+import { useToast } from "./hooks/useToast";
 import { useCodeReviewConfig } from "./hooks/useCodeReviewConfig";
 
 type TabType =
@@ -675,7 +676,7 @@ function App() {
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
-          response?: { status: number; data?: any };
+          response?: { status: number; data?: unknown };
         };
         if (axiosError.response?.status === 400) {
           errorMessage = "Repository has no accessible commits";
@@ -741,7 +742,7 @@ function App() {
 
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as {
-          response?: { status: number; data?: any };
+          response?: { status: number; data?: unknown };
         };
         if (axiosError.response?.status === 400) {
           errorMessage = "Repository has no accessible pull requests";

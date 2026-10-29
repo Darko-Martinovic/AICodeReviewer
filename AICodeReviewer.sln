@@ -5,7 +5,10 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AICodeReviewer", "AICodeReviewer.csproj", "{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE}"
 EndProject
-
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AICodeReviewer.Tests", "tests\AICodeReviewer.Tests\AICodeReviewer.Tests.csproj", "{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,15 +31,29 @@ Global
 		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE}.Release|x64.Build.0 = Release|Any CPU
 		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE}.Release|x86.ActiveCfg = Release|Any CPU
 		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE}.Release|x86.Build.0 = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|x64.Build.0 = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Debug|x86.Build.0 = Debug|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|x64.ActiveCfg = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|x64.Build.0 = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|x86.ActiveCfg = Release|Any CPU
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(StartupProject) = preSolution
-		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE} = AICodeReviewer
+	GlobalSection(NestedProjects) = preSolution
+		{89C65256-BA16-49B4-9DDB-F98B7F8CBE15} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
-
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {60DD172B-711C-4BE2-B3E4-E796588DF028}
+	EndGlobalSection
+	GlobalSection(StartupProject) = preSolution
+		{838AEF1B-D24D-0F1C-3E96-12CCDE4E3EFE} = AICodeReviewer
 	EndGlobalSection
 EndGlobal

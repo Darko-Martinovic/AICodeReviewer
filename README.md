@@ -45,7 +45,7 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
 
 ### Prerequisites
 
-- .NET 9.0 SDK
+- .NET 10 SDK
 - Node.js 18+
 - An Azure OpenAI deployment and a GitHub token
 
@@ -103,6 +103,17 @@ Token usage and estimated cost are shown at the top of each review summary. To h
   "ShowTokenMetrics": false
 }
 ```
+
+## Checks
+
+The backend tests start the API in memory with placeholder settings, so they need no keys:
+
+```bash
+dotnet test
+cd client-app && npm run lint && npm run build
+```
+
+GitHub Actions runs the same checks on every pull request.
 
 ## License
 
