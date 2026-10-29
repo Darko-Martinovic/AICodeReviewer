@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 // dotnet run --project lab/AICodeReviewer.Lab -- run [--dataset v1] [--model key] [--judge key] [--cases prefix]
 //                                                    [--prompt Language=version]... [--repeat n] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- scoreboard [--dataset v1]
-// dotnet run --project lab/AICodeReviewer.Lab -- rejudge [--dataset v1] [--judge key] [--max-cost dollars] [--estimate]
+// dotnet run --project lab/AICodeReviewer.Lab -- rejudge [--dataset v1] [--judge key] [--cases prefix] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt list
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt new <Language> --notes "what changes" [--from version]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt decide <Language> <version> [--model key] [--judge key] [--margin 0.02]
@@ -127,7 +127,7 @@ static async Task<int> Rejudge(Options options)
     var resultsFolder = Path.Combine(lab.RepoRoot, "lab", "results");
     var runs = new PromptLab(resultsFolder, lab.Dataset, lab.Prompts).Runs();
 
-    var estimate = runs.Sum(r => runner.EstimateRejudge(r.Result, judgeModel));
+    var estimate = runs.Sum(r => runner.EstimateRejudge(r.Result, judgeModel, options.Cases));
     Console.WriteLine($"Grading the reviews of {runs.Count} saved runs again with {judgeModel}: estimate ${estimate:F2} (budget ${options.MaxCost:F2})");
     if (options.EstimateOnly)
     {
@@ -143,10 +143,11 @@ static async Task<int> Rejudge(Options options)
     foreach (var run in runs)
     {
         Console.WriteLine(run.File);
-        var result = await runner.RejudgeAsync(run.Result, judgeModel, Console.WriteLine);
+        var result = await runner.RejudgeAsync(run.Result, judgeModel, Console.WriteLine, options.Cases);
         File.WriteAllText(Path.Combine(resultsFolder, lab.Dataset.Name, run.File),
             System.Text.Json.JsonSerializer.Serialize(result, Runner.ResultJson) + "\n");
-        var cost = result.Cases.Sum(c => c.JudgeCost);
+        // Only the cases graded this time cost anything
+        var cost = result.Cases.Where(c => options.Cases is null || c.Id.StartsWith(options.Cases, StringComparison.Ordinal)).Sum(c => c.JudgeCost);
         spent += cost;
         Console.WriteLine($"  recall {run.Result.Summary.Recall:P0} -> {result.Summary.Recall:P0}, " +
             $"precision {run.Result.Summary.Precision:P0} -> {result.Summary.Precision:P0}, ${cost:F4}");

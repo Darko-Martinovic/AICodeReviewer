@@ -38,7 +38,7 @@
     "f1": 0.647,
     "false_alarms_per_clean_case": 2.75,
     "reviewer_cost": 0.0133125,
-    "judge_cost": 0.108694
+    "judge_cost": 0.108744
   },
   "groups": {
     "clean": {
@@ -81,7 +81,7 @@
       "f1": 0.712,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0091926,
-      "judge_cost": 0.081072
+      "judge_cost": 0.081122
     }
   },
   "cases": [
@@ -193,7 +193,7 @@
           "label_ids": [
             "sql-02-transfer-funds#1"
           ],
-          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows overdraft and lost updates."
+          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows lost updates and overdrafts."
         },
         {
           "line": 12,
@@ -206,7 +206,7 @@
           "label_ids": [
             "sql-02-transfer-funds#2"
           ],
-          "reason": "Reports the missing TRY/CATCH and XACT_ABORT, so a failing statement can leave the transaction open."
+          "reason": "Names the missing TRY/CATCH and XACT_ABORT, and the resulting open transaction when a statement fails."
         },
         {
           "line": 23,
@@ -217,7 +217,7 @@
           "explanation": "If @FromAccountId equals @ToAccountId, the procedure debits and then credits the same row, so the net change is zero, but it still writes a Transfers record for a transfer that did not happen. The procedure does not validate this input.",
           "verdict": "real",
           "label_ids": [],
-          "reason": "A self-transfer is not rejected and writes a bogus Transfers row. It is a genuine input validation gap that no label covers."
+          "reason": "A self-transfer is not rejected and produces a bogus Transfers record. This is a genuine validation gap that no label covers."
         },
         {
           "line": 31,
@@ -228,7 +228,7 @@
           "explanation": "The existence of @ToAccountId is only checked at line 31, after the source balance has already been updated. The code relies on rollback for correctness, which works but is fragile and does unnecessary write work for an invalid input. The check is also tied to @@ROWCOUNT from the second UPDATE only, which makes the logic harder to follow.",
           "verdict": "false_alarm",
           "label_ids": [],
-          "reason": "The rollback correctly handles an unknown destination, and the ordering is only a design preference. Nothing is actually broken."
+          "reason": "The destination check happens inside a transaction and is rolled back on failure, so the result is correct. The remark is a design preference, not a defect."
         }
       ],
       "found": [
@@ -241,8 +241,8 @@
       "reviewer_output_tokens": 1989,
       "reviewer_cost": 0.0011886,
       "judge_input_tokens": 2305,
-      "judge_output_tokens": 308,
-      "judge_cost": 0.00769,
+      "judge_output_tokens": 313,
+      "judge_cost": 0.00774,
       "seconds": 13.4,
       "error": null
     },
@@ -1167,5 +1167,5 @@
       "error": null
     }
   ],
-  "rejudged_at": "2026-10-29T13:09:30.9747913+00:00"
+  "rejudged_at": "2026-10-29T13:25:48.8260771+00:00"
 }

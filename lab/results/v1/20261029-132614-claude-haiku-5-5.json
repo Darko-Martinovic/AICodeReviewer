@@ -1,0 +1,931 @@
+{
+  "dataset": "v1",
+  "model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "prompts": {
+    "Sql": 1
+  },
+  "repeat": 2,
+  "tolerance": 3,
+  "started_at": "2026-10-29T13:26:14.5975214+00:00",
+  "seconds": 46.2,
+  "stopped_by_budget": false,
+  "estimate": {
+    "cases": 12,
+    "input_tokens": 21500,
+    "output_tokens": 36080,
+    "reviewer_cost": 0.0069,
+    "judge_cost": 0.2655,
+    "total": 0.2724
+  },
+  "summary": {
+    "cases": 12,
+    "errors": 0,
+    "labels": 14,
+    "found": 13,
+    "findings": 45,
+    "matched": 13,
+    "duplicates": 0,
+    "real": 9,
+    "false_alarms": 23,
+    "outside_window": 0,
+    "clean_cases": 4,
+    "false_alarms_on_clean": 14,
+    "recall": 0.9286,
+    "precision": 0.4889,
+    "strict_precision": 0.2889,
+    "f1": 0.6405,
+    "false_alarms_per_clean_case": 3.5,
+    "reviewer_cost": 0.0114783,
+    "judge_cost": 0.091464
+  },
+  "groups": {
+    "clean": {
+      "cases": 4,
+      "errors": 0,
+      "labels": 0,
+      "found": 0,
+      "findings": 17,
+      "matched": 0,
+      "duplicates": 0,
+      "real": 3,
+      "false_alarms": 14,
+      "outside_window": 0,
+      "clean_cases": 4,
+      "false_alarms_on_clean": 14,
+      "recall": 1,
+      "precision": 0.1765,
+      "strict_precision": 0,
+      "f1": 0.3,
+      "false_alarms_per_clean_case": 3.5,
+      "reviewer_cost": 0.0038296,
+      "judge_cost": 0.036672
+    },
+    "realistic": {
+      "cases": 8,
+      "errors": 0,
+      "labels": 14,
+      "found": 13,
+      "findings": 28,
+      "matched": 13,
+      "duplicates": 0,
+      "real": 6,
+      "false_alarms": 9,
+      "outside_window": 0,
+      "clean_cases": 0,
+      "false_alarms_on_clean": 0,
+      "recall": 0.9286,
+      "precision": 0.6786,
+      "strict_precision": 0.4643,
+      "f1": 0.7841,
+      "false_alarms_per_clean_case": 0,
+      "reviewer_cost": 0.0076487,
+      "judge_cost": 0.054792
+    }
+  },
+  "cases": [
+    {
+      "id": "sql-01-search-products",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-01-search-products#1"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 15,
+          "category": "Security",
+          "severity": "Critical",
+          "title": "SQL injection via @SortColumn in dynamic SQL",
+          "explanation": "@SortColumn is concatenated directly into the ORDER BY clause of the dynamic SQL string with no validation or quoting. A caller can pass a value such as \u0027Name; DROP TABLE dbo.Products; --\u0027 or a subquery to execute arbitrary SQL. SYSNAME parameters do not prevent this. The @SortDescending value is safe because it is only used in a CASE expression.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Identifies SQL injection through unvalidated concatenation of @SortColumn into the ORDER BY clause, the same defect as the label."
+        },
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "LIKE wildcard characters in user input are not escaped",
+          "explanation": "@Search is wrapped in % and passed to LIKE without escaping. Characters such as %, _ and [ in the user\u0027s input act as pattern wildcards, so searches return unintended matches. A NULL @Search also makes @pattern NULL, so the query silently returns no rows instead of being handled explicitly.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Unescaped LIKE wildcards in user input are a genuine, though minor, correctness issue. A NULL @Search also silently returns no rows. Not covered by the label."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Leading-wildcard LIKE prevents index seeks",
+          "explanation": "The pattern \u0027%term%\u0027 has a leading wildcard, so any index on Name cannot be used for a seek. The query will scan the table or index on every search, which degrades as the Products table grows.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "A leading-wildcard LIKE is inherent to a contains-style search. Flagging it is a generic performance remark with no practical fix in this code."
+        },
+        {
+          "line": 6,
+          "end_line": 18,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "No error handling around dynamic SQL execution",
+          "explanation": "The procedure has no TRY...CATCH block. An invalid sort column name or other runtime error in the dynamic SQL is returned raw to the caller, with no logging or controlled error message.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Missing TRY...CATCH is a best-practice suggestion. Letting errors propagate to the caller is acceptable behavior, and wrapping would not materially fix anything."
+        }
+      ],
+      "found": [
+        "sql-01-search-products#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1622,
+      "reviewer_output_tokens": 1414,
+      "reviewer_cost": 0.0008692,
+      "judge_input_tokens": 1752,
+      "judge_output_tokens": 348,
+      "judge_cost": 0.006984,
+      "seconds": 11.6,
+      "error": null
+    },
+    {
+      "id": "sql-02-transfer-funds",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 24,
+          "category": "Bug",
+          "severity": "Critical",
+          "title": "Race condition allows overdraft under concurrency",
+          "explanation": "The balance is read at line 14-15 without locking hints (UPDLOCK, HOLDLOCK) or a conditional update. Two concurrent transfers from the same account can both read the same balance, both pass the check at line 17, and both write back a stale value (line 24 uses @Balance - @Amount instead of an atomic Balance - @Amount). This can overdraw the account and lose updates.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read-then-write race that lets concurrent transfers overdraw and lose an update, the same defect as label 1."
+        },
+        {
+          "line": 12,
+          "end_line": 40,
+          "category": "Maintainability",
+          "severity": "High",
+          "title": "No TRY/CATCH error handling around the transaction",
+          "explanation": "The transaction has no TRY...CATCH block and XACT_ABORT is not set. If an unexpected error occurs (deadlock, constraint violation, conversion error) after BEGIN TRANSACTION at line 12, the transaction may remain open or partially applied, and the caller gets raw errors. Only the explicit checks are handled.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-02-transfer-funds#2"
+          ],
+          "reason": "Reports no TRY/CATCH and no XACT_ABORT, so an error leaves the transaction open or partially applied, the same defect as label 2."
+        },
+        {
+          "line": 19,
+          "end_line": 19,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "Unconditional ROLLBACK may affect caller\u0027s transaction",
+          "explanation": "ROLLBACK TRANSACTION is issued without checking @@TRANCOUNT. If the procedure is called inside an outer transaction, this rolls back the caller\u0027s entire transaction, and the same applies at line 33.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Rolling back unconditionally without checking @@TRANCOUNT would roll back a caller\u0027s outer transaction. This is a genuine but minor issue that no label covers."
+        }
+      ],
+      "found": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1941,
+      "reviewer_output_tokens": 1920,
+      "reviewer_cost": 0.0011541,
+      "judge_input_tokens": 2105,
+      "judge_output_tokens": 270,
+      "judge_cost": 0.00691,
+      "seconds": 12.7,
+      "error": null
+    },
+    {
+      "id": "sql-03-customers-without-orders",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "findings": [
+        {
+          "line": 9,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "High",
+          "title": "NOT IN with a nullable subquery column can return no rows",
+          "explanation": "If any row returned by the subquery has a NULL CustomerId, NOT IN evaluates to UNKNOWN for every customer, so the procedure silently returns an empty result set. Orders.CustomerId is not guaranteed to be non-nullable in this code, and the query has no guard against it.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Describes the NOT IN NULL pitfall: a NULL CustomerId in the subquery makes the predicate UNKNOWN and the procedure returns no rows."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Non-sargable date filter prevents index seek on OrderDate",
+          "explanation": "Wrapping OrderDate in YEAR() forces a scan of every order row, because an index on OrderDate cannot be used for a range seek. The cost grows with the size of the Orders table.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Identifies YEAR(o.OrderDate) as non-sargable, preventing an index seek on OrderDate."
+        },
+        {
+          "line": 2,
+          "end_line": 2,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "No validation of the @Year parameter",
+          "explanation": "A NULL or out-of-range @Year is accepted without checks. A NULL value makes YEAR(o.OrderDate) = NULL for every row, so the procedure returns every customer with no error, which is misleading to callers.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Missing validation of @Year is speculative advice; a NULL @Year returning all customers is a reasonable result for \u0027no orders matching\u0027, and the claim is minor and not a real defect here."
+        }
+      ],
+      "found": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1486,
+      "reviewer_output_tokens": 1332,
+      "reviewer_cost": 0.0008146,
+      "judge_input_tokens": 1572,
+      "judge_output_tokens": 282,
+      "judge_cost": 0.005964,
+      "seconds": 14.1,
+      "error": null
+    },
+    {
+      "id": "sql-04-import-price-changes",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "findings": [
+        {
+          "line": 12,
+          "end_line": 23,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Row-by-row cursor used for a set-based update",
+          "explanation": "The procedure iterates staging rows with a cursor and runs one UPDATE per row against dbo.Products. This is slow for large batches, holds locks for the whole loop inside an open transaction, and is harder to maintain than a single set-based statement. The cursor is also not declared LOCAL FAST_FORWARD, so it uses default scope and cursor options.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Describes the row-by-row cursor performing one UPDATE per staged row inside a transaction, the same defect as label 1."
+        },
+        {
+          "line": 28,
+          "end_line": 28,
+          "category": "Bug",
+          "severity": "High",
+          "title": "@@IDENTITY can return the wrong identity value",
+          "explanation": "@@IDENTITY returns the last identity generated in the session across any scope, including triggers. If a trigger on dbo.ImportLog inserts into another identity table, @LogId will point to the wrong row, and the staging rows will be tagged with an incorrect ImportLogId.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Identifies @@IDENTITY returning the wrong identity because of triggers, same as label 2."
+        },
+        {
+          "line": 8,
+          "end_line": 34,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY...CATCH error handling",
+          "explanation": "The transaction is started without TRY...CATCH. SET XACT_ABORT ON rolls back on error, but the caller receives no controlled error message, nothing is logged, and the cursor may be left open if a failure occurs mid-loop. The procedure also does not check @@TRANCOUNT before committing.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "XACT_ABORT ON already rolls back the transaction on error and the error propagates to the caller. The missing TRY/CATCH is a style preference, and the cursor is deallocated when the batch ends, so the claim is weak."
+        },
+        {
+          "line": 8,
+          "end_line": 34,
+          "category": "Performance",
+          "severity": "Low",
+          "title": "Long-running transaction covers the entire import",
+          "explanation": "The explicit transaction spans the cursor loop, the log insert, and the staging update. With row-by-row updates on dbo.Products, locks are held for the full duration, which increases blocking for other sessions reading or updating prices.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "This restates the lock-holding consequence of the row-by-row cursor loop already covered by label 1. The transaction scope itself is appropriate for atomicity."
+        },
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "NULL or invalid prices are written without validation",
+          "explanation": "NewPrice and Sku are read from staging and applied directly to dbo.Products. A NULL NewPrice would set Price to NULL, and a NULL or unmatched Sku would silently update nothing. There is no validation or filtering of staging rows before the update.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "A NULL NewPrice would overwrite Price with NULL or fail on a NOT NULL constraint, and there is no validation of staging data. This is a genuine robustness gap that no label covers."
+        }
+      ],
+      "found": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1927,
+      "reviewer_output_tokens": 2048,
+      "reviewer_cost": 0.0012167,
+      "judge_input_tokens": 2309,
+      "judge_output_tokens": 448,
+      "judge_cost": 0.009098,
+      "seconds": 16,
+      "error": null
+    },
+    {
+      "id": "sql-clean-01-upsert-customer",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 15,
+          "end_line": 17,
+          "category": "Bug",
+          "severity": "High",
+          "title": "OUTPUT parameter not reset before lookup",
+          "explanation": "@CustomerId is an OUTPUT parameter, so a caller may pass in a non-NULL value. If no customer matches @Email, the SELECT assigns nothing and @CustomerId keeps the caller\u0027s value. The IF @CustomerId IS NULL check at line 19 then fails, so the procedure runs an UPDATE against the wrong or nonexistent row and never inserts the new customer.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Valid: an OUTPUT parameter can carry a caller-supplied value in T-SQL. If no row matches, the SELECT assigns nothing, so @CustomerId keeps that value, the insert is skipped and the UPDATE hits the wrong row. Initializing @CustomerId = NULL before the lookup fixes it."
+        },
+        {
+          "line": 28,
+          "end_line": 30,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "NULL @Name overwrites existing name and may fail insert",
+          "explanation": "@Name is nullable and is not validated, unlike @Email. Passing NULL on an existing customer sets Name to NULL on update, and on insert it passes NULL to Name, which fails if the column is NOT NULL.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Speculative. Nothing in the file says Name is NOT NULL or that a NULL name is invalid. Allowing NULL is a design choice, and an overwrite with the supplied value is normal upsert behavior."
+        },
+        {
+          "line": 1,
+          "end_line": 34,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY/CATCH error handling",
+          "explanation": "The procedure has no TRY...CATCH block. XACT_ABORT rolls back the transaction on error, but errors are passed to the caller without context, and there is no logging or controlled handling for failures such as unique key violations during concurrent inserts.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Missing TRY/CATCH is a style preference. With XACT_ABORT ON the transaction rolls back and the error propagates to the caller, which is acceptable behavior. UPDLOCK/HOLDLOCK also serializes the race."
+        },
+        {
+          "line": 16,
+          "end_line": 22,
+          "category": "Design",
+          "severity": "Low",
+          "title": "Upsert correctness depends on a unique constraint not visible here",
+          "explanation": "The locking hints protect the check-then-insert pattern only if every writer uses them. Without a unique index on Email, concurrent or non-procedure writers can still create duplicate customers. The file does not show such an index.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Speculative about schema outside this file. The procedure is correct as written for its own locking pattern, and a missing unique index is not a defect visible here."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1812,
+      "reviewer_output_tokens": 1752,
+      "reviewer_cost": 0.0010572,
+      "judge_input_tokens": 1862,
+      "judge_output_tokens": 440,
+      "judge_cost": 0.008124,
+      "seconds": 13.4,
+      "error": null
+    },
+    {
+      "id": "sql-clean-02-monthly-revenue",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 20,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Orders with NULL Status are silently excluded",
+          "explanation": "The predicate o.Status \u003C\u003E N\u0027Cancelled\u0027 evaluates to UNKNOWN when Status is NULL, so those orders are dropped from the revenue totals without any signal. If NULL is a valid state for pending or unset orders, revenue is understated.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The NULL-handling concern is technically accurate: \u0060\u003C\u003E\u0060 evaluates to UNKNOWN for NULL Status, so those rows are dropped. It is conditional on whether Status is nullable, which the file does not show. A careful reviewer could still want it addressed, so it counts as a real but modest defect."
+        },
+        {
+          "line": 7,
+          "end_line": 8,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Hardcoded year range validation values",
+          "explanation": "The bounds 2000 and 2100 are magic numbers embedded in the validation logic, and the error code 50030 is also hardcoded. Changing the accepted range requires a code change and redeployment, and the bounds are not documented.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "This is a style complaint about magic numbers. Bounds checks in a stored procedure and a THROW error number are normal practice, and the finding points to no actual defect."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1711,
+      "reviewer_output_tokens": 1048,
+      "reviewer_cost": 0.0006951,
+      "judge_input_tokens": 1493,
+      "judge_output_tokens": 222,
+      "judge_cost": 0.005206,
+      "seconds": 9.5,
+      "error": null
+    },
+    {
+      "id": "sql-01-search-products",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-01-search-products#1"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 15,
+          "category": "Security",
+          "severity": "Critical",
+          "title": "SQL injection via unvalidated @SortColumn in ORDER BY",
+          "explanation": "@SortColumn is concatenated directly into the dynamic SQL text, so any caller can inject arbitrary T-SQL, for example a value like \u0027Name; DROP TABLE dbo.Products; --\u0027. sp_executesql only parameterizes @pattern; it does not protect identifiers or keywords in the text. Because the column name is not validated, it can also reference any column or expression, and invalid names cause runtime errors.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Describes SQL injection through concatenated @SortColumn in the ORDER BY, the same defect as the label."
+        },
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "LIKE wildcards in user input are not escaped",
+          "explanation": "@Search is wrapped in % without escaping. Characters such as %, _ and [ in the user\u0027s input are treated as LIKE pattern metacharacters, so a search for \u0027100%\u0027 or \u0027a_b\u0027 matches unintended rows. This is a correctness issue, not an injection risk, since the value is passed as a parameter.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Unescaped LIKE wildcards in @Search are a genuine, minor correctness defect not covered by the label, and the finding correctly notes it is not injection."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Leading wildcard LIKE prevents index seeks",
+          "explanation": "The pattern \u0027%term%\u0027 has a leading wildcard, so any index on Products.Name cannot be used for a seek and the query will scan the table on every search. This gets worse as the table grows.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "A leading-wildcard LIKE scan is inherent to substring search and is the intended behavior here; this is not a fixable defect in the code."
+        },
+        {
+          "line": 6,
+          "end_line": 18,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "No TRY-CATCH error handling or transaction context",
+          "explanation": "The procedure has no TRY-CATCH block. Errors from invalid sort columns or from execution are returned raw to the caller, with no logging or controlled error message.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "A read-only SELECT needs no transaction, and raw errors propagating to the caller is acceptable; the TRY-CATCH advice is a best-practice preference, not a defect."
+        }
+      ],
+      "found": [
+        "sql-01-search-products#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1622,
+      "reviewer_output_tokens": 1493,
+      "reviewer_cost": 0.0009087,
+      "judge_input_tokens": 1756,
+      "judge_output_tokens": 334,
+      "judge_cost": 0.006852,
+      "seconds": 12.4,
+      "error": null
+    },
+    {
+      "id": "sql-02-transfer-funds",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 24,
+          "category": "Bug",
+          "severity": "High",
+          "title": "Balance check is not protected against concurrent transfers",
+          "explanation": "The source balance is read at line 14-15 without an update lock or serializable hint, then the UPDATE at line 23-25 writes a value computed from that earlier read (@Balance - @Amount). Two concurrent transfers from the same account can both read the same balance, both pass the check, and the later write overwrites the earlier one (lost update), allowing the account to go negative or money to vanish.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read followed by a write from the stale variable, causing lost updates and overdraw under concurrency, which is exactly label #1."
+        }
+      ],
+      "found": [
+        "sql-02-transfer-funds#1"
+      ],
+      "missed": [
+        "sql-02-transfer-funds#2"
+      ],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1941,
+      "reviewer_output_tokens": 1338,
+      "reviewer_cost": 0.0008631,
+      "judge_input_tokens": 1841,
+      "judge_output_tokens": 101,
+      "judge_cost": 0.004692,
+      "seconds": 9.5,
+      "error": null
+    },
+    {
+      "id": "sql-03-customers-without-orders",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "findings": [
+        {
+          "line": 9,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "High",
+          "title": "NOT IN returns no rows if the subquery yields any NULL CustomerId",
+          "explanation": "If dbo.Orders.CustomerId can be NULL, the NOT IN predicate evaluates to UNKNOWN for every customer whose CustomerId is not matched, so the procedure silently returns an empty result set. The schema is not shown, but this is a common cause of wrong results.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Identifies the NOT IN with NULL CustomerId in the subquery causing an empty result, same as label 1."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Non-sargable YEAR() filter on OrderDate prevents index seeks",
+          "explanation": "Wrapping o.OrderDate in YEAR() forces SQL Server to evaluate the function on every row, so any index on OrderDate cannot be used for a range seek and the query tends to scan the Orders table.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Identifies the non-sargable YEAR(o.OrderDate) predicate preventing index seeks, same as label 2."
+        }
+      ],
+      "found": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1486,
+      "reviewer_output_tokens": 983,
+      "reviewer_cost": 0.0006401,
+      "judge_input_tokens": 1488,
+      "judge_output_tokens": 175,
+      "judge_cost": 0.004726,
+      "seconds": 8.5,
+      "error": null
+    },
+    {
+      "id": "sql-04-import-price-changes",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "findings": [
+        {
+          "line": 12,
+          "end_line": 23,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Row-by-row cursor used for a set-based update",
+          "explanation": "The procedure loops over staging rows with a cursor and issues one UPDATE per row against dbo.Products. This is slower than a single set-based MERGE or UPDATE...FROM join, and it keeps the transaction open longer while row-by-row work runs.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Describes the row-by-row cursor update that should be a set-based UPDATE with a join."
+        },
+        {
+          "line": 28,
+          "end_line": 28,
+          "category": "Bug",
+          "severity": "High",
+          "title": "@@IDENTITY used instead of SCOPE_IDENTITY()",
+          "explanation": "@@IDENTITY returns the last identity value generated in the session from any scope, including triggers that insert into identity tables. If ImportLog has such a trigger, @LogId can point to the wrong row and the staging rows get linked to the wrong log entry.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Identifies @@IDENTITY vs SCOPE_IDENTITY() with the trigger scenario."
+        },
+        {
+          "line": 8,
+          "end_line": 34,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY...CATCH error handling around the transaction",
+          "explanation": "XACT_ABORT ON rolls back on error, but the procedure has no CATCH block. Errors are not logged, the cursor is not closed or deallocated if a failure happens mid-loop, and the caller gets no controlled error message. The procedure also never checks @@TRANCOUNT before committing.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "XACT_ABORT ON already rolls back the transaction on error, and the cursor is cleaned up when the batch ends. The missing TRY/CATCH is a style preference here."
+        },
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "NULL or invalid NewPrice is written to Products without validation",
+          "explanation": "The procedure copies NewPrice from staging directly into dbo.Products.Price. If the staging value is NULL or negative, the product price is overwritten with bad data, and nothing checks this before the update.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "NewPrice is written to Products without any NULL or negative check. If Price is nullable, a NULL silently wipes the price, so this is a genuine validation gap."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Performance",
+          "severity": "Low",
+          "title": "Staging query has no supporting index shown and no deterministic ordering",
+          "explanation": "The cursor filters staging.PriceChanges by BatchId. Without an index on BatchId, this scans the whole table. The query also has no ORDER BY, so processing order is undefined if order matters.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Speculative index advice about a schema not shown, and ordering does not matter for these independent updates."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Duplicate SKUs in a batch are silently double-counted",
+          "explanation": "If staging contains the same Sku more than once for a batch, the cursor runs one UPDATE per duplicate. The last row wins and @Rows counts each update, so RowsUpdated overstates the number of products changed.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Duplicate SKUs in a batch are updated repeatedly, so the last row wins nondeterministically with no ordering and @Rows overcounts. This is a real data-correctness issue."
+        }
+      ],
+      "found": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1927,
+      "reviewer_output_tokens": 1979,
+      "reviewer_cost": 0.0011822,
+      "judge_input_tokens": 2373,
+      "judge_output_tokens": 482,
+      "judge_cost": 0.009566,
+      "seconds": 14.5,
+      "error": null
+    },
+    {
+      "id": "sql-clean-01-upsert-customer",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 15,
+          "end_line": 30,
+          "category": "Bug",
+          "severity": "High",
+          "title": "Stale OUTPUT value bypasses insert path",
+          "explanation": "@CustomerId is an OUTPUT parameter that the caller may pass in with a non-NULL value. If no row matches @Email, the SELECT at lines 15-17 does not assign to @CustomerId, so it keeps the caller\u0027s value. The IF @CustomerId IS NULL check at line 19 then fails, the code takes the UPDATE branch against a non-existent or wrong CustomerId, and no customer is created. The procedure reports success without writing the row.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "In T-SQL, SELECT @var = ... leaves the variable unchanged when no row matches. A non-NULL value passed in through the OUTPUT parameter therefore skips the insert branch, and the UPDATE hits the wrong row or none. The procedure never resets @CustomerId to NULL first."
+        },
+        {
+          "line": 16,
+          "end_line": 17,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Email normalization inconsistent with validation",
+          "explanation": "The validation at line 10 trims @Email, but the lookup at line 17 and the insert at line 22 use the untrimmed value. Inputs with leading or trailing spaces or different casing can create duplicate customers depending on collation, and the lookup may miss existing rows.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The validation only rejects blank emails. Not normalizing the value is a design choice. Trailing spaces are ignored by = comparison, and casing depends on the collation, which is usually case-insensitive. The duplicate-customer claim is speculative."
+        },
+        {
+          "line": 21,
+          "end_line": 22,
+          "category": "Design",
+          "severity": "Medium",
+          "title": "Upsert relies on locking hints rather than a uniqueness constraint",
+          "explanation": "The UPDLOCK and HOLDLOCK hints serialize this code path, but nothing in the file enforces that Email is unique. Any other writer that bypasses this procedure can still insert duplicate emails, and the hints do not cover every concurrency case.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "A unique constraint would live in the table schema, not in this procedure. The finding speculates about code outside the file, and the UPDLOCK/HOLDLOCK pattern is the standard way to make this upsert safe."
+        },
+        {
+          "line": 28,
+          "end_line": 30,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Update overwrites Name with NULL and always writes",
+          "explanation": "@Name is not validated for NULL or emptiness, so a NULL argument silently clears an existing customer name. The UPDATE also runs on every call, even when nothing changed, which bumps UpdatedAt and causes unnecessary writes and log growth.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Whether a NULL @Name should clear the stored name is an unspecified contract question, so the claim is speculative. Updating UpdatedAt on every call is normal upsert behavior, not a defect."
+        },
+        {
+          "line": 11,
+          "end_line": 34,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY-CATCH error handling",
+          "explanation": "The procedure has no TRY...CATCH block. XACT_ABORT rolls back the transaction on error, but the caller receives only a raw error with no context, and any open transaction state is not handled explicitly. This makes failures harder to diagnose and to log.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "SET XACT_ABORT ON already rolls the transaction back on error and propagates the error to the caller. A TRY...CATCH block is not needed here, so this is a style preference."
+        },
+        {
+          "line": 13,
+          "end_line": 33,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Transaction does not account for an outer transaction",
+          "explanation": "BEGIN TRANSACTION and COMMIT TRANSACTION are unconditional. If the caller already has an open transaction, this nested transaction behaves unexpectedly and XACT_ABORT can roll back the caller\u0027s work.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Unconditional BEGIN/COMMIT TRANSACTION is a common pattern. The claim about nested transactions is speculative, and XACT_ABORT rolling back the outer transaction on error is the expected behavior."
+        },
+        {
+          "line": 2,
+          "end_line": 3,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Missing comments and parameter documentation",
+          "explanation": "The procedure has no header comment describing its purpose, the expected email normalization, the NULL semantics of @Name, or the meaning of @CustomerId as input and output. This makes the contract unclear to callers.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Missing header comments are a style remark, not a functional defect."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1812,
+      "reviewer_output_tokens": 2351,
+      "reviewer_cost": 0.0013567,
+      "judge_input_tokens": 2244,
+      "judge_output_tokens": 1224,
+      "judge_cost": 0.016728,
+      "seconds": 20.6,
+      "error": null
+    },
+    {
+      "id": "sql-clean-02-monthly-revenue",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 2,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 20,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Status filter silently drops rows where Status is NULL",
+          "explanation": "The predicate o.Status \u003C\u003E N\u0027Cancelled\u0027 evaluates to UNKNOWN when Status is NULL, so orders with a NULL status are excluded from the monthly revenue totals. This is an unintended side effect unless NULL status is guaranteed impossible by the schema.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The NULL-status concern is speculative. The schema is not shown, Status is likely NOT NULL, and the finding itself concedes it depends on that. A NULL status is ambiguous and not a clear defect here."
+        },
+        {
+          "line": 7,
+          "end_line": 8,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Hardcoded year range in validation",
+          "explanation": "The valid range 2000 to 2100 is embedded in the procedure. It will need code changes if business rules change, and the bounds are not documented.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "A hardcoded sanity range for the year is a reasonable validation choice. Calling it a maintainability issue is a style preference."
+        },
+        {
+          "line": 14,
+          "end_line": 21,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Duplicated month-start expression",
+          "explanation": "DATEFROMPARTS(YEAR(o.OrderDate), MONTH(o.OrderDate), 1) appears in both the SELECT list and the GROUP BY. Keeping them in sync is error-prone, and the expression is repeated without explanation.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "SQL Server requires the GROUP BY expression to match the SELECT expression, so the repetition is necessary. This is not a defect."
+        },
+        {
+          "line": 11,
+          "end_line": 11,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Date range boundary computed from a DATE variable without a comment",
+          "explanation": "The exclusive upper bound @To is calculated with DATEADD on @From. This works, but the exclusive-end convention is not stated, which invites off-by-one changes later.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The half-open range with DATEADD is correct and idiomatic. A missing comment is only a style remark."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1711,
+      "reviewer_output_tokens": 1099,
+      "reviewer_cost": 0.0007206,
+      "judge_input_tokens": 1682,
+      "judge_output_tokens": 325,
+      "judge_cost": 0.006614,
+      "seconds": 9.2,
+      "error": null
+    }
+  ],
+  "rejudged_at": null
+}

@@ -46,6 +46,7 @@ When the judge or the labels change, grade the saved reviews again instead of re
 ```bash
 dotnet run --project lab/AICodeReviewer.Lab -- rejudge --estimate
 dotnet run --project lab/AICodeReviewer.Lab -- rejudge --max-cost 1.50
+dotnet run --project lab/AICodeReviewer.Lab -- rejudge --cases sql-02      # only the cases whose labels changed
 ```
 
 Every saved run in `lab/results/v1` was graded again on 2026-10-29, when a match went from one label to several, for $1.06.
