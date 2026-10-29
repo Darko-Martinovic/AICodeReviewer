@@ -10,7 +10,7 @@ This is a **full-stack .NET 10 + React/TypeScript application** for AI-powered c
 - **Controllers**: REST API endpoints in `/Controllers/` (repositories, commits, pull requests, system prompts)
 - **Services**: Business logic in `/Services/` with interface-based dependency injection
 - **Models**: DTOs and configuration models in `/Models/`
-- **Key Dependencies**: Semantic Kernel (Azure OpenAI), Octokit (GitHub API)
+- **Key Dependencies**: Anthropic SDK and chat completions APIs (the reviewer, `Services/Reviewing/`), Semantic Kernel (workflow plugins), Octokit (GitHub API)
 
 ### Frontend (React + TypeScript + Vite)
 

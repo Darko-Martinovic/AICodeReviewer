@@ -13,14 +13,14 @@ namespace AICodeReviewer.Controllers;
 public class TrainingController : ControllerBase
 {
     private readonly ICodeValidationService _validationService;
-    private readonly IAzureOpenAIService _openAIService;
+    private readonly ICodeAnalysisService _openAIService;
     private readonly IPromptManagementService _promptManagementService;
     private readonly IConfigurationService _configurationService;
     private readonly ILogger<TrainingController> _logger;
 
     public TrainingController(
         ICodeValidationService validationService,
-        IAzureOpenAIService openAIService,
+        ICodeAnalysisService openAIService,
         IPromptManagementService promptManagementService,
         IConfigurationService configurationService,
         ILogger<TrainingController> logger)

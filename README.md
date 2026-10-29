@@ -16,7 +16,8 @@ https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 
 ## What the lab has today
 
-- AI reviews of commits and pull requests with Azure OpenAI
+- AI reviews of commits and pull requests, with Claude Haiku 5.5 by default; any model in `Configuration/models.json` (Anthropic, Azure OpenAI or an OpenAI-compatible API such as Ollama) can do the review
+- Findings come back as structured JSON (line, end line, category, severity, title, explanation, suggestion), with the cost of each review worked out from the prices in `models.json`
 - A system prompt per language (C#, VB.NET, Java, JavaScript, TypeScript, React and T-SQL), editable in the UI
 - Train AI: try a prompt on a piece of code, give feedback and refine the prompt
 - Workflows defined in JSON that run after a review (a PR comment, a Jira ticket, Slack or Teams notifications) through Semantic Kernel plugins
@@ -29,7 +30,7 @@ https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 Copilot answers "can AI review my PR?". The lab is meant to answer "how good is the review?":
 
 1. A labelled set of files with seeded bugs, each bug written down with its file, line and category
-2. Structured JSON output from the model instead of parsing free text
+2. Structured JSON output from the model instead of parsing free text (done)
 3. A judge that scores each review against the labels: bugs found, bugs missed and false alarms
 4. Runs that compare prompts, models and Copilot's own comments on the same changes
 5. A scoreboard of prompt versions, keeping a change only when the scores improve
@@ -47,7 +48,7 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
 
 - .NET 10 SDK
 - Node.js 18+
-- An Azure OpenAI deployment and a GitHub token
+- An Anthropic API key (or an Azure OpenAI deployment, or a local model in Ollama) and a GitHub token
 
 ### Setup
 
@@ -55,10 +56,11 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
 
    ```json
    {
-     "AzureOpenAI": {
-       "Endpoint": "https://your-resource.openai.azure.com",
-       "ApiKey": "your-api-key",
-       "DeploymentName": "your-deployment"
+     "Anthropic": {
+       "ApiKey": "your-anthropic-key"
+     },
+     "Review": {
+       "Model": "claude-haiku-5-5"
      },
      "GitHub": {
        "Token": "your-github-token",
@@ -68,7 +70,7 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
    }
    ```
 
-   The same keys can come from environment variables instead, such as `AzureOpenAI__ApiKey`.
+   The same keys can come from environment variables instead, such as `Anthropic__ApiKey` (or `ANTHROPIC_API_KEY`). `Review:Model` is a key from `Configuration/models.json` and defaults to `claude-haiku-5-5`. To review with Azure OpenAI, set `Review:Model` to `azure-openai` and add an `AzureOpenAI` section with `Endpoint`, `ApiKey` and `DeploymentName`.
 
 2. Start the backend:
 

@@ -1,0 +1,38 @@
+{
+  "defaultReviewer": "claude-haiku-5-5",
+  "defaultJudge": "claude-sonnet-5-5",
+  "models": [
+    {
+      "key": "claude-haiku-5-5",
+      "provider": "anthropic",
+      "id": "claude-haiku-5-5",
+      "inputPerMillion": 0.10,
+      "outputPerMillion": 0.50
+    },
+    {
+      "key": "claude-sonnet-5-5",
+      "provider": "anthropic",
+      "id": "claude-sonnet-5-5",
+      "inputPerMillion": 2.00,
+      "outputPerMillion": 10.00
+    },
+    {
+      "key": "azure-openai",
+      "provider": "azure-openai",
+      "id": "",
+      "apiVersion": "2024-10-21",
+      "inputPerMillion": 0,
+      "outputPerMillion": 0,
+      "notes": "The deployment named in AzureOpenAI:DeploymentName; set the prices of your deployment here"
+    },
+    {
+      "key": "ollama-qwen3.5-9b",
+      "provider": "openai-compatible",
+      "id": "qwen3.5:9b",
+      "baseUrl": "http://localhost:11434/v1",
+      "inputPerMillion": 0,
+      "outputPerMillion": 0,
+      "notes": "Runs locally through Ollama's OpenAI-compatible API"
+    }
+  ]
+}

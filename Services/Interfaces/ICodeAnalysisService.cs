@@ -1,9 +1,9 @@
 namespace AICodeReviewer.Services.Interfaces
 {
     /// <summary>
-    /// Interface for Azure OpenAI service operations
+    /// Reviews one file for the commit, pull request and Train AI pages
     /// </summary>
-    public interface IAzureOpenAIService
+    public interface ICodeAnalysisService
     {
         Task<(List<string> issues, List<Models.DetailedIssue> detailedIssues, Models.Usage usage)> AnalyzeCodeAsync(string fileName, string fileContent);
     }
