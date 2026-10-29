@@ -5,6 +5,7 @@ The lab measures how good a reviewer is. It reviews every file of a labelled dat
 - `datasets/v1`: the files and their labels; see [its README](datasets/v1/README.md)
 - `AICodeReviewer.Lab`: the console tool
 - `results/<dataset>`: one JSON file per run, kept in the repository so runs can be compared
+- `results/scoreboard-<dataset>.json`: the scoreboard, refreshed after every run, rejudge and decision, which the app's Lab tab shows with the runs
 
 ## Running it
 

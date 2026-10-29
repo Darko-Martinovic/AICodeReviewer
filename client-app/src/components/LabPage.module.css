@@ -1,0 +1,208 @@
+/* LabPage Component CSS Module */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+}
+
+:global(.dark) .heading,
+:global(.dark) .subheading {
+  color: rgb(243 244 246);
+}
+
+.subheading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgb(31 41 55);
+  margin-bottom: 0.5rem;
+}
+
+.section {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.table th {
+  text-align: left;
+  font-weight: 600;
+  color: rgb(75 85 99);
+  border-bottom: 1px solid rgb(229 231 235);
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  border-bottom: 1px solid rgb(243 244 246);
+  padding: 0.5rem 0.75rem;
+  color: rgb(31 41 55);
+  vertical-align: top;
+}
+
+:global(.dark) .table th {
+  color: rgb(156 163 175);
+  border-bottom-color: rgb(55 65 81);
+}
+
+:global(.dark) .table td {
+  color: rgb(229 231 235);
+  border-bottom-color: rgb(31 41 55);
+}
+
+.number {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.muted {
+  color: rgb(107 114 128);
+  font-size: 0.8125rem;
+}
+
+:global(.dark) .muted {
+  color: rgb(156 163 175);
+}
+
+.errorText {
+  color: rgb(185 28 28);
+  font-size: 0.8125rem;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover td {
+  background-color: rgb(249 250 251);
+}
+
+:global(.dark) .clickable:hover td {
+  background-color: rgb(31 41 55);
+}
+
+.selected td {
+  background-color: rgb(239 246 255);
+}
+
+:global(.dark) .selected td {
+  background-color: rgba(30, 58, 138, 0.3);
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.activeBadge {
+  composes: badge;
+  margin-left: 0.5rem;
+  background-color: rgb(219 234 254);
+  color: rgb(30 64 175);
+}
+
+.keptBadge {
+  composes: badge;
+  background-color: rgb(220 252 231);
+  color: rgb(22 101 52);
+}
+
+.rolledBackBadge {
+  composes: badge;
+  background-color: rgb(254 243 199);
+  color: rgb(146 64 14);
+}
+
+.runDetail {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.5rem;
+}
+
+:global(.dark) .runDetail {
+  border-color: rgb(55 65 81);
+}
+
+.findingsCell {
+  background-color: rgb(249 250 251);
+}
+
+:global(.dark) .findingsCell {
+  background-color: rgb(17 24 39);
+}
+
+.findings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.finding {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.lines {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+
+.reason {
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  color: rgb(75 85 99);
+}
+
+:global(.dark) .reason {
+  color: rgb(156 163 175);
+}
+
+.verdict_match {
+  composes: badge;
+  background-color: rgb(220 252 231);
+  color: rgb(22 101 52);
+}
+
+.verdict_duplicate {
+  composes: badge;
+  background-color: rgb(243 244 246);
+  color: rgb(55 65 81);
+}
+
+.verdict_real {
+  composes: badge;
+  background-color: rgb(219 234 254);
+  color: rgb(30 64 175);
+}
+
+.verdict_false_alarm {
+  composes: badge;
+  background-color: rgb(254 226 226);
+  color: rgb(153 27 27);
+}

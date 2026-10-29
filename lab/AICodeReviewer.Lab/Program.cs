@@ -112,6 +112,7 @@ static async Task<int> Run(Options options)
     Console.WriteLine($"Cost ${s.ReviewerCost:F4} reviewing + ${s.JudgeCost:F4} judging = ${s.ReviewerCost + s.JudgeCost:F4} in {result.Seconds:F0} s" +
         (result.StoppedByBudget ? "; stopped early by the budget" : ""));
     Console.WriteLine($"Saved {Path.GetRelativePath(lab.RepoRoot, path)}");
+    RefreshScoreboard(lab);
     return s.Errors == 0 ? 0 : 3;
 }
 
@@ -151,6 +152,7 @@ static async Task<int> Rejudge(Options options)
             $"precision {run.Result.Summary.Precision:P0} -> {result.Summary.Precision:P0}, ${cost:F4}");
     }
     Console.WriteLine($"Spent ${spent:F4} judging");
+    RefreshScoreboard(lab);
     return 0;
 }
 
@@ -166,6 +168,7 @@ static void Scoreboard(Options options)
             extra: $" {score.Runs,4}  {score.Model} / {score.JudgeModel}");
     }
     Console.WriteLine("* the active version");
+    RefreshScoreboard(lab);
 }
 
 static int PromptCommand(string[] args)
@@ -209,6 +212,7 @@ static int PromptCommand(string[] args)
             Console.WriteLine(verdict.Keep
                 ? $"Kept: {language} v{candidate} is now active. {verdict.Reason}."
                 : $"Rolled back: {language} stays on v{baseline}. {verdict.Reason}.");
+            RefreshScoreboard(lab);
             return 0;
         }
         default:
@@ -216,6 +220,10 @@ static int PromptCommand(string[] args)
             return 1;
     }
 }
+
+// The app's Lab page reads lab/results/scoreboard-<dataset>.json
+static void RefreshScoreboard(Lab lab) =>
+    new PromptLab(Path.Combine(lab.RepoRoot, "lab", "results"), lab.Dataset, lab.Prompts).SaveScoreboard(lab.Store);
 
 static void PrintMetricsHeader(string first, string extra = "") =>
     Console.WriteLine($"{first,-14} {"Cases",5} {"Labels",6} {"Found",5} {"Recall",7} {"Findings",8} {"Real",5} {"False",5} {"Precision",9} {"F1",6} {"FA/clean",8}{extra}");

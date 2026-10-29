@@ -151,6 +151,114 @@ export const systemPromptsApi = {
     api.delete(`/systemprompts/${language}/custom`),
 };
 
+// Lab API: results the lab tool saved in lab/results (snake_case, as the tool writes them)
+export const labApi = {
+  getScoreboard: (dataset: string = "v1") =>
+    api.get<LabScoreboardResponse>(`/lab/${dataset}/scoreboard`),
+  getRuns: (dataset: string = "v1") =>
+    api.get<LabRunSummary[]>(`/lab/${dataset}/runs`),
+  getRun: (file: string, dataset: string = "v1") =>
+    api.get<LabRun>(`/lab/${dataset}/runs/${encodeURIComponent(file)}`),
+};
+
+export interface LabMetrics {
+  cases: number;
+  errors: number;
+  labels: number;
+  found: number;
+  findings: number;
+  matched: number;
+  duplicates: number;
+  real: number;
+  false_alarms: number;
+  outside_window: number;
+  clean_cases: number;
+  false_alarms_on_clean: number;
+  recall: number;
+  precision: number;
+  strict_precision: number;
+  f1: number;
+  false_alarms_per_clean_case: number;
+  reviewer_cost: number;
+  judge_cost: number;
+}
+
+export interface LabDecision {
+  result: "kept" | "rolled_back";
+  date: string;
+  reason: string;
+  recall_before: number;
+  recall_after: number;
+  precision_before: number;
+  precision_after: number;
+  f1_before: number;
+  f1_after: number;
+}
+
+export interface LabScoreboardRow {
+  language: string;
+  version: number;
+  active: boolean;
+  model: string;
+  judge_model: string;
+  runs: number;
+  metrics: LabMetrics;
+  notes: string;
+  decision: LabDecision | null;
+}
+
+export interface LabScoreboardResponse {
+  scoreboard: { dataset: string; updated_at: string; rows: LabScoreboardRow[] } | null;
+  active: Record<string, number>;
+}
+
+export interface LabRunSummary {
+  file: string;
+  dataset: string;
+  model: string;
+  judge_model: string;
+  prompts: Record<string, number> | null;
+  repeat: number;
+  started_at: string;
+  seconds: number;
+  stopped_by_budget: boolean;
+  summary: LabMetrics;
+  groups: Record<string, LabMetrics>;
+  rejudged_at?: string | null;
+}
+
+export interface LabFinding {
+  line: number;
+  end_line: number;
+  category: string;
+  severity: string;
+  title: string;
+  explanation: string;
+  verdict: "match" | "duplicate" | "real" | "false_alarm";
+  label_ids: string[];
+  reason: string;
+}
+
+export interface LabCase {
+  id: string;
+  group: string;
+  kind: string;
+  language: string | null;
+  prompt_version: number;
+  repeat: number;
+  labels: string[];
+  findings: LabFinding[];
+  found: string[];
+  missed: string[];
+  error: string | null;
+  reviewer_cost: number;
+  judge_cost: number;
+}
+
+export interface LabRun extends LabRunSummary {
+  cases: LabCase[];
+}
+
 // Types
 export interface Repository {
   id: number;

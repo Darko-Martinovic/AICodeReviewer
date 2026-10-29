@@ -32,6 +32,7 @@ import { useCodeReviewConfig } from "./hooks/useCodeReviewConfig";
 type TabType =
   | "repositories"
   | "trainai"
+  | "lab"
   | "commits"
   | "pullrequests"
   | "systemprompts"

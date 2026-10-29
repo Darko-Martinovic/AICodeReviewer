@@ -14,6 +14,12 @@ namespace AICodeReviewer.Lab
     /// </summary>
     public record VersionScore(string Language, int Version, string Model, string JudgeModel, int Runs, Metrics Metrics);
 
+    public record ScoreboardRow(
+        string Language, int Version, bool Active, string Model, string JudgeModel, int Runs, Metrics Metrics,
+        string Notes, PromptDecision? Decision);
+
+    public record ScoreboardDocument(string Dataset, DateTimeOffset UpdatedAt, IReadOnlyList<ScoreboardRow> Rows);
+
     /// <summary>
     /// What the lab decided about a candidate version, and the scores it compared
     /// </summary>
@@ -120,6 +126,24 @@ namespace AICodeReviewer.Lab
         private static string Invariant(FormattableString text) => FormattableString.Invariant(text);
 
         private static string Percent(double rate) => Invariant($"{Math.Round(rate * 100):0}%");
+
+        /// <summary>
+        /// Writes lab/results/scoreboard-&lt;dataset&gt;.json, the scoreboard with each version's notes and decision,
+        /// which the app's Lab page shows. It sits beside the dataset's folder of runs, not in it
+        /// </summary>
+        public string SaveScoreboard(PromptStore store)
+        {
+            var rows = Scoreboard().Select(s =>
+            {
+                var version = store.Versions.FirstOrDefault(v => v.Language == s.Language && v.Version == s.Version);
+                return new ScoreboardRow(s.Language, s.Version, store.ActiveVersion(s.Language) == s.Version, s.Model, s.JudgeModel,
+                    s.Runs, s.Metrics, version?.Notes ?? "", version?.Decision);
+            }).ToList();
+            var path = Path.Combine(resultsFolder, $"scoreboard-{dataset.Name}.json");
+            Directory.CreateDirectory(resultsFolder);
+            File.WriteAllText(path, JsonSerializer.Serialize(new ScoreboardDocument(dataset.Name, DateTimeOffset.UtcNow, rows), Runner.ResultJson) + "\n");
+            return path;
+        }
 
         public static PromptDecision ToDecision(Verdict verdict, DateOnly today) => new(
             verdict.Keep ? "kept" : "rolled_back", today.ToString("yyyy-MM-dd"), verdict.Reason,
