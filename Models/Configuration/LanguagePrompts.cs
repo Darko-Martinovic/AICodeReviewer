@@ -57,7 +57,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -69,7 +69,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultCSharpUserPromptTemplate()
@@ -131,7 +131,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -143,7 +143,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultVbNetUserPromptTemplate()
@@ -206,7 +206,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -218,7 +218,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultSqlUserPromptTemplate()
@@ -280,7 +280,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -292,7 +292,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultJavaScriptUserPromptTemplate()
@@ -354,7 +354,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -366,7 +366,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultTypeScriptUserPromptTemplate()
@@ -429,7 +429,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -441,7 +441,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultReactUserPromptTemplate()
@@ -508,7 +508,7 @@ For each issue found, provide:
 5. RECOMMENDATION: Concrete steps to fix with code examples
 6. LINE: Line number if identifiable (or 'N/A' if general)
 
-BE CRITICAL. Even well-written code has improvement opportunities. Look harder.
+Report only issues you can point to in the code. Do not invent issues to fill the list.
 
 Format your response as:
 ---
@@ -520,7 +520,7 @@ RECOMMENDATION: [specific fix with examples]
 LINE: [line number or N/A]
 ---
 
-Only respond with 'No issues found' if the code is truly exemplary.";
+If you find no real issues, respond with 'No issues found'.";
         }
 
         private static string GetDefaultJavaUserPromptTemplate()
