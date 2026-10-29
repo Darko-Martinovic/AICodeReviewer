@@ -7,7 +7,7 @@ namespace AICodeReviewer.Tests;
 
 /// <summary>
 /// Starts the whole API in memory with placeholder settings, so the package upgrades
-/// (ASP.NET Core, API versioning, Swashbuckle, Semantic Kernel) are checked end to end
+/// (ASP.NET Core, API versioning, Swashbuckle, Semantic Kernel) are checked end to end; no model keys are needed
 /// </summary>
 public class ApiSmokeTests : IClassFixture<ApiSmokeTests.Api>
 {
@@ -16,9 +16,6 @@ public class ApiSmokeTests : IClassFixture<ApiSmokeTests.Api>
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
-            builder.UseSetting("AzureOpenAI:Endpoint", "https://example.openai.azure.com");
-            builder.UseSetting("AzureOpenAI:ApiKey", "test-key");
-            builder.UseSetting("AzureOpenAI:DeploymentName", "test-deployment");
             builder.UseSetting("GitHub:Token", "test-token");
             builder.UseSetting("GitHub:Owner", "test-owner");
             builder.UseSetting("GitHub:Name", "test-repo");

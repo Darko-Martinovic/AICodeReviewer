@@ -1,5 +1,6 @@
 ﻿using AICodeReviewer.Services;
 using AICodeReviewer.Services.Interfaces;
+using AICodeReviewer.Services.Reviewing;
 using AICodeReviewer.Plugins;
 using AICodeReviewer.Hubs;
 using Microsoft.SemanticKernel;
@@ -127,23 +128,11 @@ namespace AICodeReviewer
                 return new RepositoryManagementService(configService.Settings, token, filterService, gitHubAppService);
             });
 
-            // Core services (singletons for this web app)
-            services.AddSingleton<IAzureOpenAIService>(provider =>
-            {
-                var httpClient = provider.GetRequiredService<HttpClient>();
-                var configService = provider.GetRequiredService<IConfigurationService>();
-                var promptManagementService = provider.GetRequiredService<IPromptManagementService>();
-                var configuration = provider.GetRequiredService<IConfiguration>();
-
-                var endpoint = configuration["AzureOpenAI:Endpoint"]
-                    ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not set in configuration");
-                var apiKey = configuration["AzureOpenAI:ApiKey"]
-                    ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not set in configuration");
-                var deployment = configuration["AzureOpenAI:DeploymentName"]
-                    ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName not set in configuration");
-
-                return new AzureOpenAIService(httpClient, endpoint, apiKey, deployment, configService, promptManagementService);
-            });
+            // The reviewer: models and prices from Configuration/models.json, the model from Review:Model
+            services.AddSingleton(_ => ModelCatalog.LoadDefault());
+            services.AddSingleton<IModelClientFactory, ModelClientFactory>();
+            services.AddSingleton<IReviewer, Reviewer>();
+            services.AddSingleton<ICodeAnalysisService, CodeAnalysisService>();
 
             services.AddSingleton<IGitHubService>(provider =>
             {
@@ -178,30 +167,18 @@ namespace AICodeReviewer
             });
 
             // Configure Semantic Kernel
-            ConfigureSemanticKernel(services, configuration);
+            ConfigureSemanticKernel(services);
         }
 
         /// <summary>
         /// Configures Semantic Kernel with plugins and workflow engine
         /// </summary>
-        private static void ConfigureSemanticKernel(IServiceCollection services, IConfiguration configuration)
+        private static void ConfigureSemanticKernel(IServiceCollection services)
         {
             // Configure Semantic Kernel
             var kernelBuilder = services.AddKernel();
 
-            // Add Azure OpenAI chat completion
-            var endpoint = configuration["AzureOpenAI:Endpoint"]
-                ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not set in configuration");
-            var apiKey = configuration["AzureOpenAI:ApiKey"]
-                ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not set in configuration");
-            var deployment = configuration["AzureOpenAI:DeploymentName"]
-                ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName not set in configuration");
-
-            kernelBuilder.AddAzureOpenAIChatCompletion(
-                deploymentName: deployment,
-                endpoint: endpoint,
-                apiKey: apiKey);
-
+            // The plugins are native functions, so the kernel needs no chat model
             // Add plugins using AddFromType method
             kernelBuilder.Plugins.AddFromType<CodeReviewPlugin>("CodeReview");
             kernelBuilder.Plugins.AddFromType<GitHubPlugin>("GitHub");

@@ -49,27 +49,9 @@ CRITICAL: Look for these common C# issues:
 - Not using pattern matching (C# 8+)
 - Missing readonly modifiers where appropriate
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultCSharpUserPromptTemplate()
@@ -123,27 +105,9 @@ CRITICAL: Look for these common VB.NET issues:
 - Using legacy VB6-style code patterns
 - Not using modern VB.NET features (LINQ, etc.)
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultVbNetUserPromptTemplate()
@@ -198,27 +162,9 @@ CRITICAL: Look for these common T-SQL issues:
 - Inefficient date/time operations
 - Not using table variables vs temp tables appropriately
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultSqlUserPromptTemplate()
@@ -272,27 +218,9 @@ CRITICAL: Look for these common JavaScript issues:
 - Missing semicolons and proper formatting
 - Not using modern ES6+ features appropriately
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultJavaScriptUserPromptTemplate()
@@ -346,27 +274,9 @@ CRITICAL: Look for these common TypeScript issues:
 - Missing return type annotations
 - Not using utility types (Partial, Pick, etc.)
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultTypeScriptUserPromptTemplate()
@@ -421,27 +331,9 @@ CRITICAL: Look for these common React issues:
 - Not using React.StrictMode
 - Using class components instead of functional components
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultReactUserPromptTemplate()
@@ -500,27 +392,9 @@ CRITICAL: Look for these common Java issues:
 - Blocking operations on UI thread
 - Not using final for immutable variables
 
-For each issue found, provide:
-1. CATEGORY: [Security|Performance|Quality|Bug|Maintainability|Design]
-2. SEVERITY: [Critical|High|Medium|Low]
-3. TITLE: Specific, actionable issue description
-4. DESCRIPTION: Explain what's wrong and why it's a problem
-5. RECOMMENDATION: Concrete steps to fix with code examples
-6. LINE: Line number if identifiable (or 'N/A' if general)
-
 Report only issues you can point to in the code. Do not invent issues to fill the list.
 
-Format your response as:
----
-CATEGORY: [category]
-SEVERITY: [severity]  
-TITLE: [specific issue title]
-DESCRIPTION: [detailed explanation of the problem]
-RECOMMENDATION: [specific fix with examples]
-LINE: [line number or N/A]
----
-
-If you find no real issues, respond with 'No issues found'.";
+If you find no real issues, return no findings.";
         }
 
         private static string GetDefaultJavaUserPromptTemplate()
@@ -538,5 +412,35 @@ Content Length: {contentLength} characters
 
 Note: {analysisNote}";
         }
+    }
+
+    /// <summary>
+    /// The prompt for files in a language with no prompt of its own
+    /// </summary>
+    public static class GeneralPrompt
+    {
+        public const string Default = @"You are a STRICT code reviewer. Your job is to find real issues in production code. Be thorough and critical.
+
+MANDATORY FOCUS AREAS - Check every single one:
+- Security: Hardcoded secrets, SQL injection, XSS, insecure deserialization, weak authentication
+- Performance: Inefficient loops, memory leaks, unnecessary object creation, blocking I/O, N+1 queries
+- Code Quality: Magic numbers, long methods, deep nesting, poor naming, code duplication
+- Bugs: Null reference exceptions, race conditions, off-by-one errors, unhandled exceptions
+- Maintainability: Tight coupling, low cohesion, missing error handling, poor separation of concerns
+- Best Practices: Missing using statements, not following C# conventions, synchronous calls in async methods
+
+CRITICAL: Look for these common C# issues:
+- ConfigureAwait(false) missing on await calls
+- Using async void instead of async Task
+- Not disposing IDisposable objects
+- Hardcoded connection strings or API keys
+- Missing input validation
+- Exception swallowing (empty catch blocks)
+- Thread safety issues
+- Memory leaks from event handlers
+
+Report only issues you can point to in the code. Do not invent issues to fill the list.
+
+If you find no real issues, return no findings.";
     }
 }

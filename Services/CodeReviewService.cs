@@ -11,13 +11,13 @@ namespace AICodeReviewer.Services
     /// </summary>
     public class CodeReviewService : ICodeReviewService
     {
-        private readonly IAzureOpenAIService _aiService;
+        private readonly ICodeAnalysisService _aiService;
         private readonly IGitHubService _gitHubService;
         private readonly IConfigurationService _configurationService;
         private readonly ICacheService _cacheService;
 
         public CodeReviewService(
-            IAzureOpenAIService aiService,
+            ICodeAnalysisService aiService,
             IGitHubService gitHubService,
             IConfigurationService configurationService,
             ICacheService cacheService

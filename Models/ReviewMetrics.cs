@@ -16,10 +16,6 @@ namespace AICodeReviewer.Models
         public decimal EstimatedCost { get; set; }
         public string ReviewType { get; set; } = string.Empty;
 
-        // Cost calculation constants (GPT-3.5-Turbo pricing)
-        private const decimal INPUT_TOKEN_COST_PER_1K = 0.0015m;
-        private const decimal OUTPUT_TOKEN_COST_PER_1K = 0.002m;
-
         public double IssuesPerFile => FilesReviewed > 0 ? (double)IssuesFound / FilesReviewed : 0;
         public double LinesPerMinute =>
             Duration.TotalMinutes > 0 ? TotalLinesOfCode / Duration.TotalMinutes : 0;
@@ -61,16 +57,7 @@ Cost/File: ${(FilesReviewed > 0 ? EstimatedCost / FilesReviewed : 0):F4}";
             InputTokens += usage.prompt_tokens;
             OutputTokens += usage.completion_tokens;
             TokensUsed += usage.total_tokens;
-            EstimatedCost = CalculateCost(InputTokens, OutputTokens);
-        }
-
-        /// <summary>
-        /// Calculate cost based on input and output tokens
-        /// </summary>
-        private static decimal CalculateCost(int inputTokens, int outputTokens)
-        {
-            return (inputTokens / 1000m * INPUT_TOKEN_COST_PER_1K)
-                + (outputTokens / 1000m * OUTPUT_TOKEN_COST_PER_1K);
+            EstimatedCost += usage.cost;
         }
 
         /// <summary>
