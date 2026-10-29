@@ -13,6 +13,11 @@ namespace AICodeReviewer.Services.Interfaces
         string GetSystemPrompt(string fileName);
 
         /// <summary>
+        /// The prompt language of a file (CSharp, React, Sql...), or General for languages without prompts of their own
+        /// </summary>
+        string PromptLanguage(string fileName);
+
+        /// <summary>
         /// Gets the appropriate user prompt template for the given file
         /// </summary>
         /// <param name="fileName">The name of the file to analyze</param>

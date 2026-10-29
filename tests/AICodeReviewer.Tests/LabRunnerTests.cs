@@ -61,7 +61,8 @@ public class LabRunnerTests : IDisposable
         var catalog = ModelCatalog.LoadDefault();
         var prompts = new FakePrompts();
         var reviewer = new Reviewer(catalog, factory, prompts, new FakeConfiguration(), Settings.From());
-        return (new Runner(Dataset.Load(Path.Combine(_folder, "v1")), reviewer, new Judge(catalog, factory), catalog, prompts), model);
+        return (new Runner(Dataset.Load(Path.Combine(_folder, "v1")), reviewer, new Judge(catalog, factory), catalog, prompts,
+            PromptStore.LoadDefault()), model);
     }
 
     private static readonly RunOptions Options = new("claude-haiku-5-5", "claude-sonnet-5-5");

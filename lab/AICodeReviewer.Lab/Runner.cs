@@ -1,8 +1,5 @@
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using AICodeReviewer.Models.Configuration;
 using AICodeReviewer.Services.Interfaces;
 using AICodeReviewer.Services.Reviewing;
 
@@ -10,26 +7,31 @@ namespace AICodeReviewer.Lab
 {
     public record RunOptions(
         string Model, string JudgeModel, int Repeat = 1, decimal MaxCost = 2.00m, string? Cases = null,
-        int Tolerance = 3, int Parallelism = 4);
+        int Tolerance = 3, int Parallelism = 4, IReadOnlyCollection<string>? Languages = null);
 
     public record Estimate(int Cases, long InputTokens, long OutputTokens, decimal ReviewerCost, decimal JudgeCost)
     {
         public decimal Total => ReviewerCost + JudgeCost;
     }
 
+    /// <param name="Prompts">The prompt version each language in the run used</param>
     public record RunResult(
-        string Dataset, string Model, string JudgeModel, int Repeat, int Tolerance, DateTimeOffset StartedAt, double Seconds,
-        bool StoppedByBudget, Estimate Estimate, Metrics Summary, IReadOnlyDictionary<string, Metrics> Groups,
-        IReadOnlyList<CaseResult> Cases);
+        string Dataset, string Model, string JudgeModel, IReadOnlyDictionary<string, int> Prompts, int Repeat, int Tolerance,
+        DateTimeOffset StartedAt, double Seconds, bool StoppedByBudget, Estimate Estimate, Metrics Summary,
+        IReadOnlyDictionary<string, Metrics> Groups, IReadOnlyList<CaseResult> Cases);
 
     /// <summary>
     /// Reviews every case of a dataset with one model, has the judge grade each review and adds up the scores,
     /// stopping before a case would take the spending past the budget
     /// </summary>
-    public class Runner(Dataset dataset, IReviewer reviewer, Judge judge, ModelCatalog catalog, IPromptManagementService prompts)
+    /// <param name="promptStore">The prompt versions the reviewer's prompts come from, to record which version each case used</param>
+    public class Runner(Dataset dataset, IReviewer reviewer, Judge judge, ModelCatalog catalog, IPromptManagementService prompts, PromptStore promptStore)
     {
         public IReadOnlyList<DatasetCase> Select(RunOptions options) =>
-            dataset.Cases.Where(c => options.Cases is null || c.Info.Id.StartsWith(options.Cases, StringComparison.Ordinal)).ToList();
+            dataset.Cases
+                .Where(c => options.Cases is null || c.Info.Id.StartsWith(options.Cases, StringComparison.Ordinal))
+                .Where(c => options.Languages is null || options.Languages.Contains(prompts.PromptLanguage(c.Info.File)))
+                .ToList();
 
         /// <summary>
         /// A rough estimate from the size of each file: about 3.5 characters a token, and output that grows with the
@@ -118,8 +120,10 @@ namespace AICodeReviewer.Lab
             var ordered = results.OrderBy(r => r.Repeat).ThenBy(r => r.Id, StringComparer.Ordinal).ToList();
             var groups = ordered.GroupBy(r => r.Group).OrderBy(g => g.Key, StringComparer.Ordinal)
                 .ToDictionary(g => g.Key, g => Metrics.Of(g.ToList()));
-            return new RunResult(dataset.Name, options.Model, options.JudgeModel, options.Repeat, options.Tolerance, startedAt,
-                Math.Round(stopwatch.Elapsed.TotalSeconds, 1), stoppedByBudget, estimate, Metrics.Of(ordered), groups, ordered);
+            var promptVersions = ordered.GroupBy(r => r.Language).OrderBy(g => g.Key, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => g.First().PromptVersion);
+            return new RunResult(dataset.Name, options.Model, options.JudgeModel, promptVersions, options.Repeat, options.Tolerance,
+                startedAt, Math.Round(stopwatch.Elapsed.TotalSeconds, 1), stoppedByBudget, estimate, Metrics.Of(ordered), groups, ordered);
         }
 
         private async Task<CaseResult> RunCaseAsync(DatasetCase c, int repeat, RunOptions options, CancellationToken ct)
@@ -128,6 +132,8 @@ namespace AICodeReviewer.Lab
             var file = c.ForReview();
             var labels = c.Labels();
             var labelIds = labels.Select(l => l.Id).ToList();
+            var language = prompts.PromptLanguage(file.FileName);
+            var version = promptStore.ActiveVersion(language);
             var promptHash = Hash(SystemPrompt(file.FileName));
 
             ReviewOutputSummary review = new(0, 0, 0m);
@@ -138,13 +144,13 @@ namespace AICodeReviewer.Lab
 
                 var judged = await judge.JudgeAsync(options.JudgeModel, file, labels, output.Findings, ct);
                 var score = Scoring.Score(labels, output.Findings, judged.Verdicts, options.Tolerance);
-                return new CaseResult(c.Info.Id, c.Info.Group, c.Info.Kind, repeat, promptHash, labelIds, score.Findings, score.Found, score.Missed,
+                return new CaseResult(c.Info.Id, c.Info.Group, c.Info.Kind, language, version, repeat, promptHash, labelIds, score.Findings, score.Found, score.Missed,
                     score.OutsideWindow, review.InputTokens, review.OutputTokens, review.Cost,
                     judged.InputTokens, judged.OutputTokens, judged.Cost, Math.Round(stopwatch.Elapsed.TotalSeconds, 1), null);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                return new CaseResult(c.Info.Id, c.Info.Group, c.Info.Kind, repeat, promptHash, labelIds, [], [], labelIds, 0,
+                return new CaseResult(c.Info.Id, c.Info.Group, c.Info.Kind, language, version, repeat, promptHash, labelIds, [], [], labelIds, 0,
                     review.InputTokens, review.OutputTokens, review.Cost, 0, 0, 0m, Math.Round(stopwatch.Elapsed.TotalSeconds, 1),
                     $"{ex.GetType().Name}: {ex.Message}");
             }
@@ -152,14 +158,9 @@ namespace AICodeReviewer.Lab
 
         private record ReviewOutputSummary(int InputTokens, int OutputTokens, decimal Cost);
 
-        private string SystemPrompt(string fileName)
-        {
-            var prompt = prompts.GetSystemPrompt(fileName);
-            return (string.IsNullOrWhiteSpace(prompt) ? GeneralPrompt.Default : prompt) + Reviewer.OutputInstructions;
-        }
+        private string SystemPrompt(string fileName) => Reviewer.SystemPromptFor(prompts.GetSystemPrompt(fileName));
 
-        private static string Hash(string text) =>
-            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text)))[..12].ToLowerInvariant();
+        private static string Hash(string systemPrompt) => PromptStore.Hash(systemPrompt);
 
         public static readonly JsonSerializerOptions ResultJson = new(Dataset.Json) { WriteIndented = true };
 

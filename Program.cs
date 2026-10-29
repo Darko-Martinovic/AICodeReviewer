@@ -99,6 +99,9 @@ namespace AICodeReviewer
 
             // Language detection and prompt management services
             services.AddSingleton<ILanguageDetectionService, LanguageDetectionService>();
+            // The versioned system prompts in Configuration/Prompts, read from the content root so the lab's decisions show up
+            services.AddSingleton(provider => PromptStore.Load(Path.Combine(
+                provider.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "Configuration", "Prompts")));
             services.AddSingleton<IPromptManagementService, PromptManagementService>();
 
             // Repository filter service

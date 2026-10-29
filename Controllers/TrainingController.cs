@@ -151,12 +151,13 @@ public class TrainingController : ControllerBase
         {
             _logger.LogInformation("Updating custom prompt for language: {Language}", request.Language);
 
+            // Append the addition to the saved custom prompt, or to the active versioned prompt when there is none
             var currentPrompt = GetCustomPrompt(request.Language);
-
-            // Append the new addition to the existing custom prompt
-            var newPrompt = string.IsNullOrWhiteSpace(currentPrompt)
-                ? request.Addition
-                : $"{currentPrompt}\n\n{request.Addition}";
+            if (string.IsNullOrWhiteSpace(currentPrompt))
+            {
+                currentPrompt = _promptManagementService.GetSystemPrompt($"prompt{GetFileExtension(request.Language)}");
+            }
+            var newPrompt = $"{currentPrompt}\n\n{request.Addition}";
 
             // Update the appropriate language prompt in configuration
             UpdateCustomPrompt(request.Language, newPrompt);

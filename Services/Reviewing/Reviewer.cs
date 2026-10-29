@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
-using AICodeReviewer.Models.Configuration;
 using AICodeReviewer.Models.Review;
 using AICodeReviewer.Services.Interfaces;
 
@@ -96,15 +95,16 @@ namespace AICodeReviewer.Services.Reviewing
 
         public ModelRequest BuildRequest(string fileName, string content)
         {
-            var systemPrompt = prompts.GetSystemPrompt(fileName);
-            if (string.IsNullOrWhiteSpace(systemPrompt))
-                systemPrompt = GeneralPrompt.Default;
-
             var user = prompts.FormatUserPrompt(
                 fileName, NumberLines(content), configurationService.Settings.AzureOpenAI.ContentLimit);
 
-            return new ModelRequest($"{systemPrompt.TrimEnd()}\n\n{OutputInstructions}", user, "review_findings", Schema, MaxOutputTokens);
+            return new ModelRequest(SystemPromptFor(prompts.GetSystemPrompt(fileName)), user, "review_findings", Schema, MaxOutputTokens);
         }
+
+        /// <summary>
+        /// The whole system prompt sent to the model: the language's prompt followed by the output instructions
+        /// </summary>
+        public static string SystemPromptFor(string languagePrompt) => $"{languagePrompt.TrimEnd()}\n\n{OutputInstructions}";
 
         public static string NumberLines(string content)
         {

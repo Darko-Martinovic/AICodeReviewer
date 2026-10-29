@@ -33,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Configuration\Prompts\**\*.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="web.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>

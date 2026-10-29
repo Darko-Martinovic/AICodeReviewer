@@ -49,3 +49,27 @@ The judge sees the numbered file, the labels and the findings, and gives every f
 | False alarms per clean file | false alarms on the clean files / clean files |
 
 Read the results per group as well as overall: the two dense files hold almost half the labels, and the clean files only measure false alarms.
+
+## Prompt versions
+
+Each language's system prompt lives in `Configuration/Prompts/<Language>/v<N>.md`, and `Configuration/Prompts/prompts.json` says which version is active, what each version changed and what the lab decided about it. The app reviews with the active versions. A prompt saved in `appsettings.json` (for example by Train AI) still overrides the versioned one in the app, but the lab ignores such overrides so it always measures the versions.
+
+The loop for improving a prompt:
+
+```bash
+dotnet run --project lab/AICodeReviewer.Lab -- prompt new CSharp --notes "what this version changes"
+# edit Configuration/Prompts/CSharp/v<N>.md
+dotnet run --project lab/AICodeReviewer.Lab -- run --prompt CSharp=<N> --repeat 2
+dotnet run --project lab/AICodeReviewer.Lab -- prompt decide CSharp <N>
+dotnet run --project lab/AICodeReviewer.Lab -- scoreboard
+```
+
+`run --prompt` reviews only that language's cases with the given version. `prompt decide` pools every saved run of the candidate and of the active version with the same reviewer and judge, scores both on the cases they share, and keeps the candidate only when:
+
+- F1 rises by at least 0.02, and
+- precision falls by no more than 0.02, and
+- recall falls by no more than 0.02, so a quieter prompt cannot win by missing defects.
+
+`--margin` changes the 0.02. The decision, its reason and the scores are written to `prompts.json`; a kept version becomes active.
+
+Two cautions. The prompts are tuned and measured on the same 28 files, so a version can fit v1 rather than code in general; a second dataset kept out of tuning is the fix. And with only a few files per language, one label is 4 to 7 percent of recall, so use `--repeat` before deciding.

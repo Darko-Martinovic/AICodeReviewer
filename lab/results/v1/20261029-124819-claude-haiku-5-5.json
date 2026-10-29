@@ -1,0 +1,1136 @@
+{
+  "dataset": "v1",
+  "model": "claude-haiku-5-5",
+  "judge_model": "claude-sonnet-5-5",
+  "prompts": {
+    "Sql": 1,
+    "TypeScript": 1
+  },
+  "repeat": 1,
+  "tolerance": 3,
+  "started_at": "2026-10-29T12:48:19.6928418+00:00",
+  "seconds": 52.1,
+  "stopped_by_budget": false,
+  "estimate": {
+    "cases": 13,
+    "input_tokens": 24533,
+    "output_tokens": 40860,
+    "reviewer_cost": 0.0080,
+    "judge_cost": 0.2981,
+    "total": 0.3061
+  },
+  "summary": {
+    "cases": 13,
+    "errors": 0,
+    "labels": 18,
+    "found": 17,
+    "findings": 63,
+    "matched": 17,
+    "duplicates": 0,
+    "real": 11,
+    "false_alarms": 35,
+    "outside_window": 2,
+    "clean_cases": 4,
+    "false_alarms_on_clean": 12,
+    "recall": 0.9444,
+    "precision": 0.4444,
+    "strict_precision": 0.2698,
+    "f1": 0.6044,
+    "false_alarms_per_clean_case": 3,
+    "reviewer_cost": 0.0133125,
+    "judge_cost": 0.101856
+  },
+  "groups": {
+    "clean": {
+      "cases": 4,
+      "errors": 0,
+      "labels": 0,
+      "found": 0,
+      "findings": 14,
+      "matched": 0,
+      "duplicates": 0,
+      "real": 2,
+      "false_alarms": 12,
+      "outside_window": 0,
+      "clean_cases": 4,
+      "false_alarms_on_clean": 12,
+      "recall": 1,
+      "precision": 0.1429,
+      "strict_precision": 0,
+      "f1": 0.25,
+      "false_alarms_per_clean_case": 3,
+      "reviewer_cost": 0.0041199,
+      "judge_cost": 0.026688
+    },
+    "realistic": {
+      "cases": 9,
+      "errors": 0,
+      "labels": 18,
+      "found": 17,
+      "findings": 49,
+      "matched": 17,
+      "duplicates": 0,
+      "real": 9,
+      "false_alarms": 23,
+      "outside_window": 2,
+      "clean_cases": 0,
+      "false_alarms_on_clean": 0,
+      "recall": 0.9444,
+      "precision": 0.5306,
+      "strict_precision": 0.3469,
+      "f1": 0.6795,
+      "false_alarms_per_clean_case": 0,
+      "reviewer_cost": 0.0091926,
+      "judge_cost": 0.075168
+    }
+  },
+  "cases": [
+    {
+      "id": "sql-01-search-products",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-01-search-products#1"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 15,
+          "category": "Security",
+          "severity": "Critical",
+          "title": "SQL injection via unvalidated @SortColumn",
+          "explanation": "@SortColumn is concatenated directly into the dynamic SQL text in the ORDER BY clause without validation or quoting. A caller can pass a value such as \u0027Name; DROP TABLE dbo.Products; --\u0027 or a subquery to execute arbitrary T-SQL under the procedure\u0027s security context. Parameterizing sp_executesql does not protect identifiers, so this is a real injection path.",
+          "verdict": "match",
+          "label_id": "sql-01-search-products#1",
+          "reason": "Describes the same SQL injection via concatenating @SortColumn into the ORDER BY."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Leading-wildcard LIKE prevents index seeks",
+          "explanation": "The pattern \u0027%\u0027 \u002B @Search \u002B \u0027%\u0027 has a leading wildcard, so any index on Name can only be scanned, not seeked. On a large Products table this causes full scans on every search.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "A leading-wildcard LIKE is inherent to a contains search; it is the intended behavior, and flagging it is not an actionable defect here."
+        },
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "LIKE wildcard characters in user input are not escaped",
+          "explanation": "If @Search contains %, _ or [ characters, they are interpreted as LIKE wildcards rather than literal text, so searches for literal underscores or brackets return unexpected rows.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Unescaped %, _ and [ in @Search are treated as wildcards, which is a genuine correctness flaw in a search procedure, though minor."
+        },
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "NULL input silently produces no results",
+          "explanation": "If @Search is NULL, @pattern becomes NULL and the LIKE predicate never matches, so the procedure returns an empty result with no error or warning. The same applies to a NULL @SortColumn, which makes @sql NULL and causes sp_executesql to do nothing silently.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "A NULL search returning no rows is standard behavior. The NULL @SortColumn point is speculative and is subsumed by the injection/validation issue."
+        },
+        {
+          "line": 1,
+          "end_line": 18,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "No error handling around dynamic SQL execution",
+          "explanation": "The procedure has no TRY...CATCH block and no validation of the dynamic SQL path. Any runtime error from the dynamic statement propagates to the caller without context, and the procedure gives no clear feedback for invalid sort requests.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Missing TRY...CATCH is a generic best-practice remark. Propagating errors to the caller is acceptable in T-SQL, so this is not a real defect."
+        }
+      ],
+      "found": [
+        "sql-01-search-products#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1622,
+      "reviewer_output_tokens": 1669,
+      "reviewer_cost": 0.0009967,
+      "judge_input_tokens": 1790,
+      "judge_output_tokens": 389,
+      "judge_cost": 0.00747,
+      "seconds": 13,
+      "error": null
+    },
+    {
+      "id": "sql-02-transfer-funds",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 25,
+          "category": "Bug",
+          "severity": "High",
+          "title": "Race condition on balance check (lost update / overdraft)",
+          "explanation": "The source balance is read into a variable at line 14-15 without a locking hint, then written back as @Balance - @Amount at line 24. Two concurrent transfers from the same account can both read the same balance, both pass the check, and both write results computed from that stale value. This can overdraw the account or lose one debit. Under READ COMMITTED, the read takes no update lock that would serialize these calls.",
+          "verdict": "match",
+          "label_id": "sql-02-transfer-funds#1",
+          "reason": "Describes the unlocked read followed by write-back from the stale variable, causing lost updates and overdrafts."
+        },
+        {
+          "line": 12,
+          "end_line": 40,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY/CATCH error handling and no XACT_ABORT",
+          "explanation": "The transaction has no BEGIN TRY / BEGIN CATCH block, and SET XACT_ABORT ON is not set. If a runtime error occurs between BEGIN TRANSACTION and COMMIT (for example a constraint violation or deadlock on the UPDATE or INSERT), the procedure may leave the transaction open or uncommitted. The caller then gets an unclear error, and locks can be held longer than intended. Also, the explicit ROLLBACK paths at lines 19 and 33 can fail if no transaction is active.",
+          "verdict": "match",
+          "label_id": "sql-02-transfer-funds#2",
+          "reason": "Identifies the missing XACT_ABORT/TRY-CATCH leaving the transaction open after a runtime error."
+        },
+        {
+          "line": 23,
+          "end_line": 29,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "Self-transfer is not rejected",
+          "explanation": "If @FromAccountId equals @ToAccountId, the procedure debits and then credits the same row, so the net change is zero, but it still writes a Transfers record for a transfer that did not happen. The procedure does not validate this input.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Self-transfer is not rejected and writes a bogus Transfers record. This is a genuine validation gap not covered by the labels."
+        },
+        {
+          "line": 31,
+          "end_line": 35,
+          "category": "Design",
+          "severity": "Low",
+          "title": "Destination account is validated after the source is debited",
+          "explanation": "The existence of @ToAccountId is only checked at line 31, after the source balance has already been updated. The code relies on rollback for correctness, which works but is fragile and does unnecessary write work for an invalid input. The check is also tied to @@ROWCOUNT from the second UPDATE only, which makes the logic harder to follow.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "The rollback correctly handles the invalid destination, so ordering is a minor design preference rather than a defect."
+        }
+      ],
+      "found": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1941,
+      "reviewer_output_tokens": 1989,
+      "reviewer_cost": 0.0011886,
+      "judge_input_tokens": 2252,
+      "judge_output_tokens": 296,
+      "judge_cost": 0.007464,
+      "seconds": 13.4,
+      "error": null
+    },
+    {
+      "id": "sql-03-customers-without-orders",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "findings": [
+        {
+          "line": 9,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "High",
+          "title": "NOT IN returns no rows if the subquery yields a NULL CustomerId",
+          "explanation": "If any row in dbo.Orders matching the year has a NULL CustomerId, the NOT IN predicate evaluates to UNKNOWN for every customer, so the procedure returns an empty result set. This silently gives wrong results whenever the Orders table contains such a row.",
+          "verdict": "match",
+          "label_id": "sql-03-customers-without-orders#1",
+          "reason": "Describes the NOT IN with NULL CustomerId returning no rows, the same defect as label 1."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Non-sargable predicate on OrderDate",
+          "explanation": "Wrapping OrderDate in YEAR() prevents the optimizer from using an index seek on OrderDate and forces a scan of all order rows, which gets worse as the Orders table grows.",
+          "verdict": "match",
+          "label_id": "sql-03-customers-without-orders#2",
+          "reason": "Identifies YEAR() on OrderDate as non-sargable, preventing an index seek, matching label 2."
+        },
+        {
+          "line": 11,
+          "end_line": 12,
+          "category": "Performance",
+          "severity": "Low",
+          "title": "No supporting index for the anti-join",
+          "explanation": "The subquery filters Orders by OrderDate and reads CustomerId. Without an index leading on OrderDate (or on CustomerId with OrderDate included), the lookup for matching orders requires scanning the table.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Speculative advice about adding an index. The schema\u0027s indexes are unknown, and the actual defect (non-sargable YEAR()) is already covered by another finding. An index leading on OrderDate would not help while YEAR() is applied."
+        }
+      ],
+      "found": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1486,
+      "reviewer_output_tokens": 1024,
+      "reviewer_cost": 0.0006606,
+      "judge_input_tokens": 1511,
+      "judge_output_tokens": 265,
+      "judge_cost": 0.005672,
+      "seconds": 8.8,
+      "error": null
+    },
+    {
+      "id": "sql-04-import-price-changes",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "findings": [
+        {
+          "line": 12,
+          "end_line": 23,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Cursor used for row-by-row price updates",
+          "explanation": "The price import is implemented with a cursor that issues one UPDATE per staging row. This is slow for large batches, holds locks for longer, and is harder to maintain than the equivalent set-based statement.",
+          "verdict": "match",
+          "label_id": "sql-04-import-price-changes#1",
+          "reason": "Describes the row-by-row cursor update that should be a set-based UPDATE, same as label 1."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Cursor declared without explicit options",
+          "explanation": "The cursor does not specify LOCAL, FORWARD_ONLY or READ_ONLY. Its scope and behaviour then depend on database settings (for example, a global cursor default), and an updatable cursor may be created unnecessarily.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Cursor options are a minor style/best-practice remark; the cursor is deallocated and scope is not a real problem here."
+        },
+        {
+          "line": 28,
+          "end_line": 28,
+          "category": "Bug",
+          "severity": "High",
+          "title": "@@IDENTITY used to obtain the new log ID",
+          "explanation": "@@IDENTITY returns the last identity value generated in the session, from any scope. If a trigger on dbo.ImportLog inserts into another identity table, the wrong ID is returned and staging rows are linked to the wrong log entry.",
+          "verdict": "match",
+          "label_id": "sql-04-import-price-changes#2",
+          "reason": "Identifies @@IDENTITY returning a trigger\u0027s identity instead of SCOPE_IDENTITY(); same defect."
+        },
+        {
+          "line": 8,
+          "end_line": 34,
+          "category": "Maintainability",
+          "severity": "High",
+          "title": "No TRY/CATCH error handling",
+          "explanation": "The procedure has no TRY...CATCH block. XACT_ABORT rolls back the transaction on error, but the caller gets no controlled error message, no context about which step failed, and the transaction state is never checked for an uncommittable state.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "XACT_ABORT ON already rolls back on error and re-raises it; absence of TRY/CATCH is a preference, not a defect."
+        },
+        {
+          "line": 30,
+          "end_line": 32,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Batch can be imported more than once",
+          "explanation": "Nothing checks whether @BatchId has already been applied. Calling the procedure again with the same batch re-applies every price change and writes another ImportLog entry, which can overwrite newer prices with stale ones.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "No idempotency check; re-running a batch reapplies stale prices and writes duplicate log entries. This is a genuine gap, though the lines are somewhat off."
+        },
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Duplicate SKUs in a batch silently overwrite each other",
+          "explanation": "If staging.PriceChanges contains more than one row for the same Sku within a batch, each row is applied in turn and the last one processed wins. Nothing detects or reports the conflict, so the final price depends on row order.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Duplicate SKUs in a batch yield an order-dependent final price with no detection; a genuine data-integrity issue."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Performance",
+          "severity": "Low",
+          "title": "Possible missing index on staging filter column",
+          "explanation": "The cursor query filters staging.PriceChanges on BatchId, and the later UPDATE filters on the same column. Without an index on BatchId this causes table scans as staging grows. The UPDATE on dbo.Products filtered by Sku also depends on an index on Sku.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Speculative index advice with no schema evidence; it is a \u0027possible\u0027 issue and not a demonstrable defect in this code."
+        }
+      ],
+      "found": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1927,
+      "reviewer_output_tokens": 2293,
+      "reviewer_cost": 0.0013392,
+      "judge_input_tokens": 2374,
+      "judge_output_tokens": 520,
+      "judge_cost": 0.009948,
+      "seconds": 22.4,
+      "error": null
+    },
+    {
+      "id": "sql-clean-01-upsert-customer",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 15,
+          "end_line": 19,
+          "category": "Bug",
+          "severity": "High",
+          "title": "OUTPUT parameter not reset when no customer matches",
+          "explanation": "A SELECT that returns no rows leaves the target variable unchanged. If the caller passes a non-NULL @CustomerId, the IF @CustomerId IS NULL check at line 19 is false, so the procedure takes the UPDATE branch and modifies whichever customer has that caller-supplied ID. The new customer is never inserted, and the wrong record can be overwritten.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Valid: SELECT with no rows leaves @CustomerId unchanged, so a caller-supplied non-NULL OUTPUT value skips the insert and updates an arbitrary customer. Real bug, though not labeled."
+        },
+        {
+          "line": 10,
+          "end_line": 21,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Email is validated after trimming but stored and matched untrimmed",
+          "explanation": "Line 10 trims whitespace only for the empty-check. The untrimmed @Email is then used in the lookup at line 17 and the insert at line 21. Input such as \u0027 a@b.com\u0027 is stored with the leading space, and later lookups for \u0027a@b.com\u0027 miss it, creating duplicate customers.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Speculative: SQL Server\u0027s default \u0027=\u0027 comparison ignores trailing spaces but not leading ones, yet trimming is not shown to be required here. This is input normalization preference, not a defect in the code."
+        },
+        {
+          "line": 15,
+          "end_line": 17,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Serializable range locking with no visible unique index on Email",
+          "explanation": "WITH (UPDLOCK, HOLDLOCK) acquires key-range locks on the Email lookup. Concurrent calls for new emails can deadlock, since each takes the range lock and then tries to insert. Without a unique index on Email, the lookup may also scan the table and escalate locks. The procedure\u0027s correctness depends entirely on this locking because nothing in the code enforces uniqueness.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "UPDLOCK, HOLDLOCK is the standard correct upsert pattern, and it serializes concurrent callers on the same key. The index existence is speculative and the deadlock claim is overstated."
+        },
+        {
+          "line": 13,
+          "end_line": 33,
+          "category": "Maintainability",
+          "severity": "Medium",
+          "title": "No TRY/CATCH or explicit rollback around the transaction",
+          "explanation": "XACT_ABORT ON rolls back on most errors, but the procedure gives the caller no structured error handling. Errors such as unique-key violations are re-raised with no context, and the transaction is not rolled back explicitly if an error is caught by the caller. The procedure also does not check @@TRANCOUNT, so it behaves unpredictably when called inside an outer transaction.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "XACT_ABORT ON already rolls back the transaction on error, so there is no leak. TRY/CATCH is a style preference, and the @@TRANCOUNT remark is speculative."
+        },
+        {
+          "line": 2,
+          "end_line": 29,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "NULL @Name is accepted and can overwrite existing names",
+          "explanation": "Only @Email is validated. A NULL @Name passed to the UPDATE at line 29 sets Name to NULL for an existing customer, and the insert at line 21 may fail if Name is NOT NULL. The procedure has no defined behavior for a missing name.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Speculative: no spec says a NULL name is invalid, and the schema is not shown. Overwriting with NULL may be intended behavior, so this is not a defect."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1812,
+      "reviewer_output_tokens": 2696,
+      "reviewer_cost": 0.0015292,
+      "judge_input_tokens": 2070,
+      "judge_output_tokens": 478,
+      "judge_cost": 0.00892,
+      "seconds": 18.9,
+      "error": null
+    },
+    {
+      "id": "sql-clean-02-monthly-revenue",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "6d7ef2ec4db0",
+      "labels": [],
+      "findings": [
+        {
+          "line": 20,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Rows with NULL Status are silently excluded",
+          "explanation": "The predicate o.Status \u003C\u003E N\u0027Cancelled\u0027 evaluates to UNKNOWN when Status is NULL, so orders with no status are dropped from the revenue totals without any signal. If NULL is a valid state for unprocessed orders, revenue and order counts are understated.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Real concern: \u0060\u003C\u003E\u0060 on a NULL Status yields UNKNOWN, so those orders are silently excluded. Whether it is a bug depends on whether Status is nullable, which the file does not show, but it is a legitimate edge case a careful reviewer would raise."
+        },
+        {
+          "line": 14,
+          "end_line": 21,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Month expression duplicated in SELECT and GROUP BY",
+          "explanation": "DATEFROMPARTS(YEAR(o.OrderDate), MONTH(o.OrderDate), 1) is repeated in the select list and the GROUP BY. Keeping the two copies in sync is error-prone and the expression is harder to read.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Repeating the expression in GROUP BY is required in T-SQL, which does not allow grouping by a select alias. The finding is a style remark and not a defect."
+        },
+        {
+          "line": 7,
+          "end_line": 8,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Hardcoded magic numbers for valid year range and error code",
+          "explanation": "The bounds 2000 and 2100 and the error number 50030 are embedded directly in the validation. Changing the accepted range requires a code change and the values carry no documented meaning.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Inline range bounds and an error number in a stored procedure are normal practice. This is a style preference with no real impact."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1711,
+      "reviewer_output_tokens": 1548,
+      "reviewer_cost": 0.0009451,
+      "judge_input_tokens": 1559,
+      "judge_output_tokens": 271,
+      "judge_cost": 0.005828,
+      "seconds": 10.1,
+      "error": null
+    },
+    {
+      "id": "ts-01-product-search",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [
+        "ts-01-product-search#1",
+        "ts-01-product-search#2"
+      ],
+      "findings": [
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Security",
+          "severity": "High",
+          "title": "Unencoded query parameter in URL",
+          "explanation": "The trimmed search term is interpolated directly into the URL without encodeURIComponent. Characters such as \u0027\u0026\u0027, \u0027#\u0027, \u0027\u002B\u0027 or \u0027=\u0027 change the request\u0027s meaning, so a query like \u0027a\u0026admin=true\u0027 injects extra parameters, and \u0027#\u0027 truncates the query string entirely.",
+          "verdict": "match",
+          "label_id": "ts-01-product-search#2",
+          "reason": "Describes the missing encodeURIComponent on the search term at line 23, the same defect as the label."
+        },
+        {
+          "line": 20,
+          "end_line": 37,
+          "category": "Bug",
+          "severity": "High",
+          "title": "Effect has no cleanup; timer and request are never cancelled",
+          "explanation": "The effect creates an AbortController and a setTimeout but returns no cleanup function. When query or delayMs changes or the component unmounts, the pending timer still fires and the in-flight fetch is never aborted. Responses for stale queries can then overwrite results for the current query, and state updates can happen after unmount.",
+          "verdict": "match",
+          "label_id": "ts-01-product-search#1",
+          "reason": "Describes the missing effect cleanup, so timers are not cleared and requests not aborted, letting stale responses overwrite newer results."
+        },
+        {
+          "line": 29,
+          "end_line": 29,
+          "category": "Quality",
+          "severity": "Medium",
+          "title": "Unvalidated type assertion on API response",
+          "explanation": "response.json() returns Promise\u003Cany\u003E, and the result is asserted as Product[] without any runtime check. If the API returns an unexpected shape, the component will store invalid data and downstream code may fail at runtime.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Casting JSON to a typed interface is a common pattern. Demanding runtime validation here is speculative best-practice advice."
+        },
+        {
+          "line": 15,
+          "end_line": 18,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "Stale error is not cleared when the query becomes too short",
+          "explanation": "The short-query branch clears results but leaves any previous error set. The hook can therefore return results: [] alongside a stale error message from an earlier failed search.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Valid: when the query shrinks below 2 characters the early-return branch clears results but not error, so a stale error persists alongside empty results."
+        },
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Missing explicit return type on exported hook",
+          "explanation": "The exported hook has no return type annotation, so its public contract is inferred from the implementation. Changes to the returned shape can then ripple silently into consumers.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "An inferred return type for a hook is a style preference and not a defect."
+        }
+      ],
+      "found": [
+        "ts-01-product-search#2",
+        "ts-01-product-search#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1668,
+      "reviewer_output_tokens": 1287,
+      "reviewer_cost": 0.0008103,
+      "judge_input_tokens": 1909,
+      "judge_output_tokens": 349,
+      "judge_cost": 0.007308,
+      "seconds": 10.9,
+      "error": null
+    },
+    {
+      "id": "ts-02-cart-math",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [
+        "ts-02-cart-math#1",
+        "ts-02-cart-math#2"
+      ],
+      "findings": [
+        {
+          "line": 26,
+          "end_line": 26,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "taxCents returns fractional cents",
+          "explanation": "The function divides by 100 without rounding, so it can return values like 123.45 for a function named in cents. Callers that add this to integer cent totals will propagate fractional amounts, and formatCents or any money storage would then carry rounding errors.",
+          "verdict": "match",
+          "label_id": "ts-02-cart-math#1",
+          "reason": "Same defect: taxCents returns unrounded fractional cents at line 26."
+        },
+        {
+          "line": 29,
+          "end_line": 35,
+          "category": "Bug",
+          "severity": "High",
+          "title": "parseQuantity accepts NaN and non-integers",
+          "explanation": "Number(input) returns NaN for inputs like \u0027abc\u0027, and NaN fails both comparisons in the range check, so NaN is returned as a valid quantity. Inputs like \u00272.5\u0027 also pass the range check and return a fractional quantity, which would corrupt subtotalCents.",
+          "verdict": "match",
+          "label_id": "ts-02-cart-math#2",
+          "reason": "Same defect: NaN and fractional quantities pass the range check in parseQuantity."
+        },
+        {
+          "line": 21,
+          "end_line": 22,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "percentOff is not validated",
+          "explanation": "applyCoupon does not check that percentOff is between 0 and 100. A negative value increases the price (the Math.max clamp only prevents negatives at zero), and a value above 100 produces a discount larger than the subtotal, which is only hidden by clamping to 0. Invalid coupon data is silently accepted.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Coupon data is typed input from the caller; a missing range check on percentOff is speculative validation advice. The clamp already prevents negative totals."
+        },
+        {
+          "line": 4,
+          "end_line": 4,
+          "category": "Design",
+          "severity": "Low",
+          "title": "Mutable data shapes for value objects",
+          "explanation": "CartItem and Coupon are plain mutable interfaces, so callers can change quantity or prices after validation or during calculation. Nothing in the type system prevents accidental mutation of cart data.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Advising readonly interfaces is a style preference and not a defect in this code."
+        },
+        {
+          "line": 37,
+          "end_line": 39,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Currency and locale are loosely typed",
+          "explanation": "currency is inferred as string, so any value is accepted at compile time. Invalid codes make Intl.NumberFormat throw a RangeError at runtime, and cents / 100 is applied without any integer check on the input.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Loose string typing for currency is a preference. Intl.NumberFormat throwing on an invalid code is reasonable behavior."
+        },
+        {
+          "line": 13,
+          "end_line": 15,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "No validation of cart item values",
+          "explanation": "subtotalCents trusts unitPriceCents and quantity without checking that they are non-negative integers. Negative, NaN, or fractional values flow silently into totals and discounts.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Validating cart items in subtotalCents is speculative defensive advice. Quantity validation is handled at parsing, which is already labeled."
+        }
+      ],
+      "found": [
+        "ts-02-cart-math#1",
+        "ts-02-cart-math#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1755,
+      "reviewer_output_tokens": 1713,
+      "reviewer_cost": 0.001032,
+      "judge_input_tokens": 2134,
+      "judge_output_tokens": 415,
+      "judge_cost": 0.008418,
+      "seconds": 13,
+      "error": null
+    },
+    {
+      "id": "ts-03-sign-in",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [
+        "ts-03-sign-in#1",
+        "ts-03-sign-in#2"
+      ],
+      "findings": [
+        {
+          "line": 19,
+          "end_line": 19,
+          "category": "Security",
+          "severity": "Critical",
+          "title": "Password and email logged to the console",
+          "explanation": "console.debug logs the raw password (and email) on every sign-in attempt. Anyone with access to browser devtools, error-reporting integrations that capture console output, or shared machines can read user credentials.",
+          "verdict": "match",
+          "label_id": "ts-03-sign-in#2",
+          "reason": "Same defect: console.debug writes the password and email to the console on line 19."
+        },
+        {
+          "line": 35,
+          "end_line": 35,
+          "category": "Security",
+          "severity": "High",
+          "title": "Unvalidated returnUrl used for redirect (open redirect)",
+          "explanation": "The returnUrl query parameter is passed directly to window.location.assign without validation. An attacker can craft a sign-in link such as /signin?returnUrl=https://evil.example that sends the user to a phishing site after successful login. The file already defines safeReturnUrl for this purpose but it is not used here.",
+          "verdict": "match",
+          "label_id": "ts-03-sign-in#1",
+          "reason": "Same defect: returnUrl is passed unvalidated to window.location.assign, and safeReturnUrl is left unused."
+        },
+        {
+          "line": 20,
+          "end_line": 25,
+          "category": "Bug",
+          "severity": "Low",
+          "title": "Network failures are not handled with a clear error",
+          "explanation": "If fetch rejects (offline, DNS failure, aborted request), the raw TypeError propagates to the caller with no user-facing message. The error handling only covers HTTP status codes.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "A rejected fetch propagating as a TypeError is normal behavior, and the caller can handle it. This is speculative advice, not a defect."
+        },
+        {
+          "line": 3,
+          "end_line": 3,
+          "category": "Design",
+          "severity": "Low",
+          "title": "Default parameter reads window at call time",
+          "explanation": "The origin default uses window.location.origin, which makes safeReturnUrl depend on a browser global. It cannot be used in SSR or Node-based tests without a window object, and the dependency is hidden in the signature.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Defaulting to window.location.origin is a common pattern, and the origin parameter can already be overridden. This is a style preference."
+        },
+        {
+          "line": 27,
+          "end_line": 31,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Untyped response handling and magic values",
+          "explanation": "The response body is never parsed or typed, and the status code and parameter name \u0022returnUrl\u0022 are inline literals. This makes the contract with the API implicit and fragile to change.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Inline status codes and the parameter name are fine here, and the body is not needed. This is a style remark, not a defect."
+        }
+      ],
+      "found": [
+        "ts-03-sign-in#2",
+        "ts-03-sign-in#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1698,
+      "reviewer_output_tokens": 1414,
+      "reviewer_cost": 0.0008768,
+      "judge_input_tokens": 1929,
+      "judge_output_tokens": 361,
+      "judge_cost": 0.007468,
+      "seconds": 15.3,
+      "error": null
+    },
+    {
+      "id": "ts-05-orders-router",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [
+        "ts-05-orders-router#1",
+        "ts-05-orders-router#2",
+        "ts-05-orders-router#3"
+      ],
+      "findings": [
+        {
+          "line": 15,
+          "end_line": 15,
+          "category": "Security",
+          "severity": "Critical",
+          "title": "SQL injection via string concatenation",
+          "explanation": "The query concatenates the raw req.params.id into the SQL string. The earlier parseInt validation only checks the parsed value, so an input like \u00221 OR 1=1\u0022 passes validation (parseInt returns 1) and the unparsed string is injected into the query. This allows arbitrary SQL execution and data exfiltration.",
+          "verdict": "match",
+          "label_id": "ts-05-orders-router#1",
+          "reason": "Same SQL injection from concatenating raw req.params.id; validation bypass via parseInt is explained."
+        },
+        {
+          "line": 9,
+          "end_line": 10,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Lenient integer parsing accepts malformed ids",
+          "explanation": "Number.parseInt accepts partial numeric strings such as \u002212abc\u0022 or \u00221.9\u0022 and returns 12 or 1, so invalid input is silently accepted and a different order may be fetched than the one requested.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "parseInt leniency is real but harmless on its own here; the real issue is the raw string used in the query, covered by the injection label. Reporting it as a separate bug misattributes the cause."
+        },
+        {
+          "line": 30,
+          "end_line": 30,
+          "category": "Bug",
+          "severity": "High",
+          "title": "req.user accessed without authentication guarantee",
+          "explanation": "req.user is not part of the Express Request type unless augmented, and it is undefined when no auth middleware ran or the user is anonymous. Accessing req.user.id will throw a TypeError, and in this file there is no check that the caller is authenticated before cancelling an order.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "req.user is untyped and can be undefined with no auth check, so the cancel route can throw a TypeError. This is a genuine defect not covered by the labels."
+        },
+        {
+          "line": 32,
+          "end_line": 32,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Ambiguous status code for cancel failures",
+          "explanation": "Returning 409 when rowCount is not 1 conflates several cases: the order does not exist, belongs to another customer, is not pending, or rowCount is null. The client cannot tell them apart, and the pg typing of rowCount as possibly null is not handled explicitly.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Returning 409 for a failed conditional update is an acceptable design choice. The remark is a minor style or preference point."
+        },
+        {
+          "line": 40,
+          "end_line": 40,
+          "category": "Security",
+          "severity": "High",
+          "title": "Error details and stack traces leaked to clients",
+          "explanation": "The error handler returns String(err) and err.stack in the JSON response. This exposes internal implementation details, file paths, and database error messages to any client, which aids attackers.",
+          "verdict": "match",
+          "label_id": "ts-05-orders-router#3",
+          "reason": "The error handler leaks the error message and stack trace to clients, which is the same defect as the label."
+        },
+        {
+          "line": 4,
+          "end_line": 4,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Pool created without error listener",
+          "explanation": "A pg Pool emits \u0027error\u0027 when an idle client fails, for example after a database restart. With no listener attached, this unhandled event can crash the Node process.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "A pg Pool without an \u0027error\u0027 listener can crash the process on an idle client error. This is a legitimate robustness issue."
+        },
+        {
+          "line": 14,
+          "end_line": 16,
+          "category": "Design",
+          "severity": "Medium",
+          "title": "Untyped database results",
+          "explanation": "pool.query is used without a generic type, so rows is any and rows[0] is returned unchecked. There is no interface describing the order shape, so type safety is lost from the database boundary to the response.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Missing generics on query results is a typing preference and is not a defect that matters here."
+        },
+        {
+          "line": 38,
+          "end_line": 41,
+          "category": "Maintainability",
+          "severity": "Low",
+          "title": "Missing explicit return type on exported function",
+          "explanation": "errorHandler has no return type annotation, and the exported function signature is not fully documented. Relying on inference weakens the API contract.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "A missing explicit return type is a style preference with no functional impact."
+        }
+      ],
+      "found": [
+        "ts-05-orders-router#1",
+        "ts-05-orders-router#3"
+      ],
+      "missed": [
+        "ts-05-orders-router#2"
+      ],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1863,
+      "reviewer_output_tokens": 1953,
+      "reviewer_cost": 0.0011628,
+      "judge_input_tokens": 2464,
+      "judge_output_tokens": 551,
+      "judge_cost": 0.010438,
+      "seconds": 15.8,
+      "error": null
+    },
+    {
+      "id": "ts-06-calendar-days",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [
+        "ts-06-calendar-days#1",
+        "ts-06-calendar-days#2"
+      ],
+      "findings": [
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Critical",
+          "title": "Month is off by one in toDate",
+          "explanation": "CalendarDay documents months as 1-12, but the JavaScript Date constructor expects 0-11. Passing month directly to new Date(year, month, day) shifts every date into the following month. For example, {year: 2024, month: 1, day: 15} produces February 15, 2024.",
+          "verdict": "match",
+          "label_id": "ts-06-calendar-days#1",
+          "reason": "Describes the same month off-by-one in toDate at line 9."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "Critical",
+          "title": "day field is populated from getDay() (weekday) instead of getDate() (day of month)",
+          "explanation": "Date.getDay() returns the day of the week (0-6, Sunday-Saturday), not the day of the month. fromDate therefore returns a wrong day value for almost every date, and this breaks addDays, compare and every other consumer of the result.",
+          "verdict": "match",
+          "label_id": "ts-06-calendar-days#2",
+          "reason": "Describes getDay() being used instead of getDate() in fromDate."
+        },
+        {
+          "line": 18,
+          "end_line": 19,
+          "category": "Bug",
+          "severity": "High",
+          "title": "addDays inherits the month offset bug and produces wrong results",
+          "explanation": "addDays builds its Date through toDate, which shifts the month by one. Date arithmetic is therefore performed on the wrong calendar date. Combined with the getDay bug in fromDate, the returned CalendarDay is incorrect. For example, adding 1 day to {2024, 1, 31} computes from March 2 rather than January 31.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Describes ts-06-calendar-days#1 but at lines 18-19, outside the window. The addDays problem is mainly the toDate month shift, which label 1 names as affecting addDays."
+        },
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Bug",
+          "severity": "High",
+          "title": "daysInMonth returns the length of the previous month",
+          "explanation": "new Date(year, month, 0) yields the last day of the 0-indexed month month-1, which is the 1-based month-1. For a 1-based month, daysInMonth(2024, 2) returns 31 (January) instead of 29 (February).",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "daysInMonth is correct for 1-based months. new Date(2024, 2, 0) is day 0 of March, which is Feb 29, so the claim that it returns the previous month\u0027s length is wrong."
+        },
+        {
+          "line": 27,
+          "end_line": 28,
+          "category": "Bug",
+          "severity": "High",
+          "title": "isWeekend computes the weekday from a wrongly shifted date",
+          "explanation": "isWeekend calls toDate, which shifts the month by one, so the weekday is computed for a different date than the one passed in. Weekend results are wrong for many inputs.",
+          "verdict": "real",
+          "label_id": null,
+          "reason": "Describes ts-06-calendar-days#1 but at lines 27-28, outside the window. isWeekend is wrong because toDate shifts the month, which is the label 1 root cause."
+        },
+        {
+          "line": 2,
+          "end_line": 6,
+          "category": "Design",
+          "severity": "Low",
+          "title": "CalendarDay fields are mutable and unvalidated",
+          "explanation": "The interface does not mark its fields readonly, and nothing enforces the documented 1-12 month range or valid day ranges. Invalid values silently roll over inside Date.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Readonly fields and input validation are style or best-practice advice, not a defect in this code."
+        }
+      ],
+      "found": [
+        "ts-06-calendar-days#1",
+        "ts-06-calendar-days#2"
+      ],
+      "missed": [],
+      "outside_window": 2,
+      "reviewer_input_tokens": 1656,
+      "reviewer_output_tokens": 1920,
+      "reviewer_cost": 0.0011256,
+      "judge_input_tokens": 2071,
+      "judge_output_tokens": 684,
+      "judge_cost": 0.010982,
+      "seconds": 16.2,
+      "error": null
+    },
+    {
+      "id": "ts-clean-01-use-interval",
+      "group": "clean",
+      "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "delayMs is not validated before being passed to setInterval",
+          "explanation": "The effect only checks for null. Negative, NaN, Infinity, or fractional values are passed straight to setInterval, which coerces them silently (for example, to a minimum of about 1ms or 0ms). A zero or near-zero delay can run the callback at a very high rate and cause heavy CPU use or a frozen UI.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Validating delayMs is speculative hardening. The hook\u0027s contract is a number or null, and passing a tiny delay to setInterval is the caller\u0027s choice. This is the standard useInterval pattern."
+        },
+        {
+          "line": 14,
+          "end_line": 17,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Effect has a bare return on one path and a function return on another",
+          "explanation": "The effect returns nothing in the null case and a cleanup function otherwise. With noImplicitReturns enabled in tsconfig, TypeScript reports \u0027Not all code paths return a value\u0027 (TS7030). The inconsistency also makes the control flow harder to read.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "A bare \u0060return;\u0060 alongside a returned cleanup function is valid and idiomatic in React effects. TS7030 does not fire for a bare \u0060return;\u0060, and the effect\u0027s return type allows void. This is a style complaint."
+        },
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Errors thrown by the callback are not handled",
+          "explanation": "If saved.current() throws, the error is raised from the timer callback and goes uncaught. The interval keeps running, so the same error can repeat on every tick with no context about the hook that caused it.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Swallowing or wrapping callback errors is not this hook\u0027s job. Uncaught errors in a timer callback are standard behavior and the caller owns the callback, so this is speculative advice."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1448,
+      "reviewer_output_tokens": 1236,
+      "reviewer_cost": 0.0007628,
+      "judge_input_tokens": 1387,
+      "judge_output_tokens": 293,
+      "judge_cost": 0.005704,
+      "seconds": 11.5,
+      "error": null
+    },
+    {
+      "id": "ts-clean-02-money",
+      "group": "clean",
+      "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 1,
+      "repeat": 1,
+      "prompt_hash": "280893685f20",
+      "labels": [],
+      "findings": [
+        {
+          "line": 22,
+          "end_line": 29,
+          "category": "Performance",
+          "severity": "Medium",
+          "title": "Unbounded array allocation in splitCents",
+          "explanation": "The only check on \u0060parts\u0060 is that it is a positive integer (line 23). A large value such as 1e9 makes Array.from on line 28 allocate a huge array and can exhaust memory. Values above 2^32-1 throw a RangeError from the Array constructor rather than the function\u0027s own validation error. If \u0060parts\u0060 comes from user input, this is a denial-of-service risk.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "The function\u0027s output is inherently proportional to \u0060parts\u0060, so allocating that many elements is expected. Callers are responsible for sensible inputs, and a huge \u0060parts\u0060 is not a flaw in this code. The claim about a different error type is trivial."
+        },
+        {
+          "line": 14,
+          "end_line": 19,
+          "category": "Quality",
+          "severity": "Low",
+          "title": "Currency and locale are unvalidated strings",
+          "explanation": "\u0060currency\u0060 and \u0060locale\u0060 are plain strings passed directly to Intl.NumberFormat. An invalid ISO 4217 code or malformed BCP 47 tag makes the constructor throw a RangeError with a message that does not mention this function. The signature also gives no hint of the expected values.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Intl.NumberFormat already throws a RangeError for invalid currency or locale values. This is reasonable behavior, and wrapping the error or adding stricter types is a style preference rather than a defect."
+        },
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Performance",
+          "severity": "Low",
+          "title": "Intl.NumberFormat constructed on every call",
+          "explanation": "A new Intl.NumberFormat is created for each formatting call. Construction is comparatively expensive, so formatting many amounts in a loop wastes CPU.",
+          "verdict": "false_alarm",
+          "label_id": null,
+          "reason": "Caching NumberFormat instances is a micro-optimization with no evidence it matters here. It is speculative advice, not a real defect."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 1748,
+      "reviewer_output_tokens": 1416,
+      "reviewer_cost": 0.0008828,
+      "judge_input_tokens": 1693,
+      "judge_output_tokens": 285,
+      "judge_cost": 0.006236,
+      "seconds": 13.7,
+      "error": null
+    }
+  ]
+}
