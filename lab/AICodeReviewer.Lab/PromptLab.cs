@@ -58,7 +58,8 @@ namespace AICodeReviewer.Lab
             var cases = run.Cases.Select(c => c with
             {
                 Language = string.IsNullOrEmpty(c.Language) && files.TryGetValue(c.Id, out var file) ? prompts.PromptLanguage(file) : c.Language,
-                PromptVersion = c.PromptVersion == 0 ? 1 : c.PromptVersion
+                // Imported reviews (another reviewer's comments) keep version 0: they used none of these prompts
+                PromptVersion = c.PromptVersion == 0 && string.IsNullOrEmpty(c.Language) ? 1 : c.PromptVersion
             }).ToList();
             var versions = cases.GroupBy(c => c.Language).ToDictionary(g => g.Key, g => g.First().PromptVersion);
             return run with { Cases = cases, Prompts = run.Prompts ?? versions };
