@@ -35,10 +35,19 @@ The judge sees the numbered file, the labels and the findings, and gives every f
 
 | Verdict | Meaning |
 |---|---|
-| `match` | the finding describes a labelled defect. It only counts when the finding's lines are within 3 lines of the label's; otherwise it becomes `real` and is counted as "outside the window" |
-| `duplicate` | a second finding for a label that is already found |
+| `match` | the finding describes one or more labelled defects; one finding about two hardcoded secrets finds both labels. A label only counts when the finding's lines are within 3 lines of it; when none is, the finding becomes `real` and is counted as "outside the window" |
+| `duplicate` | a finding whose labels were all found already |
 | `real` | a genuine defect with no label: a good finding, and a candidate for a new label |
 | `false_alarm` | wrong, not applicable, or only a style or preference remark |
+
+When the judge or the labels change, grade the saved reviews again instead of reviewing again; it costs only the judge's calls:
+
+```bash
+dotnet run --project lab/AICodeReviewer.Lab -- rejudge --estimate
+dotnet run --project lab/AICodeReviewer.Lab -- rejudge --max-cost 1.50
+```
+
+Every saved run in `lab/results/v1` was graded again on 2026-10-29, when a match went from one label to several, for $1.06.
 
 | Measure | Definition |
 |---|---|

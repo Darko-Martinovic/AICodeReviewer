@@ -2,6 +2,9 @@
   "dataset": "v1",
   "model": "claude-haiku-5-5",
   "judge_model": "claude-sonnet-5-5",
+  "prompts": {
+    "CSharp": 1
+  },
   "repeat": 1,
   "tolerance": 3,
   "started_at": "2026-10-29T12:30:41.0735969+00:00",
@@ -34,7 +37,7 @@
     "f1": 0.6947,
     "false_alarms_per_clean_case": 3,
     "reviewer_cost": 0.0119153,
-    "judge_cost": 0.102784
+    "judge_cost": 0.107620
   },
   "groups": {
     "clean": {
@@ -56,7 +59,7 @@
       "f1": 0.1818,
       "false_alarms_per_clean_case": 3,
       "reviewer_cost": 0.0027344,
-      "judge_cost": 0.024966
+      "judge_cost": 0.027844
     },
     "realistic": {
       "cases": 8,
@@ -77,7 +80,7 @@
       "f1": 0.7619,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0091809,
-      "judge_cost": 0.077818
+      "judge_cost": 0.079776
     }
   },
   "cases": [
@@ -85,6 +88,8 @@
       "id": "cs-01-order-pricing",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -100,8 +105,10 @@
           "title": "Comment contradicts threshold condition",
           "explanation": "The comment says orders of 500 or more get an extra 5 percent, but the code uses \u0027subtotal \u003E 500m\u0027, so an order of exactly 500 does not receive the bonus. Either the comment or the operator is wrong, and the mismatch can cause incorrect pricing at the boundary.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#1",
-          "reason": "Identifies that \u0027\u003E 500m\u0027 contradicts the \u0027or more\u0027 comment, so exactly 500 misses the bonus."
+          "label_ids": [
+            "cs-01-order-pricing#1"
+          ],
+          "reason": "Identifies the off-by-one boundary: the comment says 500 or more but the code uses \u003E 500, so exactly 500 misses the bonus."
         },
         {
           "line": 45,
@@ -111,8 +118,10 @@
           "title": "Division by zero for empty order",
           "explanation": "AveragePricePerItem divides by items.Count without checking for zero. An empty input sequence causes a DivideByZeroException at runtime.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#2",
-          "reason": "Describes the DivideByZeroException on an empty order at line 45, which is part of label #2."
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Reports the DivideByZeroException on an empty order at the items.Count division, which is part of label #2."
         },
         {
           "line": 45,
@@ -122,8 +131,10 @@
           "title": "Average divides by line count instead of item count",
           "explanation": "The method is named AveragePricePerItem, but it divides the subtotal by the number of order lines, not the total quantity. An order with one line of quantity 10 would be reported as the price of 10 items, not one.",
           "verdict": "duplicate",
-          "label_id": "cs-01-order-pricing#2",
-          "reason": "Describes dividing by line count rather than quantity, the other half of label #2."
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Reports dividing by line count rather than quantity, which is the other half of label #2."
         },
         {
           "line": 12,
@@ -133,8 +144,8 @@
           "title": "No validation of quantities or prices",
           "explanation": "Subtotal accepts any quantity and unit price, including negative or zero values. A negative quantity or price silently reduces the total, and null lines cause an unhelpful exception from LINQ.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Input validation is speculative advice here; the code is a simple pricing calculation and no spec requires validation."
+          "label_ids": [],
+          "reason": "Speculative input-validation advice. Nothing in this code indicates that negative or null values are expected, and no defect is shown in the pricing logic."
         },
         {
           "line": 9,
@@ -144,8 +155,8 @@
           "title": "Magic numbers for rates and thresholds",
           "explanation": "Discount rates (0.10m, 0.05m), the bulk threshold (500m) and the bonus rate are embedded directly in the logic. This makes pricing rules hard to find, review and change.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Magic numbers are a style preference; the values are readable in a small switch and don\u0027t constitute a defect."
+          "label_ids": [],
+          "reason": "Style preference about magic numbers. The values are few and readable, and the comment explains the threshold, so this is not a defect."
         },
         {
           "line": 38,
@@ -154,9 +165,9 @@
           "severity": "Low",
           "title": "Shipping is charged for empty orders",
           "explanation": "Total on an empty line collection yields a discounted total of 0, which is below the free-shipping threshold, so the 7.50 shipping fee is charged for an order with no items.",
-          "verdict": "real",
-          "label_id": null,
-          "reason": "An empty order is charged 7.50 shipping on a zero total, which is a genuine pricing bug that no label covers."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Charging shipping on an empty order is a speculative business-rule concern. Empty orders are not a meaningful case for Total, and no requirement is violated."
         }
       ],
       "found": [
@@ -168,9 +179,9 @@
       "reviewer_input_tokens": 1950,
       "reviewer_output_tokens": 1787,
       "reviewer_cost": 0.0010885,
-      "judge_input_tokens": 2202,
-      "judge_output_tokens": 407,
-      "judge_cost": 0.008474,
+      "judge_input_tokens": 2255,
+      "judge_output_tokens": 469,
+      "judge_cost": 0.0092,
       "seconds": 14.1,
       "error": null
     },
@@ -178,6 +189,8 @@
       "id": "cs-02-invoice-repository",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -193,8 +206,10 @@
           "title": "SQL injection via unvalidated sortBy in ORDER BY",
           "explanation": "The sortBy parameter is interpolated directly into the SQL text with $\u0022\u0022\u0022 ... {sortBy}. An attacker can supply a value such as \u0027IssuedOn; DROP TABLE dbo.Invoices--\u0027 or a subquery to run arbitrary SQL. Parameters cannot bind column names, so the value must be checked against an allow list.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#1",
-          "reason": "Describes SQL injection via unvalidated sortBy interpolated into ORDER BY on line 28, matching the label."
+          "label_ids": [
+            "cs-02-invoice-repository#1"
+          ],
+          "reason": "Identifies SQL injection from unvalidated sortBy interpolated into ORDER BY on line 28."
         },
         {
           "line": 10,
@@ -204,8 +219,8 @@
           "title": "Allow list defined but never used",
           "explanation": "SortColumns is declared as a whitelist but SearchAsync never consults it. The protection the code appears to have is therefore absent, which makes the injection risk on line 28 easy to miss in review.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-02-invoice-repository#1 but at lines 10-13, outside the window. The unused SortColumns allow-list is the same root cause as the label (allow-list no longer applied, enabling injection); it mainly supports the injection defect."
+          "label_ids": [],
+          "reason": "Describes cs-02-invoice-repository#1 but at lines 10-13, outside the window. Describes the same defect from the other side: the allow-list SortColumns is never applied to sortBy, which is the root cause of the injection label."
         },
         {
           "line": 48,
@@ -215,8 +230,10 @@
           "title": "SqlConnection is never disposed in DeleteOlderThanAsync",
           "explanation": "The connection is created with plain var and not wrapped in await using, unlike the other method. It is never closed or disposed on the success path or when an exception is thrown, so the pooled connection is held until finalization. Under load this exhausts the connection pool.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#2",
-          "reason": "Identifies the undisposed SqlConnection in DeleteOlderThanAsync leading to pool exhaustion."
+          "label_ids": [
+            "cs-02-invoice-repository#2"
+          ],
+          "reason": "Connection in DeleteOlderThanAsync is never disposed, exhausting the pool."
         },
         {
           "line": 34,
@@ -226,8 +243,8 @@
           "title": "Customer search input not validated or escaped",
           "explanation": "The customer string is wrapped in % signs and bound with a fixed size of 200. Inputs longer than 198 characters will throw at execution time. LIKE wildcards such as % and _ inside the user input are not escaped, so users can broaden the match unintentionally.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Unescaped LIKE wildcards in user input is a genuine minor issue. The length claim is partly wrong, since a SqlParameter with size 200 truncates the value rather than throwing, but the wildcard point holds."
+          "label_ids": [],
+          "reason": "Unescaped LIKE wildcards are a minor but genuine issue; also the NVarChar(200) parameter will truncate rather than throw, so the exception claim is wrong, but the wildcard point stands as a minor real defect."
         },
         {
           "line": 32,
@@ -237,8 +254,8 @@
           "title": "Missing ConfigureAwait(false) in library code",
           "explanation": "This is a data access library, and the awaits do not pass ConfigureAwait(false). That forces continuations back onto the captured synchronization context, which can cause deadlocks or unnecessary context switches when callers block on the result.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait advice is a best-practice preference, not a defect here, and it is labeled Performance when the claim is about deadlocks. Modern ASP.NET Core has no sync context."
+          "label_ids": [],
+          "reason": "ConfigureAwait advice is a style/best-practice remark; not a real defect here, and mislabeled as performance."
         }
       ],
       "found": [
@@ -250,9 +267,9 @@
       "reviewer_input_tokens": 2171,
       "reviewer_output_tokens": 1770,
       "reviewer_cost": 0.0011021,
-      "judge_input_tokens": 2438,
-      "judge_output_tokens": 448,
-      "judge_cost": 0.009356,
+      "judge_input_tokens": 2491,
+      "judge_output_tokens": 420,
+      "judge_cost": 0.009182,
       "seconds": 15.4,
       "error": null
     },
@@ -260,6 +277,8 @@
       "id": "cs-03-password-reset",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -275,7 +294,9 @@
           "title": "Reset token generated with non-cryptographic Random",
           "explanation": "System.Random is a predictable pseudo-random generator. Reset tokens must be unpredictable, so an attacker who observes some output or the seed state can predict valid tokens for other users.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#1",
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
           "reason": "Identifies System.Random as predictable for reset tokens, the same defect as label 1."
         },
         {
@@ -286,8 +307,10 @@
           "title": "Token has only about 900,000 possible values and no attempt limiting",
           "explanation": "A 6-digit token gives roughly 900k possibilities. Nothing in RedeemAsync limits failed attempts per user, so an attacker can brute-force a token within its 30-minute lifetime.",
           "verdict": "duplicate",
-          "label_id": "cs-03-password-reset#1",
-          "reason": "Same line; the label explicitly covers six digits being guessable and insufficient length, which this finding describes."
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
+          "reason": "Flags the six-digit token space as guessable on line 21, which label 1 also names (six digits can be guessed, need enough length)."
         },
         {
           "line": 29,
@@ -297,8 +320,10 @@
           "title": "Expiry check is inverted, so expired tokens are accepted",
           "explanation": "The condition returns false when ExpiresAt \u003E now, which means it rejects tokens that are still valid and accepts tokens that have already expired. An expired reset token can therefore still reset the password.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#2",
-          "reason": "Describes the inverted expiry comparison exactly."
+          "label_ids": [
+            "cs-03-password-reset#2"
+          ],
+          "reason": "Correctly describes the inverted expiry check on line 29."
         },
         {
           "line": 38,
@@ -308,8 +333,8 @@
           "title": "Token is deleted after verification, allowing concurrent reuse",
           "explanation": "Two concurrent RedeemAsync calls with the same valid token can both pass the check before either deletes it. Both would return true, so the token is redeemed twice.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Check-then-delete is not atomic, so concurrent redemptions with the same token can both succeed. This is a genuine race in single-use token handling that no label covers."
+          "label_ids": [],
+          "reason": "Find-then-delete is not atomic, so concurrent redemptions of the same token can both succeed. This is a genuine race that no label covers."
         },
         {
           "line": 34,
@@ -319,8 +344,8 @@
           "title": "Hash comparison is performed after an early return on expiry",
           "explanation": "The early return before the constant-time comparison makes the response timing depend on token state. The leak is minor, but mixing the two checks makes the flow harder to reason about.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Early return on expiry leaks nothing meaningful and is normal flow. This is speculative and not a real defect."
+          "label_ids": [],
+          "reason": "The early return on expiry reveals nothing exploitable and the finding concedes this. It is a style remark, not a defect."
         },
         {
           "line": 10,
@@ -330,8 +355,8 @@
           "title": "Store interface methods do not accept a CancellationToken",
           "explanation": "Async I/O operations cannot be cancelled by callers, which is a common expectation for async APIs in production code.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Missing CancellationToken is a best-practice suggestion that does not matter for correctness here."
+          "label_ids": [],
+          "reason": "Missing CancellationToken is a best-practice preference, not a defect here."
         },
         {
           "line": 22,
@@ -341,8 +366,8 @@
           "title": "Awaited calls lack ConfigureAwait(false) in library code",
           "explanation": "This is library code, and awaits without ConfigureAwait(false) can capture the synchronization context unnecessarily, which can cause deadlocks in some hosts.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait advice is a style preference. It is not relevant to modern ASP.NET Core hosts and does not point to a real defect."
+          "label_ids": [],
+          "reason": "ConfigureAwait advice is a style preference and mostly irrelevant for modern ASP.NET Core hosts."
         }
       ],
       "found": [
@@ -354,9 +379,9 @@
       "reviewer_input_tokens": 1935,
       "reviewer_output_tokens": 1691,
       "reviewer_cost": 0.001039,
-      "judge_input_tokens": 2246,
-      "judge_output_tokens": 481,
-      "judge_cost": 0.009302,
+      "judge_input_tokens": 2299,
+      "judge_output_tokens": 491,
+      "judge_cost": 0.009508,
       "seconds": 14.1,
       "error": null
     },
@@ -364,6 +389,8 @@
       "id": "cs-04-document-upload",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -380,8 +407,10 @@
           "title": "Path traversal via client-supplied file name on upload",
           "explanation": "storedName is the raw file.FileName supplied by the client and is combined directly with the uploads folder. A name such as \u0022../../appsettings.json\u0022 or an absolute path can write outside the uploads directory, potentially overwriting application files. ASP.NET Core does not sanitize FileName.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Client-supplied FileName used as stored name allows traversal out of the uploads folder; same defect as label 1."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Describes the client-supplied file name used as the stored name, which allows path traversal on upload. This is the same defect as label 1."
         },
         {
           "line": 43,
@@ -391,8 +420,10 @@
           "title": "Path traversal in Download via route id",
           "explanation": "The id route value is combined into a file path without validation. Values like \u0022..%2F..%2Fappsettings.json\u0022 or a rooted path (Path.Combine discards the base when the second argument is rooted) allow reading arbitrary files readable by the process, including secrets in configuration.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#3",
-          "reason": "Download combines id into a path without validation, enabling arbitrary file read; same as label 3."
+          "label_ids": [
+            "cs-04-document-upload#3"
+          ],
+          "reason": "Describes path traversal in Download through the unvalidated id, which is label 3."
         },
         {
           "line": 32,
@@ -402,8 +433,10 @@
           "title": "Unnecessary in-memory copy and synchronous I/O in async method",
           "explanation": "The upload is copied synchronously into a MemoryStream, then converted with ToArray (another full copy), then written. This doubles memory use per request for up to 10 MB and blocks a thread during the copy. The CancellationToken is also not applied to the copy.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#2",
-          "reason": "Synchronous CopyTo into MemoryStream and buffering of the whole upload; same as label 2."
+          "label_ids": [
+            "cs-04-document-upload#2"
+          ],
+          "reason": "Describes the synchronous CopyTo into a MemoryStream and the buffering of the whole upload, which is label 2."
         },
         {
           "line": 14,
@@ -413,8 +446,8 @@
           "title": "Missing null check on file parameter",
           "explanation": "If the request does not include the form field, file may be null, and file.Length on line 16 throws a NullReferenceException that produces a 500 instead of a 400.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "With [ApiController], a missing IFormFile parameter is inferred as required and model validation returns 400 automatically; no NullReferenceException occurs."
+          "label_ids": [],
+          "reason": "The [ApiController] attribute makes model binding and validation return 400 automatically when the required IFormFile is missing. In practice the action is not invoked with a null file."
         },
         {
           "line": 22,
@@ -424,8 +457,8 @@
           "title": "Extension-only file type validation",
           "explanation": "Only the file name extension is checked. Any content can be uploaded under a .pdf, .png or .jpg name, and nothing verifies the file signature. Combined with the Download endpoint, which serves files as application/octet-stream, this can be used to store arbitrary content.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Only the extension is checked, so arbitrary content can be stored under an allowed extension. This is a genuine validation weakness not covered by the labels."
+          "label_ids": [],
+          "reason": "Validating only the extension is a genuine weakness: arbitrary content can be stored under an allowed name. It is not covered by any label."
         },
         {
           "line": 29,
@@ -435,8 +468,10 @@
           "title": "Uploads silently overwrite existing files with the same name",
           "explanation": "Because the stored name is the client-supplied name, a second upload with the same name replaces the first file without any warning. The returned id then points to different content, which is a data-integrity problem.",
           "verdict": "duplicate",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Label 1 explicitly includes same-named uploads overwriting each other, caused by using the client-supplied name."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Label 1 explicitly includes the overwrite of uploads that share a name, and this finding describes the same overwrite from the same client-supplied name."
         },
         {
           "line": 18,
@@ -446,8 +481,8 @@
           "title": "Hard-coded size text duplicates the constant",
           "explanation": "The error message repeats the 10 MB limit as literal text, so it will become wrong if MaxBytes changes. The same limit is also duplicated in the RequestSizeLimit attribute usage.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The hard-coded text in the message is a minor style nit; the RequestSizeLimit attribute actually uses the constant, so the duplication claim there is wrong."
+          "label_ids": [],
+          "reason": "This is a minor style remark. The message text is not a real defect, and the claim that RequestSizeLimit duplicates the limit is wrong because the attribute uses the constant."
         }
       ],
       "found": [
@@ -460,9 +495,9 @@
       "reviewer_input_tokens": 2054,
       "reviewer_output_tokens": 2057,
       "reviewer_cost": 0.0012339,
-      "judge_input_tokens": 2563,
-      "judge_output_tokens": 529,
-      "judge_cost": 0.010416,
+      "judge_input_tokens": 2616,
+      "judge_output_tokens": 564,
+      "judge_cost": 0.010872,
       "seconds": 14.9,
       "error": null
     },
@@ -470,6 +505,8 @@
       "id": "cs-05-exchange-rate-cache",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -485,8 +522,10 @@
           "title": "Blocking on async call with .Result",
           "explanation": "ConvertAsync is declared async but calls GetRateAsync(...).Result, which blocks the calling thread. In contexts with a SynchronizationContext (such as ASP.NET Framework or UI apps) this can deadlock. It also wastes a thread-pool thread during HTTP I/O and ignores the async contract of the method.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#2",
-          "reason": "Describes blocking .Result in async method with deadlock and thread-pool waste."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#2"
+          ],
+          "reason": "Describes blocking .Result inside an async method and the deadlock and thread-waste risks, which is the labeled defect."
         },
         {
           "line": 20,
@@ -496,8 +535,8 @@
           "title": "Cancellation token not propagated through ConvertAsync",
           "explanation": "ConvertAsync accepts a CancellationToken but the blocking .Result call hides cancellation semantics, and the token is only passed indirectly. The async method also has no await, so the compiler flags it and the state machine is wasted.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Claim that the token is not propagated is wrong; GetRateAsync receives ct. The \u0027no await\u0027 remark is a side effect of the .Result issue and is not a distinct defect."
+          "label_ids": [],
+          "reason": "The token is passed directly to GetRateAsync, so the cancellation claim is wrong. The \u0027no await\u0027 remark is only a side effect of the .Result issue, not a separate defect."
         },
         {
           "line": 11,
@@ -507,8 +546,10 @@
           "title": "Shared static Dictionary is not thread-safe",
           "explanation": "_rates is a static Dictionary\u003Cstring, ExchangeRate\u003E that is written in GetRateAsync (line 36) and read concurrently (line 27). Concurrent reads and writes can corrupt the dictionary, cause infinite loops or exceptions, or return inconsistent data. The System.Collections.Concurrent using on line 1 suggests ConcurrentDictionary was intended.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#1",
-          "reason": "Static Dictionary used concurrently is not thread-safe."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#1"
+          ],
+          "reason": "Identifies the static non-thread-safe Dictionary being read and written concurrently."
         },
         {
           "line": 11,
@@ -518,8 +559,8 @@
           "title": "Static cache shared across all instances and ignores injected dependencies",
           "explanation": "The cache is static, so every ExchangeRateCache instance shares the same data even though each instance has its own HttpClient and TimeProvider. Tests or multiple tenants with different clocks or endpoints will see each other\u0027s cached rates, which makes behavior hard to predict and test.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Static cache shared across instances while keyed only by currency pair ignores each instance\u0027s injected HttpClient and clock; this is a genuine design defect causing cross-instance contamination."
+          "label_ids": [],
+          "reason": "A static cache shared across instances ignores each instance\u0027s injected HttpClient and TimeProvider, so instances with different endpoints or clocks pollute each other. This is a genuine design defect that the labels do not cover."
         },
         {
           "line": 27,
@@ -529,8 +570,8 @@
           "title": "Check-then-act race causes duplicate fetches and stale reads",
           "explanation": "The cache is checked on line 27 and written on line 36 with no synchronization. Many concurrent callers for the same expired key will each issue an HTTP request (thundering herd), and a reader can observe a partially updated entry under concurrent writes.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The thundering herd/duplicate fetch is a minor inefficiency; the data race part duplicates the dictionary thread-safety label, and \u0027partially updated entry\u0027 is incorrect for an immutable record."
+          "label_ids": [],
+          "reason": "The duplicate-fetch race is mostly benign, and the partially-updated-entry claim comes down to the Dictionary thread-safety problem already labeled. The finding is speculative and overlaps that label."
         },
         {
           "line": 32,
@@ -540,8 +581,8 @@
           "title": "Missing ConfigureAwait(false) on awaited HTTP call",
           "explanation": "This is library code that does not need to resume on the caller\u0027s synchronization context. Without ConfigureAwait(false), continuations are marshaled back to the captured context, which can cause unnecessary overhead and deadlock risk when combined with blocking callers.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) is a best-practice nit that is irrelevant in modern ASP.NET Core; the real problem is the blocking call."
+          "label_ids": [],
+          "reason": "ConfigureAwait advice is a best-practice nit for this code. ASP.NET Core has no sync context, so it does not matter here."
         },
         {
           "line": 33,
@@ -551,8 +592,8 @@
           "title": "Currency codes are not validated",
           "explanation": "from and to are used directly to build the cache key and the request URL without validation. Null, empty, or malformed codes produce confusing downstream errors or cache entries with meaningless keys.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Input validation advice is speculative; the codes are URL-escaped and the remote service handles invalid codes."
+          "label_ids": [],
+          "reason": "Inputs are URL-escaped and bad codes just cause the remote service to fail. This is speculative advice to add validation."
         },
         {
           "line": 40,
@@ -562,8 +603,8 @@
           "title": "Response rate is not validated",
           "explanation": "RateResponse.Rate is accepted as-is. A zero, negative, or otherwise implausible rate returned by the remote service would be cached for 10 minutes and used for money conversions in ConvertAsync.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "An unvalidated zero or negative rate would be cached and used for money conversions in a payments context, a legitimate correctness risk."
+          "label_ids": [],
+          "reason": "An unvalidated zero or negative rate would be cached and used for money conversions in a payments flow. This is a legitimate robustness gap."
         },
         {
           "line": 34,
@@ -573,8 +614,8 @@
           "title": "No fallback when the rate service fails",
           "explanation": "If the HTTP call throws or returns null, the method fails even if a stale cached rate exists. For a payments flow, falling back to a recently expired rate or failing with a clearer error may be preferable, but the current behavior is undefined.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Stale-fallback is a design preference; failing on service error is reasonable behavior and not a defect."
+          "label_ids": [],
+          "reason": "Wanting a stale-cache fallback is a design preference, not a defect in the code."
         },
         {
           "line": 21,
@@ -583,9 +624,9 @@
           "severity": "Low",
           "title": "Magic number for currency precision",
           "explanation": "The literal 2 in Math.Round encodes an assumption about currency decimal places, which is not true for all currencies (for example JPY uses 0 and some use 3).",
-          "verdict": "real",
-          "label_id": null,
-          "reason": "Hardcoded 2 decimal places gives wrong results for currencies like JPY (0) or KWD (3) in money conversions, a genuine correctness issue."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Hardcoded 2 decimal places is a minor point and speculative here. It is a style or preference remark rather than a clear defect."
         }
       ],
       "found": [
@@ -597,9 +638,9 @@
       "reviewer_input_tokens": 1953,
       "reviewer_output_tokens": 2627,
       "reviewer_cost": 0.0015088,
-      "judge_input_tokens": 2802,
-      "judge_output_tokens": 760,
-      "judge_cost": 0.013204,
+      "judge_input_tokens": 2855,
+      "judge_output_tokens": 803,
+      "judge_cost": 0.01374,
       "seconds": 18.6,
       "error": null
     },
@@ -607,6 +648,8 @@
       "id": "cs-06-shipping-client",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -622,8 +665,10 @@
           "title": "Loop performs only two attempts despite MaxAttempts of 3",
           "explanation": "The loop condition uses \u0027attempt \u003C MaxAttempts\u0027, so attempts run 1 and 2 only. The constant suggests three total attempts were intended, so the retry budget is one short. The same off-by-one also makes the retry check on line 19 meaningless inside the loop.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#1",
-          "reason": "Identifies the off-by-one in the loop condition \u0060attempt \u003C MaxAttempts\u0060 that yields only two attempts."
+          "label_ids": [
+            "cs-06-shipping-client#1"
+          ],
+          "reason": "Identifies the off-by-one loop condition giving only two attempts instead of three, same as label 1."
         },
         {
           "line": 25,
@@ -632,9 +677,9 @@
           "severity": "High",
           "title": "Non-retryable 4xx errors are retried via HttpRequestException",
           "explanation": "EnsureSuccessStatusCode throws HttpRequestException for any non-2xx status, including 400, 401, 404. The catch on line 28 catches that exception while attempt \u003C MaxAttempts and retries it, so permanent client errors are retried needlessly with backoff.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Misreads the control flow. For non-retryable 4xx, EnsureSuccessStatusCode throws HttpRequestException inside the try, and the catch filter \u0060attempt \u003C MaxAttempts\u0060 does catch it and retry on attempt 1. So the retry of 4xx does actually occur, but... the claim is technically accurate; however it is a real defect rather than false alarm."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Valid: EnsureSuccessStatusCode throws HttpRequestException on 4xx, and the catch clause retries it while attempt \u003C MaxAttempts, so permanent client errors get retried. Not covered by labels."
         },
         {
           "line": 35,
@@ -644,8 +689,8 @@
           "title": "Final 5xx response yields misleading \u0027Unreachable\u0027 exception",
           "explanation": "When the last attempt returns a retryable status (for example 503), the \u0027continue\u0027 is skipped at attempt 2 and the loop ends. Execution then reaches the \u0027Unreachable\u0027 throw, which is reachable and hides the real HTTP failure. The caller gets an InvalidOperationException instead of the status information.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. Describes the consequence of the same off-by-one: the loop ends and throws the \u0027Unreachable\u0027 exception instead of the real error."
+          "label_ids": [],
+          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. Describes the consequence named in label 1: the last retryable response ends the loop in the \u0027Unreachable\u0027 exception instead of the real error."
         },
         {
           "line": 40,
@@ -655,8 +700,10 @@
           "title": "New HttpClient created per call, bypassing IHttpClientFactory",
           "explanation": "Creating and disposing an HttpClient for each request causes socket exhaustion and DNS caching problems under load. It also ignores the injected factory and its configured handlers, timeouts, and resilience settings that GetTrackingStatusAsync uses.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#2",
-          "reason": "New HttpClient per call bypassing the factory, same as the label."
+          "label_ids": [
+            "cs-06-shipping-client#2"
+          ],
+          "reason": "Per-call HttpClient creation causing socket exhaustion and bypassing the factory, same as label 2."
         },
         {
           "line": 40,
@@ -665,9 +712,9 @@
           "severity": "Medium",
           "title": "Hardcoded API base address",
           "explanation": "The shipper endpoint URL is hardcoded in the method. This makes environment changes (staging, sandbox) require code changes and is inconsistent with the \u0027shipping\u0027 named client used elsewhere.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Hardcoded base URL is a configuration preference; the core problem (bypassing factory client) is already covered by the other label."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The hardcoded base URL is a legitimate config problem and diverges from the configured \u0027shipping\u0027 client, though it is not the labeled defect."
         },
         {
           "line": 38,
@@ -677,8 +724,8 @@
           "title": "CreateShipmentAsync lacks retry and input validation",
           "explanation": "GetTrackingStatusAsync has retry logic while CreateShipmentAsync does not, so behavior is inconsistent. Also, payloadJson is not validated for null or empty before being sent, and the method does not handle cancellation or transient failures in the same way.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative advice: retrying a POST create is not safe without idempotency, and input validation/consistency remarks are not concrete defects."
+          "label_ids": [],
+          "reason": "Retrying POST creation could cause duplicate shipments; missing retry is not a defect, and the vague validation advice is speculative."
         },
         {
           "line": 26,
@@ -688,8 +735,8 @@
           "title": "Missing ConfigureAwait(false) on await in library code",
           "explanation": "This is library code that does not depend on a synchronization context. Awaits on line 26 and elsewhere do not use ConfigureAwait(false), which can cause unnecessary context marshalling and deadlock risk in consumers that block on async calls.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) advice is a best practice that does not matter in modern ASP.NET Core code."
+          "label_ids": [],
+          "reason": "ConfigureAwait(false) advice is a style preference, and the deadlock claim is not a defect in this code."
         },
         {
           "line": 47,
@@ -699,8 +746,8 @@
           "title": "Magic number and no jitter in backoff",
           "explanation": "The base delay of 200 is a magic number, and the backoff is deterministic. Multiple clients retrying together can produce synchronized retry storms.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Magic number and lack of jitter are style/preference remarks, not a defect here."
+          "label_ids": [],
+          "reason": "Magic number and missing jitter are minor style and best-practice remarks that do not matter at three attempts."
         }
       ],
       "found": [
@@ -712,9 +759,9 @@
       "reviewer_input_tokens": 2125,
       "reviewer_output_tokens": 2833,
       "reviewer_cost": 0.001629,
-      "judge_input_tokens": 2759,
-      "judge_output_tokens": 643,
-      "judge_cost": 0.011948,
+      "judge_input_tokens": 2812,
+      "judge_output_tokens": 626,
+      "judge_cost": 0.011884,
       "seconds": 17.9,
       "error": null
     },
@@ -722,6 +769,8 @@
       "id": "cs-07-sales-report",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -738,8 +787,10 @@
           "title": "Date range excludes the last day despite the doc comment",
           "explanation": "The doc comment says both the first and last day are included, but \u0060end\u0060 is \u0060to\u0060 at midnight and the filter uses \u0060PlacedAt \u003C end\u0060. Orders placed on the \u0060to\u0060 date are silently dropped from the report.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#1",
-          "reason": "Same defect: end is midnight of the last day with a strict \u003C filter, so the last day is excluded despite the doc comment."
+          "label_ids": [
+            "cs-07-sales-report#1"
+          ],
+          "reason": "Describes the exclusive end at midnight of the \u0060to\u0060 date dropping the last day, contradicting the doc comment."
         },
         {
           "line": 17,
@@ -749,8 +800,8 @@
           "title": "All orders in the range are loaded into memory",
           "explanation": "The query materializes every order in the period just to aggregate it in C#. For large date ranges this is slow and memory-heavy, and the aggregation could run in the database.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Loading every order into memory to aggregate in C# is a genuine performance problem. The label only covers the per-customer query loop, so this is a separate issue, though it is closely related to the fix for the N\u002B1."
+          "label_ids": [],
+          "reason": "Loading all orders into memory to aggregate in C# is a genuine performance issue. The label only covers the N\u002B1 customer lookup, though it mentions in-memory loading in passing."
         },
         {
           "line": 22,
@@ -760,8 +811,10 @@
           "title": "N\u002B1 query: one customer lookup per group",
           "explanation": "A separate \u0060SingleAsync\u0060 round trip runs for every customer group. A report covering many customers issues many queries, and \u0060SingleAsync\u0060 also throws if a customer is missing.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#2",
-          "reason": "Describes the N\u002B1 pattern of one SingleAsync customer query per group, which is the labeled defect."
+          "label_ids": [
+            "cs-07-sales-report#2"
+          ],
+          "reason": "Identifies the per-group SingleAsync customer query as an N\u002B1 problem."
         },
         {
           "line": 37,
@@ -771,8 +824,10 @@
           "title": "Average throws on an empty result",
           "explanation": "\u0060Enumerable.Average\u0060 on an empty sequence throws InvalidOperationException. A customer with no orders causes an unhandled exception instead of a meaningful value.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#3",
-          "reason": "Enumerable.Average throws InvalidOperationException on an empty list when the customer has no orders, which matches the label."
+          "label_ids": [
+            "cs-07-sales-report#3"
+          ],
+          "reason": "Identifies Average throwing InvalidOperationException on an empty sequence for a customer with no orders."
         }
       ],
       "found": [
@@ -785,9 +840,9 @@
       "reviewer_input_tokens": 1895,
       "reviewer_output_tokens": 1127,
       "reviewer_cost": 0.000753,
-      "judge_input_tokens": 1987,
-      "judge_output_tokens": 324,
-      "judge_cost": 0.007214,
+      "judge_input_tokens": 2040,
+      "judge_output_tokens": 313,
+      "judge_cost": 0.00721,
       "seconds": 8.7,
       "error": null
     },
@@ -795,6 +850,8 @@
       "id": "cs-08-jwt-setup",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -811,8 +868,10 @@
           "title": "Hardcoded fallback signing key",
           "explanation": "If the Jwt:SigningKey setting is missing, the code silently falls back to a known literal key. Anyone who reads the source can forge JWTs that pass signature validation, which allows authentication bypass in any environment where configuration is incomplete.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#2",
-          "reason": "Same hardcoded fallback signing key on line 11."
+          "label_ids": [
+            "cs-08-jwt-setup#2"
+          ],
+          "reason": "Identifies the hardcoded fallback signing key on line 11 that allows forged tokens."
         },
         {
           "line": 23,
@@ -822,8 +881,10 @@
           "title": "Token lifetime validation disabled",
           "explanation": "ValidateLifetime = false means expired tokens are accepted indefinitely. A leaked or stolen token stays valid forever, and ClockSkew on line 24 has no effect.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#1",
-          "reason": "Same defect: ValidateLifetime = false lets expired tokens through."
+          "label_ids": [
+            "cs-08-jwt-setup#1"
+          ],
+          "reason": "Identifies ValidateLifetime = false, so expired tokens are accepted."
         },
         {
           "line": 34,
@@ -833,8 +894,10 @@
           "title": "Bearer token written to logs",
           "explanation": "The full Authorization header, which contains the bearer token, is logged on every authentication failure. Log readers, log aggregators, or anyone with log access could replay live tokens.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#3",
-          "reason": "Same defect: the Authorization header with the bearer token is logged on authentication failure."
+          "label_ids": [
+            "cs-08-jwt-setup#3"
+          ],
+          "reason": "Identifies the Authorization header and bearer token being logged on authentication failure."
         },
         {
           "line": 20,
@@ -844,8 +907,8 @@
           "title": "Issuer and audience may be null without validation",
           "explanation": "ValidateIssuer and ValidateAudience are enabled, but ValidIssuer and ValidAudience are read from configuration with no null or empty check. A missing setting produces a misconfigured validator that rejects all tokens or behaves unpredictably, and the error appears only at runtime.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A null ValidIssuer or ValidAudience with validation enabled causes tokens to be rejected (fails closed), which is not a security hole. The claim is speculative and mostly a best-practice remark."
+          "label_ids": [],
+          "reason": "With a missing issuer or audience and validation enabled, tokens are rejected (fail closed), which is not a security hole. The speculative configuration-validation advice is not a real defect here."
         },
         {
           "line": 9,
@@ -855,8 +918,8 @@
           "title": "No argument null checks",
           "explanation": "The services and configuration parameters are used without null guards. A null argument causes a NullReferenceException later, which is harder to diagnose than an ArgumentNullException at the entry point.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Null guards on an extension method called at startup are a style preference and do not matter here."
+          "label_ids": [],
+          "reason": "Null guards on an extension method called at startup are a style preference with little practical value."
         }
       ],
       "found": [
@@ -869,9 +932,9 @@
       "reviewer_input_tokens": 1996,
       "reviewer_output_tokens": 1254,
       "reviewer_cost": 0.0008266,
-      "judge_input_tokens": 2212,
-      "judge_output_tokens": 348,
-      "judge_cost": 0.007904,
+      "judge_input_tokens": 2265,
+      "judge_output_tokens": 365,
+      "judge_cost": 0.00818,
       "seconds": 10.1,
       "error": null
     },
@@ -879,6 +942,8 @@
       "id": "cs-clean-01-slug",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -891,8 +956,8 @@
           "title": "string.Normalize can throw on malformed input",
           "explanation": "string.Normalize throws ArgumentException when the input contains invalid Unicode, such as unpaired surrogates. ToSlug only guards against null, so user-supplied titles with malformed characters will raise an unhandled exception.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Normalize does throw ArgumentException on invalid Unicode such as lone surrogates, and ToSlug only guards against null. The edge case is real, though low severity."
+          "label_ids": [],
+          "reason": "string.Normalize throws ArgumentException on invalid Unicode such as lone surrogates. ToSlug only guards null, so malformed user titles would throw unexpectedly. It is a low-severity edge case, but the claim is accurate."
         },
         {
           "line": 17,
@@ -902,8 +967,8 @@
           "title": "Entire title is normalized even though output is capped at MaxLength",
           "explanation": "Normalize(FormD) allocates and processes the full input string, which can be arbitrarily long, even though the loop stops after 80 output characters. The work is wasted for long titles.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Titles are short in practice, so normalizing the whole string costs almost nothing. This is speculative micro-optimization, not a defect."
+          "label_ids": [],
+          "reason": "This is a speculative micro-optimization. Normalizing the whole string is linear and simple, and the finding gives no evidence that long titles are a real problem here."
         },
         {
           "line": 48,
@@ -913,8 +978,8 @@
           "title": "Redundant truncation and TrimEnd",
           "explanation": "The loop already breaks once the length reaches MaxLength, so the Math.Min in ToString is a no-op. Hyphens are only appended before a letter or digit, so the result can never end with a hyphen and TrimEnd(\u0027-\u0027) never removes anything. These calls suggest the logic is less clear than it is.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The claim is wrong. At length 79 with a pending hyphen, the code appends \u0027-\u0027 and then a letter, reaching 81, so Math.Min truncation is needed. Truncating to 80 can then leave a trailing hyphen, so TrimEnd is needed too."
+          "label_ids": [],
+          "reason": "The claim is wrong. When the slug is at 79 characters with a pending hyphen, one iteration appends both a hyphen and a letter, reaching 81. So Math.Min truncation is needed. Truncating to 80 can also leave a trailing hyphen, so TrimEnd is needed too."
         }
       ],
       "found": [],
@@ -923,9 +988,9 @@
       "reviewer_input_tokens": 1883,
       "reviewer_output_tokens": 1298,
       "reviewer_cost": 0.0008373,
-      "judge_input_tokens": 1746,
-      "judge_output_tokens": 774,
-      "judge_cost": 0.011232,
+      "judge_input_tokens": 1799,
+      "judge_output_tokens": 1010,
+      "judge_cost": 0.013698,
       "seconds": 14.5,
       "error": null
     },
@@ -933,6 +998,8 @@
       "id": "cs-clean-02-customer-repository",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -945,8 +1012,8 @@
           "title": "Nullable column read with GetString may throw",
           "explanation": "reader.GetString(2) throws SqlNullValueException if the Email column is NULL. The code never checks reader.IsDBNull, and the Customer record declares Email as non-nullable. If the schema allows NULL emails, FindAsync will fail at runtime for those rows.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative: the schema is not shown, and the Email column is likely NOT NULL. The record declares Email as non-nullable, so the reader code is consistent with that, and no defect is evident."
+          "label_ids": [],
+          "reason": "Speculative: the schema is unknown and the record\u0027s non-nullable Email suggests a NOT NULL column. Without evidence of a nullable column this is not a defect."
         },
         {
           "line": 33,
@@ -956,8 +1023,8 @@
           "title": "Name length not validated against NVarChar(200)",
           "explanation": "The parameter is declared as NVarChar with size 200, but the input is only checked for whitespace. A name longer than 200 characters after trimming will cause a SqlException from the database layer instead of a clear argument error.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "With a declared size of 200, SQL Server truncates the parameter value for NVarChar parameters rather than throwing. Even if it did throw, a SqlException on oversized input is acceptable behavior, so this is only a \u0027consider adding\u0027 remark."
+          "label_ids": [],
+          "reason": "A SqlParameter with size 200 does not throw; SQL Server raises a truncation error (or truncates silently). Failing on over-long input is acceptable behavior, so this is a minor \u0027consider adding\u0027 remark, not a defect."
         },
         {
           "line": 13,
@@ -967,8 +1034,8 @@
           "title": "Awaits lack ConfigureAwait(false) in library code",
           "explanation": "This is a data-access library, and none of its awaits use ConfigureAwait(false). Continuations are therefore forced back to the caller\u0027s synchronization context, which can add overhead and cause deadlocks in UI or legacy ASP.NET callers that block on the result.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) is a best-practice preference. Modern ASP.NET Core has no sync context, and the deadlock scenario only arises if callers block on the result, so the finding does not apply here."
+          "label_ids": [],
+          "reason": "ConfigureAwait(false) is a best-practice preference. Modern ASP.NET Core has no synchronization context, and the deadlock only affects callers who block on the result, so it is not a defect in this code."
         }
       ],
       "found": [],
@@ -977,9 +1044,9 @@
       "reviewer_input_tokens": 1914,
       "reviewer_output_tokens": 1474,
       "reviewer_cost": 0.0009284,
-      "judge_input_tokens": 1790,
-      "judge_output_tokens": 310,
-      "judge_cost": 0.00668,
+      "judge_input_tokens": 1843,
+      "judge_output_tokens": 303,
+      "judge_cost": 0.006716,
       "seconds": 12.2,
       "error": null
     },
@@ -987,6 +1054,8 @@
       "id": "cs-clean-03-order-controller",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -999,8 +1068,8 @@
           "title": "Subject claim lookup may fail under default JWT claim mapping",
           "explanation": "ASP.NET Core\u0027s JWT handler maps inbound claims by default, and \u0027sub\u0027 is commonly remapped to ClaimTypes.NameIdentifier. User.FindFirst(\u0022sub\u0022) can then return null even for authenticated users, causing every request to fail.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "In modern ASP.NET Core (.NET 8\u002B with JsonWebTokenHandler) inbound claim mapping is disabled by default, and the app config isn\u0027t shown. This is speculative, not a defect in this code."
+          "label_ids": [],
+          "reason": "In ASP.NET Core 8\u002B, JsonWebTokenHandler (the default) does not remap inbound claims, so \u0027sub\u0027 stays \u0027sub\u0027. Even in the older handler, mapping is a configuration matter, and the code is plausible as written. Speculative."
         },
         {
           "line": 39,
@@ -1010,8 +1079,8 @@
           "title": "Missing subject claim surfaces as HTTP 500",
           "explanation": "Throwing InvalidOperationException for a missing claim produces an unhandled server error. An authenticated request without the expected claim is a client or identity-configuration problem, so it should not be reported as a server fault.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A missing subject claim on an authorized request is a server/identity misconfiguration, so a 500 is a reasonable response. Fail-fast here is intentional, not a defect."
+          "label_ids": [],
+          "reason": "An authenticated token lacking the required subject claim is a server or identity configuration fault, so throwing and returning 500 is defensible. The finding is a preference remark."
         },
         {
           "line": 8,
@@ -1021,8 +1090,8 @@
           "title": "Required SKU accepts whitespace-only values",
           "explanation": "[Required] rejects null and empty strings but accepts whitespace, so a SKU such as \u0022   \u0022 passes validation and reaches the service layer.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "[Required] with default AllowEmptyStrings=false rejects whitespace-only strings too, so the claim is factually wrong."
+          "label_ids": [],
+          "reason": "[Required] on a string rejects null and empty, and AllowEmptyStrings is false by default, which also rejects whitespace-only strings. The claim is factually wrong."
         },
         {
           "line": 24,
@@ -1032,8 +1101,8 @@
           "title": "No idempotency protection for order placement",
           "explanation": "POST creates a new order on every call. A client retry after a timeout or network failure can create duplicate orders with no way to detect them.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Idempotency keys are an optional best-practice enhancement and speculative advice, not a defect in this code."
+          "label_ids": [],
+          "reason": "Idempotency keys are a speculative best-practice suggestion, not a defect in this code."
         }
       ],
       "found": [],
@@ -1042,11 +1111,12 @@
       "reviewer_input_tokens": 1947,
       "reviewer_output_tokens": 1548,
       "reviewer_cost": 0.0009687,
-      "judge_input_tokens": 1852,
-      "judge_output_tokens": 335,
-      "judge_cost": 0.007054,
+      "judge_input_tokens": 1905,
+      "judge_output_tokens": 362,
+      "judge_cost": 0.00743,
       "seconds": 12.9,
       "error": null
     }
-  ]
+  ],
+  "rejudged_at": "2026-10-29T13:08:34.243369+00:00"
 }

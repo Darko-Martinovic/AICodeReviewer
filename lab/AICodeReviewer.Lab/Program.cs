@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 // dotnet run --project lab/AICodeReviewer.Lab -- run [--dataset v1] [--model key] [--judge key] [--cases prefix]
 //                                                    [--prompt Language=version]... [--repeat n] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- scoreboard [--dataset v1]
+// dotnet run --project lab/AICodeReviewer.Lab -- rejudge [--dataset v1] [--judge key] [--max-cost dollars] [--estimate]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt list
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt new <Language> --notes "what changes" [--from version]
 // dotnet run --project lab/AICodeReviewer.Lab -- prompt decide <Language> <version> [--model key] [--judge key] [--margin 0.02]
@@ -28,10 +29,12 @@ try
         case "scoreboard":
             Scoreboard(Options.Parse(args.Skip(1).ToArray()));
             return 0;
+        case "rejudge":
+            return await Rejudge(Options.Parse(args.Skip(1).ToArray()));
         case "prompt":
             return PromptCommand(args.Skip(1).ToArray());
         default:
-            Console.Error.WriteLine($"Unknown command '{command}'. Commands: list, labels, run, scoreboard, prompt");
+            Console.Error.WriteLine($"Unknown command '{command}'. Commands: list, labels, run, scoreboard, rejudge, prompt");
             return 1;
     }
 }
@@ -110,6 +113,45 @@ static async Task<int> Run(Options options)
         (result.StoppedByBudget ? "; stopped early by the budget" : ""));
     Console.WriteLine($"Saved {Path.GetRelativePath(lab.RepoRoot, path)}");
     return s.Errors == 0 ? 0 : 3;
+}
+
+static async Task<int> Rejudge(Options options)
+{
+    var lab = Open(options.Dataset);
+    var catalog = ModelCatalog.LoadDefault();
+    var clients = new ModelClientFactory(lab.Configuration, new HttpClient { Timeout = TimeSpan.FromMinutes(5) });
+    var judgeModel = options.Judge ?? catalog.DefaultJudge;
+    var runner = new Runner(lab.Dataset, new Reviewer(catalog, clients, lab.Prompts, lab.ConfigService, lab.Configuration),
+        new Judge(catalog, clients), catalog, lab.Prompts, lab.RunStore);
+    var resultsFolder = Path.Combine(lab.RepoRoot, "lab", "results");
+    var runs = new PromptLab(resultsFolder, lab.Dataset, lab.Prompts).Runs();
+
+    var estimate = runs.Sum(r => runner.EstimateRejudge(r.Result, judgeModel));
+    Console.WriteLine($"Grading the reviews of {runs.Count} saved runs again with {judgeModel}: estimate ${estimate:F2} (budget ${options.MaxCost:F2})");
+    if (options.EstimateOnly)
+    {
+        return 0;
+    }
+    if (estimate > options.MaxCost)
+    {
+        Console.Error.WriteLine("The estimate is over the budget; raise --max-cost.");
+        return 2;
+    }
+
+    decimal spent = 0;
+    foreach (var run in runs)
+    {
+        Console.WriteLine(run.File);
+        var result = await runner.RejudgeAsync(run.Result, judgeModel, Console.WriteLine);
+        File.WriteAllText(Path.Combine(resultsFolder, lab.Dataset.Name, run.File),
+            System.Text.Json.JsonSerializer.Serialize(result, Runner.ResultJson) + "\n");
+        var cost = result.Cases.Sum(c => c.JudgeCost);
+        spent += cost;
+        Console.WriteLine($"  recall {run.Result.Summary.Recall:P0} -> {result.Summary.Recall:P0}, " +
+            $"precision {run.Result.Summary.Precision:P0} -> {result.Summary.Precision:P0}, ${cost:F4}");
+    }
+    Console.WriteLine($"Spent ${spent:F4} judging");
+    return 0;
 }
 
 static void Scoreboard(Options options)

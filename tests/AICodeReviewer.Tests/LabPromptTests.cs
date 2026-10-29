@@ -34,7 +34,7 @@ public class LabPromptTests : IDisposable
     {
         var labels = Enumerable.Range(1, 10).Select(i => $"{caseId}#{i}").ToList();
         var findings = Enumerable.Range(0, 10)
-            .Select(i => new ScoredFinding(1, 1, "Bug", "Low", "t", "e", i < falseAlarms ? Scoring.FalseAlarm : Scoring.Real, null, "r"))
+            .Select(i => new ScoredFinding(1, 1, "Bug", "Low", "t", "e", i < falseAlarms ? Scoring.FalseAlarm : Scoring.Real, [], "r"))
             .ToList();
         var caseResult = new CaseResult(caseId, "realistic", "buggy", language, version, 1, "hash", labels, findings,
             labels.Take(found).ToList(), labels.Skip(found).ToList(), 0, 100, 50, 0.001m, 200, 100, 0.002m, 1.0, null);

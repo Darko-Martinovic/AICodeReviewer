@@ -23,22 +23,22 @@
     "cases": 36,
     "errors": 0,
     "labels": 84,
-    "found": 76,
+    "found": 81,
     "findings": 107,
     "matched": 76,
     "duplicates": 3,
-    "real": 20,
-    "false_alarms": 8,
+    "real": 24,
+    "false_alarms": 4,
     "outside_window": 2,
     "clean_cases": 10,
-    "false_alarms_on_clean": 3,
-    "recall": 0.9048,
-    "precision": 0.9252,
+    "false_alarms_on_clean": 2,
+    "recall": 0.9643,
+    "precision": 0.9626,
     "strict_precision": 0.7383,
-    "f1": 0.9149,
-    "false_alarms_per_clean_case": 0.3,
+    "f1": 0.9635,
+    "false_alarms_per_clean_case": 0.2,
     "reviewer_cost": 0.0316626,
-    "judge_cost": 0.236954
+    "judge_cost": 0.254086
   },
   "groups": {
     "clean": {
@@ -49,18 +49,18 @@
       "findings": 6,
       "matched": 0,
       "duplicates": 0,
-      "real": 3,
-      "false_alarms": 3,
+      "real": 4,
+      "false_alarms": 2,
       "outside_window": 0,
       "clean_cases": 10,
-      "false_alarms_on_clean": 3,
+      "false_alarms_on_clean": 2,
       "recall": 1,
-      "precision": 0.5,
+      "precision": 0.6667,
       "strict_precision": 0,
-      "f1": 0.6667,
-      "false_alarms_per_clean_case": 0.3,
+      "f1": 0.8,
+      "false_alarms_per_clean_case": 0.2,
       "reviewer_cost": 0.0063787,
-      "judge_cost": 0.041204
+      "judge_cost": 0.051190
     },
     "realistic": {
       "cases": 24,
@@ -70,24 +70,24 @@
       "findings": 67,
       "matched": 50,
       "duplicates": 2,
-      "real": 12,
-      "false_alarms": 3,
+      "real": 15,
+      "false_alarms": 0,
       "outside_window": 2,
       "clean_cases": 0,
       "false_alarms_on_clean": 0,
       "recall": 0.9615,
-      "precision": 0.9552,
+      "precision": 1,
       "strict_precision": 0.7761,
-      "f1": 0.9584,
+      "f1": 0.9804,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0207787,
-      "judge_cost": 0.152438
+      "judge_cost": 0.156212
     },
     "seeded-dense": {
       "cases": 2,
       "errors": 0,
       "labels": 32,
-      "found": 26,
+      "found": 31,
       "findings": 34,
       "matched": 26,
       "duplicates": 1,
@@ -96,13 +96,13 @@
       "outside_window": 0,
       "clean_cases": 0,
       "false_alarms_on_clean": 0,
-      "recall": 0.8125,
+      "recall": 0.9688,
       "precision": 0.9412,
       "strict_precision": 0.7941,
-      "f1": 0.8721,
+      "f1": 0.9548,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0045052,
-      "judge_cost": 0.043312
+      "judge_cost": 0.046684
     }
   },
   "cases": [
@@ -127,8 +127,10 @@
           "title": "Large-order discount boundary contradicts its comment",
           "explanation": "The comment says orders of 500 or more get an extra 5 percent, but the condition on line 25 is \u0060subtotal \u003E 500m\u0060. An order with a subtotal of exactly 500.00 does not receive the extra discount, so the code does not match its documented rule.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#1",
-          "reason": "Same defect: \u0060subtotal \u003E 500m\u0060 contradicts the \u0022500 or more\u0022 comment, so an order of exactly 500 misses the extra discount."
+          "label_ids": [
+            "cs-01-order-pricing#1"
+          ],
+          "reason": "Identifies the \u0060\u003E 500m\u0060 boundary contradicting the \u0027500 or more\u0027 comment, so exactly 500 misses the discount."
         },
         {
           "line": 42,
@@ -138,8 +140,10 @@
           "title": "Average per item divides by line count and throws on empty input",
           "explanation": "The method is named AveragePricePerItem, but it divides the subtotal by items.Count, which is the number of order lines, not the number of units. An order with one line of quantity 10 is averaged over 1 item instead of 10. Also, for an empty collection, items.Count is 0, and decimal division by zero throws DivideByZeroException.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#2",
-          "reason": "Same defect: dividing by items.Count averages over lines rather than quantities, and an empty order throws DivideByZeroException."
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Reports dividing by line count instead of quantity and the DivideByZeroException on an empty order, which is the same defect as the label."
         }
       ],
       "found": [
@@ -151,9 +155,9 @@
       "reviewer_input_tokens": 1969,
       "reviewer_output_tokens": 886,
       "reviewer_cost": 0.0006399,
-      "judge_input_tokens": 1894,
-      "judge_output_tokens": 178,
-      "judge_cost": 0.005568,
+      "judge_input_tokens": 1947,
+      "judge_output_tokens": 177,
+      "judge_cost": 0.005664,
       "seconds": 7.2,
       "error": null
     },
@@ -178,8 +182,10 @@
           "title": "SQL injection through sortBy in ORDER BY",
           "explanation": "The sortBy value is interpolated directly into the SQL text at line 28 with no validation. A caller who controls sortBy can append arbitrary SQL, for example a value like \u0022IssuedOn; DROP TABLE dbo.Invoices--\u0022 or a subquery that reads other tables. The SortColumns allow-list at lines 10-13 is defined but never checked against sortBy, so it provides no protection.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#1",
-          "reason": "Identifies unvalidated sortBy interpolated into the ORDER BY clause and the unused SortColumns allow-list, the same SQL injection defect."
+          "label_ids": [
+            "cs-02-invoice-repository#1"
+          ],
+          "reason": "Identifies sortBy interpolated unchecked into ORDER BY at line 28, with the unused SortColumns allow-list; same defect as label 1."
         },
         {
           "line": 48,
@@ -189,8 +195,10 @@
           "title": "SqlConnection is never disposed in DeleteOlderThanAsync",
           "explanation": "The connection is created with a plain var declaration and not wrapped in await using, unlike the command beside it. Nothing closes it after ExecuteNonQueryAsync returns. The connection stays checked out of the pool until it is garbage collected, so repeated calls can exhaust the connection pool.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#2",
-          "reason": "Identifies the undisposed SqlConnection in DeleteOlderThanAsync, which leaks pooled connections, the same defect as the label."
+          "label_ids": [
+            "cs-02-invoice-repository#2"
+          ],
+          "reason": "Identifies the undisposed SqlConnection in DeleteOlderThanAsync (line 48) and the resulting connection pool exhaustion; same as label 2."
         }
       ],
       "found": [
@@ -202,9 +210,9 @@
       "reviewer_input_tokens": 2190,
       "reviewer_output_tokens": 1056,
       "reviewer_cost": 0.000747,
-      "judge_input_tokens": 2158,
-      "judge_output_tokens": 188,
-      "judge_cost": 0.006196,
+      "judge_input_tokens": 2211,
+      "judge_output_tokens": 200,
+      "judge_cost": 0.006422,
       "seconds": 9.9,
       "error": null
     },
@@ -229,8 +237,10 @@
           "title": "Expiry check is inverted, so valid tokens are rejected and expired tokens are accepted",
           "explanation": "The condition \u0060saved.ExpiresAt \u003E clock.GetUtcNow()\u0060 returns false when the token has NOT yet expired. Every unexpired token is rejected, and only tokens past their 30-minute lifetime reach the comparison and can be redeemed. Password reset therefore fails for normal users, and a stale token leaked earlier still works.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#2",
-          "reason": "Describes the inverted expiry comparison on line 29, with the same consequences."
+          "label_ids": [
+            "cs-03-password-reset#2"
+          ],
+          "reason": "Identifies the inverted expiry comparison on line 29, with the correct consequences."
         },
         {
           "line": 21,
@@ -240,8 +250,10 @@
           "title": "Reset token generated with System.Random, which is predictable",
           "explanation": "\u0060new Random()\u0060 is a non-cryptographic PRNG seeded from the clock. An attacker who observes some outputs or knows the approximate issue time can predict later tokens, which allows account takeover through password reset. The token space is also only 900,000 values.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#1",
-          "reason": "Identifies System.Random and the small token space on line 21 as predictable and guessable."
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
+          "reason": "Identifies System.Random as predictable and the small six-digit token space on line 21."
         },
         {
           "line": 34,
@@ -251,8 +263,8 @@
           "title": "Check-then-delete allows a token to be redeemed more than once under concurrency",
           "explanation": "The token is read with FindAsync and only deleted afterwards with DeleteAsync. Two concurrent RedeemAsync calls with the correct token can both read it, both match, and both return true, so the same reset can be used twice.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Genuine race: the read-then-delete is non-atomic, so concurrent redeems can both succeed and a token can be reused. No label covers it."
+          "label_ids": [],
+          "reason": "The find-then-delete sequence is not atomic, so concurrent redemptions can both succeed. This is a genuine race condition that no label covers."
         },
         {
           "line": 36,
@@ -262,8 +274,8 @@
           "title": "Reset codes are stored as unsalted fast SHA-256 hashes and have no attempt limit",
           "explanation": "A 6-digit code has only 900,000 possibilities. An unsalted SHA-256 hash of it can be reversed by brute force in well under a second if the store leaks. RedeemAsync also has no failed-attempt counter or lockout, so an online attacker can try all codes within the 30-minute window.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Valid concerns: no attempt limiting or lockout on redemption lets an online attacker brute-force the small code space, and the unsalted fast hash of a low-entropy code is trivially reversible. Not covered by the labels, which concern token generation and expiry."
+          "label_ids": [],
+          "reason": "RedeemAsync has no attempt limit, so an online attacker can brute-force the small code space within the window. The unsalted fast hash is also weak for such a small keyspace. Neither issue is labeled."
         }
       ],
       "found": [
@@ -275,9 +287,9 @@
       "reviewer_input_tokens": 1954,
       "reviewer_output_tokens": 1611,
       "reviewer_cost": 0.0010009,
-      "judge_input_tokens": 2147,
-      "judge_output_tokens": 321,
-      "judge_cost": 0.007504,
+      "judge_input_tokens": 2200,
+      "judge_output_tokens": 313,
+      "judge_cost": 0.00753,
       "seconds": 12.6,
       "error": null
     },
@@ -303,8 +315,10 @@
           "title": "Client-supplied file name used unsanitized as a write path",
           "explanation": "storedName is taken directly from file.FileName, which is controlled by the client. Path.Combine(folder, storedName) does not neutralize directory segments, so a name such as \u0022../../web.pdf\u0022 resolves outside the uploads folder. An attacker can write attacker-chosen bytes to arbitrary locations the process can write to, while the extension check only validates the suffix. An absolute path in FileName also makes Path.Combine discard the folder entirely.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Describes the client-supplied file name used as the storage path, allowing traversal out of the uploads folder, which is the defect in label #1."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Client-supplied FileName used as the storage path, allowing traversal out of the uploads folder; same defect as label 1."
         },
         {
           "line": 43,
@@ -314,8 +328,10 @@
           "title": "Path traversal in Download via the id route value",
           "explanation": "The id route parameter is combined into the path without validation. Values containing traversal sequences (for example \u0022..\\..\\appsettings.json\u0022 on Windows, or segments that survive URL decoding) resolve outside the uploads folder. File.Exists then passes and PhysicalFile serves arbitrary files such as configuration files containing secrets.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#3",
-          "reason": "Describes path traversal in Download via the unvalidated id, matching label #3."
+          "label_ids": [
+            "cs-04-document-upload#3"
+          ],
+          "reason": "Download combines unvalidated id into a path, enabling arbitrary file read; same as label 3."
         },
         {
           "line": 29,
@@ -325,8 +341,10 @@
           "title": "Uploads with the same file name overwrite each other",
           "explanation": "The file name is used as both the storage path and the returned id. A second upload named \u0022report.pdf\u0022 silently replaces the first file on disk. The earlier id now returns different content, and one user\u0027s data can be lost or replaced by another user\u0027s upload.",
           "verdict": "duplicate",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Same-name overwrite is the second half of label #1, which covers both traversal and overwriting from using the client\u0027s file name."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Same-name overwrite is the second half of label 1, which covers the client-chosen stored name causing overwrites."
         },
         {
           "line": 32,
@@ -336,8 +354,10 @@
           "title": "Synchronous copy into a memory buffer followed by a second array copy",
           "explanation": "file.CopyTo performs synchronous I/O on the request thread. The content is copied into a MemoryStream and then ToArray duplicates it again before writing. Each upload therefore uses about three times its size in memory and blocks a thread while it runs.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#2",
-          "reason": "Describes the synchronous CopyTo into a MemoryStream and the buffering of the whole upload, matching label #2."
+          "label_ids": [
+            "cs-04-document-upload#2"
+          ],
+          "reason": "Synchronous CopyTo into MemoryStream, buffering the whole upload; same as label 2, with the extra ToArray copy noted."
         }
       ],
       "found": [
@@ -350,9 +370,9 @@
       "reviewer_input_tokens": 2073,
       "reviewer_output_tokens": 2081,
       "reviewer_cost": 0.0012478,
-      "judge_input_tokens": 2358,
-      "judge_output_tokens": 304,
-      "judge_cost": 0.007756,
+      "judge_input_tokens": 2411,
+      "judge_output_tokens": 324,
+      "judge_cost": 0.008062,
       "seconds": 14.8,
       "error": null
     },
@@ -377,8 +397,10 @@
           "title": "Shared static Dictionary mutated without synchronization",
           "explanation": "_rates is a static, non-thread-safe Dictionary written at line 36 and read at line 27. The class is registered as a service and called concurrently by requests, so concurrent writes or a read during a write can corrupt the dictionary, return wrong cached rates, or throw. Static state also makes the cache shared across all instances.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#1",
-          "reason": "Identifies the static non-thread-safe Dictionary accessed concurrently, same defect as label #1."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#1"
+          ],
+          "reason": "Identifies the static non-thread-safe Dictionary being read and written concurrently, which is the same defect as label #1."
         },
         {
           "line": 20,
@@ -388,8 +410,10 @@
           "title": "Blocking on async call with .Result inside an async method",
           "explanation": "ConvertAsync is declared async but blocks on GetRateAsync(...).Result. Under a synchronization context (legacy ASP.NET, WPF, WinForms) this can deadlock. Elsewhere it blocks a thread-pool thread for the full HTTP round trip, which can starve the pool under load and ignores the caller\u0027s cancellation while blocked. The method also has no await, so the async keyword does nothing.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#2",
-          "reason": "Identifies blocking on .Result inside an async method with deadlock and thread-pool starvation risks, same as label #2."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#2"
+          ],
+          "reason": "Identifies blocking on .Result in an async method, with deadlock and thread-pool starvation risks, which is the same defect as label #2."
         }
       ],
       "found": [
@@ -401,9 +425,9 @@
       "reviewer_input_tokens": 1972,
       "reviewer_output_tokens": 1192,
       "reviewer_cost": 0.0007932,
-      "judge_input_tokens": 1966,
-      "judge_output_tokens": 169,
-      "judge_cost": 0.005622,
+      "judge_input_tokens": 2019,
+      "judge_output_tokens": 184,
+      "judge_cost": 0.005878,
       "seconds": 8.6,
       "error": null
     },
@@ -428,8 +452,10 @@
           "title": "Loop allows only two attempts despite MaxAttempts of 3",
           "explanation": "The loop condition \u0060attempt \u003C MaxAttempts\u0060 runs attempts 1 and 2 only, so the client makes two requests in total, not the three the MaxAttempts constant states. The same comparison on lines 19 and 28 is then always true inside the loop, which hides the mismatch.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#1",
-          "reason": "Identifies the off-by-one loop condition at line 13 allowing only two attempts instead of MaxAttempts."
+          "label_ids": [
+            "cs-06-shipping-client#1"
+          ],
+          "reason": "Identifies the off-by-one loop condition at line 13 that allows only two attempts instead of MaxAttempts."
         },
         {
           "line": 35,
@@ -439,8 +465,8 @@
           "title": "Final failure is replaced by a misleading \u0027Unreachable\u0027 exception",
           "explanation": "The code after the loop is reachable. On the last attempt (attempt 2), a 429 or 5xx response takes the retry path at line 21-22, and an HttpRequestException from EnsureSuccessStatusCode at line 25 is caught at line 28 and retried. Once the loop exits, the method throws InvalidOperationException(\u0022Unreachable\u0022). The caller never sees the real HTTP status or the original exception, and the message is wrong.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. Describes the consequence the label names: the loop ending in the \u0027Unreachable\u0027 exception instead of the real error, caused by the early loop stop."
+          "label_ids": [],
+          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. Describes the consequence named in the label: the loop ends in the \u0027Unreachable\u0027 exception instead of the real error because of the early stop."
         },
         {
           "line": 40,
@@ -450,8 +476,10 @@
           "title": "New HttpClient created for every call",
           "explanation": "Each CreateShipmentAsync call constructs and disposes a new HttpClient. Disposing it does not release the underlying socket promptly, so repeated calls exhaust sockets and leave connections in TIME_WAIT. The client also skips the connection pooling and DNS refresh that IHttpClientFactory provides, which the class already uses for tracking.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#2",
-          "reason": "Same defect: new HttpClient per CreateShipmentAsync call, socket exhaustion and bypassing the factory."
+          "label_ids": [
+            "cs-06-shipping-client#2"
+          ],
+          "reason": "Reports a new HttpClient per CreateShipmentAsync call, which risks socket exhaustion and bypasses the factory."
         }
       ],
       "found": [
@@ -463,9 +491,9 @@
       "reviewer_input_tokens": 2144,
       "reviewer_output_tokens": 1925,
       "reviewer_cost": 0.0011769,
-      "judge_input_tokens": 2286,
-      "judge_output_tokens": 249,
-      "judge_cost": 0.007062,
+      "judge_input_tokens": 2339,
+      "judge_output_tokens": 257,
+      "judge_cost": 0.007248,
       "seconds": 12.6,
       "error": null
     },
@@ -491,8 +519,10 @@
           "title": "Date range excludes the last day despite documentation saying it is included",
           "explanation": "The summary says the range includes the last day, but \u0060end\u0060 is \u0060to\u0060 at midnight and the filter is \u0060PlacedAt \u003C end\u0060. Orders placed on the \u0060to\u0060 date are dropped, so the report undercounts sales for the final day of every range.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#1",
-          "reason": "Same defect: end is midnight of the last day and filter uses \u003C end, so the last day is excluded."
+          "label_ids": [
+            "cs-07-sales-report#1"
+          ],
+          "reason": "Same defect: end is midnight of the \u0060to\u0060 date with a \u0060\u003C\u0060 filter, so the last day is excluded."
         },
         {
           "line": 22,
@@ -502,8 +532,10 @@
           "title": "Query inside loop causes N\u002B1 database round trips",
           "explanation": "For each customer group, \u0060db.Customers.SingleAsync\u0060 issues a separate database query. A report covering many customers produces one query per customer, so latency grows linearly with the number of customers.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#2",
-          "reason": "Same N\u002B1 query: Customers queried once per group inside the loop."
+          "label_ids": [
+            "cs-07-sales-report#2"
+          ],
+          "reason": "Same N\u002B1 issue: SingleAsync on Customers issued once per group inside the loop."
         },
         {
           "line": 17,
@@ -513,8 +545,8 @@
           "title": "All orders in the range are loaded into memory to aggregate them",
           "explanation": "The method pulls every order in the date range into a list and then groups and sums in C#. For large date ranges this buffers a large amount of data when the database could compute the counts and sums.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Loading every order into memory to group and sum in C# is a genuine inefficiency. The label mentions it only as context for the N\u002B1, but this finding is about buffering, and a database-side aggregation would fix it."
+          "label_ids": [],
+          "reason": "Loading all orders into memory and aggregating in C# is a genuine inefficiency. The label mentions it only as context for the N\u002B1, and this finding is about buffering rather than per-customer queries, so it is a separate valid concern."
         },
         {
           "line": 37,
@@ -524,8 +556,10 @@
           "title": "Average throws for a customer with no orders",
           "explanation": "\u0060Enumerable.Average\u0060 on an empty sequence throws InvalidOperationException. A customer who has never placed an order will cause this method to throw instead of returning a value or a sentinel.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#3",
-          "reason": "Same defect: Average on an empty sequence throws InvalidOperationException."
+          "label_ids": [
+            "cs-07-sales-report#3"
+          ],
+          "reason": "Same defect: Average throws InvalidOperationException on an empty sequence when the customer has no orders."
         },
         {
           "line": 32,
@@ -535,8 +569,8 @@
           "title": "Average computed by loading all order totals into memory",
           "explanation": "All totals for the customer are fetched into a list only to compute an average. For customers with many orders this transfers more data than needed.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Fetching all totals just to compute an average is wasteful, since the database could do AverageAsync. It is a real but minor inefficiency not covered by a label."
+          "label_ids": [],
+          "reason": "Fetching all totals to compute an average in memory when the database could do it with AverageAsync is a real, though minor, inefficiency not covered by the labels."
         }
       ],
       "found": [
@@ -549,9 +583,9 @@
       "reviewer_input_tokens": 1914,
       "reviewer_output_tokens": 1231,
       "reviewer_cost": 0.0008069,
-      "judge_input_tokens": 2096,
-      "judge_output_tokens": 369,
-      "judge_cost": 0.007882,
+      "judge_input_tokens": 2149,
+      "judge_output_tokens": 406,
+      "judge_cost": 0.008358,
       "seconds": 10.5,
       "error": null
     },
@@ -577,8 +611,10 @@
           "title": "Token lifetime is not validated",
           "explanation": "ValidateLifetime is set to false, so the middleware accepts JWTs whose exp claim is in the past. A token that was issued and should have expired, or that was revoked by expiry, remains valid indefinitely as long as its signature checks out.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#1",
-          "reason": "Identifies ValidateLifetime = false on line 23, so expired tokens are accepted."
+          "label_ids": [
+            "cs-08-jwt-setup#1"
+          ],
+          "reason": "Reports ValidateLifetime = false, which lets expired tokens be accepted. Same defect as label 1."
         },
         {
           "line": 11,
@@ -588,8 +624,10 @@
           "title": "Hardcoded fallback signing key",
           "explanation": "If the Jwt:SigningKey setting is missing, the code silently signs and verifies tokens with the literal key \u0027portal-dev-signing-key-change-me-0123456789\u0027, which is present in source control. Anyone who knows this string can mint tokens that the service accepts, so a misconfigured production deployment is open to authentication bypass.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#2",
-          "reason": "Identifies the hardcoded fallback signing key on line 11 that is used when configuration is missing."
+          "label_ids": [
+            "cs-08-jwt-setup#2"
+          ],
+          "reason": "Reports the hardcoded fallback signing key on line 11, the same defect as label 2."
         },
         {
           "line": 34,
@@ -599,8 +637,10 @@
           "title": "Bearer token written to logs",
           "explanation": "The OnAuthenticationFailed handler logs the full Authorization header, which contains the bearer token. Anyone with access to log storage can take those tokens and reuse them until they expire, and the lifetime check is disabled, so they may remain usable for a long time.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#3",
-          "reason": "Identifies the Authorization header being logged in OnAuthenticationFailed, which exposes bearer tokens in logs."
+          "label_ids": [
+            "cs-08-jwt-setup#3"
+          ],
+          "reason": "Reports the Authorization header being logged on rejected tokens, the same defect as label 3."
         }
       ],
       "found": [
@@ -613,9 +653,9 @@
       "reviewer_input_tokens": 2015,
       "reviewer_output_tokens": 853,
       "reviewer_cost": 0.000628,
-      "judge_input_tokens": 2077,
-      "judge_output_tokens": 231,
-      "judge_cost": 0.006464,
+      "judge_input_tokens": 2130,
+      "judge_output_tokens": 232,
+      "judge_cost": 0.00658,
       "seconds": 7.4,
       "error": null
     },
@@ -636,9 +676,9 @@
           "severity": "Medium",
           "title": "Normalize throws on malformed UTF-16 input",
           "explanation": "String.Normalize throws ArgumentException when the string contains invalid Unicode, such as an unpaired surrogate. ToSlug accepts arbitrary titles and only guards against null, so a title containing a lone surrogate propagates an unhandled exception to the caller. If titles come from user input, this turns bad input into a crash or a 500 response.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The ArgumentException on a lone surrogate is real .NET behavior, but throwing on invalid UTF-16 is a reasonable reaction to malformed input. The method already rejects null, and the answer key lists no defects. This is a speculative edge case, not a defect a reviewer would insist on fixing."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "string.Normalize does throw ArgumentException on invalid Unicode such as a lone surrogate, and ToSlug only guards against null. An undocumented exception on malformed input is a legitimate, if minor, robustness gap. No label covers it because the key lists no defects."
         }
       ],
       "found": [],
@@ -647,9 +687,9 @@
       "reviewer_input_tokens": 1902,
       "reviewer_output_tokens": 991,
       "reviewer_cost": 0.0006857,
-      "judge_input_tokens": 1562,
-      "judge_output_tokens": 515,
-      "judge_cost": 0.008274,
+      "judge_input_tokens": 1615,
+      "judge_output_tokens": 496,
+      "judge_cost": 0.00819,
       "seconds": 13.3,
       "error": null
     },
@@ -693,8 +733,8 @@
           "title": "Subject claim lookup by raw name may return null under default JWT mapping",
           "explanation": "User.FindFirst(\u0022sub\u0022) looks up the claim by its literal type name. With the default JwtBearer configuration (MapInboundClaims enabled), the JwtSecurityTokenHandler remaps the inbound \u0022sub\u0022 claim to ClaimTypes.NameIdentifier, so FindFirst(\u0022sub\u0022) returns null. The null-coalescing throw then fires on every authenticated request, so Place and Get fail with a 500 for normal, valid users. This depends on the auth setup, which is not shown in this file.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The finding is speculative. It admits it depends on auth setup not shown in this file. Looking up \u0022sub\u0022 is correct when MapInboundClaims is disabled, which is common, and the code explicitly fails with a clear message if the claim is missing. The file has no known defects, and nothing here shows the claim lookup is wrong."
+          "label_ids": [],
+          "reason": "The finding is speculative. It depends on authentication setup that is not in this file, and the code reading the literal \u0022sub\u0022 claim is correct when MapInboundClaims is disabled, which is common. Nothing in this file shows a defect, and the answer key lists none."
         }
       ],
       "found": [],
@@ -703,9 +743,9 @@
       "reviewer_input_tokens": 1966,
       "reviewer_output_tokens": 1240,
       "reviewer_cost": 0.0008166,
-      "judge_input_tokens": 1684,
-      "judge_output_tokens": 673,
-      "judge_cost": 0.010098,
+      "judge_input_tokens": 1737,
+      "judge_output_tokens": 601,
+      "judge_cost": 0.009484,
       "seconds": 13.2,
       "error": null
     },
@@ -744,8 +784,11 @@
           "title": "Hardcoded credentials and keys in source",
           "explanation": "The database password (admin123), an API key, and an encryption key are compiled as constants. Anyone with read access to the source or binary gets production database access and the key material, and rotating them requires a code change and redeploy.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#1",
-          "reason": "Hardcoded DB password in lines 10-12 covers the connection string constant; it also mentions the API key, but the primary match is the hardcoded credentials."
+          "label_ids": [
+            "seed-01-user-data-service#1",
+            "seed-01-user-data-service#2"
+          ],
+          "reason": "Reports hardcoded DB credentials and API key in lines 10-12, covering both labels (the encryption key at line 12 is also mentioned)."
         },
         {
           "line": 26,
@@ -755,8 +798,10 @@
           "title": "SQL injection through tableName and userId",
           "explanation": "The query is built by string interpolation of both the table name and the user id. A userId such as x\u0027 OR \u00271\u0027=\u00271 returns every row, and a tableName such as Users; DROP TABLE Users executes arbitrary SQL. Parameters cannot bind identifiers, so the table name is a separate concern.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#4",
-          "reason": "SQL injection via interpolated tableName and userId."
+          "label_ids": [
+            "seed-01-user-data-service#4"
+          ],
+          "reason": "SQL injection via interpolated tableName and userId at line 26."
         },
         {
           "line": 106,
@@ -766,8 +811,10 @@
           "title": "Connection string with password included in exception message",
           "explanation": "A failed login throws an exception whose message embeds the full connection string including the database password. Any caller, log, or error page that shows the exception message exposes the credentials. A wrong password is also reported as an UnauthorizedAccessException, which is not the right exception type for an ordinary failed login.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#11",
-          "reason": "Connection string embedded in the failed-login exception message."
+          "label_ids": [
+            "seed-01-user-data-service#11"
+          ],
+          "reason": "Connection string embedded in the failed-login exception message at line 106."
         },
         {
           "line": 113,
@@ -777,8 +824,10 @@
           "title": "Database error message exposes connection string",
           "explanation": "The SqlException handler rethrows with the connection string, including the password, embedded in the message. Because the original exception is replaced, the stack trace is lost as well.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#13",
-          "reason": "SqlException handler rethrows with the connection string embedded."
+          "label_ids": [
+            "seed-01-user-data-service#13"
+          ],
+          "reason": "The rethrown SqlException message exposes the connection string and drops the original exception."
         },
         {
           "line": 109,
@@ -788,8 +837,10 @@
           "title": "Application API key returned to every authenticated caller",
           "explanation": "On successful login the method returns the global ApiKey constant in the result object. Any user who logs in receives the shared secret, which lets them call other services with the application\u0027s credentials.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#12",
-          "reason": "API key returned to the caller on login."
+          "label_ids": [
+            "seed-01-user-data-service#12"
+          ],
+          "reason": "The API key is returned to every authenticated caller at line 109."
         },
         {
           "line": 42,
@@ -799,8 +850,11 @@
           "title": "Weak DES encryption with a static key and IV",
           "explanation": "DES has a 56-bit key and is considered broken. The key and IV are the same hard-coded string \u002712345678\u0027, so every ciphertext is deterministic and the key is trivially recoverable. Using the key as the IV also leaks information about the plaintext.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#5",
-          "reason": "Describes the weak DES algorithm as its main point, with static key/IV as a secondary mention."
+          "label_ids": [
+            "seed-01-user-data-service#5",
+            "seed-01-user-data-service#6"
+          ],
+          "reason": "Reports both the weak DES algorithm and the hardcoded static key and IV."
         },
         {
           "line": 55,
@@ -810,8 +864,10 @@
           "title": "Path traversal in user file read",
           "explanation": "The fileName argument is appended directly to a fixed directory. An input such as ..\\..\\Windows\\win.ini or an absolute path lets a caller read any file the process can access, because the directory prefix is not enforced after path resolution.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#7",
-          "reason": "Path traversal in ReadUserFileAsync."
+          "label_ids": [
+            "seed-01-user-data-service#7"
+          ],
+          "reason": "Path traversal through fileName at line 55."
         },
         {
           "line": 69,
@@ -821,8 +877,10 @@
           "title": "Command injection through user-supplied command",
           "explanation": "The command string is concatenated into the cmd.exe argument line without validation. Input such as file \u0026 del important.db runs arbitrary commands with the service account\u0027s privileges.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#8",
-          "reason": "Command injection through cmd.exe argument."
+          "label_ids": [
+            "seed-01-user-data-service#8"
+          ],
+          "reason": "Command injection through cmd.exe arguments at line 69."
         },
         {
           "line": 83,
@@ -832,8 +890,10 @@
           "title": "Cross-site scripting in comment HTML",
           "explanation": "The raw user comment is interpolated into HTML and returned as the message. A comment containing a script tag or event-handler attribute runs in the browser of anyone who views the rendered output.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#9",
-          "reason": "XSS from the raw comment in HTML."
+          "label_ids": [
+            "seed-01-user-data-service#9"
+          ],
+          "reason": "XSS from the unencoded comment placed into HTML at line 83."
         },
         {
           "line": 85,
@@ -843,8 +903,8 @@
           "title": "Log injection from unsanitized comment",
           "explanation": "The comment is written to the log file without removing line breaks. A comment containing newlines can forge additional log entries that look legitimate.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Log injection: the comment is written unsanitized to the log (also no newline appended). It is a genuine defect not covered by the labels."
+          "label_ids": [],
+          "reason": "Log injection is genuine: the comment is written to the log unsanitized and the entry has no newline, so entries are run together and forgeable. No label covers it."
         },
         {
           "line": 86,
@@ -854,8 +914,8 @@
           "title": "Synchronous file I/O in request handler",
           "explanation": "File.AppendAllText blocks the request thread on every comment. Under load this exhausts the thread pool and slows the whole endpoint, and the method also writes without any concurrency coordination.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Synchronous file append in a handler is a minor performance remark and not a significant defect here."
+          "label_ids": [],
+          "reason": "Synchronous file append in a handler is a minor performance remark. It is not a significant defect here, and the concurrency claim is speculative."
         },
         {
           "line": 113,
@@ -865,8 +925,10 @@
           "title": "Original exception and stack trace discarded",
           "explanation": "The SqlException is caught and replaced with a new Exception without passing ex as the inner exception. The original stack trace and error details are lost for diagnostics.",
           "verdict": "duplicate",
-          "label_id": "seed-01-user-data-service#13",
-          "reason": "Same line 113 rethrow that drops the original exception, which label 13 explicitly mentions."
+          "label_ids": [
+            "seed-01-user-data-service#13"
+          ],
+          "reason": "Describes the discarded original exception at line 113, which label 13 includes (the rethrown exception drops the original)."
         },
         {
           "line": 19,
@@ -876,8 +938,10 @@
           "title": "Shared SqlConnection opened in constructor and used across concurrent calls",
           "explanation": "A single SqlConnection is opened in the constructor and reused by every method. Concurrent requests issuing commands on this instance will fail with errors because a connection can run only one command at a time without MARS. The connection is also never closed or disposed, and the class does not implement IDisposable.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#3",
-          "reason": "Connection opened in constructor and never closed or disposed; concurrency use is an extra point."
+          "label_ids": [
+            "seed-01-user-data-service#3"
+          ],
+          "reason": "The connection opened in the constructor is never closed or disposed and the class is not IDisposable. The concurrency point is extra, but the core matches."
         },
         {
           "line": 117,
@@ -887,8 +951,10 @@
           "title": "Non-thread-safe static counter",
           "explanation": "_counter\u002B\u002B on a static field is not atomic, so concurrent callers can receive duplicate or skipped IDs. Thread.Sleep(1) also blocks the calling thread for no functional reason.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#14",
-          "reason": "Non-atomic increment of a static counter."
+          "label_ids": [
+            "seed-01-user-data-service#14"
+          ],
+          "reason": "Non-atomic increment of the static counter, allowing duplicate IDs."
         },
         {
           "line": 128,
@@ -898,8 +964,10 @@
           "title": "Streams and HttpClient created per iteration without disposal",
           "explanation": "Each of one million iterations creates a MemoryStream, a FileStream that creates a file on disk, and a new HttpClient, none of which are disposed. File handles leak quickly and the process will fail with too many open files. Creating HttpClient repeatedly exhausts sockets. The loop also creates a million files.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#15",
-          "reason": "Undisposed streams and HttpClient created in a loop."
+          "label_ids": [
+            "seed-01-user-data-service#15"
+          ],
+          "reason": "Undisposed MemoryStream, FileStream and HttpClient created in a million-iteration loop."
         },
         {
           "line": 138,
@@ -909,17 +977,21 @@
           "title": "Security token generated from fixed-seed PRNG",
           "explanation": "System.Random seeded with the constant 123 produces the same sequence every time, so every generated token is identical and predictable. Anyone can reproduce tokens and impersonate users.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#16",
-          "reason": "Fixed-seed Random used for security tokens."
+          "label_ids": [
+            "seed-01-user-data-service#16"
+          ],
+          "reason": "Fixed-seed Random produces identical, predictable security tokens."
         }
       ],
       "found": [
         "seed-01-user-data-service#1",
+        "seed-01-user-data-service#2",
         "seed-01-user-data-service#4",
         "seed-01-user-data-service#11",
         "seed-01-user-data-service#13",
         "seed-01-user-data-service#12",
         "seed-01-user-data-service#5",
+        "seed-01-user-data-service#6",
         "seed-01-user-data-service#7",
         "seed-01-user-data-service#8",
         "seed-01-user-data-service#9",
@@ -929,17 +1001,15 @@
         "seed-01-user-data-service#16"
       ],
       "missed": [
-        "seed-01-user-data-service#2",
-        "seed-01-user-data-service#6",
         "seed-01-user-data-service#10"
       ],
       "outside_window": 0,
       "reviewer_input_tokens": 3451,
       "reviewer_output_tokens": 3916,
       "reviewer_cost": 0.0023031,
-      "judge_input_tokens": 5598,
-      "judge_output_tokens": 970,
-      "judge_cost": 0.020896,
+      "judge_input_tokens": 5651,
+      "judge_output_tokens": 1140,
+      "judge_cost": 0.022702,
       "seconds": 25.4,
       "error": null
     },
@@ -963,8 +1033,10 @@
           "title": "SQL injection through @SortColumn in dynamic ORDER BY",
           "explanation": "@SortColumn is concatenated directly into the dynamic SQL text with no validation or quoting. A caller can pass a value such as N\u0027Name; DROP TABLE dbo.Products; --\u0027 and the appended \u0027 ASC;\u0027 is commented out, so arbitrary statements run under the procedure\u0027s permissions. Only @Search is passed as a parameter, so the sort column is fully unprotected.",
           "verdict": "match",
-          "label_id": "sql-01-search-products#1",
-          "reason": "Describes the same SQL injection via concatenated @SortColumn in the ORDER BY clause."
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Describes the same SQL injection via unvalidated @SortColumn concatenated into dynamic SQL on line 14."
         },
         {
           "line": 9,
@@ -973,9 +1045,9 @@
           "severity": "Low",
           "title": "LIKE wildcards in user input are not escaped",
           "explanation": "@Search is wrapped in % and used in LIKE without escaping. Input containing % or _ acts as a wildcard, so a search for \u0027_\u0027 or \u0027%\u0027 returns every product instead of the literal text the user typed.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Treating % and _ in a search box as wildcards is commonly accepted behavior for a contains search; it is not a security flaw and a careful reviewer would not demand a fix here."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Unescaped LIKE wildcards in @Search are a genuine, if minor, correctness issue; the label does not cover it."
         },
         {
           "line": 13,
@@ -984,9 +1056,9 @@
           "severity": "Medium",
           "title": "Leading wildcard prevents index seek on Name",
           "explanation": "The pattern \u0027%\u0027 \u002B @Search \u002B \u0027%\u0027 starts with a wildcard, so SQL Server cannot seek on an index on Name and must scan the table for every search. Cost grows with the size of dbo.Products.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A contains-style search inherently needs a leading wildcard; flagging it is a generic remark with no practical alternative within this design."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "A leading-wildcard LIKE forces a scan and cannot use an index seek. This is a real performance limitation, though it is inherent to substring search and not necessarily a defect to fix."
         }
       ],
       "found": [
@@ -997,9 +1069,9 @@
       "reviewer_input_tokens": 1558,
       "reviewer_output_tokens": 1169,
       "reviewer_cost": 0.0007403,
-      "judge_input_tokens": 1571,
-      "judge_output_tokens": 237,
-      "judge_cost": 0.005512,
+      "judge_input_tokens": 1624,
+      "judge_output_tokens": 247,
+      "judge_cost": 0.005718,
       "seconds": 11.9,
       "error": null
     },
@@ -1024,8 +1096,10 @@
           "title": "Balance check and debit are not atomic, allowing overdrafts and lost updates",
           "explanation": "The balance is read at line 14-15 without a locking hint, and the debit at lines 23-25 uses that value (@Balance - @Amount) rather than re-checking the stored balance. Under the default READ COMMITTED isolation, two concurrent transfers from the same account can both read the same balance, both pass the check at line 17, and both write. The result is an overdrawn account, and one debit overwrites the other, so money is created or lost. The fix is to make the check and debit one atomic statement, for example UPDATE dbo.Accounts SET Balance = Balance - @Amount WHERE AccountId = @FromAccountId AND Balance \u003E= @Amount and then check @@ROWCOUNT, or take an UPDLOCK, HOLDLOCK on the initial read.",
           "verdict": "match",
-          "label_id": "sql-02-transfer-funds#1",
-          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows overdrafts and lost updates under concurrency. This is the same defect as label 1."
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read followed by a write from the stale variable, which allows concurrent overdraft and lost debits, the same defect as label 1."
         },
         {
           "line": 12,
@@ -1035,8 +1109,10 @@
           "title": "Runtime errors can leave the transaction open with partial work",
           "explanation": "There is no TRY/CATCH and SET XACT_ABORT is not enabled. If a statement fails at runtime, such as an arithmetic overflow on the DECIMAL(19,4) balance update at lines 23-29, SQL Server may roll back only that statement and leave the transaction open. The procedure then continues, and the caller can receive a return with an open transaction or a committed partial transfer. Without the rollback, the debit at line 23 could persist while the credit does not.",
           "verdict": "match",
-          "label_id": "sql-02-transfer-funds#2",
-          "reason": "Describes the missing XACT_ABORT/TRY-CATCH, which leaves the transaction open and the debit applied when a statement fails. This is the same defect as label 2."
+          "label_ids": [
+            "sql-02-transfer-funds#2"
+          ],
+          "reason": "Describes the missing XACT_ABORT/TRY-CATCH that lets a runtime error leave the transaction open with partial work, the same defect as label 2."
         }
       ],
       "found": [
@@ -1048,9 +1124,9 @@
       "reviewer_input_tokens": 1877,
       "reviewer_output_tokens": 2009,
       "reviewer_cost": 0.0011922,
-      "judge_input_tokens": 2119,
-      "judge_output_tokens": 198,
-      "judge_cost": 0.006218,
+      "judge_input_tokens": 2172,
+      "judge_output_tokens": 195,
+      "judge_cost": 0.006294,
       "seconds": 16.4,
       "error": null
     },
@@ -1075,8 +1151,10 @@
           "title": "NOT IN returns no rows if any matching order has a NULL CustomerId",
           "explanation": "If dbo.Orders.CustomerId is nullable and any order from @Year has a NULL CustomerId, the subquery returns a NULL. Under SQL Server\u0027s three-valued logic, c.CustomerId NOT IN (..., NULL) evaluates to UNKNOWN for every customer, so the procedure silently returns an empty result set. Whether this can happen depends on the nullability of Orders.CustomerId, which is not visible in this file.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#1",
-          "reason": "Describes the NOT IN with NULL CustomerId in the subquery returning no rows, the same defect as label 1."
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Describes the NOT IN with NULL CustomerId problem returning an empty result set, same as label 1."
         },
         {
           "line": 12,
@@ -1086,8 +1164,10 @@
           "title": "Wrapping OrderDate in YEAR() makes the predicate non-sargable",
           "explanation": "YEAR(o.OrderDate) = @Year applies a function to the indexed column, so SQL Server cannot perform a range seek on an index over OrderDate. It must scan and evaluate the function on every order row, and the cost grows with the total order history rather than the single year being queried.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#2",
-          "reason": "Describes YEAR() on OrderDate making the predicate non-sargable, preventing an index seek, which is the same defect as label 2."
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Describes YEAR() on OrderDate making the predicate non-sargable, same as label 2."
         }
       ],
       "found": [
@@ -1099,9 +1179,9 @@
       "reviewer_input_tokens": 1422,
       "reviewer_output_tokens": 982,
       "reviewer_cost": 0.0006332,
-      "judge_input_tokens": 1510,
-      "judge_output_tokens": 174,
-      "judge_cost": 0.00476,
+      "judge_input_tokens": 1563,
+      "judge_output_tokens": 163,
+      "judge_cost": 0.004756,
       "seconds": 8.6,
       "error": null
     },
@@ -1126,8 +1206,10 @@
           "title": "@@IDENTITY can return an identity value from a trigger instead of the log row",
           "explanation": "DECLARE @LogId INT = @@IDENTITY reads the last identity generated in the session, from any scope. If dbo.ImportLog has an AFTER INSERT trigger that inserts into another identity table, @@IDENTITY returns that trigger\u0027s identity value. The UPDATE on line 30-32 would then stamp staging rows with the wrong ImportLogId. SCOPE_IDENTITY() returns the value for the current scope only.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#2",
-          "reason": "Identifies @@IDENTITY returning a trigger\u0027s identity instead of the log row; recommends SCOPE_IDENTITY()."
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Identifies @@IDENTITY returning a trigger\u0027s identity instead of the log row, with SCOPE_IDENTITY() as the fix."
         },
         {
           "line": 12,
@@ -1137,8 +1219,10 @@
           "title": "Row-by-row cursor performs a single-row UPDATE per staged change",
           "explanation": "The cursor fetches each staged row and runs a separate UPDATE against dbo.Products keyed on Sku. For a large batch this means one statement, one plan execution and one round trip per row, all inside one long transaction holding row locks. The work grows linearly with the number of rows and the cost per row is high.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#1",
-          "reason": "Describes the row-by-row cursor performing one UPDATE per staged row inside a long transaction, the same performance defect."
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Describes the row-by-row cursor issuing one UPDATE per staged row inside a transaction as a performance problem."
         },
         {
           "line": 13,
@@ -1148,8 +1232,8 @@
           "title": "Duplicate SKUs in a batch apply prices in an undefined order",
           "explanation": "The cursor query has no ORDER BY, and nothing prevents a batch from containing the same Sku more than once with different NewPrice values. Each row runs its own UPDATE, so the final Products.Price is whichever row happened to be fetched last. The result is nondeterministic, and the value stored may not match the one the staging data intends.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Duplicate SKUs in a batch with no ORDER BY would give a nondeterministic final price; this is a genuine data-correctness concern not covered by the labels, though it depends on the staging data allowing duplicates."
+          "label_ids": [],
+          "reason": "Duplicate SKUs in a batch with no ORDER BY make the final price nondeterministic. This is a genuine correctness concern in the code, and no label covers it."
         }
       ],
       "found": [
@@ -1161,9 +1245,9 @@
       "reviewer_input_tokens": 1863,
       "reviewer_output_tokens": 1533,
       "reviewer_cost": 0.0009528,
-      "judge_input_tokens": 2106,
-      "judge_output_tokens": 271,
-      "judge_cost": 0.006922,
+      "judge_input_tokens": 2159,
+      "judge_output_tokens": 263,
+      "judge_cost": 0.006948,
       "seconds": 10.8,
       "error": null
     },
@@ -1185,8 +1269,8 @@
           "title": "Caller-supplied OUTPUT value can cause an update to the wrong customer",
           "explanation": "The OUTPUT parameter @CustomerId is never reset before the lookup. A SELECT with an assignment does not change the variable when no row matches, so if the caller passes a non-NULL value (for example a reused variable from an earlier call), the value survives. The IF @CustomerId IS NULL check at line 19 then takes the ELSE branch and runs UPDATE dbo.Customers ... WHERE CustomerId = @CustomerId at line 28-30. That overwrites the Name of an unrelated customer for a brand-new email, and the procedure returns that wrong ID, so no new customer is created.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Valid defect: @CustomerId is an INT OUTPUT parameter that is never initialized. A SELECT assignment that matches no rows leaves the variable unchanged, so a caller passing a non-NULL value (e.g., a reused variable) takes the ELSE branch, updates an unrelated customer, and returns the wrong ID. Fix by setting @CustomerId = NULL before the lookup."
+          "label_ids": [],
+          "reason": "The finding is correct. In T-SQL, a SELECT that assigns a variable leaves it unchanged when no row matches. An OUTPUT parameter also carries the caller\u0027s input value in. If a caller reuses a variable that already holds an ID, @CustomerId is non-NULL for a new email. The procedure then takes the ELSE branch and updates an unrelated customer. The fix is to set @CustomerId = NULL before the lookup. The answer key lists no defects, but this one is genuine."
         }
       ],
       "found": [],
@@ -1195,9 +1279,9 @@
       "reviewer_input_tokens": 1748,
       "reviewer_output_tokens": 1314,
       "reviewer_cost": 0.0008318,
-      "judge_input_tokens": 1561,
-      "judge_output_tokens": 171,
-      "judge_cost": 0.004832,
+      "judge_input_tokens": 1614,
+      "judge_output_tokens": 403,
+      "judge_cost": 0.007258,
       "seconds": 10.6,
       "error": null
     },
@@ -1244,8 +1328,10 @@
           "title": "AveragePricePerItem throws on an empty order",
           "explanation": "When lines is empty, items.Count is 0 and Subtotal(items) returns 0m. Dividing a decimal by zero throws DivideByZeroException, so a caller passing an empty order gets an unhandled exception instead of a result or a clear argument error.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#2",
-          "reason": "Identifies the DivideByZeroException on an empty order at line 45, which is part of label #2."
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Reports the DivideByZeroException on an empty order at line 45, which is part of label #2."
         },
         {
           "line": 25,
@@ -1255,8 +1341,10 @@
           "title": "Large-order surcharge boundary contradicts the comment",
           "explanation": "The comment on line 24 says orders of 500 or more get an extra 5 percent, but the condition uses \u0027subtotal \u003E 500m\u0027. An order of exactly 500.00 does not receive the surcharge, which conflicts with the documented rule.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#1",
-          "reason": "Identifies that \u0027\u003E 500m\u0027 contradicts the \u0027500 or more\u0027 rule, so an order of exactly 500 misses the extra discount. Calling it a surcharge is a wording slip, but the defect is the same."
+          "label_ids": [
+            "cs-01-order-pricing#1"
+          ],
+          "reason": "Identifies that \u0060\u003E 500m\u0060 contradicts the \u0022500 or more\u0022 comment, so an order of exactly 500 misses the extra discount. Calling it a surcharge is a wording slip; it is the same defect."
         }
       ],
       "found": [
@@ -1268,9 +1356,9 @@
       "reviewer_input_tokens": 1969,
       "reviewer_output_tokens": 626,
       "reviewer_cost": 0.0005099,
-      "judge_input_tokens": 1869,
-      "judge_output_tokens": 187,
-      "judge_cost": 0.005608,
+      "judge_input_tokens": 1922,
+      "judge_output_tokens": 192,
+      "judge_cost": 0.005764,
       "seconds": 6,
       "error": null
     },
@@ -1295,8 +1383,10 @@
           "title": "SQL injection through unvalidated sortBy in ORDER BY",
           "explanation": "The sortBy argument is interpolated directly into the SQL text at line 28. The SortColumns allowlist defined at lines 10-13 is never checked, so any caller passing user-supplied sort input can append arbitrary SQL, such as subqueries or CASE expressions for data extraction. The column name is not a bound parameter, so the parameterized customer filter does not protect it.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#1",
-          "reason": "Identifies the unvalidated sortBy interpolated into ORDER BY and the unused SortColumns allowlist, which is the SQL injection in label 1."
+          "label_ids": [
+            "cs-02-invoice-repository#1"
+          ],
+          "reason": "Identifies the unvalidated sortBy interpolated into ORDER BY and the unused SortColumns allowlist, which is the same SQL injection defect."
         },
         {
           "line": 48,
@@ -1306,8 +1396,10 @@
           "title": "SqlConnection is never disposed",
           "explanation": "The connection at line 48 is created with a plain var declaration, not await using, so it is never disposed or closed. The pooled connection is only returned to the pool when Dispose or Close runs. Each call leaks a connection until the garbage collector finalizes it, which can exhaust the connection pool under repeated calls.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#2",
-          "reason": "Identifies that the SqlConnection in DeleteOlderThanAsync is never disposed, leaking pooled connections, which is label 2."
+          "label_ids": [
+            "cs-02-invoice-repository#2"
+          ],
+          "reason": "Identifies that the SqlConnection at line 48 is not disposed (no using), leaking pooled connections and risking pool exhaustion."
         }
       ],
       "found": [
@@ -1319,9 +1411,9 @@
       "reviewer_input_tokens": 2190,
       "reviewer_output_tokens": 1112,
       "reviewer_cost": 0.000775,
-      "judge_input_tokens": 2144,
-      "judge_output_tokens": 188,
-      "judge_cost": 0.006168,
+      "judge_input_tokens": 2197,
+      "judge_output_tokens": 192,
+      "judge_cost": 0.006314,
       "seconds": 8.2,
       "error": null
     },
@@ -1346,8 +1438,10 @@
           "title": "Expiry check is inverted, so valid reset tokens are rejected and expired ones are accepted",
           "explanation": "The condition \u0060saved.ExpiresAt \u003E clock.GetUtcNow()\u0060 returns false when the token is still valid. Tokens that have already expired fall through to the hash comparison and can be redeemed. Normal redemption fails within the 30-minute window, and a stolen or old token keeps working indefinitely.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#2",
-          "reason": "Describes the inverted expiry comparison on line 29, same defect as the label."
+          "label_ids": [
+            "cs-03-password-reset#2"
+          ],
+          "reason": "Identifies the inverted expiry comparison on line 29 with the same consequences as the label."
         },
         {
           "line": 21,
@@ -1357,8 +1451,10 @@
           "title": "Password reset token generated with System.Random, which is not cryptographically secure",
           "explanation": "System.Random is a predictable PRNG, so its output can be guessed from observed values or internal state. The token is only a 6-digit number (about 900k values). An attacker who can predict or brute-force it can take over accounts. Nothing in this code limits redemption attempts either.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#1",
-          "reason": "Identifies System.Random and the 6-digit token space as predictable and guessable, matching the label."
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
+          "reason": "Identifies System.Random and the short six-digit token on line 21 as insecure and guessable."
         },
         {
           "line": 38,
@@ -1368,8 +1464,8 @@
           "title": "Single-use check is not atomic, so a concurrent race can redeem the same token twice",
           "explanation": "The token is found, compared, and only then deleted in a separate call. Two concurrent requests with the correct token can both pass the comparison before either deletes it, so both return true and the token is used twice.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The find/compare/delete sequence is non-atomic, so concurrent requests can both redeem the same token. This is a genuine single-use violation that no label covers."
+          "label_ids": [],
+          "reason": "The find, compare and delete sequence is not atomic, so concurrent redemptions can both succeed. This is a genuine defect that no label covers."
         }
       ],
       "found": [
@@ -1381,9 +1477,9 @@
       "reviewer_input_tokens": 1954,
       "reviewer_output_tokens": 1327,
       "reviewer_cost": 0.0008589,
-      "judge_input_tokens": 1989,
-      "judge_output_tokens": 219,
-      "judge_cost": 0.006168,
+      "judge_input_tokens": 2042,
+      "judge_output_tokens": 225,
+      "judge_cost": 0.006334,
       "seconds": 14.2,
       "error": null
     },
@@ -1409,8 +1505,10 @@
           "title": "Path traversal on upload via client-supplied file name",
           "explanation": "storedName is taken directly from file.FileName, which is client-controlled. Path.Combine(folder, storedName) does not neutralise \u0027..\u0027 segments, and a rooted name such as \u0027/x.pdf\u0027 makes Path.Combine discard the uploads folder entirely. The extension check on line 22 only looks at the suffix, so a name like \u0027../../Views/evil.pdf\u0027 passes validation and is written outside the uploads directory, potentially into the web root or code locations.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Describes the upload path traversal from using the client-supplied file name as the stored name, which is the core of label #1."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Describes the upload path traversal from using the client-supplied file name as the stored name, which is the first half of label #1."
         },
         {
           "line": 43,
@@ -1420,8 +1518,10 @@
           "title": "Path traversal on download through unvalidated route id",
           "explanation": "The id route value is combined into a path without validation. A request such as GET api/documents/..%5C..%5Cappsettings.json (backslashes on Windows) or an absolute path yields a path outside uploads. Because File.Exists is checked and the file is then returned by PhysicalFile, any readable file on the server can be downloaded, including configuration files that contain secrets.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#3",
-          "reason": "Describes path traversal in Download via the unvalidated id combined into a path, matching label #3."
+          "label_ids": [
+            "cs-04-document-upload#3"
+          ],
+          "reason": "Describes the Download path traversal from the unvalidated id combined into a path, the same defect as label #3."
         },
         {
           "line": 29,
@@ -1431,8 +1531,10 @@
           "title": "Uploads with the same file name silently overwrite earlier files",
           "explanation": "The stored name equals the client file name, and WriteAllBytesAsync replaces any existing file with that name. Two different users uploading \u0027report.pdf\u0027 overwrite each other\u0027s data, and the id returned to the first user now points to the second user\u0027s content. This is data loss on ordinary input.",
           "verdict": "duplicate",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Same-name uploads overwriting each other is the second half of label #1, which covers storing under the client-sent name."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Covers the overwrite-on-same-name half of label #1, which comes from storing under the client\u0027s file name."
         }
       ],
       "found": [
@@ -1446,9 +1548,9 @@
       "reviewer_input_tokens": 2073,
       "reviewer_output_tokens": 1781,
       "reviewer_cost": 0.0010978,
-      "judge_input_tokens": 2270,
-      "judge_output_tokens": 223,
-      "judge_cost": 0.00677,
+      "judge_input_tokens": 2323,
+      "judge_output_tokens": 234,
+      "judge_cost": 0.006986,
       "seconds": 12.2,
       "error": null
     },
@@ -1473,8 +1575,10 @@
           "title": "Static Dictionary mutated and read without synchronization",
           "explanation": "_rates is a static, non-thread-safe Dictionary. GetRateAsync reads it at line 27 and writes it at line 36 from whatever threads call the service. Concurrent writes, or a read during a write, can corrupt the dictionary, return wrong entries, or throw. Because the cache is static it is also shared across every ExchangeRateCache instance, so instances with different HttpClient or clock settings silently share rates.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#1",
-          "reason": "Identifies the static non-thread-safe Dictionary read and written concurrently without synchronization, the same defect as label 1."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#1"
+          ],
+          "reason": "Identifies the static non-thread-safe Dictionary being read and written concurrently, which is the same defect as label #1."
         },
         {
           "line": 20,
@@ -1484,8 +1588,10 @@
           "title": "Blocking on async call with .Result inside an async method",
           "explanation": "ConvertAsync is declared async but blocks on GetRateAsync(...).Result. This ties up a thread while the HTTP call runs and can deadlock in any context with a SynchronizationContext, such as legacy ASP.NET or UI hosts, because the continuation needs that context to resume. Under load it also starves the thread pool. The method is async, so the call should simply be awaited, and the cancellation token is already available.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#2",
-          "reason": "Identifies blocking on .Result inside an async method, with the risks of deadlock and thread starvation, the same defect as label 2."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#2"
+          ],
+          "reason": "Identifies blocking on .Result in an async method with deadlock and thread starvation risk, the same defect as label #2."
         }
       ],
       "found": [
@@ -1497,9 +1603,9 @@
       "reviewer_input_tokens": 1972,
       "reviewer_output_tokens": 1049,
       "reviewer_cost": 0.0007217,
-      "judge_input_tokens": 1998,
+      "judge_input_tokens": 2051,
       "judge_output_tokens": 178,
-      "judge_cost": 0.005776,
+      "judge_cost": 0.005882,
       "seconds": 7.8,
       "error": null
     },
@@ -1524,8 +1630,10 @@
           "title": "Retry loop runs only twice and ends in a misleading exception",
           "explanation": "The loop condition \u0060attempt \u003C MaxAttempts\u0060 with MaxAttempts = 3 runs only attempts 1 and 2. Inside the loop, the check \u0060attempt \u003C MaxAttempts\u0060 on line 19 is therefore always true, so on the final attempt a 429 or 5xx response sets retryable and the loop simply continues and exits. Execution then reaches line 35 and throws InvalidOperationException(\u0022Unreachable\u0022), which is wrong: the code is reachable and the caller gets no HTTP status information. The intended behaviour was three attempts with the final failure surfacing as an HttpRequestException from EnsureSuccessStatusCode.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#1",
-          "reason": "Same defect: the loop condition \u0060attempt \u003C MaxAttempts\u0060 stops one attempt early, so the lookup runs twice and falls through to the \u0027Unreachable\u0027 exception."
+          "label_ids": [
+            "cs-06-shipping-client#1"
+          ],
+          "reason": "Identifies the off-by-one loop condition at line 13, which gives only two attempts and falls through to the \u0027Unreachable\u0027 exception."
         },
         {
           "line": 28,
@@ -1535,8 +1643,8 @@
           "title": "Non-transient HTTP errors are retried",
           "explanation": "EnsureSuccessStatusCode on line 25 throws HttpRequestException for every non-success status, including 4xx responses such as 400 or 404 that the code deliberately did not classify as retryable. The catch on line 28 then catches that exception and retries after a delay, so permanent client errors are retried once when they should fail immediately.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Real defect not covered by a label: EnsureSuccessStatusCode throws HttpRequestException for 4xx responses inside the try, and the catch with \u0060when (attempt \u003C MaxAttempts)\u0060 retries them. Permanent client errors get retried."
+          "label_ids": [],
+          "reason": "Valid: EnsureSuccessStatusCode throws HttpRequestException for 4xx, and the catch with attempt \u003C MaxAttempts retries it. This is a genuine defect that no label covers."
         },
         {
           "line": 40,
@@ -1546,8 +1654,10 @@
           "title": "New HttpClient created for every shipment request",
           "explanation": "Each call to CreateShipmentAsync constructs a new HttpClient. Although it is disposed, each instance can hold its own socket pool, and frequent creation under load can exhaust sockets and leave TIME_WAIT connections. It also bypasses the IHttpClientFactory handler lifetime management that the tracking method uses, so the two methods behave inconsistently.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#2",
-          "reason": "Same defect: a new HttpClient per CreateShipmentAsync call risks socket exhaustion and bypasses the factory-configured \u0027shipping\u0027 client."
+          "label_ids": [
+            "cs-06-shipping-client#2"
+          ],
+          "reason": "Reports a new HttpClient per CreateShipmentAsync call, with socket exhaustion and bypassing the factory, matching the label."
         }
       ],
       "found": [
@@ -1559,9 +1669,9 @@
       "reviewer_input_tokens": 2144,
       "reviewer_output_tokens": 1638,
       "reviewer_cost": 0.0010334,
-      "judge_input_tokens": 2367,
-      "judge_output_tokens": 304,
-      "judge_cost": 0.007774,
+      "judge_input_tokens": 2420,
+      "judge_output_tokens": 277,
+      "judge_cost": 0.00761,
       "seconds": 11.4,
       "error": null
     },
@@ -1587,8 +1697,10 @@
           "title": "Last day of range is excluded despite documented inclusive behavior",
           "explanation": "The doc comment says both the first and last day are included, but \u0060end\u0060 is \u0060to\u0060 at midnight and the filter is \u0060PlacedAt \u003C end\u0060. Any order placed during the \u0060to\u0060 date (after 00:00 on that day) is silently dropped, so reports for a range ending on a given day undercount revenue and order counts.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#1",
-          "reason": "Same defect: end is midnight of the last day with a \u003C filter, so the last day is excluded despite the doc comment."
+          "label_ids": [
+            "cs-07-sales-report#1"
+          ],
+          "reason": "Identifies that end is midnight of the last day with a \u003C filter, dropping the last day, same as label 1."
         },
         {
           "line": 22,
@@ -1598,8 +1710,10 @@
           "title": "Customer lookup query executed once per customer inside a loop",
           "explanation": "For every group, \u0060db.Customers.SingleAsync\u0060 issues a separate database round trip. A report covering many customers produces N\u002B1 queries, which scales poorly with the number of customers in the range.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#2",
-          "reason": "Describes the N\u002B1 query from SingleAsync per group inside the loop."
+          "label_ids": [
+            "cs-07-sales-report#2"
+          ],
+          "reason": "Describes the per-customer SingleAsync query in the loop, the N\u002B1 defect in label 2."
         },
         {
           "line": 17,
@@ -1609,8 +1723,8 @@
           "title": "All orders in the range are materialized in memory to aggregate them",
           "explanation": "The full set of order entities for the date range is pulled into a list and then grouped and summed in application code. For large date ranges this buffers a potentially very large number of rows in memory when the database could perform the aggregation.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Loading all order entities into memory instead of aggregating in the database is a genuine scalability problem. The label mentions it only as context for the N\u002B1 fix, and this finding targets the materialization itself, which is a distinct issue."
+          "label_ids": [],
+          "reason": "Loading all order entities into memory instead of aggregating in the database is a genuine performance concern. Label 2 mentions it only as context for the N\u002B1, and this finding targets the separate materialization problem at lines 17-19."
         },
         {
           "line": 37,
@@ -1620,8 +1734,10 @@
           "title": "Average throws when a customer has no orders",
           "explanation": "\u0060Enumerable.Average\u0060 on an empty decimal sequence throws InvalidOperationException. A customer with no orders (a normal input) causes an unhandled exception instead of a sensible result.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#3",
-          "reason": "Same defect: Average on an empty sequence throws InvalidOperationException for a customer with no orders."
+          "label_ids": [
+            "cs-07-sales-report#3"
+          ],
+          "reason": "Enumerable.Average on an empty sequence throws InvalidOperationException, as in label 3."
         }
       ],
       "found": [
@@ -1634,9 +1750,9 @@
       "reviewer_input_tokens": 1914,
       "reviewer_output_tokens": 1096,
       "reviewer_cost": 0.0007394,
-      "judge_input_tokens": 2067,
-      "judge_output_tokens": 313,
-      "judge_cost": 0.007264,
+      "judge_input_tokens": 2120,
+      "judge_output_tokens": 327,
+      "judge_cost": 0.00751,
       "seconds": 9.8,
       "error": null
     },
@@ -1662,8 +1778,10 @@
           "title": "Hardcoded fallback JWT signing key",
           "explanation": "If the Jwt:SigningKey setting is missing, the code silently uses the literal \u0022portal-dev-signing-key-change-me-0123456789\u0022 as the HMAC key. That string is in source control, so anyone who knows it can mint tokens that pass signature validation. A missing configuration value in production therefore turns into a complete authentication bypass.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#2",
-          "reason": "Describes the hardcoded fallback signing key on line 11 that is used when the config value is missing."
+          "label_ids": [
+            "cs-08-jwt-setup#2"
+          ],
+          "reason": "Identifies the hardcoded fallback signing key on line 11 and the risk of forged tokens."
         },
         {
           "line": 23,
@@ -1673,7 +1791,9 @@
           "title": "Token lifetime is not validated",
           "explanation": "ValidateLifetime = false means the middleware accepts JWTs whose exp claim has passed, so a stolen or leaked token stays valid indefinitely. ClockSkew on line 24 has no effect while lifetime validation is off.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#1",
+          "label_ids": [
+            "cs-08-jwt-setup#1"
+          ],
           "reason": "Identifies ValidateLifetime = false, which lets expired tokens be accepted."
         },
         {
@@ -1684,8 +1804,10 @@
           "title": "Full bearer token written to logs",
           "explanation": "On authentication failure the handler logs the complete Authorization header, which contains the bearer token. Anyone with access to the logs can reuse those tokens until they expire. Because ValidateLifetime is false (line 23), the exposure lasts even longer.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#3",
-          "reason": "Describes the Authorization header with the bearer token being logged on authentication failure."
+          "label_ids": [
+            "cs-08-jwt-setup#3"
+          ],
+          "reason": "Identifies the Authorization header with the bearer token being logged on authentication failure."
         }
       ],
       "found": [
@@ -1698,9 +1820,9 @@
       "reviewer_input_tokens": 2015,
       "reviewer_output_tokens": 872,
       "reviewer_cost": 0.0006375,
-      "judge_input_tokens": 2081,
-      "judge_output_tokens": 213,
-      "judge_cost": 0.006292,
+      "judge_input_tokens": 2134,
+      "judge_output_tokens": 224,
+      "judge_cost": 0.006508,
       "seconds": 9,
       "error": null
     },
@@ -1722,8 +1844,8 @@
           "title": "Normalize can throw on titles containing unpaired surrogates",
           "explanation": "title.Normalize(NormalizationForm.FormD) throws ArgumentException when the string contains an invalid code point such as an unpaired UTF-16 surrogate. ToSlug only guards against null, so a title with such a character, which can come from user-supplied input, makes the method throw instead of returning a slug.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The claim is accurate: string.Normalize throws ArgumentException on unpaired surrogates. ToSlug only checks for null, so user-supplied titles with such characters would make it throw instead of returning a slug. This is a genuine robustness gap, though an edge case."
+          "label_ids": [],
+          "reason": "The claim is accurate. string.Normalize throws ArgumentException on invalid Unicode such as a lone surrogate, and ToSlug only guards against null. A user-supplied title with such a character would make the method throw instead of returning a slug. It is an edge case, but it is a genuine robustness gap that no label covers."
         }
       ],
       "found": [],
@@ -1732,9 +1854,9 @@
       "reviewer_input_tokens": 1902,
       "reviewer_output_tokens": 940,
       "reviewer_cost": 0.0006602,
-      "judge_input_tokens": 1553,
-      "judge_output_tokens": 592,
-      "judge_cost": 0.009026,
+      "judge_input_tokens": 1606,
+      "judge_output_tokens": 554,
+      "judge_cost": 0.008752,
       "seconds": 18.5,
       "error": null
     },
@@ -1778,8 +1900,8 @@
           "title": "Subject claim lookup by \u0022sub\u0022 can fail under default JWT claim mapping",
           "explanation": "User.FindFirst(\u0022sub\u0022) looks for the raw \u0022sub\u0022 claim type. With the default JwtBearer setup (MapInboundClaims = true), the JWT handler maps the inbound \u0022sub\u0022 claim to ClaimTypes.NameIdentifier, so FindFirst(\u0022sub\u0022) returns null and CustomerId() throws InvalidOperationException. Every authenticated request to Place and Get would then fail with a 500 error.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "This depends on unseen auth configuration. Many apps set MapInboundClaims=false or clear the claim map, and the code deliberately throws a clear error when the claim is missing. Nothing in this file shows the claim lookup is wrong, so the finding is speculative."
+          "label_ids": [],
+          "reason": "The claim depends on the JWT authentication setup, which is not in this file. Reading the \u0022sub\u0022 claim is valid when MapInboundClaims is false or the claim is otherwise preserved, and it is a common pattern. The assertion that every request would fail with a 500 is speculative, and the code is clean."
         }
       ],
       "found": [],
@@ -1788,9 +1910,9 @@
       "reviewer_input_tokens": 1966,
       "reviewer_output_tokens": 1200,
       "reviewer_cost": 0.0007966,
-      "judge_input_tokens": 1660,
-      "judge_output_tokens": 128,
-      "judge_cost": 0.0046,
+      "judge_input_tokens": 1713,
+      "judge_output_tokens": 754,
+      "judge_cost": 0.010966,
       "seconds": 7.7,
       "error": null
     },
@@ -1829,8 +1951,11 @@
           "title": "Hardcoded credentials and secrets in source",
           "explanation": "The database password (line 10), API key (line 11) and encryption key (line 12) are compile-time constants in source. Anyone with read access to the code or the compiled assembly gets production database access and the API key.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#1",
-          "reason": "Covers hardcoded DB password on line 10 (also API key and encryption key); primarily matches the DB credentials label."
+          "label_ids": [
+            "seed-01-user-data-service#1",
+            "seed-01-user-data-service#2"
+          ],
+          "reason": "Reports hardcoded DB password, API key and encryption key constants; covers labels 1 and 2, and the hardcoded EncryptionKey relates to the hardcoded key issue (label 6 covers key/IV on lines 44-45, mentioned here only loosely)."
         },
         {
           "line": 26,
@@ -1840,8 +1965,10 @@
           "title": "SQL injection through table name and user id",
           "explanation": "tableName and userId are concatenated directly into the SQL text. A caller can pass a table name such as \u0027Users; DROP TABLE Users; --\u0027 or a userId containing a quote to read or modify arbitrary data.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#4",
-          "reason": "SQL injection via tableName and userId interpolation."
+          "label_ids": [
+            "seed-01-user-data-service#4"
+          ],
+          "reason": "SQL injection via tableName and userId on line 26."
         },
         {
           "line": 55,
@@ -1851,7 +1978,9 @@
           "title": "Path traversal in user file read",
           "explanation": "fileName is appended to C:\\UserFiles without validation. A value such as \u0027..\\..\\Windows\\win.ini\u0027 or an absolute path reads files outside the user directory.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#7",
+          "label_ids": [
+            "seed-01-user-data-service#7"
+          ],
           "reason": "Path traversal via fileName."
         },
         {
@@ -1862,8 +1991,10 @@
           "title": "Command injection via cmd.exe",
           "explanation": "The untrusted command string is placed into the cmd.exe arguments. Input such as \u0027x \u0026 del C:\\data\u0027 runs arbitrary commands with the service\u0027s privileges.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#8",
-          "reason": "Command injection through cmd.exe arguments."
+          "label_ids": [
+            "seed-01-user-data-service#8"
+          ],
+          "reason": "Command injection via cmd.exe."
         },
         {
           "line": 83,
@@ -1873,7 +2004,9 @@
           "title": "Stored and reflected XSS through unencoded comment",
           "explanation": "The raw comment is embedded in HTML that is returned to the client. A comment containing a script tag executes in other users\u0027 browsers when the markup is rendered.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#9",
+          "label_ids": [
+            "seed-01-user-data-service#9"
+          ],
           "reason": "XSS from unencoded comment in HTML."
         },
         {
@@ -1884,8 +2017,8 @@
           "title": "Log injection via unsanitized comment",
           "explanation": "The comment is written to the log unchanged. Embedded CR/LF characters let a user forge additional log lines.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Log injection of the unsanitized comment into the log file is a genuine, though minor, defect not covered by any label."
+          "label_ids": [],
+          "reason": "Log injection through unsanitized comment written to the log is a genuine, uncovered issue (also no newline between entries)."
         },
         {
           "line": 106,
@@ -1895,8 +2028,10 @@
           "title": "Connection string with password leaked in exception message",
           "explanation": "The exception message includes the full ConnectionString, which contains the database password. Any code or middleware that logs or returns exception text exposes the credential.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#11",
-          "reason": "Connection string in failed-login exception message."
+          "label_ids": [
+            "seed-01-user-data-service#11"
+          ],
+          "reason": "Connection string in the failed-login exception message."
         },
         {
           "line": 113,
@@ -1906,8 +2041,10 @@
           "title": "Connection string leaked in wrapped database exception",
           "explanation": "The SqlException is rethrown with the connection string, including the password, embedded in the message. The original exception is not preserved as InnerException, so the leak reaches any upstream logging.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#13",
-          "reason": "Connection string leaked in wrapped SqlException, original dropped."
+          "label_ids": [
+            "seed-01-user-data-service#13"
+          ],
+          "reason": "Connection string leaked in the wrapped DB exception, original dropped."
         },
         {
           "line": 91,
@@ -1917,8 +2054,11 @@
           "title": "Plaintext password comparison and API key returned on login",
           "explanation": "The query compares the password column directly with the supplied password, which means passwords are stored in plaintext. On success the method returns the application ApiKey to the caller, so any successful login hands out a shared secret.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#10",
-          "reason": "Primarily describes plaintext password comparison; also mentions the API key return, which is a separate label, but the lead issue is the password."
+          "label_ids": [
+            "seed-01-user-data-service#10",
+            "seed-01-user-data-service#12"
+          ],
+          "reason": "Covers plaintext password comparison and API key returned on login."
         },
         {
           "line": 42,
@@ -1928,8 +2068,11 @@
           "title": "Weak DES encryption with hardcoded key and IV",
           "explanation": "DES is obsolete and brute-forceable. The key and IV are the constant string \u002712345678\u0027, and the IV is reused for every message, so identical inputs produce identical ciphertext. The EncryptionKey constant is unused.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#5",
-          "reason": "Leads with weak DES; also covers hardcoded key/IV, but DES is the main subject."
+          "label_ids": [
+            "seed-01-user-data-service#5",
+            "seed-01-user-data-service#6"
+          ],
+          "reason": "Weak DES plus hardcoded key and fixed IV."
         },
         {
           "line": 138,
@@ -1939,7 +2082,9 @@
           "title": "Predictable token from Random with fixed seed",
           "explanation": "System.Random seeded with 123 produces the same sequence every run, so the \u0027security token\u0027 is fully predictable and can be forged.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#16",
+          "label_ids": [
+            "seed-01-user-data-service#16"
+          ],
           "reason": "Fixed-seed Random for security token."
         },
         {
@@ -1950,8 +2095,8 @@
           "title": "Failed login is reported as a generic exception",
           "explanation": "An unknown user or wrong password throws UnauthorizedAccessException, which callers must catch to return a proper authentication failure. The method also throws a plain Exception for database errors, which loses the exception type and stack trace.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Throwing UnauthorizedAccessException for failed login is a style complaint, and the lost stack trace point duplicates the leak finding; no distinct defect."
+          "label_ids": [],
+          "reason": "Throwing UnauthorizedAccessException for failed login is reasonable; the lost-exception-type point is a weak restatement of the already-labeled rethrow issue and not a distinct defect."
         },
         {
           "line": 117,
@@ -1961,8 +2106,10 @@
           "title": "Unsynchronized static counter and blocking sleep",
           "explanation": "_counter\u002B\u002B is not atomic, so concurrent calls can return duplicate or skipped IDs. Thread.Sleep(1) blocks the calling thread on every call, which hurts throughput under load.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#14",
-          "reason": "Non-atomic static counter increment; the Thread.Sleep remark is secondary."
+          "label_ids": [
+            "seed-01-user-data-service#14"
+          ],
+          "reason": "Non-atomic static counter increment; the Thread.Sleep remark is extra but the core defect matches."
         },
         {
           "line": 126,
@@ -1972,8 +2119,10 @@
           "title": "Resources created in loop and never disposed",
           "explanation": "Each of the one million iterations allocates a MemoryStream, a FileStream that creates a file, and an HttpClient. None are disposed, so file handles and sockets leak until exhausted, and a million files are written.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#15",
-          "reason": "Undisposed MemoryStream, FileStream, HttpClient in loop."
+          "label_ids": [
+            "seed-01-user-data-service#15"
+          ],
+          "reason": "Undisposed MemoryStream, FileStream, HttpClient in a million-iteration loop."
         },
         {
           "line": 22,
@@ -1983,8 +2132,8 @@
           "title": "Shared SqlConnection used by concurrent calls",
           "explanation": "A single SqlConnection opened in the constructor is used by every method call. SqlCommand objects on one connection cannot run concurrently, so overlapping requests fail with InvalidOperationException.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "A single shared SqlConnection across concurrent calls is a real concurrency defect, distinct from the never-closed label."
+          "label_ids": [],
+          "reason": "A single shared SqlConnection used across concurrent async calls is a genuine concurrency defect not covered by labels (label 3 is about never closing)."
         },
         {
           "line": 14,
@@ -1994,8 +2143,10 @@
           "title": "Connection opened in constructor and never disposed",
           "explanation": "The constructor opens a database connection, which blocks and fails object creation if the database is down. The class does not implement IDisposable, so the connection is never closed.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#3",
-          "reason": "Connection opened in constructor and never disposed."
+          "label_ids": [
+            "seed-01-user-data-service#3"
+          ],
+          "reason": "Connection opened in constructor and never disposed, no IDisposable."
         },
         {
           "line": 67,
@@ -2005,8 +2156,8 @@
           "title": "Process object not disposed",
           "explanation": "The Process instance is never disposed, which leaves its native handles open until finalization.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The Process object is never disposed, a minor but real resource leak not covered by any label."
+          "label_ids": [],
+          "reason": "Process is never disposed; a minor but genuine resource leak not covered by labels."
         },
         {
           "line": 33,
@@ -2016,12 +2167,13 @@
           "title": "User id written to console on every row",
           "explanation": "Each row logs the user id and labels the output as sensitive data. This creates a personal-data trail in console logs and adds per-row output cost.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Logging user id to the console for every row while labeling the data sensitive leaks personal data into logs and adds per-row output, a real if minor issue not covered by any label."
+          "label_ids": [],
+          "reason": "Logging user ids to console as sensitive data per row is a real, if minor, data-exposure/logging issue not labeled."
         }
       ],
       "found": [
         "seed-01-user-data-service#1",
+        "seed-01-user-data-service#2",
         "seed-01-user-data-service#4",
         "seed-01-user-data-service#7",
         "seed-01-user-data-service#8",
@@ -2029,24 +2181,22 @@
         "seed-01-user-data-service#11",
         "seed-01-user-data-service#13",
         "seed-01-user-data-service#10",
+        "seed-01-user-data-service#12",
         "seed-01-user-data-service#5",
+        "seed-01-user-data-service#6",
         "seed-01-user-data-service#16",
         "seed-01-user-data-service#14",
         "seed-01-user-data-service#15",
         "seed-01-user-data-service#3"
       ],
-      "missed": [
-        "seed-01-user-data-service#2",
-        "seed-01-user-data-service#6",
-        "seed-01-user-data-service#12"
-      ],
+      "missed": [],
       "outside_window": 0,
       "reviewer_input_tokens": 3451,
       "reviewer_output_tokens": 3714,
       "reviewer_cost": 0.0022021,
-      "judge_input_tokens": 5563,
-      "judge_output_tokens": 1129,
-      "judge_cost": 0.022416,
+      "judge_input_tokens": 5616,
+      "judge_output_tokens": 1275,
+      "judge_cost": 0.023982,
       "seconds": 24.8,
       "error": null
     },
@@ -2070,8 +2220,10 @@
           "title": "SQL injection through @SortColumn in dynamic ORDER BY",
           "explanation": "@SortColumn is an unvalidated SYSNAME parameter concatenated directly into the dynamic SQL text. A caller can pass a value such as Name; DROP TABLE dbo.Products; -- or a crafted expression, and sp_executesql will run it as part of the batch. Because the value is never quoted or checked against real column names, the procedure gives any caller the ability to run arbitrary statements with the permissions of the procedure.",
           "verdict": "match",
-          "label_id": "sql-01-search-products#1",
-          "reason": "Describes SQL injection via unvalidated @SortColumn concatenated into dynamic SQL, the same defect as the label."
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Same SQL injection via concatenated @SortColumn in the dynamic ORDER BY."
         },
         {
           "line": 9,
@@ -2081,8 +2233,8 @@
           "title": "LIKE wildcards in the search text are not escaped",
           "explanation": "@Search is wrapped in % characters without escaping, so any % or _ the user types is treated as a LIKE wildcard. Searching for \u002750%\u0027 matches every name containing \u002750\u0027, and searching for \u0027a_b\u0027 matches \u0027axb\u0027 as well. This changes the result set for valid input.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Unescaped % and _ in @Search are treated as wildcards, which alters results for legitimate input. This is a genuine minor correctness defect not covered by the label."
+          "label_ids": [],
+          "reason": "Unescaped % and _ in @Search are treated as wildcards, altering results for literal searches. This is a genuine, if minor, defect not covered by the label."
         },
         {
           "line": 13,
@@ -2091,9 +2243,9 @@
           "severity": "Low",
           "title": "Leading wildcard LIKE prevents an index seek on Name",
           "explanation": "The pattern N\u0027%\u0027 \u002B @Search \u002B N\u0027%\u0027 starts with a wildcard, so SQL Server cannot seek on an index on Name and must scan the rows to evaluate the predicate. Cost grows with the size of dbo.Products.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A leading-wildcard LIKE is inherent to a contains-style search. It is an expected tradeoff of the feature, not a defect in this code."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The leading-wildcard LIKE does prevent an index seek, forcing a scan that grows with the table. Real, though it is inherent to substring search and low severity."
         }
       ],
       "found": [
@@ -2104,9 +2256,9 @@
       "reviewer_input_tokens": 1558,
       "reviewer_output_tokens": 1377,
       "reviewer_cost": 0.0008443,
-      "judge_input_tokens": 1624,
-      "judge_output_tokens": 245,
-      "judge_cost": 0.005698,
+      "judge_input_tokens": 1677,
+      "judge_output_tokens": 241,
+      "judge_cost": 0.005764,
       "seconds": 11.1,
       "error": null
     },
@@ -2131,8 +2283,10 @@
           "title": "Balance check and debit are not protected against concurrent transfers",
           "explanation": "The balance is read at line 14-15 with a plain SELECT under the default READ COMMITTED isolation level, and the shared lock is released immediately. Two concurrent transfers from the same account can both read the same balance, both pass the check at line 17, and both write Balance = @Balance - @Amount at line 24. One debit is lost and the account can be overdrawn. The update also overwrites with a value computed from the stale read rather than applying a relative change.",
           "verdict": "match",
-          "label_id": "sql-02-transfer-funds#1",
-          "reason": "Describes the unlocked read followed by a write from the stale variable, which loses a debit and allows overdraw under concurrent transfers."
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read-then-write race under READ COMMITTED, where the stale balance is written back and a debit is lost, the same as label #1."
         },
         {
           "line": 37,
@@ -2142,8 +2296,8 @@
           "title": "Failure in the insert does not stop the procedure, so partial work is committed",
           "explanation": "There is no TRY/CATCH and SET XACT_ABORT is not ON. If the INSERT into dbo.Transfers at line 37 fails with a statement-level error (for example a constraint violation), SQL Server rolls back only that statement and execution continues to line 40. COMMIT TRANSACTION then commits both account updates without the matching transfer record, which breaks the invariant that every balance change has a transfer row.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes sql-02-transfer-funds#2 but at lines 37-40, outside the window. Describes the missing XACT_ABORT/TRY-CATCH, so a failing statement does not roll back the transaction. The INSERT example is a variant of the label\u0027s \u0027second UPDATE or the INSERT\u0027 case."
+          "label_ids": [],
+          "reason": "Describes sql-02-transfer-funds#2 but at lines 37-40, outside the window. Describes the missing XACT_ABORT/TRY-CATCH, so a statement-level error does not roll back the transaction and partial work is committed. This is the same defect as label #2, with the INSERT as the failure example."
         }
       ],
       "found": [
@@ -2156,9 +2310,9 @@
       "reviewer_input_tokens": 1877,
       "reviewer_output_tokens": 2148,
       "reviewer_cost": 0.0012617,
-      "judge_input_tokens": 1992,
-      "judge_output_tokens": 204,
-      "judge_cost": 0.006024,
+      "judge_input_tokens": 2045,
+      "judge_output_tokens": 215,
+      "judge_cost": 0.00624,
       "seconds": 14.3,
       "error": null
     },
@@ -2183,8 +2337,10 @@
           "title": "NOT IN returns no rows if any matching order has a NULL CustomerId",
           "explanation": "The anti-join is written as c.CustomerId NOT IN (SELECT o.CustomerId ... WHERE YEAR(o.OrderDate) = @Year). If the subquery returns even one NULL CustomerId for the given year, the NOT IN predicate evaluates to UNKNOWN for every customer, so the procedure returns an empty result set. This happens whenever dbo.Orders.CustomerId is nullable and such a row exists in that year. The schema is not shown, so this depends on that column\u0027s nullability.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#1",
-          "reason": "Describes NOT IN returning no rows when the subquery yields a NULL CustomerId, the same defect as label #1."
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Describes the NOT IN with NULL CustomerId returning an empty result, the same defect as label 1."
         },
         {
           "line": 12,
@@ -2194,8 +2350,10 @@
           "title": "Function on OrderDate prevents index seek",
           "explanation": "YEAR(o.OrderDate) = @Year applies a function to the column, so SQL Server cannot seek on an index on OrderDate and must evaluate the function for every order row. Cost grows with the full Orders table rather than only the rows for the requested year.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#2",
-          "reason": "Describes the non-sargable YEAR(o.OrderDate) predicate preventing an index seek, the same defect as label #2."
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Describes the non-sargable YEAR(o.OrderDate) predicate that prevents an index seek, the same defect as label 2."
         }
       ],
       "found": [
@@ -2207,9 +2365,9 @@
       "reviewer_input_tokens": 1422,
       "reviewer_output_tokens": 889,
       "reviewer_cost": 0.0005867,
-      "judge_input_tokens": 1515,
-      "judge_output_tokens": 173,
-      "judge_cost": 0.00476,
+      "judge_input_tokens": 1568,
+      "judge_output_tokens": 175,
+      "judge_cost": 0.004886,
       "seconds": 7.4,
       "error": null
     },
@@ -2234,8 +2392,10 @@
           "title": "Row-by-row cursor update where a set-based UPDATE would do",
           "explanation": "The procedure loads every staged price change into a cursor and issues one UPDATE dbo.Products per row (lines 16-21). For a large batch this means one statement, one index seek and one log record per row, with the cursor and the transaction held open for the whole loop. A single UPDATE joined to staging.PriceChanges on Sku, filtered by BatchId, would do the same work in one statement.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#1",
-          "reason": "Describes the row-by-row cursor update that should be a set-based UPDATE with a join, same as the label."
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Same defect: row-by-row cursor UPDATE inside the transaction instead of a set-based join update."
         },
         {
           "line": 28,
@@ -2245,8 +2405,10 @@
           "title": "@@IDENTITY can return an identity value from a different scope",
           "explanation": "@@IDENTITY returns the last identity generated in the session in any scope, including triggers and nested procedures. If dbo.ImportLog has an INSERT trigger that inserts into another identity table, @LogId will be that table\u0027s value, and the staging rows will be stamped with the wrong ImportLogId on line 31.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#2",
-          "reason": "Identifies @@IDENTITY returning an identity from another scope (trigger) instead of SCOPE_IDENTITY()."
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Same defect: @@IDENTITY can return an identity from a trigger\u0027s scope; SCOPE_IDENTITY() should be used."
         },
         {
           "line": 13,
@@ -2256,8 +2418,8 @@
           "title": "Duplicate Sku rows in a batch give an arbitrary final price",
           "explanation": "The cursor query has no ORDER BY and does not check for duplicate Sku values within the batch. If staging.PriceChanges holds more than one row for the same Sku and BatchId, each row is applied in turn and the last one processed wins. That order is not defined, so the stored price may not match the intended change.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Genuine data-integrity concern: duplicate Sku rows in a batch are applied in undefined order with no ORDER BY, so the final price is nondeterministic. No label covers it."
+          "label_ids": [],
+          "reason": "Genuine data-integrity concern: duplicate Sku rows in a batch are applied in an undefined order, so the final price is nondeterministic. It is not covered by any label, though it is low severity and depends on the data."
         }
       ],
       "found": [
@@ -2269,9 +2431,9 @@
       "reviewer_input_tokens": 1863,
       "reviewer_output_tokens": 1934,
       "reviewer_cost": 0.0011533,
-      "judge_input_tokens": 2070,
-      "judge_output_tokens": 253,
-      "judge_cost": 0.00667,
+      "judge_input_tokens": 2123,
+      "judge_output_tokens": 271,
+      "judge_cost": 0.006956,
       "seconds": 12.2,
       "error": null
     },
@@ -2293,8 +2455,8 @@
           "title": "Stale OUTPUT value can cause the wrong customer to be updated",
           "explanation": "@CustomerId is an OUTPUT parameter, so a caller can pass in a non-NULL value. The SELECT on lines 15-17 only assigns @CustomerId when a row matches @Email. If no row matches, the variable keeps the caller\u0027s value, so line 19 sees a non-NULL id and takes the ELSE branch. That runs UPDATE on line 28-30 against whichever customer has that id, changing their Name and UpdatedAt, and no new customer is inserted for @Email. The procedure should always work from the email lookup result.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Valid bug: when no row matches, SELECT @var = ... leaves the variable unchanged, so a non-NULL caller-supplied OUTPUT value skips the INSERT and updates an unrelated customer. Fix is to set @CustomerId = NULL before the lookup."
+          "label_ids": [],
+          "reason": "This is a genuine bug. In T-SQL an OUTPUT parameter also carries its input value. \u0060SELECT @var = col\u0060 leaves the variable unchanged when no row matches. A caller that reuses a variable holding a non-NULL id makes line 19 take the ELSE branch, so the procedure updates the wrong customer and never inserts the new one. The fix is to set \u0060@CustomerId = NULL\u0060 before the lookup."
         }
       ],
       "found": [],
@@ -2303,9 +2465,9 @@
       "reviewer_input_tokens": 1748,
       "reviewer_output_tokens": 1078,
       "reviewer_cost": 0.0007138,
-      "judge_input_tokens": 1537,
-      "judge_output_tokens": 130,
-      "judge_cost": 0.004374,
+      "judge_input_tokens": 1590,
+      "judge_output_tokens": 336,
+      "judge_cost": 0.00654,
       "seconds": 8.6,
       "error": null
     },
@@ -2331,5 +2493,6 @@
       "seconds": 4.6,
       "error": null
     }
-  ]
+  ],
+  "rejudged_at": "2026-10-29T13:10:49.9645189+00:00"
 }

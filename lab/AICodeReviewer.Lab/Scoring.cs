@@ -5,14 +5,15 @@ namespace AICodeReviewer.Lab
     /// <summary>
     /// What the judge said about one finding
     /// </summary>
-    public record JudgeVerdict(int Finding, string Verdict, string LabelId, string Reason);
+    public record JudgeVerdict(int Finding, string Verdict, IReadOnlyList<string> LabelIds, string Reason);
 
     /// <summary>
-    /// A finding with its final verdict: match, duplicate, real (a real issue with no label) or false_alarm
+    /// A finding with its final verdict: match, duplicate, real (a real issue with no label) or false_alarm, and the
+    /// labels it was counted for
     /// </summary>
     public record ScoredFinding(
         int Line, int EndLine, string Category, string Severity, string Title, string Explanation,
-        string Verdict, string? LabelId, string Reason);
+        string Verdict, IReadOnlyList<string> LabelIds, string Reason);
 
     public record CaseScore(IReadOnlyList<ScoredFinding> Findings, IReadOnlyList<string> Found, IReadOnlyList<string> Missed, int OutsideWindow);
 
@@ -24,9 +25,9 @@ namespace AICodeReviewer.Lab
         public const string FalseAlarm = "false_alarm";
 
         /// <summary>
-        /// Turns the judge's verdicts into the case's score. The judge decides whether a finding describes a labelled
-        /// defect; a match only counts when the finding's lines are within tolerance of the label's, a second match of
-        /// the same label is a duplicate, and a match the rules refuse becomes "real"
+        /// Turns the judge's verdicts into the case's score. The judge decides which labelled defects a finding
+        /// describes (one finding may cover several); a label only counts when the finding's lines are within tolerance
+        /// of the label's. A finding that adds no new label is a duplicate, and a match the rules refuse becomes "real"
         /// </summary>
         public static CaseScore Score(IReadOnlyList<Label> labels, IReadOnlyList<Finding> findings, IReadOnlyList<JudgeVerdict> verdicts, int tolerance)
         {
@@ -38,36 +39,37 @@ namespace AICodeReviewer.Lab
             for (var i = 0; i < findings.Count; i++)
             {
                 var finding = findings[i];
-                var verdict = byFinding.TryGetValue(i, out var v) ? v : new JudgeVerdict(i, FalseAlarm, "", "The judge gave no verdict");
+                var verdict = byFinding.TryGetValue(i, out var v) ? v : new JudgeVerdict(i, FalseAlarm, [], "The judge gave no verdict");
                 var final = verdict.Verdict;
-                string? labelId = null;
+                var counted = new List<string>();
                 var reason = verdict.Reason;
 
                 if (final == Match)
                 {
-                    var label = labels.FirstOrDefault(l => l.Id == verdict.LabelId);
-                    if (label is null)
+                    var named = (verdict.LabelIds ?? []).Distinct().ToList();
+                    var known = labels.Where(l => named.Contains(l.Id)).ToList();
+                    var inWindow = known.Where(l => Overlaps(finding, l, tolerance)).ToList();
+                    if (known.Count < named.Count)
+                    {
+                        reason = $"The judge named unknown labels {string.Join(", ", named.Except(known.Select(l => l.Id)))}. {reason}";
+                    }
+
+                    if (known.Count == 0)
                     {
                         final = Real;
-                        reason = $"The judge named an unknown label '{verdict.LabelId}'. {reason}";
                     }
-                    else if (!Overlaps(finding, label, tolerance))
+                    else if (inWindow.Count == 0)
                     {
                         final = Real;
                         outsideWindow++;
-                        reason = $"Describes {label.Id} but at lines {finding.Line}-{finding.EndLine}, outside the window. {reason}";
+                        reason = $"Describes {string.Join(", ", known.Select(l => l.Id))} but at lines {finding.Line}-{finding.EndLine}, outside the window. {reason}";
                     }
                     else
                     {
-                        labelId = label.Id;
-                        if (found.Contains(label.Id))
-                        {
-                            final = Duplicate;
-                        }
-                        else
-                        {
-                            found.Add(label.Id);
-                        }
+                        counted = inWindow.Select(l => l.Id).ToList();
+                        var fresh = counted.Where(id => !found.Contains(id)).ToList();
+                        found.AddRange(fresh);
+                        final = fresh.Count > 0 ? Match : Duplicate;
                     }
                 }
                 else if (final is not (Real or FalseAlarm))
@@ -77,7 +79,7 @@ namespace AICodeReviewer.Lab
                 }
 
                 scored.Add(new ScoredFinding(finding.Line, finding.EndLine, finding.Category, finding.Severity, finding.Title,
-                    finding.Explanation, final, labelId, reason));
+                    finding.Explanation, final, counted, reason));
             }
 
             var missed = labels.Select(l => l.Id).Where(id => !found.Contains(id)).ToList();

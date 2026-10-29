@@ -18,16 +18,17 @@ namespace AICodeReviewer.Lab
             You grade a code review against an answer key. You get a source file with its line numbers, the defects
             known to be in it (the labels), and the findings a reviewer reported. Give every finding exactly one verdict:
 
-            - match: the finding describes the same defect as one label. Give that label's id. The wording may differ and
-              the lines may be a little off, but it must be the same problem in the same code, not merely the same kind
-              of problem somewhere else.
+            - match: the finding describes the same defect as one or more labels. List the id of every label it covers;
+              a finding that names two defects, such as two hardcoded secrets reported together, covers both. The
+              wording may differ and the lines may be a little off, but each must be the same problem in the same code,
+              not merely the same kind of problem somewhere else.
             - real: a genuine defect in this code that no label covers, one a careful senior reviewer would want fixed.
               Style preferences, speculative "consider adding" advice and best practices that do not matter here are not real.
             - false_alarm: the finding is wrong, does not apply to this code, or is only a style or preference remark.
 
-            When a finding touches two labels, match the one it mainly describes. Several findings may match the same
-            label. Give a short reason for each verdict, and a verdict for every finding, using the finding numbers given.
-            For a verdict other than match, leave label_id empty.
+            Do not list a label the finding only mentions in passing. Several findings may match the same label. Give a
+            short reason for each verdict, and a verdict for every finding, using the finding numbers given. For a verdict
+            other than match, leave label_ids empty.
             """;
 
         public static readonly JsonElement Schema = JsonSerializer.SerializeToElement(new Dictionary<string, object>
@@ -44,12 +45,12 @@ namespace AICodeReviewer.Lab
                     {
                         ["type"] = "object",
                         ["additionalProperties"] = false,
-                        ["required"] = new[] { "finding", "verdict", "label_id", "reason" },
+                        ["required"] = new[] { "finding", "verdict", "label_ids", "reason" },
                         ["properties"] = new Dictionary<string, object>
                         {
                             ["finding"] = new { type = "integer" },
                             ["verdict"] = new { type = "string", @enum = new[] { Scoring.Match, Scoring.Real, Scoring.FalseAlarm } },
-                            ["label_id"] = new { type = "string" },
+                            ["label_ids"] = new { type = "array", items = new { type = "string" } },
                             ["reason"] = new { type = "string" },
                         }
                     }
@@ -119,7 +120,7 @@ namespace AICodeReviewer.Lab
                 throw new ModelAnswerException(
                     $"The judge gave verdicts for findings [{string.Join(", ", numbers)}] instead of one for each of 0-{findingCount - 1}");
             }
-            return verdicts.Select(v => new JudgeVerdict(v.Finding, v.Verdict, v.LabelId, v.Reason)).ToList();
+            return verdicts.Select(v => new JudgeVerdict(v.Finding, v.Verdict, v.LabelIds, v.Reason)).ToList();
         }
 
         private sealed class Verdicts
@@ -132,7 +133,7 @@ namespace AICodeReviewer.Lab
         {
             [JsonPropertyName("finding")] public int Finding { get; set; }
             [JsonPropertyName("verdict")] public string Verdict { get; set; } = "";
-            [JsonPropertyName("label_id")] public string LabelId { get; set; } = "";
+            [JsonPropertyName("label_ids")] public List<string> LabelIds { get; set; } = new();
             [JsonPropertyName("reason")] public string Reason { get; set; } = "";
         }
     }
