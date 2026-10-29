@@ -1,0 +1,8 @@
+{
+  "id": "cs-06-shipping-client",
+  "language": "csharp",
+  "file": "ShippingApiClient.cs",
+  "group": "realistic",
+  "description": "Calls to a shipping API with retries",
+  "kind": "buggy"
+}

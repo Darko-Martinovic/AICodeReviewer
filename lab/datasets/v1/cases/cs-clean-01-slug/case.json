@@ -1,0 +1,8 @@
+{
+  "id": "cs-clean-01-slug",
+  "language": "csharp",
+  "file": "SlugGenerator.cs",
+  "group": "clean",
+  "description": "Turning titles into URL slugs",
+  "kind": "clean"
+}

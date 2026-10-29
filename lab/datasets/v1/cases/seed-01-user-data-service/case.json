@@ -1,0 +1,8 @@
+{
+  "id": "seed-01-user-data-service",
+  "language": "csharp",
+  "file": "UserDataService.cs",
+  "group": "seeded-dense",
+  "description": "A service with many seeded security and resource bugs (from the OPS-1 branch)",
+  "kind": "buggy"
+}

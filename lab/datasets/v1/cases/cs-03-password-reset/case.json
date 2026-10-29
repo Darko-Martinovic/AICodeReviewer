@@ -1,0 +1,8 @@
+{
+  "id": "cs-03-password-reset",
+  "language": "csharp",
+  "file": "PasswordResetService.cs",
+  "group": "realistic",
+  "description": "Issuing and redeeming password reset tokens",
+  "kind": "buggy"
+}

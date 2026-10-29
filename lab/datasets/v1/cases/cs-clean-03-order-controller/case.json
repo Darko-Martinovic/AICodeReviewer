@@ -1,0 +1,8 @@
+{
+  "id": "cs-clean-03-order-controller",
+  "language": "csharp",
+  "file": "OrdersController.cs",
+  "group": "clean",
+  "description": "An API controller for placing and reading orders",
+  "kind": "clean"
+}

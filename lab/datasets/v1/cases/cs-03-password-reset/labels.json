@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cs-03-password-reset#1",
+    "line": 21,
+    "end_line": 21,
+    "category": "Security",
+    "severity": "High",
+    "title": "Reset tokens come from a non-cryptographic six-digit random number",
+    "description": "System.Random is predictable and six digits can be guessed; reset tokens need RandomNumberGenerator and enough length."
+  },
+  {
+    "id": "cs-03-password-reset#2",
+    "line": 29,
+    "end_line": 29,
+    "category": "Bug",
+    "severity": "High",
+    "title": "The expiry check is inverted",
+    "description": "Tokens that have not expired are refused and expired tokens are accepted."
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "id": "ts-clean-03-todo-list",
+  "language": "typescript",
+  "file": "TodoList.tsx",
+  "group": "clean",
+  "description": "A React to-do list with add, toggle and remove",
+  "kind": "clean"
+}

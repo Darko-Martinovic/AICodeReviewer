@@ -1,0 +1,8 @@
+{
+  "id": "ts-05-orders-router",
+  "language": "typescript",
+  "file": "ordersRouter.ts",
+  "group": "realistic",
+  "description": "Express routes for reading and cancelling a customer's orders",
+  "kind": "buggy"
+}

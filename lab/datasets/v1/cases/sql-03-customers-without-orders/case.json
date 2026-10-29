@@ -1,0 +1,8 @@
+{
+  "id": "sql-03-customers-without-orders",
+  "language": "sql",
+  "file": "CustomersWithoutOrders.sql",
+  "group": "realistic",
+  "description": "Customers who placed no order in a given year",
+  "kind": "buggy"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cs-01-order-pricing#1",
+    "line": 25,
+    "end_line": 25,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "An order of exactly 500 misses the extra discount",
+    "description": "The comment and the rule say 500 or more, but the check is strictly greater than 500."
+  },
+  {
+    "id": "cs-01-order-pricing#2",
+    "line": 45,
+    "end_line": 45,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "Average per item divides by the number of lines and fails on an empty order",
+    "description": "Dividing by items.Count averages over order lines instead of quantities, and an empty order throws DivideByZeroException."
+  }
+]

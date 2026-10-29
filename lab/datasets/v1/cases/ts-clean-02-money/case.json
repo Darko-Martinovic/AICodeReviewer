@@ -1,0 +1,8 @@
+{
+  "id": "ts-clean-02-money",
+  "language": "typescript",
+  "file": "money.ts",
+  "group": "clean",
+  "description": "Parsing and formatting money amounts in cents",
+  "kind": "clean"
+}

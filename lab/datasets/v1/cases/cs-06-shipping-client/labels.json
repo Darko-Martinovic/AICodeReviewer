@@ -1,0 +1,20 @@
+[
+  {
+    "id": "cs-06-shipping-client#1",
+    "line": 13,
+    "end_line": 13,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The retry loop stops one attempt early",
+    "description": "With < the lookup runs at most twice, and when the last attempt is retryable the loop ends in the 'Unreachable' exception instead of the real error."
+  },
+  {
+    "id": "cs-06-shipping-client#2",
+    "line": 40,
+    "end_line": 40,
+    "category": "Performance",
+    "severity": "Medium",
+    "title": "A new HttpClient for every shipment",
+    "description": "Creating and disposing HttpClient per call can exhaust sockets and ignores the configured 'shipping' client from the factory."
+  }
+]

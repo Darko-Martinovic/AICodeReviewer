@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sql-02-transfer-funds#1",
+    "line": 15,
+    "end_line": 24,
+    "category": "Bug",
+    "severity": "High",
+    "title": "Read-then-write lets concurrent transfers overdraw the account",
+    "description": "The balance is read without a lock and written back from the variable, so two transfers at once both pass the check and one debit is lost."
+  },
+  {
+    "id": "sql-02-transfer-funds#2",
+    "line": 12,
+    "end_line": 12,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The transaction is left open when a statement fails",
+    "description": "Without SET XACT_ABORT ON or TRY/CATCH, an error in the second UPDATE or the INSERT does not roll back, leaving the debit applied and the transaction open."
+  }
+]

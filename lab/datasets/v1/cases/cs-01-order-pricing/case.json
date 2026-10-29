@@ -1,0 +1,8 @@
+{
+  "id": "cs-01-order-pricing",
+  "language": "csharp",
+  "file": "OrderPricing.cs",
+  "group": "realistic",
+  "description": "Order totals with tier discounts and free shipping",
+  "kind": "buggy"
+}

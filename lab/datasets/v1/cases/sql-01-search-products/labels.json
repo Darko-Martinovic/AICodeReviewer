@@ -1,0 +1,11 @@
+[
+  {
+    "id": "sql-01-search-products#1",
+    "line": 14,
+    "end_line": 14,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "SQL injection through @SortColumn",
+    "description": "The column name is concatenated into dynamic SQL without QUOTENAME or an allow-list, so a caller can append any SQL."
+  }
+]

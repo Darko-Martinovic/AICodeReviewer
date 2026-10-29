@@ -1,0 +1,8 @@
+{
+  "id": "seed-02-user-dashboard",
+  "language": "typescript",
+  "file": "UserDashboard.tsx",
+  "group": "seeded-dense",
+  "description": "A React component with many seeded security and state bugs (from the OPS-1 branch)",
+  "kind": "buggy"
+}

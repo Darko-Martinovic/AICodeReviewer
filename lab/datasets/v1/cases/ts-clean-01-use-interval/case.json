@@ -1,0 +1,8 @@
+{
+  "id": "ts-clean-01-use-interval",
+  "language": "typescript",
+  "file": "useInterval.ts",
+  "group": "clean",
+  "description": "A React hook that calls a function on an interval",
+  "kind": "clean"
+}

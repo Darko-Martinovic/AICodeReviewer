@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ts-01-product-search#1",
+    "line": 21,
+    "end_line": 21,
+    "category": "Bug",
+    "severity": "High",
+    "title": "The effect has no cleanup",
+    "description": "Earlier timers and requests are neither cleared nor aborted, so every keystroke sends a search and a slow older response can overwrite the results of a newer query."
+  },
+  {
+    "id": "ts-01-product-search#2",
+    "line": 23,
+    "end_line": 23,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The search term is not URL-encoded",
+    "description": "Characters such as & or # in the term break the query string or add parameters."
+  }
+]

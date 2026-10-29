@@ -1,0 +1,8 @@
+{
+  "id": "cs-08-jwt-setup",
+  "language": "csharp",
+  "file": "AuthenticationSetup.cs",
+  "group": "realistic",
+  "description": "JWT bearer authentication setup",
+  "kind": "buggy"
+}

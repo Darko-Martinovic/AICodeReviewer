@@ -1,0 +1,8 @@
+{
+  "id": "sql-clean-02-monthly-revenue",
+  "language": "sql",
+  "file": "MonthlyRevenue.sql",
+  "group": "clean",
+  "description": "Revenue per month for a year",
+  "kind": "clean"
+}

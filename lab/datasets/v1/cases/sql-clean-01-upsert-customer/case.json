@@ -1,0 +1,8 @@
+{
+  "id": "sql-clean-01-upsert-customer",
+  "language": "sql",
+  "file": "UpsertCustomer.sql",
+  "group": "clean",
+  "description": "Inserting or updating a customer by email",
+  "kind": "clean"
+}

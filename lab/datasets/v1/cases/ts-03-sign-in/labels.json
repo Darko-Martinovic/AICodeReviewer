@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ts-03-sign-in#1",
+    "line": 35,
+    "end_line": 35,
+    "category": "Security",
+    "severity": "High",
+    "title": "Open redirect after sign-in",
+    "description": "returnUrl from the query string is used as is, so a link can send a freshly signed-in user to another site or a javascript: URL; safeReturnUrl is no longer used."
+  },
+  {
+    "id": "ts-03-sign-in#2",
+    "line": 19,
+    "end_line": 19,
+    "category": "Security",
+    "severity": "Medium",
+    "title": "The password is written to the browser console",
+    "description": "Logging credentials exposes them to anyone with access to the console, extensions or log collectors."
+  }
+]

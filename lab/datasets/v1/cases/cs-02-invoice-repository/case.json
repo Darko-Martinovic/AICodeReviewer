@@ -1,0 +1,8 @@
+{
+  "id": "cs-02-invoice-repository",
+  "language": "csharp",
+  "file": "InvoiceRepository.cs",
+  "group": "realistic",
+  "description": "Invoice search with a caller-chosen sort column",
+  "kind": "buggy"
+}

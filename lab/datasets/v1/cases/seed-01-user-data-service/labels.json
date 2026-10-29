@@ -1,0 +1,146 @@
+[
+  {
+    "id": "seed-01-user-data-service#1",
+    "line": 10,
+    "end_line": 10,
+    "category": "Security",
+    "severity": "High",
+    "title": "Database credentials hardcoded in the source",
+    "description": "The connection string with the admin password is a constant in the code."
+  },
+  {
+    "id": "seed-01-user-data-service#2",
+    "line": 11,
+    "end_line": 11,
+    "category": "Security",
+    "severity": "High",
+    "title": "API key hardcoded in the source",
+    "description": "The API key is a constant in the code instead of configuration or a secret store."
+  },
+  {
+    "id": "seed-01-user-data-service#3",
+    "line": 18,
+    "end_line": 19,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "A connection opened in the constructor is never closed",
+    "description": "The service opens a SqlConnection for its whole life, does not implement IDisposable and never disposes it."
+  },
+  {
+    "id": "seed-01-user-data-service#4",
+    "line": 26,
+    "end_line": 26,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "SQL injection through tableName and userId",
+    "description": "Both values are interpolated into the SQL text."
+  },
+  {
+    "id": "seed-01-user-data-service#5",
+    "line": 42,
+    "end_line": 42,
+    "category": "Security",
+    "severity": "High",
+    "title": "Obsolete DES encryption",
+    "description": "DES has a 56-bit key and is broken; use AES-GCM or another modern authenticated cipher."
+  },
+  {
+    "id": "seed-01-user-data-service#6",
+    "line": 44,
+    "end_line": 45,
+    "category": "Security",
+    "severity": "High",
+    "title": "Hardcoded encryption key and IV",
+    "description": "A constant key and a fixed IV make the ciphertext easy to decrypt and identical for identical data."
+  },
+  {
+    "id": "seed-01-user-data-service#7",
+    "line": 55,
+    "end_line": 55,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Path traversal in ReadUserFileAsync",
+    "description": "fileName is put into the path unchecked, so ..\\ sequences read files outside the folder."
+  },
+  {
+    "id": "seed-01-user-data-service#8",
+    "line": 69,
+    "end_line": 69,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Command injection",
+    "description": "The caller's text is executed by cmd.exe."
+  },
+  {
+    "id": "seed-01-user-data-service#9",
+    "line": 83,
+    "end_line": 83,
+    "category": "Security",
+    "severity": "High",
+    "title": "Cross-site scripting through the comment",
+    "description": "The comment is put into HTML without encoding and returned to the browser."
+  },
+  {
+    "id": "seed-01-user-data-service#10",
+    "line": 95,
+    "end_line": 95,
+    "category": "Security",
+    "severity": "High",
+    "title": "Passwords are stored and compared in plain text",
+    "description": "The query compares the password column directly, so passwords are stored unhashed."
+  },
+  {
+    "id": "seed-01-user-data-service#11",
+    "line": 106,
+    "end_line": 106,
+    "category": "Security",
+    "severity": "High",
+    "title": "The connection string is put into an exception message",
+    "description": "The failed-login exception carries the connection string with its password."
+  },
+  {
+    "id": "seed-01-user-data-service#12",
+    "line": 109,
+    "end_line": 109,
+    "category": "Security",
+    "severity": "High",
+    "title": "The API key is returned to the caller",
+    "description": "Every successful login hands out the service's own API key."
+  },
+  {
+    "id": "seed-01-user-data-service#13",
+    "line": 113,
+    "end_line": 113,
+    "category": "Security",
+    "severity": "High",
+    "title": "Database errors expose the connection string and schema",
+    "description": "The rethrown exception carries the connection string and table name and drops the original exception."
+  },
+  {
+    "id": "seed-01-user-data-service#14",
+    "line": 121,
+    "end_line": 121,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "Non-atomic increment of a shared counter",
+    "description": "Concurrent calls can return the same id; use Interlocked.Increment."
+  },
+  {
+    "id": "seed-01-user-data-service#15",
+    "line": 130,
+    "end_line": 132,
+    "category": "Performance",
+    "severity": "High",
+    "title": "Disposable objects created in a loop and never disposed",
+    "description": "A million iterations each create a FileStream, MemoryStream and HttpClient without disposing them, leaking file handles and sockets."
+  },
+  {
+    "id": "seed-01-user-data-service#16",
+    "line": 138,
+    "end_line": 138,
+    "category": "Security",
+    "severity": "Critical",
+    "title": "Security tokens from a fixed-seed Random",
+    "description": "Random with a constant seed produces the same token every time; use RandomNumberGenerator."
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ts-04-profile-tags#1",
+    "line": 27,
+    "end_line": 27,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "The profile is not reloaded when userId changes",
+    "description": "The effect uses userId but has an empty dependency list, so switching users keeps showing the first user's profile."
+  },
+  {
+    "id": "ts-04-profile-tags#2",
+    "line": 36,
+    "end_line": 37,
+    "category": "Bug",
+    "severity": "Medium",
+    "title": "State is mutated in place",
+    "description": "Pushing into the existing array and passing the same object to setProfile does not trigger a re-render, so the new tag does not appear."
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "id": "ts-04-profile-tags",
+  "language": "typescript",
+  "file": "ProfileTags.tsx",
+  "group": "realistic",
+  "description": "A React component that shows and adds profile tags",
+  "kind": "buggy"
+}
