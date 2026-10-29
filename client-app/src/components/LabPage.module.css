@@ -1,70 +1,463 @@
-/* LabPage Component CSS Module */
+/* LabPage Component CSS Module
+   Data colors: one blue ramp for the meters, the status steps for verdicts
+   (always with a label or icon), and the app's own grays for surfaces. */
 
 .page {
+  --lab-card: #ffffff;
+  --lab-card-soft: rgb(249 250 251);
+  --lab-border: rgb(229 231 235);
+  --lab-ink: rgb(17 24 39);
+  --lab-ink-2: rgb(75 85 99);
+  --lab-muted: rgb(107 114 128);
+  --lab-track: #cde2fb;
+  --lab-fill: #2a78d6;
+  --lab-accent-bg: #eef5fd;
+  --lab-good: #0ca30c;
+  --lab-good-text: #006300;
+  --lab-good-bg: rgb(220 252 231);
+  --lab-bad-text: #b42323;
+  --lab-serious: #ec835a;
+  --lab-serious-bg: rgb(255 237 213);
+  --lab-serious-text: rgb(154 52 18);
+  --lab-critical: #d03b3b;
+  --lab-critical-bg: rgb(254 226 226);
+  --lab-critical-text: rgb(153 27 27);
+  --lab-real: #2a78d6;
+  --lab-real-bg: #e3eefc;
+  --lab-real-text: #1c5cab;
+  --lab-duplicate: #c3c2b7;
+  --lab-duplicate-bg: rgb(243 244 246);
+
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
+  color: var(--lab-ink);
 }
 
-.intro {
+:global(.dark) .page {
+  --lab-card: rgb(31 41 55);
+  --lab-card-soft: rgb(17 24 39);
+  --lab-border: rgb(55 65 81);
+  --lab-ink: rgb(243 244 246);
+  --lab-ink-2: rgb(209 213 219);
+  --lab-muted: rgb(156 163 175);
+  --lab-track: #104281;
+  --lab-fill: #3987e5;
+  --lab-accent-bg: rgba(57, 135, 229, 0.12);
+  --lab-good-text: #0ca30c;
+  --lab-good-bg: rgba(12, 163, 12, 0.16);
+  --lab-bad-text: #e66767;
+  --lab-serious-bg: rgba(236, 131, 90, 0.18);
+  --lab-serious-text: #f0a080;
+  --lab-critical-bg: rgba(208, 59, 59, 0.2);
+  --lab-critical-text: #f08a8a;
+  --lab-real: #3987e5;
+  --lab-real-bg: rgba(57, 135, 229, 0.18);
+  --lab-real-text: #86b6ef;
+  --lab-duplicate: #5a5955;
+  --lab-duplicate-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* Header */
+
+.header {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
 }
 
 .heading {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: rgb(17 24 39);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
-:global(.dark) .heading,
-:global(.dark) .subheading {
-  color: rgb(243 244 246);
+.headingIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--lab-fill);
 }
 
 .subheading {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgb(31 41 55);
-  margin-bottom: 0.5rem;
+  margin-top: 0.25rem;
+  max-width: 44rem;
+  font-size: 0.875rem;
+  color: var(--lab-ink-2);
 }
 
-.section {
+.metaChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.chip {
+  display: inline-block;
+  margin: 0 0.25rem 0.25rem 0;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 9999px;
+  background: var(--lab-card);
+  font-size: 0.75rem;
+  color: var(--lab-ink-2);
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lab-muted);
+}
+
+/* Stat tiles */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 0.75rem;
+  background: var(--lab-card);
+}
+
+.tileLabel {
+  font-size: 0.8125rem;
+  color: var(--lab-ink-2);
+}
+
+.tileValue {
+  margin: 0.25rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.deltaBetter,
+.deltaWorse,
+.deltaFlat {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.deltaBetter {
+  color: var(--lab-good-text);
+}
+
+.deltaWorse {
+  color: var(--lab-bad-text);
+}
+
+.deltaFlat {
+  color: var(--lab-muted);
+}
+
+/* Language cards */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 0.75rem;
+  background: var(--lab-card);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardTitle {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.activePill {
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  background: var(--lab-fill);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.version,
+.versionActive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid transparent;
+}
+
+.version {
+  background: var(--lab-card-soft);
+}
+
+.versionActive {
+  background: var(--lab-accent-bg);
+  border-left-color: var(--lab-fill);
+}
+
+.versionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.versionName {
+  font-weight: 700;
+}
+
+.versionFalseAlarms {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--lab-ink-2);
+}
+
+.versionNotes {
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--lab-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.meter {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.meterLabel {
+  color: var(--lab-ink-2);
+}
+
+.meterTrack {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--lab-track);
+  overflow: hidden;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--lab-fill);
+}
+
+.meterValue {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Badges: status color plus an icon or a word, never color alone */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.keptBadge {
+  composes: badge;
+  background: var(--lab-good-bg);
+  color: var(--lab-good-text);
+}
+
+.rolledBackBadge {
+  composes: badge;
+  background: var(--lab-serious-bg);
+  color: var(--lab-serious-text);
+}
+
+.baselineBadge {
+  composes: badge;
+  background: var(--lab-duplicate-bg);
+  color: var(--lab-ink-2);
+}
+
+.allFoundBadge {
+  composes: badge;
+  background: var(--lab-good-bg);
+  color: var(--lab-good-text);
+}
+
+.missBadge {
+  composes: badge;
+  background: var(--lab-serious-bg);
+  color: var(--lab-serious-text);
+}
+
+/* Verdicts: the bar, the legend swatches and the finding badges share colors */
+
+.verdictBar {
+  display: inline-flex;
+  gap: 2px;
+  width: 8rem;
+  height: 0.625rem;
+  vertical-align: middle;
+}
+
+.verdictFound,
+.verdictReal,
+.verdictDuplicate,
+.verdictFalseAlarm {
+  min-width: 4px;
+  border-radius: 2px;
+}
+
+.verdictFound {
+  background: var(--lab-good);
+}
+
+.verdictReal {
+  background: var(--lab-real);
+}
+
+.verdictDuplicate {
+  background: var(--lab-duplicate);
+}
+
+.verdictFalseAlarm {
+  background: var(--lab-critical);
+}
+
+.verdictFoundSwatch,
+.verdictRealSwatch,
+.verdictDuplicateSwatch,
+.verdictFalseAlarmSwatch {
+  display: inline-block;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 2px;
+}
+
+.verdictFoundSwatch {
+  composes: verdictFound;
+}
+
+.verdictRealSwatch {
+  composes: verdictReal;
+}
+
+.verdictDuplicateSwatch {
+  composes: verdictDuplicate;
+}
+
+.verdictFalseAlarmSwatch {
+  composes: verdictFalseAlarm;
+}
+
+.verdictFoundBadge {
+  composes: badge;
+  background: var(--lab-good-bg);
+  color: var(--lab-good-text);
+}
+
+.verdictRealBadge {
+  composes: badge;
+  background: var(--lab-real-bg);
+  color: var(--lab-real-text);
+}
+
+.verdictDuplicateBadge {
+  composes: badge;
+  background: var(--lab-duplicate-bg);
+  color: var(--lab-ink-2);
+}
+
+.verdictFalseAlarmBadge {
+  composes: badge;
+  background: var(--lab-critical-bg);
+  color: var(--lab-critical-text);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0.75rem 0 0.25rem;
+  font-size: 0.75rem;
+  color: var(--lab-ink-2);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Tables */
+
+.tableWrap {
   overflow-x: auto;
+  border: 1px solid var(--lab-border);
+  border-radius: 0.75rem;
+  background: var(--lab-card);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
-  margin-bottom: 1rem;
 }
 
 .table th {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--lab-border);
   text-align: left;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: rgb(75 85 99);
-  border-bottom: 1px solid rgb(229 231 235);
-  padding: 0.5rem 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--lab-muted);
   white-space: nowrap;
 }
 
 .table td {
-  border-bottom: 1px solid rgb(243 244 246);
-  padding: 0.5rem 0.75rem;
-  color: rgb(31 41 55);
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--lab-border);
   vertical-align: top;
 }
 
-:global(.dark) .table th {
-  color: rgb(156 163 175);
-  border-bottom-color: rgb(55 65 81);
-}
-
-:global(.dark) .table td {
-  color: rgb(229 231 235);
-  border-bottom-color: rgb(31 41 55);
+.table tr:last-child td {
+  border-bottom: none;
 }
 
 .number {
@@ -74,17 +467,8 @@
 }
 
 .muted {
-  color: rgb(107 114 128);
   font-size: 0.8125rem;
-}
-
-:global(.dark) .muted {
-  color: rgb(156 163 175);
-}
-
-.errorText {
-  color: rgb(185 28 28);
-  font-size: 0.8125rem;
+  color: var(--lab-muted);
 }
 
 .clickable {
@@ -92,72 +476,85 @@
 }
 
 .clickable:hover td {
-  background-color: rgb(249 250 251);
-}
-
-:global(.dark) .clickable:hover td {
-  background-color: rgb(31 41 55);
+  background: var(--lab-card-soft);
 }
 
 .selected td {
-  background-color: rgb(239 246 255);
+  background: var(--lab-accent-bg) !important;
 }
 
-:global(.dark) .selected td {
-  background-color: rgba(30, 58, 138, 0.3);
-}
-
-.badge {
+.chevron {
   display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.0625rem 0.5rem;
-  border-radius: 9999px;
-  white-space: nowrap;
+  width: 1rem;
+  color: var(--lab-muted);
 }
 
-.activeBadge {
-  composes: badge;
-  margin-left: 0.5rem;
-  background-color: rgb(219 234 254);
-  color: rgb(30 64 175);
-}
-
-.keptBadge {
-  composes: badge;
-  background-color: rgb(220 252 231);
-  color: rgb(22 101 52);
-}
-
-.rolledBackBadge {
-  composes: badge;
-  background-color: rgb(254 243 199);
-  color: rgb(146 64 14);
+.detailCell {
+  padding: 0 !important;
+  background: var(--lab-card-soft);
 }
 
 .runDetail {
-  margin-top: 1rem;
   padding: 1rem;
-  border: 1px solid rgb(229 231 235);
-  border-radius: 0.5rem;
 }
 
-:global(.dark) .runDetail {
-  border-color: rgb(55 65 81);
+.runDetail .table {
+  border: 1px solid var(--lab-border);
+  border-radius: 0.5rem;
+  background: var(--lab-card);
+}
+
+.groupTiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.groupTile {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--lab-border);
+  border-radius: 0.5rem;
+  background: var(--lab-card);
+}
+
+.groupFigures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--lab-ink-2);
+}
+
+.groupFigures strong {
+  font-size: 1.125rem;
+  color: var(--lab-ink);
+}
+
+.verdictCell {
+  white-space: nowrap;
+}
+
+.findingCount {
+  margin-left: 0.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--lab-ink-2);
+}
+
+.missed {
+  font-size: 0.8125rem;
+  color: var(--lab-serious-text);
 }
 
 .findingsCell {
-  background-color: rgb(249 250 251);
-}
-
-:global(.dark) .findingsCell {
-  background-color: rgb(17 24 39);
+  background: var(--lab-card-soft);
 }
 
 .findings {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.875rem;
+  padding-left: 1rem;
 }
 
 .finding {
@@ -170,39 +567,17 @@
 .lines {
   font-family: ui-monospace, monospace;
   font-size: 0.75rem;
-  color: rgb(107 114 128);
+  color: var(--lab-muted);
+}
+
+.findingTitle {
+  font-weight: 600;
 }
 
 .reason {
   flex-basis: 100%;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--lab-border);
   font-size: 0.8125rem;
-  color: rgb(75 85 99);
-}
-
-:global(.dark) .reason {
-  color: rgb(156 163 175);
-}
-
-.verdict_match {
-  composes: badge;
-  background-color: rgb(220 252 231);
-  color: rgb(22 101 52);
-}
-
-.verdict_duplicate {
-  composes: badge;
-  background-color: rgb(243 244 246);
-  color: rgb(55 65 81);
-}
-
-.verdict_real {
-  composes: badge;
-  background-color: rgb(219 234 254);
-  color: rgb(30 64 175);
-}
-
-.verdict_false_alarm {
-  composes: badge;
-  background-color: rgb(254 226 226);
-  color: rgb(153 27 27);
+  color: var(--lab-ink-2);
 }
