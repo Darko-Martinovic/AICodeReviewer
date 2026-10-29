@@ -16,13 +16,14 @@ https://github.com/user-attachments/assets/ccbce9bc-30b1-494a-9efc-146f1473e9d9
 
 ## What the lab has today
 
-- AI reviews of commits and pull requests, with Claude Haiku 5.5 by default; any model in `Configuration/models.json` (Anthropic, Azure OpenAI or an OpenAI-compatible API such as Ollama) can do the review
+- AI reviews of what a commit or pull request changed (the changed and removed lines, with the rest of the file as context), with Claude Haiku 5.5 by default; any model in `Configuration/models.json` (Anthropic, Azure OpenAI or an OpenAI-compatible API such as Ollama) can do the review
 - Findings come back as structured JSON (line, end line, category, severity, title, explanation, suggestion), with the cost of each review worked out from the prices in `models.json`
 - A system prompt per language (C#, VB.NET, Java, JavaScript, TypeScript, React and T-SQL), editable in the UI
 - Train AI: try a prompt on a piece of code, give feedback and refine the prompt
 - Workflows defined in JSON that run after a review (a PR comment, a Jira ticket, Slack or Teams notifications) through Semantic Kernel plugins
 - Shared review sessions with live comments and presence over SignalR
 - GitHub App authentication and repository filters
+- Pull request reviews posted as a GitHub review, with each issue as a comment on its line of the diff and the summary as the review's body
 - Token usage and estimated cost for each review
 - A Lab tab with the scoreboard of prompt versions and every lab run, down to each finding and the judge's reason
 
@@ -33,15 +34,14 @@ Copilot answers "can AI review my PR?". The lab is meant to answer "how good is 
 1. A labelled set of files with seeded bugs, each bug written down with its file, line and category (done: [`lab/datasets/v1`](lab/datasets/v1/README.md), 28 files and 71 labels)
 2. Structured JSON output from the model instead of parsing free text (done)
 3. A judge that scores each review against the labels: bugs found, bugs missed and false alarms (done: `dotnet run --project lab/AICodeReviewer.Lab -- run`)
-4. Runs that compare prompts, models and Copilot's own comments on the same changes
+4. Runs that compare prompts, models and Copilot's own comments on the same changes (prompts, models and whole-file against change review done; Copilot waits for credits)
 5. A scoreboard of prompt versions, keeping a change only when the scores improve (done: the lab tool's `prompt` and `scoreboard` commands, and the Lab tab in the app)
 
 How to run the lab and how a review is scored: [`lab/README.md`](lab/README.md).
 
 ## Known limits
 
-- Reviews read whole files, cut off at `ContentLimit`, and at most `MaxFilesToReview` files per review, rather than the diff
-- A pull request review is posted as one comment, not as comments on the changed lines
+- At most `MaxFilesToReview` files per review, each cut off at `ContentLimit` characters; `CodeReview:ReviewMode` set to `file` reviews whole files instead of the change
 - The API has no authentication and allows any origin, so run it locally only
 - Collaboration sessions and cached reviews are kept in memory and are lost on restart
 

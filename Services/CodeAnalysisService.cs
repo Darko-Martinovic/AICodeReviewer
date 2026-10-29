@@ -9,11 +9,12 @@ namespace AICodeReviewer.Services
     /// </summary>
     public class CodeAnalysisService(IReviewer reviewer, ILogger<CodeAnalysisService> logger) : ICodeAnalysisService
     {
-        public async Task<(List<string> issues, List<DetailedIssue> detailedIssues, Usage usage)> AnalyzeCodeAsync(string fileName, string fileContent)
+        public async Task<(List<string> issues, List<DetailedIssue> detailedIssues, Usage usage)> AnalyzeCodeAsync(string fileName, string fileContent, string? patch = null)
         {
             try
             {
-                var review = await reviewer.ReviewFileAsync(fileName, fileContent);
+                var change = patch is null ? null : LineDiff.FromPatch(patch);
+                var review = await reviewer.ReviewFileAsync(fileName, fileContent, change: change);
                 logger.LogInformation(
                     "Reviewed {FileName} with {Model}: {Findings} findings, {Input} input and {Output} output tokens, ${Cost:F4}",
                     fileName, review.Model, review.Findings.Count, review.InputTokens, review.OutputTokens, review.Cost);

@@ -11,5 +11,10 @@ namespace AICodeReviewer.Models.Configuration
         /// Controls visibility of token usage and cost information in all review displays
         /// </summary>
         public bool ShowTokenMetrics { get; set; } = true;
+        /// <summary>
+        /// "diff" reviews what a commit or pull request changed, with the rest of the file as context;
+        /// "file" reviews every file it touches as a whole
+        /// </summary>
+        public string ReviewMode { get; set; } = "diff";
     }
 }

@@ -393,6 +393,29 @@ namespace AICodeReviewer.Services
         }
 
         /// <summary>
+        /// Posts a pull request review: the summary as its body and each comment on its line of the diff.
+        /// Returns false when GitHub refuses it, for example because a line is no longer in the diff
+        /// </summary>
+        public async Task<bool> PostPullRequestReviewAsync(int prNumber, string body, IReadOnlyList<Reviewing.InlineComment> comments)
+        {
+            try
+            {
+                var review = new PullRequestReviewCreate { Body = body, Event = PullRequestReviewEvent.Comment };
+                foreach (var comment in comments)
+                {
+                    review.Comments.Add(new DraftPullRequestReviewComment(comment.Body, comment.Path, comment.Position));
+                }
+                await _gitHubClient.PullRequest.Review.Create(_repoOwner, _repoName, prNumber, review);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"   ❌ Failed to post PR review: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets repository details
         /// </summary>
         public async Task<Repository> GetRepositoryDetailsAsync()

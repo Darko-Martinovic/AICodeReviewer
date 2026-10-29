@@ -7,7 +7,7 @@ namespace AICodeReviewer.Lab
 {
     public record RunOptions(
         string Model, string JudgeModel, int Repeat = 1, decimal MaxCost = 2.00m, string? Cases = null,
-        int Tolerance = 3, int Parallelism = 4, IReadOnlyCollection<string>? Languages = null);
+        int Tolerance = 3, int Parallelism = 4, IReadOnlyCollection<string>? Languages = null, string Mode = "file");
 
     public record Estimate(int Cases, long InputTokens, long OutputTokens, decimal ReviewerCost, decimal JudgeCost)
     {
@@ -19,7 +19,7 @@ namespace AICodeReviewer.Lab
     public record RunResult(
         string Dataset, string Model, string JudgeModel, IReadOnlyDictionary<string, int> Prompts, int Repeat, int Tolerance,
         DateTimeOffset StartedAt, double Seconds, bool StoppedByBudget, Estimate Estimate, Metrics Summary,
-        IReadOnlyDictionary<string, Metrics> Groups, IReadOnlyList<CaseResult> Cases, DateTimeOffset? RejudgedAt = null);
+        IReadOnlyDictionary<string, Metrics> Groups, IReadOnlyList<CaseResult> Cases, DateTimeOffset? RejudgedAt = null, string Mode = "file");
 
     /// <summary>
     /// Reviews every case of a dataset with one model, has the judge grade each review and adds up the scores,
@@ -194,7 +194,7 @@ namespace AICodeReviewer.Lab
             var promptVersions = ordered.GroupBy(r => r.Language).OrderBy(g => g.Key, StringComparer.Ordinal)
                 .ToDictionary(g => g.Key, g => g.First().PromptVersion);
             return new RunResult(dataset.Name, options.Model, options.JudgeModel, promptVersions, options.Repeat, options.Tolerance,
-                startedAt, Math.Round(stopwatch.Elapsed.TotalSeconds, 1), stoppedByBudget, estimate, Metrics.Of(ordered), groups, ordered);
+                startedAt, Math.Round(stopwatch.Elapsed.TotalSeconds, 1), stoppedByBudget, estimate, Metrics.Of(ordered), groups, ordered, null, options.Mode);
         }
 
         private async Task<CaseResult> RunCaseAsync(DatasetCase c, int repeat, RunOptions options, CancellationToken ct)
@@ -210,7 +210,8 @@ namespace AICodeReviewer.Lab
             ReviewOutputSummary review = new(0, 0, 0m);
             try
             {
-                var output = await reviewer.ReviewFileAsync(file.FileName, file.Content, options.Model, ct);
+                var output = await reviewer.ReviewFileAsync(file.FileName, file.Content, options.Model,
+                    options.Mode == "diff" ? Change(c, file) : null, ct);
                 review = new ReviewOutputSummary(output.InputTokens, output.OutputTokens, output.Cost);
 
                 var judged = await judge.JudgeAsync(options.JudgeModel, file, labels, output.Findings, ct);
@@ -228,6 +229,17 @@ namespace AICodeReviewer.Lab
         }
 
         private record ReviewOutputSummary(int InputTokens, int OutputTokens, decimal Cost);
+
+        /// <summary>
+        /// What a pull request with the case would change: the lines that differ from the version before it,
+        /// or every line when the case has no earlier version (a new file)
+        /// </summary>
+        public static ChangeView Change(DatasetCase c, ReviewFile file) =>
+            c.Before() is { } before
+                ? LineDiff.Between(before, file.Content)
+                : new ChangeView(
+                    Enumerable.Range(1, file.Content.TrimEnd('\n').Split('\n').Length).ToHashSet(),
+                    new Dictionary<int, IReadOnlyList<string>>());
 
         private string SystemPrompt(string fileName) => Reviewer.SystemPromptFor(prompts.GetSystemPrompt(fileName));
 

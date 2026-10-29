@@ -12,10 +12,10 @@ namespace AICodeReviewer.Lab
     /// <summary>
     /// The pooled scores of one prompt version of one language with one reviewer and judge, over every saved run
     /// </summary>
-    public record VersionScore(string Language, int Version, string Model, string JudgeModel, int Runs, Metrics Metrics);
+    public record VersionScore(string Language, int Version, string Model, string JudgeModel, int Runs, Metrics Metrics, string Mode = "file");
 
     public record ScoreboardRow(
-        string Language, int Version, bool Active, string Model, string JudgeModel, int Runs, Metrics Metrics,
+        string Language, int Version, bool Active, string Model, string JudgeModel, int Runs, Metrics Metrics, string Mode,
         string Notes, PromptDecision? Decision);
 
     public record ScoreboardDocument(string Dataset, DateTimeOffset UpdatedAt, IReadOnlyList<ScoreboardRow> Rows);
@@ -68,19 +68,19 @@ namespace AICodeReviewer.Lab
         {
             var cases = Runs().SelectMany(r => r.Result.Cases.Select(c => (Run: r, Case: c)));
             return cases
-                .GroupBy(x => (x.Case.Language, x.Case.PromptVersion, x.Run.Result.Model, x.Run.Result.JudgeModel))
-                .OrderBy(g => g.Key.Language, StringComparer.Ordinal).ThenBy(g => g.Key.PromptVersion).ThenBy(g => g.Key.Model, StringComparer.Ordinal)
+                .GroupBy(x => (x.Case.Language, x.Case.PromptVersion, x.Run.Result.Model, x.Run.Result.JudgeModel, Mode: x.Run.Result.Mode ?? "file"))
+                .OrderBy(g => g.Key.Language, StringComparer.Ordinal).ThenBy(g => g.Key.PromptVersion).ThenBy(g => g.Key.Model, StringComparer.Ordinal).ThenBy(g => g.Key.Mode, StringComparer.Ordinal)
                 .Select(g => new VersionScore(g.Key.Language, g.Key.PromptVersion, g.Key.Model, g.Key.JudgeModel,
-                    g.Select(x => x.Run.File).Distinct().Count(), Metrics.Of(g.Select(x => x.Case).ToList())))
+                    g.Select(x => x.Run.File).Distinct().Count(), Metrics.Of(g.Select(x => x.Case).ToList()), g.Key.Mode))
                 .ToList();
         }
 
-        public Verdict Decide(string language, int candidate, int baseline, string model, string judgeModel, double margin = DefaultMargin)
+        public Verdict Decide(string language, int candidate, int baseline, string model, string judgeModel, double margin = DefaultMargin, string mode = "file")
         {
             List<(string File, List<CaseResult> Cases)> Pool(int version)
             {
                 var matching = Runs()
-                    .Where(r => r.Result.Model == model && r.Result.JudgeModel == judgeModel)
+                    .Where(r => r.Result.Model == model && r.Result.JudgeModel == judgeModel && (r.Result.Mode ?? "file") == mode)
                     .Select(r => (r.File, Cases: r.Result.Cases.Where(c => c.Language == language && c.PromptVersion == version).ToList()))
                     .Where(r => r.Cases.Count > 0)
                     .ToList();
@@ -137,7 +137,7 @@ namespace AICodeReviewer.Lab
             {
                 var version = store.Versions.FirstOrDefault(v => v.Language == s.Language && v.Version == s.Version);
                 return new ScoreboardRow(s.Language, s.Version, store.ActiveVersion(s.Language) == s.Version, s.Model, s.JudgeModel,
-                    s.Runs, s.Metrics, version?.Notes ?? "", version?.Decision);
+                    s.Runs, s.Metrics, s.Mode, version?.Notes ?? "", version?.Decision);
             }).ToList();
             var path = Path.Combine(resultsFolder, $"scoreboard-{dataset.Name}.json");
             Directory.CreateDirectory(resultsFolder);

@@ -23,6 +23,7 @@ namespace AICodeReviewer.Services.Interfaces
         Task<(string Owner, string Name)> GetRepositoryInfoAsync();
         Task<Repository> GetRepositoryDetailsAsync();
         Task<bool> PostPullRequestCommentAsync(int prNumber, string comment);
+        Task<bool> PostPullRequestReviewAsync(int prNumber, string body, IReadOnlyList<Reviewing.InlineComment> comments);
         void UpdateRepository(string owner, string name);
     }
 }

@@ -169,6 +169,24 @@ public class LabRunnerTests : IDisposable
     }
 
     [Fact]
+    public async Task A_diff_run_marks_the_lines_that_differ_from_the_version_before()
+    {
+        Directory.CreateDirectory(Path.Combine(_folder, "v1", "cases", "a-buggy", "before"));
+        File.WriteAllText(Path.Combine(_folder, "v1", "cases", "a-buggy", "before", "Repo.cs"),
+            "class Repo\n{\n    string Sql(string id) => id;\n}\n");
+        var (runner, model) = NewRunner();
+
+        var result = await runner.RunAsync(Options with { Mode = "diff" });
+
+        var buggy = model.Requests.Single(r => r.SchemaName == "review_findings" && r.User.Contains("class Repo"));
+        Assert.Contains("1   | class Repo", buggy.User);
+        Assert.Contains("3 + |     string Sql", buggy.User);
+        var clean = model.Requests.Single(r => r.SchemaName == "review_findings" && r.User.Contains("static class Slug"));
+        Assert.Contains("1 + | static class Slug", clean.User);
+        Assert.Equal("diff", result.Mode);
+    }
+
+    [Fact]
     public async Task Rejudging_grades_the_saved_findings_again_without_asking_the_reviewer()
     {
         var (runner, model) = NewRunner();

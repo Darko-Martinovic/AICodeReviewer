@@ -58,7 +58,25 @@ public class CodeAnalysisServiceTests
         public StubReviewer(ReviewOutput review) => _review = review;
         public StubReviewer(Exception error) => _error = error;
 
-        public Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null, CancellationToken cancellationToken = default) =>
-            _error is null ? Task.FromResult(_review!) : Task.FromException<ReviewOutput>(_error);
+        public ChangeView? Change { get; private set; }
+
+        public Task<ReviewOutput> ReviewFileAsync(string fileName, string content, string? modelKey = null, ChangeView? change = null, CancellationToken cancellationToken = default)
+        {
+            Change = change;
+            return _error is null ? Task.FromResult(_review!) : Task.FromException<ReviewOutput>(_error);
+        }
+    }
+
+    [Fact]
+    public async Task With_a_patch_the_reviewer_is_told_which_lines_changed()
+    {
+        var reviewer = new StubReviewer(new ReviewOutput { Model = "claude-haiku-5-5" });
+        var service = new CodeAnalysisService(reviewer, NullLogger<CodeAnalysisService>.Instance);
+
+        await service.AnalyzeCodeAsync("Repo.cs", "a\nb\nc\n", "@@ -1,2 +1,3 @@\n a\n+b\n c");
+        Assert.Equal(new HashSet<int> { 2 }, reviewer.Change!.Added);
+
+        await service.AnalyzeCodeAsync("Repo.cs", "a\nb\nc\n");
+        Assert.Null(reviewer.Change);
     }
 }

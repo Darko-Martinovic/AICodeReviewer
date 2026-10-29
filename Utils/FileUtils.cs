@@ -21,6 +21,21 @@ namespace AICodeReviewer.Utils
         }
 
         /// <summary>
+        /// Gets the unified diff of a file object (either GitHubCommitFile or PullRequestFile); null when GitHub
+        /// sends none, as for binary or very large files
+        /// </summary>
+        public static string? GetFilePatch(object file)
+        {
+            var patch = file switch
+            {
+                GitHubCommitFile commitFile => commitFile.Patch,
+                PullRequestFile prFile => prFile.Patch,
+                _ => null
+            };
+            return string.IsNullOrEmpty(patch) ? null : patch;
+        }
+
+        /// <summary>
         /// Gets the file status from a file object (either GitHubCommitFile or PullRequestFile)
         /// </summary>
         public static string GetFileStatus(object file)
