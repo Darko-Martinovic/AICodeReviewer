@@ -9,12 +9,14 @@ import SystemPromptsManager from "./SystemPromptsManagerFixed";
 import WorkflowManager from "./WorkflowManager";
 import RepositoryFilterSettings from "./RepositoryFilterSettings";
 import { AITrainer } from "./AITrainer";
+import { LabPage } from "./LabPage";
 import { LoadingSpinner, EmptyState } from "./UI";
 import styles from "./TabContent.module.css";
 
 type TabType =
   | "repositories"
   | "trainai"
+  | "lab"
   | "commits"
   | "pullrequests"
   | "systemprompts"
@@ -103,6 +105,11 @@ export const TabContent: React.FC<TabContentProps> = ({
   // Train AI Tab
   if (activeTab === "trainai") {
     return <AITrainer />;
+  }
+
+  // Lab Tab
+  if (activeTab === "lab") {
+    return <LabPage />;
   }
 
   // Commits Tab

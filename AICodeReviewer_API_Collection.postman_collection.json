@@ -1333,6 +1333,85 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Lab",
+      "description": "The lab's saved results for the Lab page; the lab tool writes them to lab/results",
+      "item": [
+        {
+          "name": "Get Prompt Scoreboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "protocol": "{{protocol}}",
+              "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/lab/v1/scoreboard",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "lab",
+                "v1",
+                "scoreboard"
+              ]
+            },
+            "description": "The scoreboard of prompt versions for dataset v1 and the active version of each language"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Runs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "protocol": "{{protocol}}",
+              "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/lab/v1/runs",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "lab",
+                "v1",
+                "runs"
+              ]
+            },
+            "description": "The saved runs of dataset v1, newest first, without their cases"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Run",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "protocol": "{{protocol}}",
+              "raw": "{{protocol}}://{{host}}:{{port}}/{{apiPrefix}}/{{apiVersion}}/lab/v1/runs/20261029-125313-claude-haiku-5-5.json",
+              "host": [
+                "{{host}}"
+              ],
+              "port": "{{port}}",
+              "path": [
+                "{{apiPrefix}}",
+                "{{apiVersion}}",
+                "lab",
+                "v1",
+                "runs",
+                "20261029-125313-claude-haiku-5-5.json"
+              ]
+            },
+            "description": "One saved run with every case, finding and verdict"
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [

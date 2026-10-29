@@ -6,6 +6,7 @@ import {
   Workflow,
   ArrowLeft,
   Brain,
+  FlaskConical,
 } from "lucide-react";
 import type { Repository, Commit, PullRequest } from "../services/api";
 import styles from "./Navigation.module.css";
@@ -13,6 +14,7 @@ import styles from "./Navigation.module.css";
 type TabType =
   | "repositories"
   | "trainai"
+  | "lab"
   | "commits"
   | "pullrequests"
   | "systemprompts"
@@ -50,6 +52,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       id: "trainai" as TabType,
       label: "Train AI",
       icon: Brain,
+      count: null,
+    },
+    {
+      id: "lab" as TabType,
+      label: "Lab",
+      icon: FlaskConical,
       count: null,
     },
     {

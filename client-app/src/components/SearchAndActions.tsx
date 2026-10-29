@@ -5,6 +5,7 @@ import styles from "./SearchAndActions.module.css";
 type TabType =
   | "repositories"
   | "trainai"
+  | "lab"
   | "commits"
   | "pullrequests"
   | "systemprompts"
@@ -50,7 +51,8 @@ export const SearchAndActions: React.FC<SearchAndActionsProps> = ({
     activeTab !== "systemprompts" &&
     activeTab !== "workflows" &&
     activeTab !== "repositoryfilters" &&
-    activeTab !== "trainai";
+    activeTab !== "trainai" &&
+    activeTab !== "lab";
 
   return (
     <div className={styles.searchAndActions}>
