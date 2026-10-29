@@ -48,8 +48,8 @@ public class LabRunnerTests : IDisposable
                     1000, 500, "end_turn"));
             }
             var verdict = request.User.Contains("Repo.cs")
-                ? """{"verdicts": [{"finding": 0, "verdict": "match", "label_id": "a-buggy#1", "reason": "same defect"}]}"""
-                : """{"verdicts": [{"finding": 0, "verdict": "false_alarm", "label_id": "", "reason": "nothing wrong"}]}""";
+                ? """{"verdicts": [{"finding": 0, "verdict": "match", "label_ids": ["a-buggy#1"], "reason": "same defect"}]}"""
+                : """{"verdicts": [{"finding": 0, "verdict": "false_alarm", "label_ids": [], "reason": "nothing wrong"}]}""";
             return Task.FromResult(new ModelAnswer(verdict, 2000, 400, "end_turn"));
         }
     }
@@ -169,9 +169,27 @@ public class LabRunnerTests : IDisposable
     }
 
     [Fact]
+    public async Task Rejudging_grades_the_saved_findings_again_without_asking_the_reviewer()
+    {
+        var (runner, model) = NewRunner();
+        var run = await runner.RunAsync(Options);
+        model.Requests.Clear();
+
+        var rejudged = await runner.RejudgeAsync(run, "claude-sonnet-5-5");
+
+        Assert.All(model.Requests, r => Assert.Equal("judge_verdicts", r.SchemaName));
+        Assert.Equal(2, model.Requests.Count);
+        Assert.Contains("[0] lines 3-3, Security/High: t. e", model.Requests.First(r => r.User.Contains("Repo.cs")).User);
+        Assert.Equal(run.Summary.Found, rejudged.Summary.Found);
+        Assert.Equal(["a-buggy#1"], rejudged.Cases.Single(c => c.Id == "a-buggy").Findings.Single().LabelIds);
+        Assert.NotNull(rejudged.RejudgedAt);
+        Assert.True(runner.EstimateRejudge(run, "claude-sonnet-5-5") > 0);
+    }
+
+    [Fact]
     public void A_judge_answer_that_skips_a_finding_is_an_error()
     {
-        var answer = new ModelAnswer("""{"verdicts": [{"finding": 0, "verdict": "real", "label_id": "", "reason": "r"}]}""", 1, 1, "end_turn");
+        var answer = new ModelAnswer("""{"verdicts": [{"finding": 0, "verdict": "real", "label_ids": [], "reason": "r"}]}""", 1, 1, "end_turn");
 
         Assert.Throws<ModelAnswerException>(() => Judge.ParseVerdicts(answer, 2));
     }

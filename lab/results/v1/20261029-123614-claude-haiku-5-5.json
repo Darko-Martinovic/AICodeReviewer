@@ -2,6 +2,12 @@
   "dataset": "v1",
   "model": "claude-haiku-5-5",
   "judge_model": "claude-sonnet-5-5",
+  "prompts": {
+    "CSharp": 1,
+    "React": 1,
+    "Sql": 1,
+    "TypeScript": 1
+  },
   "repeat": 1,
   "tolerance": 3,
   "started_at": "2026-10-29T12:36:14.6560763+00:00",
@@ -19,22 +25,22 @@
     "cases": 28,
     "errors": 0,
     "labels": 71,
-    "found": 66,
+    "found": 68,
     "findings": 181,
-    "matched": 66,
-    "duplicates": 2,
-    "real": 35,
-    "false_alarms": 78,
-    "outside_window": 6,
+    "matched": 65,
+    "duplicates": 1,
+    "real": 40,
+    "false_alarms": 75,
+    "outside_window": 3,
     "clean_cases": 8,
     "false_alarms_on_clean": 24,
-    "recall": 0.9296,
-    "precision": 0.5691,
-    "strict_precision": 0.3757,
-    "f1": 0.706,
+    "recall": 0.9577,
+    "precision": 0.5856,
+    "strict_precision": 0.3646,
+    "f1": 0.7268,
     "false_alarms_per_clean_case": 3,
     "reviewer_cost": 0.0318648,
-    "judge_cost": 0.265404
+    "judge_cost": 0.271982
   },
   "groups": {
     "clean": {
@@ -56,7 +62,7 @@
       "f1": 0.25,
       "false_alarms_per_clean_case": 3,
       "reviewer_cost": 0.0071494,
-      "judge_cost": 0.053116
+      "judge_cost": 0.055174
     },
     "realistic": {
       "cases": 18,
@@ -65,40 +71,40 @@
       "found": 38,
       "findings": 107,
       "matched": 38,
-      "duplicates": 2,
-      "real": 21,
-      "false_alarms": 46,
-      "outside_window": 5,
+      "duplicates": 1,
+      "real": 25,
+      "false_alarms": 43,
+      "outside_window": 2,
       "clean_cases": 0,
       "false_alarms_on_clean": 0,
       "recall": 0.9744,
-      "precision": 0.5701,
-      "strict_precision": 0.3738,
-      "f1": 0.7193,
+      "precision": 0.5981,
+      "strict_precision": 0.3645,
+      "f1": 0.7412,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0190237,
-      "judge_cost": 0.159816
+      "judge_cost": 0.163374
     },
     "seeded-dense": {
       "cases": 2,
       "errors": 0,
       "labels": 32,
-      "found": 28,
+      "found": 30,
       "findings": 46,
-      "matched": 28,
+      "matched": 27,
       "duplicates": 0,
-      "real": 10,
+      "real": 11,
       "false_alarms": 8,
       "outside_window": 1,
       "clean_cases": 0,
       "false_alarms_on_clean": 0,
-      "recall": 0.875,
+      "recall": 0.9375,
       "precision": 0.8261,
-      "strict_precision": 0.6087,
-      "f1": 0.8498,
+      "strict_precision": 0.587,
+      "f1": 0.8783,
       "false_alarms_per_clean_case": 0,
       "reviewer_cost": 0.0056917,
-      "judge_cost": 0.052472
+      "judge_cost": 0.053434
     }
   },
   "cases": [
@@ -106,6 +112,8 @@
       "id": "cs-01-order-pricing",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -121,8 +129,10 @@
           "title": "Division by zero on empty order",
           "explanation": "AveragePricePerItem divides the subtotal by items.Count without checking for an empty list. For an empty input, decimal division by zero throws DivideByZeroException at runtime.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#2",
-          "reason": "Identifies DivideByZeroException from dividing by items.Count on an empty order, the core of label #2."
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Reports the DivideByZeroException on an empty order at line 45, which is part of label #2."
         },
         {
           "line": 25,
@@ -132,8 +142,10 @@
           "title": "Threshold comparison contradicts comment",
           "explanation": "The comment on line 24 says orders of 500 or more get an extra 5 percent, but the code uses \u0027subtotal \u003E 500m\u0027, so an order of exactly 500 does not qualify. Either the comment or the operator is wrong, and the mismatch can cause a billing dispute.",
           "verdict": "match",
-          "label_id": "cs-01-order-pricing#1",
-          "reason": "Strict \u003E 500 contradicts the \u0027or more\u0027 comment, so an order of exactly 500 misses the extra discount."
+          "label_ids": [
+            "cs-01-order-pricing#1"
+          ],
+          "reason": "Identifies that \u0027\u003E 500m\u0027 contradicts the \u0027or more\u0027 comment, so an order of exactly 500 misses the extra discount."
         },
         {
           "line": 12,
@@ -143,8 +155,8 @@
           "title": "No validation of order line values",
           "explanation": "Subtotal accepts any quantity and unit price, including negative or zero values. Negative quantities or prices would silently reduce totals and could produce negative or incorrect charges. Null lines or a null collection would throw an unhelpful NullReferenceException.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative input-validation advice; nothing in this code requires it and it is not a concrete defect."
+          "label_ids": [],
+          "reason": "Speculative input-validation advice; no defect in the shown code, since callers are not shown to pass invalid data."
         },
         {
           "line": 19,
@@ -154,7 +166,7 @@
           "title": "Magic numbers in discount rates",
           "explanation": "The discount percentages 0.10m, 0.05m, and the extra 0.05m on line 27 are embedded directly in the logic. Changing pricing policy requires editing code, and the repeated 0.05m value is easy to update inconsistently.",
           "verdict": "false_alarm",
-          "label_id": null,
+          "label_ids": [],
           "reason": "Magic-number remark is a style preference; the constants are readable in a small switch."
         },
         {
@@ -165,8 +177,8 @@
           "title": "Free shipping evaluated on discounted total without clear intent",
           "explanation": "Free shipping is decided using the discounted amount, so a discount can push an order below the threshold and add a fee. This behavior is probably intended but is not documented, and a reviewer could easily assume the pre-discount subtotal was used.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Shipping on the discounted total is plausible intended behavior; the finding itself admits that and only asks for documentation."
+          "label_ids": [],
+          "reason": "Free shipping on the discounted total is plausible intended behavior; the finding admits this and reports no actual defect."
         },
         {
           "line": 35,
@@ -176,8 +188,8 @@
           "title": "Unnecessary materialization in Total",
           "explanation": "The lines enumerable is materialized with ToList() and then passed to Subtotal, which enumerates it again. This is a minor cost, but it also means the method enumerates the input more than once when it is a deferred query.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Materializing with ToList() prevents multiple enumeration, and Subtotal then enumerates the list once. The claim is wrong."
+          "label_ids": [],
+          "reason": "Wrong: ToList materializes once and the list is passed to Subtotal, so the input is enumerated only once; the claim of multiple enumeration is incorrect."
         }
       ],
       "found": [
@@ -189,9 +201,9 @@
       "reviewer_input_tokens": 1950,
       "reviewer_output_tokens": 1652,
       "reviewer_cost": 0.001021,
-      "judge_input_tokens": 2269,
-      "judge_output_tokens": 416,
-      "judge_cost": 0.008698,
+      "judge_input_tokens": 2322,
+      "judge_output_tokens": 443,
+      "judge_cost": 0.009074,
       "seconds": 12.1,
       "error": null
     },
@@ -199,6 +211,8 @@
       "id": "cs-02-invoice-repository",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -214,8 +228,10 @@
           "title": "SQL injection via unvalidated sortBy in ORDER BY",
           "explanation": "The caller-supplied sortBy string is interpolated directly into the SQL text, so any input such as \u0022IssuedOn; DROP TABLE dbo.Invoices\u0022 or a subquery is executed by the database. Parameters cannot be used for column names, so the value must be validated against an allowlist before it is put into the query.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#1",
-          "reason": "Describes SQL injection through unvalidated sortBy interpolated into ORDER BY, same as label 1."
+          "label_ids": [
+            "cs-02-invoice-repository#1"
+          ],
+          "reason": "Describes SQL injection through the unvalidated sortBy interpolated into ORDER BY at line 28."
         },
         {
           "line": 10,
@@ -225,8 +241,8 @@
           "title": "Allowlist defined but never enforced",
           "explanation": "SortColumns is declared as a case-insensitive allowlist of valid sort columns, but SearchAsync never checks sortBy against it. The protection the field was clearly meant to provide is absent, so the injection risk above is fully exposed.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-02-invoice-repository#1 but at lines 10-13, outside the window. Allowlist defined but not applied to sortBy is the root cause of the label\u0027s injection defect; label explicitly mentions the allow-list no longer applied."
+          "label_ids": [],
+          "reason": "Describes cs-02-invoice-repository#1 but at lines 10-13, outside the window. Reports that the SortColumns allowlist is never applied to sortBy, which is the root of the same injection defect."
         },
         {
           "line": 48,
@@ -236,8 +252,10 @@
           "title": "SqlConnection is never disposed",
           "explanation": "DeleteOlderThanAsync creates a SqlConnection without a using or await using declaration. The command is disposed, but the connection is not, so the connection is not returned to the pool promptly and can leak under load or if an exception is thrown.",
           "verdict": "match",
-          "label_id": "cs-02-invoice-repository#2",
-          "reason": "SqlConnection in DeleteOlderThanAsync is not disposed, leaking pooled connections."
+          "label_ids": [
+            "cs-02-invoice-repository#2"
+          ],
+          "reason": "Identifies the undisposed SqlConnection in DeleteOlderThanAsync, which leaks pooled connections."
         },
         {
           "line": 22,
@@ -246,9 +264,9 @@
           "severity": "Low",
           "title": "LIKE wildcards in user input are not escaped",
           "explanation": "The customer value is wrapped in % characters and used in a LIKE pattern without escaping. Any % or _ typed by the user acts as a wildcard, so searches can match more rows than intended.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Unescaped wildcards in a user-supplied search are normally intended behavior for a contains search; not a real defect, and no injection risk since it\u0027s parameterized."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Unescaped % and _ in the LIKE pattern is a genuine, though minor, correctness issue. It is not covered by the labels."
         },
         {
           "line": 32,
@@ -258,8 +276,8 @@
           "title": "Missing ConfigureAwait(false) in library code",
           "explanation": "This repository is library code, but the awaits on OpenAsync, ExecuteReaderAsync, ReadAsync, and ExecuteNonQueryAsync do not use ConfigureAwait(false). This can force continuations back onto a captured synchronization context, which can cause deadlocks in some hosts and adds unnecessary overhead.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) advice is a best-practice preference; not a meaningful defect here (ASP.NET Core has no sync context) and mislabeled as performance."
+          "label_ids": [],
+          "reason": "ConfigureAwait(false) is a style preference. It is not a defect here, and the claimed performance impact is speculative."
         }
       ],
       "found": [
@@ -271,9 +289,9 @@
       "reviewer_input_tokens": 2171,
       "reviewer_output_tokens": 1520,
       "reviewer_cost": 0.0009771,
-      "judge_input_tokens": 2452,
-      "judge_output_tokens": 415,
-      "judge_cost": 0.009054,
+      "judge_input_tokens": 2505,
+      "judge_output_tokens": 391,
+      "judge_cost": 0.00892,
       "seconds": 12,
       "error": null
     },
@@ -281,6 +299,8 @@
       "id": "cs-03-password-reset",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -296,8 +316,10 @@
           "title": "Password reset token generated with non-cryptographic Random",
           "explanation": "System.Random is a predictable PRNG, and a new instance per call can produce repeated or guessable sequences. Reset tokens must come from a CSPRNG. The range 100000 to 999999 also gives only about 900,000 possible values, and Random.Next\u0027s exclusive upper bound means 999999 is never issued.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#1",
-          "reason": "Identifies non-cryptographic System.Random and small six-digit space for reset tokens, same as label."
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
+          "reason": "Identifies non-cryptographic System.Random and the small six-digit space at line 21, which is the labeled defect."
         },
         {
           "line": 21,
@@ -307,8 +329,8 @@
           "title": "Short token with no attempt limiting or expiry-independent brute-force protection",
           "explanation": "A 6-digit token gives roughly one million possibilities. RedeemAsync accepts unlimited guesses for a user within the 30-minute lifetime, with no attempt counter, lockout, or rate limit, so an attacker can brute-force the token.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Missing attempt limiting/rate limiting on redemption is a genuine weakness given a six-digit token, and it is not covered by the labels, which concern the token\u0027s generation. It is a distinct defect in RedeemAsync."
+          "label_ids": [],
+          "reason": "No attempt limiting on redemption is a genuine weakness given a ~1M token space. It is a distinct issue from the weak generator the label covers."
         },
         {
           "line": 29,
@@ -318,8 +340,10 @@
           "title": "Expiry check is inverted",
           "explanation": "The condition returns false when saved.ExpiresAt \u003E now, which means the token is still valid. Valid tokens are therefore rejected, and expired tokens (ExpiresAt \u003C= now) fall through and can be redeemed.",
           "verdict": "match",
-          "label_id": "cs-03-password-reset#2",
-          "reason": "Describes the inverted expiry comparison on line 29 exactly."
+          "label_ids": [
+            "cs-03-password-reset#2"
+          ],
+          "reason": "Correctly describes the inverted expiry comparison at line 29."
         },
         {
           "line": 36,
@@ -329,8 +353,8 @@
           "title": "Check-then-delete is not atomic, allowing a token to be redeemed more than once",
           "explanation": "The token is validated, then deleted in a separate step. Two concurrent RedeemAsync calls with the correct token can both pass validation before either deletes it, so the same reset can be used twice.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Non-atomic check-then-delete permits concurrent double redemption of a reset token; a genuine race not covered by the labels."
+          "label_ids": [],
+          "reason": "Non-atomic check-then-delete permits concurrent double redemption. This is a real race, not covered by the labels."
         },
         {
           "line": 46,
@@ -339,9 +363,9 @@
           "severity": "Medium",
           "title": "Unsalted fast hash of low-entropy token",
           "explanation": "The token is stored as an unsalted SHA-256 hash. Because the token space is only about one million values, anyone who obtains the stored hashes can recover every token by brute force in a short time.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Hash-only storage of a short token is a mild concern, but it is mainly a consequence of the low entropy already labeled. Salting would not fix it, and the finding is speculative."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "An unsalted fast hash of a low-entropy token is brute-forceable if the store leaks. This is a genuine but secondary weakness, not labeled."
         },
         {
           "line": 22,
@@ -351,8 +375,8 @@
           "title": "Missing ConfigureAwait(false) on awaited store calls",
           "explanation": "This is library-style service code, and the awaited store calls in IssueAsync and RedeemAsync capture the caller\u0027s synchronization context unnecessarily.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait advice is a style/best-practice remark that does not matter in this code; it is not a defect."
+          "label_ids": [],
+          "reason": "ConfigureAwait advice is a style preference and does not matter for this code."
         }
       ],
       "found": [
@@ -364,9 +388,9 @@
       "reviewer_input_tokens": 1935,
       "reviewer_output_tokens": 1743,
       "reviewer_cost": 0.001065,
-      "judge_input_tokens": 2256,
-      "judge_output_tokens": 459,
-      "judge_cost": 0.009102,
+      "judge_input_tokens": 2309,
+      "judge_output_tokens": 424,
+      "judge_cost": 0.008858,
       "seconds": 15,
       "error": null
     },
@@ -374,6 +398,8 @@
       "id": "cs-04-document-upload",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -390,8 +416,10 @@
           "title": "Path traversal via client-supplied file name on upload",
           "explanation": "storedName is taken directly from file.FileName, which is client-controlled. A name containing directory segments such as \u0022../\u0022 or an absolute path can make Path.Combine resolve outside the uploads folder, allowing arbitrary file writes on the server. Path.Combine also discards the folder when the second argument is rooted.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Client-supplied file name used as stored name allows traversal out of the uploads folder, which is the core of label #1."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Client-supplied file name used as stored name allows traversal out of the uploads folder, which is the label\u0027s defect."
         },
         {
           "line": 43,
@@ -401,8 +429,10 @@
           "title": "Path traversal in Download via route parameter",
           "explanation": "The id route value is combined with the uploads folder without validation. A request such as /api/documents/..%2F..%2Fappsettings.json can read files outside the uploads directory. File.Exists confirms the target before it is served.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#3",
-          "reason": "Download combines the id with the path unvalidated, enabling path traversal; same as label #3."
+          "label_ids": [
+            "cs-04-document-upload#3"
+          ],
+          "reason": "Download combines id into a path without validation, enabling path traversal reads."
         },
         {
           "line": 14,
@@ -412,8 +442,8 @@
           "title": "No authentication or authorization on upload and download endpoints",
           "explanation": "Neither Upload nor Download declares any authorization requirement. Any anonymous caller can write files to the server and read any stored document, which is a serious exposure for a documents API.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The file shows no auth configuration. Authorization may be applied globally or via middleware, so this is speculative."
+          "label_ids": [],
+          "reason": "Missing authorization is not a defect visible in this file; auth might be configured globally or elsewhere, so the claim is speculative."
         },
         {
           "line": 22,
@@ -423,8 +453,8 @@
           "title": "File type validated only by extension",
           "explanation": "The extension comes from the client-supplied file name and the content is never inspected. A file such as malware.exe renamed to .pdf, or any content labelled .png, passes validation and is stored and later served.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Validation by extension only is a genuine weakness; content is never checked and the file is later served from the same API."
+          "label_ids": [],
+          "reason": "Validation only by client-controlled extension is a genuine weakness; files are stored and later served without content checks."
         },
         {
           "line": 33,
@@ -434,8 +464,10 @@
           "title": "Synchronous CopyTo inside an async method and unnecessary buffering",
           "explanation": "file.CopyTo blocks a thread inside an async action and ignores the cancellation token. The code also copies the upload into a MemoryStream and then calls ToArray, which duplicates the full 10 MB payload in memory per request.",
           "verdict": "match",
-          "label_id": "cs-04-document-upload#2",
-          "reason": "Synchronous CopyTo and in-memory buffering with ToArray are exactly the performance problem in label #2."
+          "label_ids": [
+            "cs-04-document-upload#2"
+          ],
+          "reason": "Synchronous CopyTo and full buffering in a MemoryStream before writing, matching the performance label."
         },
         {
           "line": 29,
@@ -445,8 +477,10 @@
           "title": "Existing files are silently overwritten",
           "explanation": "Using the original file name means a second upload with the same name replaces the earlier document. The API then returns the same id for two different documents, which causes data loss.",
           "verdict": "duplicate",
-          "label_id": "cs-04-document-upload#1",
-          "reason": "Same-name uploads overwriting each other is explicitly part of label #1."
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Same-name uploads overwriting each other is the second part of label 1 (stored under client name)."
         },
         {
           "line": 16,
@@ -456,8 +490,8 @@
           "title": "No null check on the uploaded file",
           "explanation": "If the request does not include the file part, file is null and file.Length throws a NullReferenceException, which surfaces as a 500 error instead of a 400 response.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "With [ApiController], a missing IFormFile parameter triggers automatic model validation returning 400, so null does not reach the action."
+          "label_ids": [],
+          "reason": "With [ApiController], a missing IFormFile parameter is handled by automatic model validation (non-nullable reference in nullable context), returning 400 rather than null reference; not a real defect."
         },
         {
           "line": 36,
@@ -467,8 +501,8 @@
           "title": "Client-controlled file name written to logs",
           "explanation": "storedName originates from the client and is logged unsanitized, which allows log forging through newline or control characters.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Log forging is minor here; structured logging with a placeholder does not allow injecting new log entries in typical providers."
+          "label_ids": [],
+          "reason": "Structured logging with a message template; ASP.NET loggers do not allow practical log forging here, and this is minor speculation."
         },
         {
           "line": 18,
@@ -478,8 +512,8 @@
           "title": "Hardcoded size limit duplicated in the message",
           "explanation": "The text \u002210 MB\u0022 is hardcoded separately from MaxBytes, so changing the constant leaves the message incorrect.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A hardcoded message duplicating the constant is a trivial style remark, not a defect."
+          "label_ids": [],
+          "reason": "Duplicated literal in an error message is a trivial style nit, not a real defect."
         }
       ],
       "found": [
@@ -492,9 +526,9 @@
       "reviewer_input_tokens": 2054,
       "reviewer_output_tokens": 2366,
       "reviewer_cost": 0.0013884,
-      "judge_input_tokens": 2638,
-      "judge_output_tokens": 603,
-      "judge_cost": 0.011306,
+      "judge_input_tokens": 2691,
+      "judge_output_tokens": 648,
+      "judge_cost": 0.011862,
       "seconds": 17.2,
       "error": null
     },
@@ -502,6 +536,8 @@
       "id": "cs-05-exchange-rate-cache",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -517,8 +553,10 @@
           "title": "Blocking on async call with .Result",
           "explanation": "GetRateAsync(...).Result blocks the calling thread while waiting for an async HTTP call. In contexts with a SynchronizationContext (ASP.NET classic, WPF, WinForms) this can deadlock, and in server code it wastes thread pool threads under load.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#2",
-          "reason": "Describes blocking on .Result at line 20, with deadlock and thread-pool starvation risk."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#2"
+          ],
+          "reason": "Identifies blocking .Result on the async call at line 20, with deadlock and thread-pool starvation risks."
         },
         {
           "line": 13,
@@ -527,9 +565,9 @@
           "severity": "Medium",
           "title": "Async method contains no await",
           "explanation": "ConvertAsync is declared async and returns Task\u003Cdecimal\u003E but contains no await, which generates a compiler warning and misleads readers about its behavior. The actual asynchronous work is hidden behind a blocking .Result call.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The async method does lack an await, but this is a minor symptom of the .Result problem. Fixing .Result fixes it. It is not a separate defect and is partly covered by label #2."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "ConvertAsync is async with no await, which produces a compiler warning. It is a genuine but minor consequence of the .Result problem, and the labels do not cover it."
         },
         {
           "line": 11,
@@ -539,8 +577,10 @@
           "title": "Non-thread-safe static dictionary",
           "explanation": "_rates is a plain Dictionary\u003Cstring, ExchangeRate\u003E accessed from concurrent requests. Concurrent reads and writes can corrupt the dictionary, cause exceptions, or return inconsistent data. The file already imports System.Collections.Concurrent but does not use it.",
           "verdict": "match",
-          "label_id": "cs-05-exchange-rate-cache#1",
-          "reason": "Static non-thread-safe Dictionary accessed concurrently."
+          "label_ids": [
+            "cs-05-exchange-rate-cache#1"
+          ],
+          "reason": "Static non-thread-safe Dictionary accessed concurrently, the same defect as label 1."
         },
         {
           "line": 27,
@@ -549,9 +589,9 @@
           "severity": "Medium",
           "title": "Check-then-act race condition on cache and multiple fetches",
           "explanation": "The cache is read, found stale or missing, fetched over HTTP, then written without synchronization. Concurrent callers for the same key will all perform the HTTP request (thundering herd), and the cache read and write are not atomic.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The race on the dictionary is the labeled issue. The thundering-herd duplicate fetch is a benign inefficiency, and the atomicity concern is the same root problem as label #1."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Check-then-act race and thundering herd on cache miss is a real concern. It is distinct from the Dictionary corruption label, though it partly overlaps in the unsynchronized write."
         },
         {
           "line": 27,
@@ -561,8 +601,8 @@
           "title": "Static cache shared across instances ignores injected dependencies",
           "explanation": "Because _rates is static, all ExchangeRateCache instances share entries regardless of which HttpClient or TimeProvider they were constructed with. This makes testing hard and can leak rates between tests or tenants.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "A static cache in an instance class with injected HttpClient and TimeProvider leaks state between instances and tests, which is a genuine design flaw."
+          "label_ids": [],
+          "reason": "The static cache is shared across instances regardless of injected HttpClient or TimeProvider, which is a real design defect that hurts testing and can mix rates between instances."
         },
         {
           "line": 32,
@@ -572,8 +612,8 @@
           "title": "No ConfigureAwait on awaited call in library code",
           "explanation": "This is library code that may be called from contexts with a SynchronizationContext. The awaited HTTP call does not use ConfigureAwait(false), which can cause unnecessary context switching and contributes to deadlock risk when combined with blocking calls.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait advice is a best practice, not a real defect in this code, and it does not apply to ASP.NET Core."
+          "label_ids": [],
+          "reason": "Missing ConfigureAwait is a style and best-practice remark and not a real defect here. Modern ASP.NET Core has no SynchronizationContext."
         },
         {
           "line": 35,
@@ -583,8 +623,8 @@
           "title": "Rate value not validated",
           "explanation": "The response rate is accepted without validation. A zero, negative, or otherwise invalid rate from the remote service would be cached for 10 minutes and used for all conversions, silently producing wrong payment amounts.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "A zero or negative rate from the remote service would be cached and used for payment conversions without any validation, which is a real correctness risk."
+          "label_ids": [],
+          "reason": "An unvalidated zero or negative rate from the remote service would be cached and produce wrong payment amounts, which is a real defect in a payments context."
         },
         {
           "line": 13,
@@ -594,8 +634,8 @@
           "title": "Missing input validation on currency codes and amount",
           "explanation": "from and to are not checked for null, empty, or malformed values before being used in the cache key and URL. Currency codes are also compared case-sensitively, so \u0027usd\u0027 and \u0027USD\u0027 would be treated as different pairs.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "This is speculative validation advice. Case sensitivity is minor and unsupported by the code context."
+          "label_ids": [],
+          "reason": "Generic input-validation advice, speculative and minor. Case sensitivity at worst produces extra cache keys."
         },
         {
           "line": 21,
@@ -605,8 +645,8 @@
           "title": "Hardcoded rounding precision",
           "explanation": "The magic number 2 assumes all currencies have two decimal places. Currencies such as JPY use zero, and others like KWD use three, so this can produce incorrect payment amounts.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Rounding to 2 decimals is wrong for currencies like JPY or KWD, so payment amounts would be incorrect."
+          "label_ids": [],
+          "reason": "Hardcoded 2 decimal places gives wrong results for currencies like JPY or KWD in a payments converter."
         }
       ],
       "found": [
@@ -618,9 +658,9 @@
       "reviewer_input_tokens": 1953,
       "reviewer_output_tokens": 2311,
       "reviewer_cost": 0.0013508,
-      "judge_input_tokens": 2608,
-      "judge_output_tokens": 662,
-      "judge_cost": 0.011836,
+      "judge_input_tokens": 2661,
+      "judge_output_tokens": 708,
+      "judge_cost": 0.012402,
       "seconds": 22.3,
       "error": null
     },
@@ -628,6 +668,8 @@
       "id": "cs-06-shipping-client",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -643,8 +685,10 @@
           "title": "Retry loop performs only two attempts (off-by-one)",
           "explanation": "The loop condition \u0060attempt \u003C MaxAttempts\u0060 with MaxAttempts = 3 runs only attempts 1 and 2. The constant name and the check on line 19 both imply three attempts, so one retry is silently lost. The \u0060attempt \u003C MaxAttempts\u0060 guards on lines 19 and 28 are also inconsistent with the intended count.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#1",
-          "reason": "Identifies the off-by-one in the loop condition at line 13 that allows only two attempts."
+          "label_ids": [
+            "cs-06-shipping-client#1"
+          ],
+          "reason": "Identifies the off-by-one in the loop condition on line 13 that allows only two attempts."
         },
         {
           "line": 40,
@@ -654,8 +698,10 @@
           "title": "New HttpClient created per call causes socket exhaustion",
           "explanation": "Creating and disposing an HttpClient for each call bypasses IHttpClientFactory and its handler pooling. Under load this exhausts sockets and causes TIME_WAIT buildup and DNS staleness. The GetTrackingStatusAsync method uses the factory, so the two methods are inconsistent.",
           "verdict": "match",
-          "label_id": "cs-06-shipping-client#2",
-          "reason": "Describes per-call HttpClient creation bypassing the factory and causing socket exhaustion."
+          "label_ids": [
+            "cs-06-shipping-client#2"
+          ],
+          "reason": "Describes a new HttpClient created per call, bypassing the factory and risking socket exhaustion."
         },
         {
           "line": 40,
@@ -664,9 +710,9 @@
           "severity": "Medium",
           "title": "Hardcoded API base address",
           "explanation": "The shipper endpoint URL is hardcoded in the method. It cannot be changed per environment (test, staging, production) without a code change, and it differs from the factory-configured \u0027shipping\u0027 client used elsewhere.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The hardcoded base URL is a configuration remark on the same line as the HttpClient defect, and it is speculative as a separate issue. The core problem is already captured by the HttpClient label."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The hardcoded base URL is a genuine configuration problem, and it differs from the configured \u0027shipping\u0027 client. It is a separate concern from the per-call HttpClient creation."
         },
         {
           "line": 42,
@@ -676,8 +722,8 @@
           "title": "CreateShipment has no retry or transient-failure handling",
           "explanation": "CreateShipmentAsync throws on any non-success status and does not retry 429 or 5xx responses, unlike GetTrackingStatusAsync. This is inconsistent behavior, and transient failures will surface as failed shipment creation.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Not retrying a POST that creates a shipment is arguably correct, since it is non-idempotent and a retry could create duplicates. Adding retry would be questionable advice."
+          "label_ids": [],
+          "reason": "POST shipment creation is not idempotent, so retrying it automatically could create duplicate shipments. Not retrying is reasonable, so this is speculative advice and not a defect."
         },
         {
           "line": 35,
@@ -687,8 +733,8 @@
           "title": "Unreachable throw indicates control-flow problem",
           "explanation": "The final throw is documented as \u0027Unreachable\u0027, but the loop can complete without returning when the retry branch is taken on the last iteration. The throw is not truly unreachable and its message is misleading.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. The \u0027Unreachable\u0027 throw being reachable is the consequence described in label 1, caused by the off-by-one loop bound."
+          "label_ids": [],
+          "reason": "Describes cs-06-shipping-client#1 but at lines 35-35, outside the window. The final \u0027Unreachable\u0027 throw is hit when the last attempt is retryable, which is a symptom of the same off-by-one loop bound described in label 1."
         },
         {
           "line": 47,
@@ -698,8 +744,8 @@
           "title": "Magic number in backoff calculation",
           "explanation": "The base delay of 200 ms and the multiplier 2 are embedded in the expression without a name, which makes tuning and understanding the policy harder.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Magic numbers in a small backoff helper are a style preference with no real defect."
+          "label_ids": [],
+          "reason": "Magic numbers in the backoff formula are a style preference and do not matter here."
         },
         {
           "line": 17,
@@ -709,8 +755,8 @@
           "title": "Missing ConfigureAwait(false) on awaits in library code",
           "explanation": "The awaits in this library class do not use ConfigureAwait(false), so continuations may be marshaled back to a synchronization context. This can cause deadlocks or unnecessary overhead if callers block or use a UI/ASP.NET classic context.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) is not needed in modern ASP.NET Core code and this is a best-practice remark that does not matter here."
+          "label_ids": [],
+          "reason": "ConfigureAwait(false) is not needed in modern ASP.NET Core, and this is a best-practice suggestion with no real defect here."
         }
       ],
       "found": [
@@ -722,9 +768,9 @@
       "reviewer_input_tokens": 2125,
       "reviewer_output_tokens": 2185,
       "reviewer_cost": 0.001305,
-      "judge_input_tokens": 2616,
-      "judge_output_tokens": 531,
-      "judge_cost": 0.010542,
+      "judge_input_tokens": 2669,
+      "judge_output_tokens": 555,
+      "judge_cost": 0.010888,
       "seconds": 15.2,
       "error": null
     },
@@ -732,6 +778,8 @@
       "id": "cs-07-sales-report",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -748,8 +796,10 @@
           "title": "Date range excludes the last day despite documentation",
           "explanation": "The summary says both the first and last day are included, but \u0027end\u0027 is set to the midnight at the start of the \u0027to\u0027 date and the filter uses \u0027PlacedAt \u003C end\u0027. Orders placed on the \u0027to\u0027 date are silently dropped from the report.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#1",
-          "reason": "Same defect: end is midnight at the start of the \u0027to\u0027 date with a \u003C filter, so the last day is excluded."
+          "label_ids": [
+            "cs-07-sales-report#1"
+          ],
+          "reason": "Identifies that end is midnight of the \u0027to\u0027 date with a \u003C filter, dropping the last day."
         },
         {
           "line": 22,
@@ -759,8 +809,10 @@
           "title": "N\u002B1 query: one database round trip per customer",
           "explanation": "Inside the loop, a separate SingleAsync query is executed for every customer group. For N customers this issues N extra queries, which is slow and scales poorly.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#2",
-          "reason": "Describes the per-customer SingleAsync query in the loop, which is the N\u002B1 problem."
+          "label_ids": [
+            "cs-07-sales-report#2"
+          ],
+          "reason": "Describes the per-customer SingleAsync query in the loop, which is the N\u002B1."
         },
         {
           "line": 17,
@@ -770,8 +822,8 @@
           "title": "All orders in the range are loaded into memory for client-side aggregation",
           "explanation": "The method pulls every order in the date range into a list and then groups and sums in memory. For large date ranges this uses significant memory and transfers far more data than needed.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes cs-07-sales-report#2 but at lines 17-19, outside the window. The label\u0027s description covers loading every order into memory and grouping in the database instead; this finding describes that same inefficiency in the same code."
+          "label_ids": [],
+          "reason": "Loading all orders into memory to aggregate client-side is a genuine inefficiency; the label mentions it only as context for the N\u002B1, and this is a separate memory and transfer concern."
         },
         {
           "line": 24,
@@ -780,9 +832,9 @@
           "severity": "Medium",
           "title": "SingleAsync throws if the customer does not exist",
           "explanation": "If an order references a CustomerId that has no matching customer record, SingleAsync throws an exception and the whole report fails. There is also no handling for this condition.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Orders presumably have a customer foreign key, so a missing customer is unlikely; this is speculative and not a defect in this code."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "SingleAsync throws if the customer is missing, failing the whole report. It is a plausible robustness issue not covered by the labels, though a foreign key would normally prevent it."
         },
         {
           "line": 37,
@@ -792,8 +844,10 @@
           "title": "Average throws on an empty result",
           "explanation": "Enumerable.Average on an empty decimal sequence throws InvalidOperationException. A customer with no orders causes an unhandled exception instead of a sensible result.",
           "verdict": "match",
-          "label_id": "cs-07-sales-report#3",
-          "reason": "Enumerable.Average throws InvalidOperationException on an empty sequence for a customer with no orders."
+          "label_ids": [
+            "cs-07-sales-report#3"
+          ],
+          "reason": "Average on an empty sequence throws InvalidOperationException for a customer with no orders."
         },
         {
           "line": 30,
@@ -803,8 +857,8 @@
           "title": "Aggregation performed on the client instead of the database",
           "explanation": "AverageOrderValueAsync materializes every order total for the customer just to compute an average. This is unnecessary data transfer when the database can compute the average.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Fetching all totals to compute an average client-side is wasteful. The database can compute AverageAsync, which also can address the empty case. This is a genuine but minor performance issue not covered by the labels."
+          "label_ids": [],
+          "reason": "Materializing all totals to compute an average is wasteful when the database can compute it; this is a valid but minor performance concern separate from the empty-sequence bug."
         }
       ],
       "found": [
@@ -813,13 +867,13 @@
         "cs-07-sales-report#3"
       ],
       "missed": [],
-      "outside_window": 1,
+      "outside_window": 0,
       "reviewer_input_tokens": 1895,
       "reviewer_output_tokens": 1465,
       "reviewer_cost": 0.000922,
-      "judge_input_tokens": 2164,
-      "judge_output_tokens": 459,
-      "judge_cost": 0.008918,
+      "judge_input_tokens": 2217,
+      "judge_output_tokens": 465,
+      "judge_cost": 0.009084,
       "seconds": 14.9,
       "error": null
     },
@@ -827,6 +881,8 @@
       "id": "cs-08-jwt-setup",
       "group": "realistic",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -843,8 +899,10 @@
           "title": "Hardcoded fallback JWT signing key",
           "explanation": "If the Jwt:SigningKey configuration value is missing, the code silently falls back to a hardcoded string that is visible in source control. Anyone who knows this default can forge tokens that pass signature validation, and the fallback can reach production unnoticed because nothing fails at startup.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#2",
-          "reason": "Describes the hardcoded fallback signing key on line 11, which is the same defect as the label."
+          "label_ids": [
+            "cs-08-jwt-setup#2"
+          ],
+          "reason": "Describes the hardcoded fallback signing key on line 11, the same defect as the label."
         },
         {
           "line": 23,
@@ -854,8 +912,10 @@
           "title": "Token lifetime validation disabled",
           "explanation": "ValidateLifetime = false means expired JWTs are accepted indefinitely. A leaked or stolen token stays valid forever, which defeats expiration-based session control.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#1",
-          "reason": "ValidateLifetime = false lets expired tokens through, which is the labeled defect."
+          "label_ids": [
+            "cs-08-jwt-setup#1"
+          ],
+          "reason": "Describes ValidateLifetime = false, so expired tokens are accepted."
         },
         {
           "line": 34,
@@ -865,8 +925,10 @@
           "title": "Full bearer token written to logs",
           "explanation": "The log entry includes the complete Authorization header, which contains the bearer credential. Anyone with access to the logs can replay the token, and logs are often retained and shared more widely than secrets should be.",
           "verdict": "match",
-          "label_id": "cs-08-jwt-setup#3",
-          "reason": "The Authorization header containing the bearer token is written to the logs, matching the label."
+          "label_ids": [
+            "cs-08-jwt-setup#3"
+          ],
+          "reason": "Describes the Authorization header token being written to the logs."
         },
         {
           "line": 20,
@@ -876,8 +938,8 @@
           "title": "Issuer and audience may be null while validation is enabled",
           "explanation": "ValidateIssuer and ValidateAudience are true, but ValidIssuer and ValidAudience come from configuration with no null check. If either key is absent, validation fails for every token, or the setup behaves unpredictably. Misconfiguration is not reported at startup.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "If issuer or audience is missing, validation fails closed and rejects every token. That is a misconfiguration that shows up immediately, not a security defect, and the claim of unpredictable behavior is speculative."
+          "label_ids": [],
+          "reason": "If issuer or audience is missing, validation fails closed, which is safe. Nothing is exploitable, and the advice to check config at startup is speculative."
         }
       ],
       "found": [
@@ -890,9 +952,9 @@
       "reviewer_input_tokens": 1996,
       "reviewer_output_tokens": 1173,
       "reviewer_cost": 0.0007861,
-      "judge_input_tokens": 2145,
-      "judge_output_tokens": 307,
-      "judge_cost": 0.00736,
+      "judge_input_tokens": 2198,
+      "judge_output_tokens": 288,
+      "judge_cost": 0.007276,
       "seconds": 10.5,
       "error": null
     },
@@ -900,6 +962,8 @@
       "id": "cs-clean-01-slug",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -912,8 +976,8 @@
           "title": "Normalize can throw on malformed Unicode input",
           "explanation": "string.Normalize throws ArgumentException when the input contains unpaired surrogates or other invalid UTF-16. ToSlug only guards against null, so untrusted titles with invalid characters will propagate an unhandled exception.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "In .NET Core/5\u002B, string.Normalize does throw ArgumentException on invalid UTF-16 such as unpaired surrogates. An unguarded call on untrusted titles is a genuine robustness issue, even though the contract only mentions null."
+          "label_ids": [],
+          "reason": "string.Normalize does throw ArgumentException on invalid Unicode such as unpaired surrogates, and ToSlug only checks for null. Untrusted titles can therefore cause an unhandled exception, which is a real robustness gap."
         },
         {
           "line": 42,
@@ -923,8 +987,8 @@
           "title": "Truncation can split words mid-token",
           "explanation": "The loop stops at exactly MaxLength characters, so long titles are cut in the middle of a word, which produces unreadable slugs such as \u0027the-quick-brown-fo\u0027.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Truncating at MaxLength is the documented behavior (\u0027at most MaxLength characters\u0027). Mid-word cuts are a stylistic preference, not a defect."
+          "label_ids": [],
+          "reason": "Cutting at MaxLength is the documented behavior (at most MaxLength characters). Truncating mid-word is a stylistic preference, not a defect."
         },
         {
           "line": 48,
@@ -934,8 +998,8 @@
           "title": "Empty slug returned for titles without ASCII alphanumerics",
           "explanation": "Titles made only of non-Latin letters or punctuation produce an empty string, which can yield empty or colliding URLs with no signal to the caller.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Titles with no ASCII alphanumerics (e.g. all CJK or punctuation) return an empty slug, which can produce empty or colliding URLs. A careful reviewer would want that handled or documented."
+          "label_ids": [],
+          "reason": "Titles with no ASCII letters or digits, such as CJK or punctuation-only text, return an empty string. Callers get no signal, so URLs can be empty or collide. This is a legitimate edge-case flaw, though minor."
         }
       ],
       "found": [],
@@ -944,9 +1008,9 @@
       "reviewer_input_tokens": 1883,
       "reviewer_output_tokens": 1394,
       "reviewer_cost": 0.0008853,
-      "judge_input_tokens": 1696,
-      "judge_output_tokens": 294,
-      "judge_cost": 0.006332,
+      "judge_input_tokens": 1749,
+      "judge_output_tokens": 301,
+      "judge_cost": 0.006508,
       "seconds": 14.7,
       "error": null
     },
@@ -954,6 +1018,8 @@
       "id": "cs-clean-02-customer-repository",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -966,8 +1032,8 @@
           "title": "Null Name or Email causes exception on read",
           "explanation": "The Customer record declares Name and Email as non-nullable strings, but reader.GetString(1) and reader.GetString(2) throw InvalidCastException when the column contains NULL. Any row with a NULL Name or Email makes FindAsync fail.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The schema is unknown; nothing indicates Name or Email columns are nullable, and the record declares them non-nullable. GetString on NULL throws SqlNull exception, but this is speculative and the code is consistent with its model."
+          "label_ids": [],
+          "reason": "The schema is not shown, so NULLs in Name or Email are speculative. GetString throws SqlNullValueException, not InvalidCastException. The record\u0027s non-nullable types suggest the columns are NOT NULL."
         },
         {
           "line": 33,
@@ -977,8 +1043,8 @@
           "title": "No length validation against NVARCHAR(200)",
           "explanation": "The parameter is declared with size 200, but the name is not checked for length before it is sent. A longer name causes a database error at execution time instead of a clear argument validation error.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "With SqlParameter size 200, longer strings are silently truncated by the client (not a DB error), and anyway missing length validation is a speculative best-practice remark rather than a real defect."
+          "label_ids": [],
+          "reason": "With an NVarChar size of 200, SqlClient truncates the parameter value silently and does not raise an error. The finding is also a speculative \u0027consider adding validation\u0027 remark, and the database error it describes would be a clear one anyway."
         },
         {
           "line": 12,
@@ -988,8 +1054,8 @@
           "title": "Missing ConfigureAwait(false) on awaits in library code",
           "explanation": "This class lives in a data layer library and every await captures the synchronization context. This can cause deadlocks in callers that block on the result and adds unnecessary context switching.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait(false) is a style/best-practice preference; modern .NET has no sync context by default, and the deadlock only arises from callers blocking on async code."
+          "label_ids": [],
+          "reason": "This is a style and best-practice remark. ASP.NET Core has no synchronization context, and the file shows no code that blocks on these calls, so the deadlock claim is speculative."
         }
       ],
       "found": [],
@@ -998,9 +1064,9 @@
       "reviewer_input_tokens": 1914,
       "reviewer_output_tokens": 1026,
       "reviewer_cost": 0.0007044,
-      "judge_input_tokens": 1736,
-      "judge_output_tokens": 287,
-      "judge_cost": 0.006342,
+      "judge_input_tokens": 1789,
+      "judge_output_tokens": 308,
+      "judge_cost": 0.006658,
       "seconds": 8.5,
       "error": null
     },
@@ -1008,6 +1074,8 @@
       "id": "cs-clean-03-order-controller",
       "group": "clean",
       "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [],
@@ -1020,8 +1088,8 @@
           "title": "Subject claim lookup may fail under default JWT claim mapping",
           "explanation": "User.FindFirst(\u0022sub\u0022) relies on the raw JWT claim type. By default, ASP.NET Core\u0027s JwtBearer handler maps inbound claims (MapInboundClaims = true), so \u0022sub\u0022 is rewritten to ClaimTypes.NameIdentifier and FindFirst(\u0022sub\u0022) returns null. Every authenticated request would then throw InvalidOperationException.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "This depends on unseen auth configuration. The code may use MapInboundClaims = false, and the finding itself says only that it \u0022may fail\u0022. It is speculative and does not show a defect in this file."
+          "label_ids": [],
+          "reason": "This depends on unseen auth configuration. The code is correct for setups that set MapInboundClaims=false, and many apps do. It is speculative, and the file\u0027s behavior is not a defect on its own."
         },
         {
           "line": 39,
@@ -1031,8 +1099,8 @@
           "title": "Missing subject claim produces a 500 instead of an authentication failure",
           "explanation": "When the signed-in user lacks a subject claim, the controller throws InvalidOperationException, which surfaces as an HTTP 500. This is an authentication/authorization problem and should be reported as 401 or 403.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "An authorized user without a subject claim is a server or configuration invariant violation. Throwing here is a deliberate choice, and [Authorize] already handles unauthenticated callers. This is a preference remark, not a defect."
+          "label_ids": [],
+          "reason": "An [Authorize]-protected endpoint reaching a user with no sub claim is a server or token configuration invariant violation, so throwing is reasonable. A 401/403 is not clearly required, so this is a preference remark."
         },
         {
           "line": 8,
@@ -1042,8 +1110,8 @@
           "title": "Required and StringLength do not reject whitespace-only SKUs",
           "explanation": "[Required] only rejects null or empty strings. A whitespace-only SKU such as \u0022   \u0022 passes validation and is forwarded to the service.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Whether [Required] rejects whitespace is wrong as stated: AllowEmptyStrings is false by default, and the attribute rejects whitespace-only strings. The finding\u0027s premise is incorrect."
+          "label_ids": [],
+          "reason": "[Required] without AllowEmptyStrings rejects empty strings, and whitespace-only strings are in fact rejected too. DataAnnotations Required treats whitespace-only strings as invalid, so the claim is factually wrong."
         }
       ],
       "found": [],
@@ -1052,9 +1120,9 @@
       "reviewer_input_tokens": 1947,
       "reviewer_output_tokens": 1297,
       "reviewer_cost": 0.0008432,
-      "judge_input_tokens": 1833,
-      "judge_output_tokens": 299,
-      "judge_cost": 0.006656,
+      "judge_input_tokens": 1886,
+      "judge_output_tokens": 317,
+      "judge_cost": 0.006942,
       "seconds": 11.4,
       "error": null
     },
@@ -1062,6 +1130,8 @@
       "id": "seed-01-user-data-service",
       "group": "seeded-dense",
       "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "60bf8c0da3bd",
       "labels": [
@@ -1091,8 +1161,10 @@
           "title": "Hardcoded database credentials",
           "explanation": "The connection string contains a production server name, username \u0027admin\u0027 and password \u0027admin123\u0027 as compile-time constants. Anyone with access to the source or compiled assembly can read them, and they cannot be rotated without a redeploy.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#1",
-          "reason": "Hardcoded DB credentials in connection string constant."
+          "label_ids": [
+            "seed-01-user-data-service#1"
+          ],
+          "reason": "Hardcoded DB connection string with admin password."
         },
         {
           "line": 11,
@@ -1102,8 +1174,10 @@
           "title": "Hardcoded API key",
           "explanation": "The API key is embedded as a constant and is also returned to callers of AuthenticateUserAsync (line 109), exposing it to every authenticated user.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#2",
-          "reason": "Hardcoded API key constant on line 11."
+          "label_ids": [
+            "seed-01-user-data-service#2"
+          ],
+          "reason": "Hardcoded API key; the return of the key is also mentioned but the primary defect is the constant."
         },
         {
           "line": 12,
@@ -1113,8 +1187,8 @@
           "title": "Hardcoded encryption key",
           "explanation": "The encryption key is a source-code constant, so anyone who can read the code can decrypt data protected with it.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The hardcoded EncryptionKey constant on line 12 is a genuine defect, and it is not covered by label 6, which addresses the key/IV on lines 44-45. It is also unused, but remains a secret in source."
+          "label_ids": [],
+          "reason": "placeholder"
         },
         {
           "line": 14,
@@ -1124,8 +1198,8 @@
           "title": "Shared mutable connection field",
           "explanation": "A single SqlConnection is held for the lifetime of the service and reused across concurrent calls. SqlConnection is not thread-safe, and the field is not readonly.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "A single SqlConnection shared across concurrent calls is not thread-safe, which is a genuine design issue distinct from the leak label."
+          "label_ids": [],
+          "reason": "A single shared SqlConnection used across concurrent calls is a genuine thread-safety/design problem not covered by labels."
         },
         {
           "line": 16,
@@ -1135,8 +1209,10 @@
           "title": "Connection opened in constructor and never disposed",
           "explanation": "The constructor opens a database connection synchronously. The class does not implement IDisposable, so the connection is never closed or disposed. This leaks connections and blocks the caller during construction.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#3",
-          "reason": "Connection opened in constructor and never disposed."
+          "label_ids": [
+            "seed-01-user-data-service#3"
+          ],
+          "reason": "Connection opened in constructor, never disposed."
         },
         {
           "line": 26,
@@ -1146,8 +1222,10 @@
           "title": "SQL injection via table name and user ID",
           "explanation": "tableName is interpolated directly into the SQL text, and userId is concatenated into the WHERE clause. Attackers can inject arbitrary SQL or read any table.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#4",
-          "reason": "SQL injection via tableName and userId interpolation."
+          "label_ids": [
+            "seed-01-user-data-service#4"
+          ],
+          "reason": "SQL injection via interpolated tableName and userId."
         },
         {
           "line": 33,
@@ -1157,8 +1235,8 @@
           "title": "Sensitive data logged to console",
           "explanation": "Each retrieved row writes a log line tied to the user ID, and the data is then returned. Logging per-user sensitive-data access leaks identifiers into logs and adds I/O to the read loop.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The log line only contains the user ID, not the sensitive data itself, so the claim of sensitive data leaking is overstated and the issue is minor."
+          "label_ids": [],
+          "reason": "Logging a user ID is weak; it is not sensitive data itself and the claim of leaking sensitive data is overstated."
         },
         {
           "line": 40,
@@ -1168,8 +1246,11 @@
           "title": "Weak DES encryption with static key and IV",
           "explanation": "DESCryptoServiceProvider is obsolete and DES is cryptographically broken. The key and IV are fixed, the IV is identical to the key, and both are derived from a short ASCII literal. Identical plaintexts always produce identical ciphertexts.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#5",
-          "reason": "Mainly describes obsolete DES; also mentions the static key/IV. The primary focus is DES weakness."
+          "label_ids": [
+            "seed-01-user-data-service#5",
+            "seed-01-user-data-service#6"
+          ],
+          "reason": "Covers both obsolete DES and the hardcoded key/IV."
         },
         {
           "line": 55,
@@ -1179,8 +1260,10 @@
           "title": "Path traversal in user file read",
           "explanation": "fileName is concatenated into a path under C:\\UserFiles without validation. Values such as \u0027..\\..\\Windows\\win.ini\u0027 allow reading arbitrary files on the server.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#7",
-          "reason": "Path traversal through fileName."
+          "label_ids": [
+            "seed-01-user-data-service#7"
+          ],
+          "reason": "Path traversal in file read."
         },
         {
           "line": 69,
@@ -1190,8 +1273,10 @@
           "title": "Command injection via cmd.exe",
           "explanation": "The user-supplied command is passed unvalidated to cmd.exe /c. Any shell metacharacter such as \u0026 or | lets an attacker execute arbitrary commands on the server.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#8",
-          "reason": "Command injection via cmd.exe /c."
+          "label_ids": [
+            "seed-01-user-data-service#8"
+          ],
+          "reason": "Command injection via cmd.exe."
         },
         {
           "line": 67,
@@ -1201,8 +1286,8 @@
           "title": "Process object not disposed",
           "explanation": "The Process instance is created but never disposed, which leaks native handles. WaitForExit is also called after reading output, and no timeout is applied, so a hung process blocks the caller indefinitely.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Process is not disposed, and there is no timeout. This is a genuine resource-handling issue not covered by any label."
+          "label_ids": [],
+          "reason": "Process not disposed and no timeout are real issues not covered by labels."
         },
         {
           "line": 83,
@@ -1212,8 +1297,10 @@
           "title": "Cross-site scripting via unencoded comment",
           "explanation": "The raw comment text is embedded in HTML without encoding. Any markup or script in the comment will be rendered by the browser.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#9",
-          "reason": "XSS from unencoded comment in HTML."
+          "label_ids": [
+            "seed-01-user-data-service#9"
+          ],
+          "reason": "XSS through unencoded comment."
         },
         {
           "line": 85,
@@ -1223,8 +1310,8 @@
           "title": "Log injection and synchronous file write in request handler",
           "explanation": "User input is written to the log without sanitizing line breaks, so attackers can forge log entries. The log entry also has no trailing newline, so consecutive entries run together. File.AppendAllText blocks the request thread.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Log injection from unsanitized user input written to the log file, plus missing newline, is a genuine defect not covered by labels."
+          "label_ids": [],
+          "reason": "Log injection from unsanitized user input and missing newline in the log are genuine defects not in the labels."
         },
         {
           "line": 91,
@@ -1234,8 +1321,10 @@
           "title": "Plaintext password comparison in SQL",
           "explanation": "The password is compared directly in the SQL query, which implies it is stored in plaintext in the Users table. A database breach then exposes every user\u0027s password.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#10",
-          "reason": "Plaintext password comparison in the query."
+          "label_ids": [
+            "seed-01-user-data-service#10"
+          ],
+          "reason": "Plaintext password comparison."
         },
         {
           "line": 106,
@@ -1245,8 +1334,10 @@
           "title": "Connection string with credentials in exception message",
           "explanation": "The exception text includes the full connection string, which contains the database password. Anything that logs or displays this exception discloses the credentials. The message also reveals whether the username exists to the caller.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#11",
-          "reason": "Connection string put in the exception message."
+          "label_ids": [
+            "seed-01-user-data-service#11"
+          ],
+          "reason": "Connection string in exception message."
         },
         {
           "line": 109,
@@ -1256,7 +1347,9 @@
           "title": "API key returned to caller",
           "explanation": "The authentication response includes the service API key, so any caller who logs in receives a secret credential.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#12",
+          "label_ids": [
+            "seed-01-user-data-service#12"
+          ],
           "reason": "API key returned to caller."
         },
         {
@@ -1267,8 +1360,10 @@
           "title": "Exception re-thrown as generic Exception with lost context",
           "explanation": "The SqlException is wrapped in a generic Exception, which discards the exception type and original stack trace. The message also embeds the connection string.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#13",
-          "reason": "Wrapped exception exposes connection string and loses the original exception."
+          "label_ids": [
+            "seed-01-user-data-service#13"
+          ],
+          "reason": "Wrapped exception exposes connection string and drops the original exception."
         },
         {
           "line": 106,
@@ -1278,8 +1373,8 @@
           "title": "Authentication failure modeled as exception",
           "explanation": "Invalid credentials are an expected outcome, not an exceptional condition. Using UnauthorizedAccessException for flow control makes the method harder to use and is costly under brute-force attempts.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "This is a design/style preference about using exceptions for control flow, not a real defect that needs fixing."
+          "label_ids": [],
+          "reason": "Design preference about using exceptions for auth failure; not a real defect here."
         },
         {
           "line": 117,
@@ -1289,8 +1384,8 @@
           "title": "Static counter is not thread-safe",
           "explanation": "_counter is a static field incremented with \u002B\u002B and read without synchronization. Concurrent calls can produce duplicate or skipped IDs.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Describes seed-01-user-data-service#14 but at lines 117-117, outside the window. Non-atomic increment of shared static counter."
+          "label_ids": [],
+          "reason": "Describes seed-01-user-data-service#14 but at lines 117-117, outside the window. Non-atomic increment of a shared static counter."
         },
         {
           "line": 122,
@@ -1300,8 +1395,8 @@
           "title": "Blocking sleep in ID generation",
           "explanation": "Thread.Sleep(1) blocks the calling thread on every ID request for no evident reason. This severely limits throughput under load.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Thread.Sleep(1) in ID generation needlessly blocks threads and hurts throughput; a genuine defect not covered by labels."
+          "label_ids": [],
+          "reason": "Thread.Sleep(1) in ID generation needlessly blocks the thread and is a genuine performance defect."
         },
         {
           "line": 128,
@@ -1311,8 +1406,10 @@
           "title": "Loop creates unmanaged resources on every iteration",
           "explanation": "The loop runs one million times and creates a FileStream that is never disposed and writes a file per iteration, which fails or exhausts file handles. It also creates a new HttpClient each iteration, causing socket exhaustion. The MemoryStream is unused and not disposed.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#15",
-          "reason": "Undisposed FileStream, MemoryStream and HttpClient in a loop."
+          "label_ids": [
+            "seed-01-user-data-service#15"
+          ],
+          "reason": "Undisposed FileStream, MemoryStream and HttpClient created in a loop."
         },
         {
           "line": 128,
@@ -1322,8 +1419,8 @@
           "title": "Magic number in loop bound",
           "explanation": "The literal 1000000 is hardcoded with no named constant or explanation of its meaning.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A magic-number remark is a style comment with no real impact here."
+          "label_ids": [],
+          "reason": "Magic-number remark is a style nit."
         },
         {
           "line": 136,
@@ -1333,8 +1430,10 @@
           "title": "Predictable security token from fixed-seed Random",
           "explanation": "System.Random seeded with the constant 123 produces a fully deterministic sequence. Anyone who knows the seed can predict every generated token.",
           "verdict": "match",
-          "label_id": "seed-01-user-data-service#16",
-          "reason": "Fixed-seed Random used for security tokens."
+          "label_ids": [
+            "seed-01-user-data-service#16"
+          ],
+          "reason": "Fixed-seed Random for security tokens."
         },
         {
           "line": 22,
@@ -1344,8 +1443,8 @@
           "title": "Awaits missing ConfigureAwait(false) and no cancellation support",
           "explanation": "The async data-access method awaits without ConfigureAwait(false) and accepts no CancellationToken. In library code this can cause unnecessary context capture and prevents callers from cancelling long queries.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "ConfigureAwait and CancellationToken advice is speculative best-practice and not a defect here."
+          "label_ids": [],
+          "reason": "ConfigureAwait and CancellationToken are speculative best-practice advice."
         },
         {
           "line": 1,
@@ -1355,8 +1454,8 @@
           "title": "Obsolete System.Data.SqlClient namespace",
           "explanation": "System.Data.SqlClient is deprecated in favor of Microsoft.Data.SqlClient, which receives the ongoing security and feature updates.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The deprecated namespace is a preference or maintenance remark, not a defect in this code."
+          "label_ids": [],
+          "reason": "Namespace deprecation is a preference and not a defect that matters here."
         }
       ],
       "found": [
@@ -1365,6 +1464,7 @@
         "seed-01-user-data-service#3",
         "seed-01-user-data-service#4",
         "seed-01-user-data-service#5",
+        "seed-01-user-data-service#6",
         "seed-01-user-data-service#7",
         "seed-01-user-data-service#8",
         "seed-01-user-data-service#9",
@@ -1376,16 +1476,15 @@
         "seed-01-user-data-service#16"
       ],
       "missed": [
-        "seed-01-user-data-service#6",
         "seed-01-user-data-service#14"
       ],
       "outside_window": 1,
       "reviewer_input_tokens": 3432,
       "reviewer_output_tokens": 5416,
       "reviewer_cost": 0.0030512,
-      "judge_input_tokens": 6130,
-      "judge_output_tokens": 1504,
-      "judge_cost": 0.0273,
+      "judge_input_tokens": 6183,
+      "judge_output_tokens": 1438,
+      "judge_cost": 0.026746,
       "seconds": 36.2,
       "error": null
     },
@@ -1393,6 +1492,8 @@
       "id": "seed-02-user-dashboard",
       "group": "seeded-dense",
       "kind": "buggy",
+      "language": "React",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "04ccacda7af3",
       "labels": [
@@ -1422,8 +1523,10 @@
           "title": "Interval never cleared (memory leak)",
           "explanation": "The setInterval created in the effect is never cleared, and the effect returns no cleanup function. The timer keeps running after unmount and logs every second, leaking resources.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#1",
-          "reason": "Interval never cleared, no cleanup returned."
+          "label_ids": [
+            "seed-02-user-dashboard#1"
+          ],
+          "reason": "Interval never cleared, no cleanup returned from the effect."
         },
         {
           "line": 25,
@@ -1433,8 +1536,10 @@
           "title": "XSS via dangerouslySetInnerHTML",
           "explanation": "renderUserComment injects raw user-controlled text as HTML. Any user name containing script or event-handler markup will execute in the dashboard origin. It is called with user.name at line 152.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#2",
-          "reason": "XSS via dangerouslySetInnerHTML."
+          "label_ids": [
+            "seed-02-user-dashboard#2"
+          ],
+          "reason": "XSS via dangerouslySetInnerHTML at line 25."
         },
         {
           "line": 32,
@@ -1444,8 +1549,11 @@
           "title": "Hardcoded API key and admin password in client code",
           "explanation": "An API key and an admin password are embedded in the frontend bundle and sent with every request. Anyone can read them from the shipped JavaScript or network traffic.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#3",
-          "reason": "Mainly describes hardcoded API key (and admin password); it spans lines 32-37 and touches both labels, but leads with the API key."
+          "label_ids": [
+            "seed-02-user-dashboard#3",
+            "seed-02-user-dashboard#5"
+          ],
+          "reason": "Reports both the hardcoded API key and the hardcoded admin password."
         },
         {
           "line": 34,
@@ -1455,8 +1563,10 @@
           "title": "Credentials sent over unencrypted HTTP",
           "explanation": "The request uses http:// so the Authorization header and admin password are transmitted in plaintext and can be intercepted or altered.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#4",
-          "reason": "Credentials over plain HTTP."
+          "label_ids": [
+            "seed-02-user-dashboard#4"
+          ],
+          "reason": "Request goes over plain HTTP."
         },
         {
           "line": 48,
@@ -1466,8 +1576,11 @@
           "title": "Passwords and API key persisted to localStorage",
           "explanation": "User passwords are written to localStorage in plaintext, and the API key is stored there too. Any XSS or browser extension can read them, and they persist across sessions.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#6",
-          "reason": "Mainly about passwords stored in localStorage (also mentions API key)."
+          "label_ids": [
+            "seed-02-user-dashboard#6",
+            "seed-02-user-dashboard#7"
+          ],
+          "reason": "Covers both passwords and the API key stored in localStorage."
         },
         {
           "line": 46,
@@ -1477,8 +1590,8 @@
           "title": "No validation of API response shape",
           "explanation": "userData.users is assumed to exist and be an array. If the response lacks it, setUsers receives undefined and the subsequent .map throws, with no meaningful error to the user.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "userData.users is used without validation; a missing field causes setUsers(undefined) and a crash on users.map. Genuine robustness defect."
+          "label_ids": [],
+          "reason": "userData.users is used without validation. If it is missing, setUsers(undefined) breaks the render and userData.users.map throws, so this is a genuine robustness defect."
         },
         {
           "line": 56,
@@ -1488,8 +1601,8 @@
           "title": "Errors reported via alert with no UI error state",
           "explanation": "Failures are surfaced with alert() and the error is stringified. There is no persistent error state, retry option, or accessible message, so the UI cannot show loading or error states properly.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "alert for errors is a UX/style preference, not a defect."
+          "label_ids": [],
+          "reason": "Using alert for errors is a UX or style preference, not a defect."
         },
         {
           "line": 62,
@@ -1499,8 +1612,8 @@
           "title": "SQL built from unsanitized input (dead code, logged)",
           "explanation": "The search term is interpolated into a SQL string, which is then logged. Even though the query is never executed, this pattern invites SQL injection if it is ever wired to a backend, and logging it leaks search input.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "SQL string built from raw input and logged to the console. It is dead code, but a careful reviewer would still flag the injection pattern and the logging of search input."
+          "label_ids": [],
+          "reason": "The SQL string built from user input and logged is dead code, but logging the query is a minor genuine smell. It is not labeled, so it counts as a real defect."
         },
         {
           "line": 62,
@@ -1510,8 +1623,10 @@
           "title": "Search overwrites the source user list",
           "explanation": "searchUsers filters and replaces the users state. Clearing the search or typing a different term cannot restore the original list, because the filtered-out users are gone. It also filters only the local state, not the server data.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#8",
-          "reason": "Search overwrites the users list so it cannot be restored."
+          "label_ids": [
+            "seed-02-user-dashboard#8"
+          ],
+          "reason": "Search overwrites the users state, so the original list cannot be restored."
         },
         {
           "line": 74,
@@ -1521,8 +1636,10 @@
           "title": "Infinite loop freezes the UI",
           "explanation": "If a user has an empty or missing name, the condition fails and processed never increments, so the while loop never terminates and blocks the main thread. The function is also unused.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#9",
-          "reason": "Infinite loop when user has no name."
+          "label_ids": [
+            "seed-02-user-dashboard#9"
+          ],
+          "reason": "Infinite loop when a user has no name."
         },
         {
           "line": 85,
@@ -1532,8 +1649,10 @@
           "title": "Concurrent updates map responses to wrong users and ignore errors",
           "explanation": "Responses are mapped to users by array index rather than by userId, so unrelated users get overwritten with \u0027Updated-N\u0027 names. The fetch responses are never checked for ok status, and the returned promise is neither awaited nor caught, so failures are silent and unhandled.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#10",
-          "reason": "Index used instead of userId; errors ignored."
+          "label_ids": [
+            "seed-02-user-dashboard#10"
+          ],
+          "reason": "Responses are mapped to users by index and failed responses are ignored."
         },
         {
           "line": 101,
@@ -1543,8 +1662,10 @@
           "title": "Allocates one million large objects in the render path",
           "explanation": "handleLargeDataOperation creates a million objects, each with a roughly 1000-element string, which can consume gigabytes of memory and freeze the browser. Objects are also appended to state rather than paginated or streamed.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#11",
-          "reason": "A million large objects allocated and put into state."
+          "label_ids": [
+            "seed-02-user-dashboard#11"
+          ],
+          "reason": "Allocates a million large objects and puts them into state."
         },
         {
           "line": 114,
@@ -1554,8 +1675,10 @@
           "title": "eval executes arbitrary code",
           "explanation": "executeUserScript runs its input with eval. Any string, including data originating from user names or input fields, executes with full access to the page and its storage.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#12",
-          "reason": "eval of arbitrary input."
+          "label_ids": [
+            "seed-02-user-dashboard#12"
+          ],
+          "reason": "eval of an arbitrary string."
         },
         {
           "line": 159,
@@ -1565,8 +1688,8 @@
           "title": "User name injected into executable script",
           "explanation": "The \u0027Say hello\u0027 button builds a JavaScript string from user.name and passes it to eval. A name containing a quote and code breaks out and runs arbitrary JavaScript.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "user.name interpolated into script passed to eval allows injection. Separate injection site at line 159 not covered by a label."
+          "label_ids": [],
+          "reason": "user.name is interpolated into a script that is passed to eval, which is code injection at line 159. It is a distinct injection site that no label covers."
         },
         {
           "line": 166,
@@ -1576,8 +1699,10 @@
           "title": "Search input evaluated as code on Enter",
           "explanation": "Pressing Enter passes the input value to executeUserScript, which calls eval. Any user, or anyone who tricks a user into pasting text, can execute code. onKeyPress is also deprecated.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#16",
-          "reason": "Search input passed to eval on Enter."
+          "label_ids": [
+            "seed-02-user-dashboard#16"
+          ],
+          "reason": "Search input is passed to eval on Enter."
         },
         {
           "line": 122,
@@ -1586,9 +1711,9 @@
           "severity": "Medium",
           "title": "Untyped merge with any and implicit index access",
           "explanation": "mergeUserSettings takes any and writes into an untyped {} object by string key, which TypeScript rejects under strict mode. Its behavior is a shallow copy that adds no default values despite the name.",
-          "verdict": "match",
-          "label_id": "seed-02-user-dashboard#13",
-          "reason": "Copying all keys from untrusted input in mergeUserSettings. It flags typing and shallow copy rather than prototype pollution, but it targets the same function and loop."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The for...in copy of untrusted keys is a prototype pollution risk, which is the labeled defect, but this finding frames it as typing and strict-mode issues and never names prototype pollution, so it does not match. The any typing and the missing defaults are minor but real issues."
         },
         {
           "line": 144,
@@ -1598,8 +1723,10 @@
           "title": "Missing key prop in list rendering",
           "explanation": "The users.map callback returns a div without a key. React cannot track items reliably, which can cause incorrect updates and state mix-ups when the list changes.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#14",
-          "reason": "Missing key prop in list."
+          "label_ids": [
+            "seed-02-user-dashboard#14"
+          ],
+          "reason": "Missing key on list items."
         },
         {
           "line": 149,
@@ -1609,8 +1736,10 @@
           "title": "Sensitive data rendered in the UI",
           "explanation": "The dashboard displays user passwords and credit card numbers in plaintext. This exposes sensitive data to anyone viewing the screen, shoulder surfers, and screenshots, and violates basic data-handling practices.",
           "verdict": "match",
-          "label_id": "seed-02-user-dashboard#15",
-          "reason": "Passwords and card numbers rendered on screen."
+          "label_ids": [
+            "seed-02-user-dashboard#15"
+          ],
+          "reason": "Passwords and credit cards rendered on screen."
         },
         {
           "line": 178,
@@ -1620,8 +1749,8 @@
           "title": "Unvalidated form data cast to any",
           "explanation": "Form values are cast with \u0027as any\u0027 and appended to state without validation or an id. Missing ids break keys and updates, and the password and card number are added to the client model.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Form data cast to any and added to state without an id, which breaks keys and updates, and the password and card number are stored in client state."
+          "label_ids": [],
+          "reason": "Form data is cast to any and added without an id, so later updates by id and the missing key will break. The password and card number are also stored in client state."
         },
         {
           "line": 166,
@@ -1631,8 +1760,8 @@
           "title": "Search input lacks accessible label",
           "explanation": "The search input relies only on a placeholder, which screen readers may not announce reliably, and the form fields are similarly unlabeled.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Accessibility label remark is minor and not a core defect."
+          "label_ids": [],
+          "reason": "Accessibility labelling is a style or best-practice remark that does not matter much here."
         },
         {
           "line": 12,
@@ -1642,37 +1771,37 @@
           "title": "Monolithic component mixes concerns and lacks error boundary",
           "explanation": "One component handles fetching, persistence, search, bulk data generation, scripting, and rendering. There is no error boundary, so any render error crashes the whole dashboard, and the logic is not reusable.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Generic design and architecture remark, speculative."
+          "label_ids": [],
+          "reason": "Generic design advice about a monolithic component and error boundaries, not a concrete defect."
         }
       ],
       "found": [
         "seed-02-user-dashboard#1",
         "seed-02-user-dashboard#2",
         "seed-02-user-dashboard#3",
+        "seed-02-user-dashboard#5",
         "seed-02-user-dashboard#4",
         "seed-02-user-dashboard#6",
+        "seed-02-user-dashboard#7",
         "seed-02-user-dashboard#8",
         "seed-02-user-dashboard#9",
         "seed-02-user-dashboard#10",
         "seed-02-user-dashboard#11",
         "seed-02-user-dashboard#12",
         "seed-02-user-dashboard#16",
-        "seed-02-user-dashboard#13",
         "seed-02-user-dashboard#14",
         "seed-02-user-dashboard#15"
       ],
       "missed": [
-        "seed-02-user-dashboard#5",
-        "seed-02-user-dashboard#7"
+        "seed-02-user-dashboard#13"
       ],
       "outside_window": 0,
       "reviewer_input_tokens": 3900,
       "reviewer_output_tokens": 4501,
       "reviewer_cost": 0.0026405,
-      "judge_input_tokens": 6361,
-      "judge_output_tokens": 1245,
-      "judge_cost": 0.025172,
+      "judge_input_tokens": 6414,
+      "judge_output_tokens": 1386,
+      "judge_cost": 0.026688,
       "seconds": 33.3,
       "error": null
     },
@@ -1680,6 +1809,8 @@
       "id": "sql-01-search-products",
       "group": "realistic",
       "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [
@@ -1694,8 +1825,10 @@
           "title": "SQL injection through @SortColumn in dynamic SQL",
           "explanation": "@SortColumn is a caller-supplied SYSNAME that is concatenated directly into the dynamic SQL text in the ORDER BY clause. It is never validated against a whitelist or passed through QUOTENAME. A caller can pass a value such as \u0027Name; DROP TABLE dbo.Products; --\u0027 or a subquery to run arbitrary statements under the procedure\u0027s permissions. Parameterizing the search value on line 17 does not protect this part of the statement.",
           "verdict": "match",
-          "label_id": "sql-01-search-products#1",
-          "reason": "Identical defect: @SortColumn concatenated into ORDER BY without allow-list or QUOTENAME, enabling SQL injection."
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Identifies the SQL injection via unvalidated @SortColumn concatenated into the ORDER BY, same as the label."
         },
         {
           "line": 13,
@@ -1705,8 +1838,8 @@
           "title": "Leading wildcard LIKE forces a full scan",
           "explanation": "The pattern N\u0027%\u0027 \u002B @Search \u002B N\u0027%\u0027 begins with a wildcard, so any index on Name cannot be used for a seek. Every row in dbo.Products must be read and evaluated, which gets expensive as the table grows.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Leading-wildcard LIKE does prevent index seeks, but this is inherent to contains-search semantics and is a minor concern; still a plausible performance note. Not a clear defect to fix, so treat as speculative."
+          "label_ids": [],
+          "reason": "Leading wildcard LIKE does prevent index seeks; a genuine though modest performance concern inherent in contains-search."
         },
         {
           "line": 9,
@@ -1716,8 +1849,8 @@
           "title": "LIKE wildcards in user input are not escaped",
           "explanation": "@Search is inserted into the LIKE pattern without escaping. Characters such as % and _ entered by the user act as wildcards, so a search for \u0027100%\u0027 or \u0027a_b\u0027 returns unintended rows.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Unescaped % and _ in user input alter LIKE semantics, so searches for literal \u0027100%\u0027 return wrong rows. This is a genuine correctness bug."
+          "label_ids": [],
+          "reason": "Unescaped % and _ in @Search act as wildcards, giving unintended matches; a real correctness issue in the pattern construction."
         },
         {
           "line": 9,
@@ -1726,9 +1859,9 @@
           "severity": "Low",
           "title": "NULL search value silently returns no rows",
           "explanation": "If @Search is passed as NULL, the concatenation yields a NULL @pattern. Name LIKE NULL is never true, so the procedure returns an empty result with no indication to the caller. The procedure does not define whether NULL means \u0027no filter\u0027 or is invalid input.",
-          "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "NULL search returning no rows is standard SQL behavior and a speculative design remark, not a defect."
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "NULL @Search yields NULL pattern and empty results silently; valid minor edge-case defect, since @Search has no default or validation."
         },
         {
           "line": 6,
@@ -1738,8 +1871,8 @@
           "title": "No error handling around dynamic SQL execution",
           "explanation": "The procedure has no TRY...CATCH block and no logging. Any failure during dynamic SQL construction or execution, such as an invalid column name in @SortColumn, propagates as a raw error to the caller with no context.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Lack of TRY...CATCH is a best-practice preference; propagating the raw error to the caller is acceptable and often preferable here."
+          "label_ids": [],
+          "reason": "Missing TRY...CATCH is a best-practice remark; propagating errors to the caller is acceptable and the real problem is the injection."
         }
       ],
       "found": [
@@ -1750,9 +1883,9 @@
       "reviewer_input_tokens": 1622,
       "reviewer_output_tokens": 1626,
       "reviewer_cost": 0.0009752,
-      "judge_input_tokens": 1825,
-      "judge_output_tokens": 404,
-      "judge_cost": 0.00769,
+      "judge_input_tokens": 1878,
+      "judge_output_tokens": 377,
+      "judge_cost": 0.007526,
       "seconds": 14.4,
       "error": null
     },
@@ -1760,6 +1893,8 @@
       "id": "sql-02-transfer-funds",
       "group": "realistic",
       "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [
@@ -1775,8 +1910,10 @@
           "title": "Race condition: balance is read and then written without locking, allowing overdrafts and lost updates",
           "explanation": "The source balance is read into @Balance at line 14-15 with no locking hint (for example UPDLOCK, HOLDLOCK or ROWLOCK), and the debit at line 24 writes back a computed value (@Balance - @Amount) rather than a relative update. Under concurrency, two transfers from the same account can both read the same balance, both pass the check at line 17, and both write, so the account can go negative or one debit is lost. The check and the update are not atomic.",
           "verdict": "match",
-          "label_id": "sql-02-transfer-funds#1",
-          "reason": "Describes the unlocked read followed by a write-back of a computed value, which allows overdrafts and lost debits under concurrency."
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read-then-write race that allows overdrafts and lost debits, same as label 1."
         },
         {
           "line": 9,
@@ -1786,8 +1923,8 @@
           "title": "NULL @Amount bypasses validation and can null out balances",
           "explanation": "The check IF @Amount \u003C= 0 evaluates to UNKNOWN when @Amount is NULL, so the THROW is skipped. Execution continues, the balance check at line 17 also evaluates to UNKNOWN for NULL comparisons, and the UPDATE at line 24 sets Balance = @Balance - NULL, which is NULL. This can wipe out the source account balance and insert a NULL-amount transfer record.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A NULL @Amount makes @Balance \u003C @Amount UNKNOWN, but the IS NULL check does not catch it. The code then goes on to the UPDATE, which would set Balance to NULL. If the Balance column or the Transfers.Amount column is NOT NULL, the statements fail instead. The scenario is plausible, and the reasoning about the UNKNOWN comparisons is valid, so this is a genuine gap. Rechecking: IF @Amount \u003C= 0 with NULL skips the THROW, and the line 17 condition is UNKNOWN, so the block is skipped and the UPDATE runs with a NULL result. That is a real defect not covered by the labels."
+          "label_ids": [],
+          "reason": "With a NULL @Amount, the check on line 17 evaluates UNKNOWN, but \u0060@Balance IS NULL OR UNKNOWN\u0060 is not true, so it proceeds. However, the UPDATE would set Balance to NULL only if the Balance column allows NULL; the claim is speculative and the INSERT/Balance column likely NOT NULL. The finding is plausible, but NULL parameter handling is not the labeled defect. Actually, in T-SQL a NULL @Amount does skip validation and would null the balance, so this is a genuine defect."
         },
         {
           "line": 12,
@@ -1797,8 +1934,10 @@
           "title": "No TRY/CATCH or XACT_ABORT handling around the transaction",
           "explanation": "The procedure opens a transaction at line 12 with no TRY...CATCH block and no SET XACT_ABORT ON. If a runtime error occurs during the UPDATEs or the INSERT (for example a constraint violation, deadlock or timeout), the transaction may be left open or partially applied depending on the error and the caller. Rollback happens only on the explicit validation paths.",
           "verdict": "match",
-          "label_id": "sql-02-transfer-funds#2",
-          "reason": "Points to the missing XACT_ABORT or TRY/CATCH, which leaves the transaction open after a runtime error."
+          "label_ids": [
+            "sql-02-transfer-funds#2"
+          ],
+          "reason": "Reports the missing TRY/CATCH and XACT_ABORT leaving the transaction open on runtime errors, matching label 2."
         },
         {
           "line": 17,
@@ -1808,8 +1947,8 @@
           "title": "Unknown source account and insufficient funds are conflated in one error",
           "explanation": "The same error (50011) is raised when the source account does not exist (NULL balance) and when funds are insufficient. Callers cannot distinguish between a bad account ID and a balance problem, which makes troubleshooting and client handling harder.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Using one error for a missing account and for insufficient funds is a design choice and deliberate here, since the message names both. It is not a defect."
+          "label_ids": [],
+          "reason": "Merging two error conditions into one message is a minor design preference, not a defect."
         },
         {
           "line": 23,
@@ -1819,8 +1958,8 @@
           "title": "Destination existence is checked after the source has already been debited",
           "explanation": "The source account is debited at line 23-25 before the destination is verified via @@ROWCOUNT at line 31. This works only because of the rollback, but it does unnecessary write work and relies on the rollback path for correctness.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The rollback does handle the unknown destination correctly, so this is a style or efficiency remark rather than a defect."
+          "label_ids": [],
+          "reason": "The ordering is handled correctly by the rollback; this is a style or efficiency remark rather than a bug."
         }
       ],
       "found": [
@@ -1832,9 +1971,9 @@
       "reviewer_input_tokens": 1941,
       "reviewer_output_tokens": 2281,
       "reviewer_cost": 0.0013346,
-      "judge_input_tokens": 2395,
-      "judge_output_tokens": 562,
-      "judge_cost": 0.01041,
+      "judge_input_tokens": 2448,
+      "judge_output_tokens": 512,
+      "judge_cost": 0.010016,
       "seconds": 17.2,
       "error": null
     },
@@ -1842,6 +1981,8 @@
       "id": "sql-03-customers-without-orders",
       "group": "realistic",
       "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [
@@ -1857,8 +1998,10 @@
           "title": "NOT IN returns no rows if the subquery yields a NULL CustomerId",
           "explanation": "If any Orders row matching the year has a NULL CustomerId, the NOT IN predicate evaluates to UNKNOWN for every customer, so the procedure silently returns an empty result set. The results are wrong whenever such a row exists, and the failure is hard to notice.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#1",
-          "reason": "Describes the NOT IN with NULL CustomerId returning no rows, same as label 1."
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Describes the NOT IN with NULL CustomerId returning an empty result, the same defect as label 1."
         },
         {
           "line": 12,
@@ -1868,8 +2011,10 @@
           "title": "Non-sargable YEAR() filter on OrderDate",
           "explanation": "Wrapping the OrderDate column in YEAR() prevents the optimizer from performing an index seek on OrderDate, forcing a scan of the Orders table for every evaluation.",
           "verdict": "match",
-          "label_id": "sql-03-customers-without-orders#2",
-          "reason": "Identifies the non-sargable YEAR() on OrderDate preventing an index seek, same as label 2."
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Identifies YEAR(o.OrderDate) as non-sargable, preventing an index seek, which is label 2."
         },
         {
           "line": 11,
@@ -1879,8 +2024,8 @@
           "title": "Possible missing supporting index on Orders",
           "explanation": "The subquery filters Orders by OrderDate and reads CustomerId. Without an index leading on OrderDate (ideally including CustomerId), the lookup has to scan the full Orders table. The index definitions are not in this file, so this cannot be confirmed.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative missing-index advice that the finding admits cannot be confirmed. Index definitions are not in the file, and the underlying problem is the non-sargable predicate, so this is not a distinct defect."
+          "label_ids": [],
+          "reason": "Speculative missing-index advice that the reviewer admits cannot be confirmed from the file. It is not a defect in this code."
         }
       ],
       "found": [
@@ -1892,9 +2037,9 @@
       "reviewer_input_tokens": 1486,
       "reviewer_output_tokens": 1116,
       "reviewer_cost": 0.0007066,
-      "judge_input_tokens": 1529,
-      "judge_output_tokens": 252,
-      "judge_cost": 0.005578,
+      "judge_input_tokens": 1582,
+      "judge_output_tokens": 242,
+      "judge_cost": 0.005584,
       "seconds": 8.2,
       "error": null
     },
@@ -1902,6 +2047,8 @@
       "id": "sql-04-import-price-changes",
       "group": "realistic",
       "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [
@@ -1917,8 +2064,10 @@
           "title": "@@IDENTITY used instead of SCOPE_IDENTITY",
           "explanation": "@@IDENTITY returns the last identity value generated in the session from any scope, including triggers fired by the INSERT on line 25. If a trigger on dbo.ImportLog inserts into another identity table, @LogId will point to the wrong row, and the staging rows will be tagged with an incorrect ImportLogId.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#2",
-          "reason": "Identifies @@IDENTITY returning trigger-scope identity instead of SCOPE_IDENTITY, same as label."
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Identifies @@IDENTITY vs SCOPE_IDENTITY with trigger scenario, same as label 2."
         },
         {
           "line": 12,
@@ -1928,8 +2077,10 @@
           "title": "Cursor used for a row-by-row set operation",
           "explanation": "The price update is performed one row at a time through a cursor. For large batches this is slow, generates many round trips and statements, and holds locks for longer. The whole operation can be expressed as a single set-based UPDATE ... FROM join between staging.PriceChanges and dbo.Products.",
           "verdict": "match",
-          "label_id": "sql-04-import-price-changes#1",
-          "reason": "Cursor row-by-row update should be a set-based UPDATE with join; same defect."
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Cursor row-by-row update replaceable by set-based UPDATE join, same as label 1."
         },
         {
           "line": 8,
@@ -1938,9 +2089,9 @@
           "severity": "Medium",
           "title": "Transaction spans the entire row-by-row loop",
           "explanation": "The explicit transaction begins before the cursor and remains open while every product row is updated and the log is written. Locks on dbo.Products are held for the full duration, increasing blocking for other sessions on large batches.",
-          "verdict": "duplicate",
-          "label_id": "sql-04-import-price-changes#1",
-          "reason": "Locks held across the row-by-row loop is part of the cursor performance label\u0027s rationale; primarily the same loop problem."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The long transaction is a consequence of the cursor loop already covered by label 1; atomicity of the import is reasonable and fixing the loop resolves it. Not a distinct defect."
         },
         {
           "line": 1,
@@ -1950,8 +2101,8 @@
           "title": "No TRY/CATCH error handling",
           "explanation": "The procedure relies only on SET XACT_ABORT ON. If an error occurs, the transaction is rolled back, but the procedure does not capture the error, log it, or clean up the open cursor. The caller receives a raw error with no context about the batch being processed.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "XACT_ABORT ON already rolls back and cursor is deallocated on batch termination; lack of TRY/CATCH is a preference, not a defect."
+          "label_ids": [],
+          "reason": "With XACT_ABORT ON the transaction rolls back and the cursor is deallocated when the procedure exits; missing TRY/CATCH is a style/best-practice remark here."
         },
         {
           "line": 18,
@@ -1961,8 +2112,8 @@
           "title": "No validation of NewPrice before update",
           "explanation": "NewPrice is copied directly into dbo.Products.Price without checking for NULL or negative values. A NULL in staging may violate a constraint and fail the batch, or if the column is nullable it will silently erase a product price.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative; validation of staged data is not shown to be needed, and a NULL would fail a constraint or be a data concern outside this code."
+          "label_ids": [],
+          "reason": "Speculative; no evidence of a nullable Price column or validation need, and constraints would handle it. Advice rather than a demonstrated defect."
         },
         {
           "line": 13,
@@ -1972,8 +2123,8 @@
           "title": "Filter column BatchId may lack an index",
           "explanation": "The query filters staging.PriceChanges on BatchId and the later update uses the same predicate. Without an index on BatchId, each call scans the staging table, which grows over time.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative index advice with no evidence about the schema; not a defect in this code."
+          "label_ids": [],
+          "reason": "Speculative index advice with no evidence in the code that the index is missing."
         }
       ],
       "found": [
@@ -1985,9 +2136,9 @@
       "reviewer_input_tokens": 1927,
       "reviewer_output_tokens": 2087,
       "reviewer_cost": 0.0012362,
-      "judge_input_tokens": 2301,
-      "judge_output_tokens": 446,
-      "judge_cost": 0.009062,
+      "judge_input_tokens": 2354,
+      "judge_output_tokens": 480,
+      "judge_cost": 0.009508,
       "seconds": 16.7,
       "error": null
     },
@@ -1995,6 +2146,8 @@
       "id": "sql-clean-01-upsert-customer",
       "group": "clean",
       "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [],
@@ -2007,8 +2160,8 @@
           "title": "OUTPUT parameter retains caller value when no customer is found",
           "explanation": "If the caller passes a non-NULL @CustomerId, the SELECT at lines 15-17 assigns nothing when no row matches, because a SELECT with no rows leaves variables unchanged. The IF test at line 19 then sees the caller\u0027s stale ID, skips the INSERT, and runs the UPDATE at line 28-30 against that unrelated customer. The procedure can overwrite the wrong customer\u0027s name and never creates the new one.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Valid bug: @CustomerId is an OUTPUT param, and a SELECT matching no rows leaves the caller\u0027s value unchanged. A non-NULL input would skip the INSERT and update the wrong customer. Fix by setting @CustomerId = NULL before the SELECT."
+          "label_ids": [],
+          "reason": "Valid bug: @CustomerId is an INPUT/OUTPUT parameter, and a SELECT matching no rows leaves the variable unchanged, so a non-NULL caller value skips the INSERT and the UPDATE hits an unrelated customer. The procedure never resets it to NULL before the lookup."
         },
         {
           "line": 10,
@@ -2018,8 +2171,8 @@
           "title": "Email is validated after trimming but stored untrimmed",
           "explanation": "The validation at line 10 uses LTRIM(RTRIM(@Email)) to reject whitespace-only input, but the lookup at line 17 and the INSERT at line 22 use the raw @Email. Values with leading or trailing spaces are stored as distinct keys, so the same customer can be created more than once depending on how the caller formats the address.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Trimming is only used for the empty check. Storing the raw email is a normalization preference, and SQL Server\u0027s default collation already ignores trailing spaces in comparisons. The duplicate-customer claim is speculative."
+          "label_ids": [],
+          "reason": "Under default SQL Server collations, comparison with trailing spaces is ignored, and the email is validated as given. Leading-space variants are a caller formatting concern. The claim of duplicate keys is speculative and overstated, so this is not a real defect here."
         },
         {
           "line": 22,
@@ -2029,8 +2182,8 @@
           "title": "NULL @Name silently overwrites existing names",
           "explanation": "@Name is nullable and is not validated. A call with NULL @Name inserts a customer with no name on the INSERT path, and on the UPDATE path at line 29 it overwrites an existing name with NULL. The validation at line 10 only covers @Email.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Whether a NULL name is allowed is a business-rule choice, and the code does not show it to be a defect. The claim is speculative."
+          "label_ids": [],
+          "reason": "Whether NULL @Name is allowed is a business decision; nothing indicates it is required. Speculative advice with no evidence of a defect."
         },
         {
           "line": 13,
@@ -2040,8 +2193,8 @@
           "title": "No TRY...CATCH error handling around the transaction",
           "explanation": "The transaction at lines 13-33 has no TRY...CATCH block. XACT_ABORT ON rolls back on error, but the caller gets a raw error with no logging, no context, and no controlled rollback. If the procedure is called inside an outer transaction, an uncommitted or doomed transaction can be left behind without explicit handling.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "With XACT_ABORT ON, an error rolls back the transaction automatically and propagates the error. TRY/CATCH here is a best-practice suggestion, not a defect."
+          "label_ids": [],
+          "reason": "With XACT_ABORT ON, errors roll back the transaction automatically and the error propagates to the caller. Adding TRY...CATCH is a best-practice preference, not a defect. The outer-transaction claim is speculative."
         }
       ],
       "found": [],
@@ -2050,9 +2203,9 @@
       "reviewer_input_tokens": 1812,
       "reviewer_output_tokens": 1868,
       "reviewer_cost": 0.0011152,
-      "judge_input_tokens": 1912,
-      "judge_output_tokens": 389,
-      "judge_cost": 0.007714,
+      "judge_input_tokens": 1965,
+      "judge_output_tokens": 439,
+      "judge_cost": 0.00832,
       "seconds": 17.7,
       "error": null
     },
@@ -2060,6 +2213,8 @@
       "id": "sql-clean-02-monthly-revenue",
       "group": "clean",
       "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "3e01b4bcce72",
       "labels": [],
@@ -2072,8 +2227,8 @@
           "title": "Rows with NULL Status are silently excluded",
           "explanation": "The predicate o.Status \u003C\u003E N\u0027Cancelled\u0027 evaluates to UNKNOWN when Status is NULL, so orders with a missing status are dropped from the revenue totals without any signal. If NULL is a valid state for non-cancelled orders, revenue is understated.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The three-valued-logic point is technically accurate, but it is speculative. Nothing indicates Status is nullable or that NULL means non-cancelled, so there is no demonstrated defect."
+          "label_ids": [],
+          "reason": "Speculative: assumes Status can be NULL, and the finding itself is conditional on that. Nothing in the code shows NULL is a valid state, and Status is typically NOT NULL, so the exclusion is not a defect in this code."
         },
         {
           "line": 14,
@@ -2083,8 +2238,8 @@
           "title": "Grouping by a computed expression repeated in SELECT and GROUP BY",
           "explanation": "The month-start expression is computed twice (SELECT and GROUP BY) and the GROUP BY on a function of OrderDate cannot use an index on OrderDate for grouping. The date range filter does allow an index seek, but the aggregation still processes every matching row through the expression.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The expression appears in both SELECT and GROUP BY because T-SQL requires that. The date range filter is sargable, and the grouping cost is minor and speculative."
+          "label_ids": [],
+          "reason": "The expression is computed once by the engine, and the range predicate is sargable. This is a minor performance remark with no real impact, not a defect."
         },
         {
           "line": 16,
@@ -2094,8 +2249,8 @@
           "title": "Revenue can be NULL for a month with no valid totals",
           "explanation": "SUM(o.Total) returns NULL when all Total values in a group are NULL or when the group contains no non-null values, and the result set will return NULL for Revenue without a default. Consumers may not expect NULL in a revenue column.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Months with no rows don\u0027t appear at all. A NULL SUM only occurs if every Total in a group is NULL, which is speculative. The finding is a preference for a default."
+          "label_ids": [],
+          "reason": "A group exists only if it has rows. NULL Revenue occurs only if all Totals are NULL, which is unlikely and speculative. SUM returning NULL for all-NULL input is standard behavior, not a bug."
         },
         {
           "line": 7,
@@ -2105,8 +2260,8 @@
           "title": "Hardcoded year bounds and error number",
           "explanation": "The valid range 2000 to 2100 and the custom error number 50030 are embedded directly in the procedure. Changing the range requires a code change and the error number is not documented.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Hardcoded validation bounds and a custom error number are normal for a stored procedure. This is a style remark, not a defect."
+          "label_ids": [],
+          "reason": "Hardcoded validation bounds and an error number in a stored procedure are normal and acceptable. This is a style preference only."
         },
         {
           "line": 4,
@@ -2116,8 +2271,8 @@
           "title": "No error handling or transaction context",
           "explanation": "The procedure has no TRY/CATCH wrapper or logging. While this read-only query is low risk, unexpected failures (for example, a deadlock or a conversion error in Total) will surface raw to callers without context.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A read-only SELECT procedure doesn\u0027t need TRY/CATCH or a transaction. This is generic best-practice advice that doesn\u0027t matter here."
+          "label_ids": [],
+          "reason": "A read-only SELECT procedure does not need TRY/CATCH or a transaction. This is generic best-practice advice that does not matter here."
         }
       ],
       "found": [],
@@ -2126,9 +2281,9 @@
       "reviewer_input_tokens": 1711,
       "reviewer_output_tokens": 1731,
       "reviewer_cost": 0.0010366,
-      "judge_input_tokens": 1770,
-      "judge_output_tokens": 418,
-      "judge_cost": 0.00772,
+      "judge_input_tokens": 1823,
+      "judge_output_tokens": 444,
+      "judge_cost": 0.008086,
       "seconds": 13,
       "error": null
     },
@@ -2136,6 +2291,8 @@
       "id": "ts-01-product-search",
       "group": "realistic",
       "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [
@@ -2151,8 +2308,10 @@
           "title": "Unencoded query parameter in URL",
           "explanation": "The user-provided term is interpolated directly into the URL without encodeURIComponent. Characters such as \u0027\u0026\u0027, \u0027#\u0027, \u0027=\u0027 or \u0027\u002B\u0027 alter the request, allowing parameter injection (e.g. adding or overriding API parameters) and producing incorrect searches.",
           "verdict": "match",
-          "label_id": "ts-01-product-search#2",
-          "reason": "Same defect: the term is interpolated into the URL without encodeURIComponent."
+          "label_ids": [
+            "ts-01-product-search#2"
+          ],
+          "reason": "Reports the missing encodeURIComponent on the search term in the URL at line 23, the same defect as label #2."
         },
         {
           "line": 13,
@@ -2162,8 +2321,10 @@
           "title": "Effect has no cleanup; timer and request are never cancelled",
           "explanation": "The effect creates an AbortController and a timer but returns no cleanup function. When query or delayMs changes or the component unmounts, the pending timer still fires and the in-flight request is never aborted. The aborted check in the catch block is therefore never triggered by the effect itself. Out-of-order responses from earlier queries can overwrite results for the current query, and state updates can run after unmount.",
           "verdict": "match",
-          "label_id": "ts-01-product-search#1",
-          "reason": "Same defect: the effect has no cleanup, so the timer is never cleared and the request never aborted, which allows stale responses to overwrite newer results."
+          "label_ids": [
+            "ts-01-product-search#1"
+          ],
+          "reason": "Reports the missing effect cleanup, so timers and requests are never cleared or aborted and stale responses can overwrite newer results. This is the same defect as label #1."
         },
         {
           "line": 29,
@@ -2173,8 +2334,8 @@
           "title": "Unvalidated type assertion on API response",
           "explanation": "response.json() returns Promise\u003Cany\u003E, and the cast to Product[] is not validated. If the API returns an unexpected shape, the hook silently stores invalid data, which may cause runtime errors downstream when fields like price or name are accessed.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Casting the JSON response to a type is a common pattern. Demanding runtime validation here is a best-practice suggestion, not a defect in this code."
+          "label_ids": [],
+          "reason": "A type assertion on a JSON response is a common pattern. Runtime validation here is speculative best-practice advice, not a defect."
         },
         {
           "line": 15,
@@ -2184,8 +2345,8 @@
           "title": "Error state not cleared when query is too short",
           "explanation": "When the trimmed term is shorter than 2 characters, results are cleared but a previously set error remains. The UI can show a stale error message alongside empty results.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Valid bug: when the term is shorter than 2 characters, results are cleared but the earlier error stays, so the UI can show a stale error next to empty results."
+          "label_ids": [],
+          "reason": "When the term is too short, results are cleared but the earlier error stays. A stale error can display next to empty results, which is a genuine minor bug."
         },
         {
           "line": 9,
@@ -2195,8 +2356,8 @@
           "title": "Missing explicit return type on exported hook",
           "explanation": "The exported hook has no return type annotation, so its public contract is only inferred. Consumers and documentation rely on implicit types.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A missing explicit return type is a style preference. TypeScript infers the type correctly."
+          "label_ids": [],
+          "reason": "Missing explicit return type is a style preference; TypeScript infers the type correctly."
         },
         {
           "line": 3,
@@ -2206,8 +2367,8 @@
           "title": "Mutable Product interface",
           "explanation": "Product fields are mutable, which allows consumers to change fetched data accidentally in shared state. Other code paths also do not indicate immutability.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Making interface fields readonly is a speculative preference and does not matter in this code."
+          "label_ids": [],
+          "reason": "Readonly interface fields are a style preference and not a defect in this code."
         }
       ],
       "found": [
@@ -2219,9 +2380,9 @@
       "reviewer_input_tokens": 1668,
       "reviewer_output_tokens": 1500,
       "reviewer_cost": 0.0009168,
-      "judge_input_tokens": 1996,
-      "judge_output_tokens": 423,
-      "judge_cost": 0.008222,
+      "judge_input_tokens": 2049,
+      "judge_output_tokens": 437,
+      "judge_cost": 0.008468,
       "seconds": 12.4,
       "error": null
     },
@@ -2229,6 +2390,8 @@
       "id": "ts-02-cart-math",
       "group": "realistic",
       "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [
@@ -2244,8 +2407,10 @@
           "title": "taxCents returns fractional cents",
           "explanation": "taxCents returns (amountCents * ratePercent) / 100 without rounding, so it can return non-integer cent values such as 12.5. The other money helpers (applyCoupon uses Math.round) produce integer cents, so callers can receive inconsistent money values and accumulate rounding drift.",
           "verdict": "match",
-          "label_id": "ts-02-cart-math#1",
-          "reason": "Same defect: taxCents returns unrounded fractional cents."
+          "label_ids": [
+            "ts-02-cart-math#1"
+          ],
+          "reason": "Identifies taxCents returning unrounded fractional cents, same as label 1."
         },
         {
           "line": 29,
@@ -2255,8 +2420,10 @@
           "title": "parseQuantity accepts NaN and non-integer quantities",
           "explanation": "Number(input) yields NaN for non-numeric strings like \u0027abc\u0027. NaN \u003C 1 and NaN \u003E 99 are both false, so NaN is returned silently. Inputs like \u00272.5\u0027 also pass the range check and return a fractional quantity, which breaks quantity * unitPriceCents arithmetic.",
           "verdict": "match",
-          "label_id": "ts-02-cart-math#2",
-          "reason": "Same defect: NaN and fractional quantities pass the range check in parseQuantity."
+          "label_ids": [
+            "ts-02-cart-math#2"
+          ],
+          "reason": "Describes NaN and fractional quantities passing the range check in parseQuantity, same as label 2."
         },
         {
           "line": 38,
@@ -2265,9 +2432,9 @@
           "severity": "Medium",
           "title": "formatCents hardcodes a two-decimal currency assumption",
           "explanation": "The function always divides by 100, but Intl.NumberFormat already applies each currency\u0027s minor-unit digits. For zero-decimal currencies such as JPY, the displayed amount is off by a factor of 100. The function also accepts non-integer cents without validation.",
-          "verdict": "real",
-          "label_id": null,
-          "reason": "Real defect: dividing by 100 is wrong for zero-decimal currencies like JPY, since the function accepts a currency parameter. Not covered by the labels."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Intl.NumberFormat does not divide by minor units; the formatter takes the major-unit value, so dividing by 100 for the EUR default is intended. The JPY claim describes a currency-generality concern, not a defect in this code, since the whole cart uses cents."
         },
         {
           "line": 17,
@@ -2277,8 +2444,8 @@
           "title": "Coupon values are not validated",
           "explanation": "applyCoupon trusts coupon.percentOff without range checks. A negative percentOff increases the total, a value above 100 is silently clamped to 0, and NaN propagates through Math.round. The Coupon type cannot express these constraints.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative validation advice for coupon data that is presumably trusted; not a concrete defect in this code."
+          "label_ids": [],
+          "reason": "Speculative validation advice about coupon data; the coupon is a trusted internal type, and the clamp to 0 is deliberate. Not a defect in this code."
         },
         {
           "line": 1,
@@ -2288,8 +2455,8 @@
           "title": "Data interfaces are mutable and loosely typed",
           "explanation": "CartItem and Coupon have mutable fields and plain number types for money and quantity. Nothing in the type system distinguishes cents from other numbers or prevents accidental mutation of shared cart data.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Style and design preference about branded types and readonly; not a real defect."
+          "label_ids": [],
+          "reason": "Style/design preference about readonly and branded types, not a real defect."
         },
         {
           "line": 13,
@@ -2299,8 +2466,8 @@
           "title": "subtotalCents does not validate inputs",
           "explanation": "The reduce trusts unitPriceCents and quantity. Negative, fractional, or NaN values flow into the total without any error, and the function has no error handling for malformed items.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative \u0027consider validating\u0027 advice on internal data; not a concrete defect."
+          "label_ids": [],
+          "reason": "Speculative \u0027consider validating\u0027 advice for subtotalCents; the function is straightforward and inputs are typed."
         }
       ],
       "found": [
@@ -2312,9 +2479,9 @@
       "reviewer_input_tokens": 1755,
       "reviewer_output_tokens": 1811,
       "reviewer_cost": 0.001081,
-      "judge_input_tokens": 2177,
-      "judge_output_tokens": 384,
-      "judge_cost": 0.008194,
+      "judge_input_tokens": 2230,
+      "judge_output_tokens": 472,
+      "judge_cost": 0.00918,
       "seconds": 14.3,
       "error": null
     },
@@ -2322,6 +2489,8 @@
       "id": "ts-03-sign-in",
       "group": "realistic",
       "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [
@@ -2337,7 +2506,9 @@
           "title": "Password logged to the console",
           "explanation": "console.debug logs the user\u0027s plaintext password. Debug output can reach browser devtools, error reporting tools, and shared machines, which exposes credentials.",
           "verdict": "match",
-          "label_id": "ts-03-sign-in#2",
+          "label_ids": [
+            "ts-03-sign-in#2"
+          ],
           "reason": "Same defect: the plaintext password is logged via console.debug on line 19."
         },
         {
@@ -2348,8 +2519,10 @@
           "title": "Unvalidated returnUrl causes an open redirect",
           "explanation": "The returnUrl query parameter is passed straight to window.location.assign. An attacker can craft a sign-in link with returnUrl set to an external site, and the user is redirected there after a successful login. The safeReturnUrl helper exists in this file but is never used here.",
           "verdict": "match",
-          "label_id": "ts-03-sign-in#1",
-          "reason": "Same defect: returnUrl goes unvalidated to window.location.assign, and safeReturnUrl is not used."
+          "label_ids": [
+            "ts-03-sign-in#1"
+          ],
+          "reason": "Same defect: returnUrl goes to window.location.assign unvalidated, and safeReturnUrl is not used."
         },
         {
           "line": 20,
@@ -2359,8 +2532,8 @@
           "title": "Network failures are not handled",
           "explanation": "The fetch call has no try/catch. A network error or aborted request rejects with a generic TypeError, and the caller gets no clear sign-in error message. The non-401 error path is handled, but transport errors are not.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A fetch rejection already propagates to the caller as a rejected promise. Wrapping it in a try/catch only to rewrite the message is a preference, not a defect."
+          "label_ids": [],
+          "reason": "The fetch rejection propagates to the caller as a rejected promise, which is normal for an async function that does not need to wrap every error. Not wrapping transport errors is a preference, not a defect."
         }
       ],
       "found": [
@@ -2372,9 +2545,9 @@
       "reviewer_input_tokens": 1698,
       "reviewer_output_tokens": 992,
       "reviewer_cost": 0.0006658,
-      "judge_input_tokens": 1717,
-      "judge_output_tokens": 231,
-      "judge_cost": 0.005744,
+      "judge_input_tokens": 1770,
+      "judge_output_tokens": 247,
+      "judge_cost": 0.00601,
       "seconds": 10.7,
       "error": null
     },
@@ -2382,6 +2555,8 @@
       "id": "ts-04-profile-tags",
       "group": "realistic",
       "kind": "buggy",
+      "language": "React",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "04ccacda7af3",
       "labels": [
@@ -2397,8 +2572,10 @@
           "title": "useEffect dependency array is missing userId",
           "explanation": "The effect reads userId to build the fetch URL but the dependency array is empty. If userId changes while the component stays mounted, the component keeps showing the previous user\u0027s profile and never refetches. The cleanup only cancels the stale request when the component unmounts.",
           "verdict": "match",
-          "label_id": "ts-04-profile-tags#1",
-          "reason": "Same defect: the effect uses userId but its dependency array is empty, so a userId change never triggers a refetch."
+          "label_ids": [
+            "ts-04-profile-tags#1"
+          ],
+          "reason": "Identifies the empty dependency array omitting userId, so the profile is not refetched when userId changes."
         },
         {
           "line": 35,
@@ -2408,8 +2585,10 @@
           "title": "Tags are mutated in place and state is set to the same reference",
           "explanation": "profile.tags.push(tag) mutates the existing state object, then setProfile(profile) passes the same reference. React uses Object.is to detect changes, so it bails out and does not re-render. The new tag may not appear, and the mutation breaks the immutability React relies on.",
           "verdict": "match",
-          "label_id": "ts-04-profile-tags#2",
-          "reason": "Same defect: tags are pushed in place and the same object is passed to setProfile, so React bails out of the re-render."
+          "label_ids": [
+            "ts-04-profile-tags#2"
+          ],
+          "reason": "Describes in-place push and setProfile with the same reference, which causes React to bail out and not re-render."
         },
         {
           "line": 19,
@@ -2419,8 +2598,8 @@
           "title": "Fetch errors are not handled and the component stays in loading state",
           "explanation": "There is no catch for network errors, non-2xx responses, or JSON parse failures. The promise rejects unhandled, and profile stays null, so the user sees \u0027Loading\u2026\u0027 forever with no error message or retry option.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The fetch chain has no catch and does not check r.ok. Failures leave the UI on \u0027Loading\u2026\u0027 forever and produce an unhandled rejection. This is a genuine defect that no label covers."
+          "label_ids": [],
+          "reason": "No catch or response.ok check, so failures leave \u0027Loading\u2026\u0027 forever with an unhandled rejection. This is a genuine defect not covered by the labels."
         },
         {
           "line": 20,
@@ -2430,8 +2609,8 @@
           "title": "API response is cast to Profile without runtime validation",
           "explanation": "r.json() as Promise\u003CProfile\u003E only asserts the type at compile time. If the API returns a different shape, for example a missing tags array, profile.tags.includes or .map will throw at render time.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A type cast on a JSON response is the common pattern here. Asking for runtime validation is speculative best-practice advice and not a defect in this code."
+          "label_ids": [],
+          "reason": "A type assertion on a fetch response is a common pattern. Runtime validation here is speculative best-practice advice."
         },
         {
           "line": 33,
@@ -2441,8 +2620,8 @@
           "title": "Added tags are never persisted to the server",
           "explanation": "addTag only updates local component state. There is no request to save the change, so a page reload loses the new tag. The UI suggests the tag was saved when it was not.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The component is not specified to persist tags. This is speculation about missing features rather than a bug in the code."
+          "label_ids": [],
+          "reason": "Persistence is not stated as a requirement of this component, so claiming a missing save is speculative."
         },
         {
           "line": 49,
@@ -2452,8 +2631,8 @@
           "title": "Tag input is not wrapped in a form",
           "explanation": "The input and button are not in a form element, so pressing Enter in the input does nothing. Keyboard users have to tab to the button to add a tag.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Wrapping the input in a form for Enter-key submission is a UX preference, not a defect."
+          "label_ids": [],
+          "reason": "Missing form/Enter-key support is a UX preference, not a defect in this code."
         }
       ],
       "found": [
@@ -2465,9 +2644,9 @@
       "reviewer_input_tokens": 1862,
       "reviewer_output_tokens": 1487,
       "reviewer_cost": 0.0009297,
-      "judge_input_tokens": 2173,
-      "judge_output_tokens": 447,
-      "judge_cost": 0.008816,
+      "judge_input_tokens": 2226,
+      "judge_output_tokens": 424,
+      "judge_cost": 0.008692,
       "seconds": 11.7,
       "error": null
     },
@@ -2475,6 +2654,8 @@
       "id": "ts-05-orders-router",
       "group": "realistic",
       "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [
@@ -2491,8 +2672,10 @@
           "title": "SQL injection via string concatenation",
           "explanation": "The raw req.params.id is concatenated into the SQL text. The parseInt check on line 9 only validates the parsed value, not the string used in the query. An input such as \u00221 OR 1=1\u0022 parses to 1 and passes validation, but the injected SQL is executed.",
           "verdict": "match",
-          "label_id": "ts-05-orders-router#1",
-          "reason": "Same SQL injection via concatenated req.params.id that bypasses the parseInt check."
+          "label_ids": [
+            "ts-05-orders-router#1"
+          ],
+          "reason": "Identifies SQL injection from concatenating req.params.id and notes that the parseInt check does not protect the query."
         },
         {
           "line": 30,
@@ -2502,8 +2685,8 @@
           "title": "req.user accessed without authentication check or type declaration",
           "explanation": "req.user is not part of Express\u0027s Request type unless an auth library augments it. If authentication middleware is absent or skipped, req.user is undefined and req.user.id throws a TypeError, resulting in a 500. There is also no check that the caller is authenticated before cancelling an order.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "req.user is dereferenced with no auth check and no type augmentation, so it can throw a TypeError. This is a genuine defect that no label covers."
+          "label_ids": [],
+          "reason": "req.user is used with no type declaration or authentication guard, so an undefined user throws a TypeError. This is a genuine robustness and typing issue that no label covers."
         },
         {
           "line": 40,
@@ -2513,8 +2696,10 @@
           "title": "Error handler leaks internal error details and stack traces to clients",
           "explanation": "The response includes String(err) and err.stack for every error. This exposes internal paths, library versions, and possibly SQL or connection details to any client. The response should not depend on the environment being non-production.",
           "verdict": "match",
-          "label_id": "ts-05-orders-router#3",
-          "reason": "Error handler sends String(err) and stack traces to clients."
+          "label_ids": [
+            "ts-05-orders-router#3"
+          ],
+          "reason": "Describes the error handler sending String(err) and the stack trace to clients."
         },
         {
           "line": 9,
@@ -2524,8 +2709,8 @@
           "title": "parseInt accepts partially numeric input",
           "explanation": "Number.parseInt(\u002712abc\u0027, 10) returns 12, so malformed identifiers like \u002712abc\u0027 or \u002712.5\u0027 are accepted as valid. Combined with the concatenated query, the validated value and the value sent to the database can differ.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "parseInt accepts \u002712abc\u0027, so the validated value can differ from the string used in the query. This is a real validation weakness, closely tied to the injection but a distinct defect from it."
+          "label_ids": [],
+          "reason": "parseInt accepts \u002712abc\u0027, so the validated value differs from the string used in the query. This is a real validation flaw, though closely tied to the injection, and it is a separate defect from the label\u0027s concatenation issue."
         },
         {
           "line": 30,
@@ -2535,8 +2720,8 @@
           "title": "Non-numeric id in cancel route is not validated",
           "explanation": "The /orders/:id/cancel route passes req.params.id directly to Postgres without validation. A non-integer value causes a database type error that falls through to the generic error handler as a 500 instead of a 400.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "The cancel route does no id validation, so a non-numeric id causes a DB type error and a 500 instead of a 400. This is a legitimate defect."
+          "label_ids": [],
+          "reason": "The cancel route has no id validation, so a non-numeric id causes a DB type error and a 500 instead of a 400. This is a real, minor bug."
         },
         {
           "line": 32,
@@ -2546,8 +2731,8 @@
           "title": "Ambiguous 409 response for cancel",
           "explanation": "A 409 is returned whenever rowCount is not 1. This covers a missing order, an order owned by another customer, and an order not in pending status. Those cases are indistinguishable to the client, and rowCount may be null in pg types, so the check is not safe.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A single 409 for any non-matching update is a reasonable design choice and not a defect. The rowCount null concern is minor."
+          "label_ids": [],
+          "reason": "Using a single 409 for every non-matching case is a deliberate design choice that avoids leaking order existence. The rowCount null concern is speculative."
         },
         {
           "line": 4,
@@ -2557,8 +2742,8 @@
           "title": "Pool has no error listener and no validation of DATABASE_URL",
           "explanation": "An idle client error emitted by pg.Pool without an \u0027error\u0027 listener is an unhandled event that can crash the process. process.env.DATABASE_URL may also be undefined, which is passed silently to the Pool.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "pg Pool without an \u0027error\u0027 listener can crash the process on an idle client error. This is a real robustness issue, though the DATABASE_URL part is weaker."
+          "label_ids": [],
+          "reason": "pg.Pool emits \u0027error\u0027 events for idle client errors, and with no listener they can crash the process. This is a known real issue."
         },
         {
           "line": 20,
@@ -2568,8 +2753,8 @@
           "title": "Untyped query results and response shapes",
           "explanation": "pool.query returns rows typed as any. The response is sent without a declared shape, so there is no compile-time guarantee that the returned object matches what clients expect.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Untyped rows and response shape is a style and typing preference, not a defect."
+          "label_ids": [],
+          "reason": "This is a typing preference with no functional defect."
         },
         {
           "line": 7,
@@ -2579,8 +2764,8 @@
           "title": "Missing explicit return types on handlers and error handler",
           "explanation": "The async route handlers and errorHandler have no explicit return type annotations. Their inferred types mix Response and void across branches, which makes the contract unclear.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Missing explicit return types is a style preference."
+          "label_ids": [],
+          "reason": "Missing explicit return types is a style preference and not a defect."
         }
       ],
       "found": [
@@ -2594,9 +2779,9 @@
       "reviewer_input_tokens": 1863,
       "reviewer_output_tokens": 2238,
       "reviewer_cost": 0.0013053,
-      "judge_input_tokens": 2602,
-      "judge_output_tokens": 607,
-      "judge_cost": 0.011274,
+      "judge_input_tokens": 2655,
+      "judge_output_tokens": 645,
+      "judge_cost": 0.01176,
       "seconds": 17,
       "error": null
     },
@@ -2604,6 +2789,8 @@
       "id": "ts-06-calendar-days",
       "group": "realistic",
       "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [
@@ -2619,8 +2806,10 @@
           "title": "toDate ignores the 1-based month convention",
           "explanation": "CalendarDay documents months as 1-12, but JavaScript\u0027s Date constructor expects 0-11. Passing month directly makes every date land one month late, e.g. January (1) becomes February. fromDate adds 1 when reading the month, so the two functions are inconsistent with each other.",
           "verdict": "match",
-          "label_id": "ts-06-calendar-days#1",
-          "reason": "Identifies toDate passing 1-based month directly to Date, shifting every date one month late."
+          "label_ids": [
+            "ts-06-calendar-days#1"
+          ],
+          "reason": "Identifies the off-by-one month passed to the Date constructor in toDate on line 9."
         },
         {
           "line": 13,
@@ -2630,8 +2819,10 @@
           "title": "fromDate returns the weekday instead of the day of the month",
           "explanation": "date.getDay() returns the day of the week (0-6), not the day of the month. The day field will be wrong for almost every date. The correct accessor is getDate().",
           "verdict": "match",
-          "label_id": "ts-06-calendar-days#2",
-          "reason": "Identifies fromDate using getDay() instead of getDate()."
+          "label_ids": [
+            "ts-06-calendar-days#2"
+          ],
+          "reason": "Identifies getDay() returning the weekday instead of getDate() on line 13."
         },
         {
           "line": 18,
@@ -2640,9 +2831,9 @@
           "severity": "High",
           "title": "addDays inherits the month offset and the wrong day field",
           "explanation": "addDays builds its Date through the buggy toDate, which shifts the month forward by one, and then reads the result through the buggy fromDate, which returns the weekday as day. The result is wrong on both counts, so adding days to a date does not produce the intended calendar day.",
-          "verdict": "real",
-          "label_id": null,
-          "reason": "Describes ts-06-calendar-days#1 but at lines 18-19, outside the window. Describes addDays as a downstream effect of the toDate month offset (and fromDate bug); the primary cause named first is the toDate month shift."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "addDays has no defect of its own; it only inherits the toDate and fromDate bugs already reported, so this is a duplicate consequence and not a separate defect."
         },
         {
           "line": 27,
@@ -2651,9 +2842,9 @@
           "severity": "High",
           "title": "isWeekend computes the weekday from a shifted date",
           "explanation": "isWeekend calls toDate, which places the date in the wrong month because of the month-indexing bug. The weekday returned by getDay() therefore belongs to a different date, and weekend detection is incorrect.",
-          "verdict": "real",
-          "label_id": null,
-          "reason": "Describes ts-06-calendar-days#1 but at lines 27-28, outside the window. isWeekend is wrong because toDate shifts the month; the label explicitly mentions isWeekend."
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "isWeekend is only a downstream symptom of the toDate month bug already labeled, with no independent defect in its code."
         },
         {
           "line": 8,
@@ -2663,8 +2854,8 @@
           "title": "No validation of CalendarDay inputs",
           "explanation": "toDate and the other functions accept any number. Out-of-range months or days are silently normalized by Date (for example month 13 rolls into the next year), and years 0-99 are mapped to 1900-1999 by the Date constructor. Invalid calendar data therefore produces plausible but wrong dates with no error.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative input validation advice; not a defect in this small utility."
+          "label_ids": [],
+          "reason": "Speculative best-practice advice about input validation; not a defect in this code."
         },
         {
           "line": 2,
@@ -2674,8 +2865,8 @@
           "title": "CalendarDay fields are mutable",
           "explanation": "The interface is used as a value object, but its properties are not readonly. Callers can mutate a day after it has been validated or shared, which can produce inconsistent state.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Readonly fields are a style preference and do not affect correctness here."
+          "label_ids": [],
+          "reason": "Readonly fields are a style preference and do not matter for the defects here."
         }
       ],
       "found": [
@@ -2683,13 +2874,13 @@
         "ts-06-calendar-days#2"
       ],
       "missed": [],
-      "outside_window": 2,
+      "outside_window": 0,
       "reviewer_input_tokens": 1656,
       "reviewer_output_tokens": 1783,
       "reviewer_cost": 0.0010571,
-      "judge_input_tokens": 2030,
-      "judge_output_tokens": 395,
-      "judge_cost": 0.00801,
+      "judge_input_tokens": 2083,
+      "judge_output_tokens": 410,
+      "judge_cost": 0.008266,
       "seconds": 13.4,
       "error": null
     },
@@ -2697,6 +2888,8 @@
       "id": "ts-clean-01-use-interval",
       "group": "clean",
       "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [],
@@ -2709,8 +2902,8 @@
           "title": "Errors thrown by the callback are unhandled",
           "explanation": "The interval wrapper calls saved.current() without any try/catch. If the callback throws, the exception escapes the timer callback on every tick, and the hook gives callers no way to observe or recover from it.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Letting a callback\u0027s exception propagate is standard behavior; swallowing it in a generic hook would be wrong, and there is no defect here."
+          "label_ids": [],
+          "reason": "Not catching callback errors is normal behavior; a hook swallowing errors would be worse. Not a defect."
         },
         {
           "line": 18,
@@ -2720,8 +2913,8 @@
           "title": "delayMs is not validated for NaN, negative, or non-finite values",
           "explanation": "The type number | null accepts NaN, negative numbers, and Infinity. setInterval coerces these to 0 or to a very short delay, which can cause a tight loop that floods the event queue. The type does not express these constraints.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Input validation for NaN, negative or Infinity delays is speculative; this matches the behavior of setInterval and the well-known useInterval pattern, so it is not a defect."
+          "label_ids": [],
+          "reason": "Speculative input validation; callers control the delay and setInterval with small or invalid values is standard behavior. Not a real defect in this hook."
         },
         {
           "line": 10,
@@ -2731,8 +2924,8 @@
           "title": "Callback ref is updated in useEffect, which runs after paint",
           "explanation": "saved.current is set in a passive effect, so during the window between render and effect flush an interval tick can still invoke the previous callback. This is a small staleness window and can cause subtle bugs with closures that depend on the latest props or state.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Updating the ref in an effect is the canonical Dan Abramov pattern. The staleness window is negligible and the code follows accepted practice."
+          "label_ids": [],
+          "reason": "Updating the ref in useEffect is the standard, recommended pattern (Dan Abramov\u0027s useInterval). The staleness window is negligible and not a defect."
         },
         {
           "line": 15,
@@ -2742,8 +2935,8 @@
           "title": "Bare return in effect alongside a cleanup-returning path",
           "explanation": "The effect returns a bare return on one path and a cleanup function on the other. Under noImplicitReturns, TypeScript can flag this inconsistent return pattern, and it is less explicit than returning undefined.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "A bare return in an effect is valid. noImplicitReturns allows a bare return in void-compatible functions, so this is only a style remark."
+          "label_ids": [],
+          "reason": "A bare return in an effect is valid; noImplicitReturns permits a bare \u0060return;\u0060 for void/undefined-returning paths, so this is only a style remark."
         }
       ],
       "found": [],
@@ -2752,9 +2945,9 @@
       "reviewer_input_tokens": 1448,
       "reviewer_output_tokens": 1568,
       "reviewer_cost": 0.0009288,
-      "judge_input_tokens": 1455,
-      "judge_output_tokens": 322,
-      "judge_cost": 0.00613,
+      "judge_input_tokens": 1508,
+      "judge_output_tokens": 320,
+      "judge_cost": 0.006216,
       "seconds": 12.8,
       "error": null
     },
@@ -2762,6 +2955,8 @@
       "id": "ts-clean-02-money",
       "group": "clean",
       "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "2599284cd1e1",
       "labels": [],
@@ -2774,8 +2969,8 @@
           "title": "Hardcoded two-decimal assumption breaks zero- and three-decimal currencies",
           "explanation": "formatCents always divides by 100 and parseCents always accepts at most two decimal places, regardless of currency. For zero-decimal currencies such as JPY, 1050 cents is formatted from 10.5 and rounds to a wrong whole amount. For three-decimal currencies such as KWD, the value is also wrong.",
           "verdict": "real",
-          "label_id": null,
-          "reason": "Dividing by 100 regardless of currency is a genuine limitation: JPY (0 decimals) and KWD (3 decimals) would be formatted incorrectly. The file\u0027s contract is explicitly in cents, but the currency parameter makes the mismatch a real defect."
+          "label_ids": [],
+          "reason": "The code does assume two decimals: formatCents divides by 100 regardless of currency. For JPY (0 decimals) or KWD (3 decimals), the amount is displayed wrongly. This is a genuine currency-handling defect, though the parseCents part of the claim is less clearly wrong."
         },
         {
           "line": 18,
@@ -2785,8 +2980,8 @@
           "title": "Invalid locale or currency throws unhandled runtime errors",
           "explanation": "Intl.NumberFormat throws a RangeError for a malformed locale and a TypeError for an invalid currency code. formatCents does not validate or document these cases, so callers receive unexpected exceptions.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Intl.NumberFormat throwing on a malformed locale or invalid currency is standard, expected behavior. The caller is responsible for passing valid values, so this is not a defect in the code."
+          "label_ids": [],
+          "reason": "Intl.NumberFormat throwing on an invalid locale or currency is standard, expected behavior. Propagating the error is reasonable, so this is not a defect."
         },
         {
           "line": 22,
@@ -2796,8 +2991,8 @@
           "title": "No upper bound on parts allows unbounded array allocation",
           "explanation": "splitCents only requires parts to be a positive integer. A large value such as 1e9 makes Array.from allocate a huge array and can exhaust memory or block the event loop.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Allocating an array of size \u0060parts\u0060 is inherent to a function that returns \u0060parts\u0060 items. The caller controls that size, so this is speculative and not a real bug."
+          "label_ids": [],
+          "reason": "Returning an array of length \u0060parts\u0060 is the function\u0027s contract. The caller controls the size, so a missing upper bound is speculative advice rather than a defect."
         },
         {
           "line": 14,
@@ -2807,7 +3002,7 @@
           "title": "Cents represented as plain number with no type distinction",
           "explanation": "Cents values and arbitrary numbers share the type number, so callers can pass a major-unit amount to formatCents or splitCents without a compile-time error. This is an easy mistake given the naming alone.",
           "verdict": "false_alarm",
-          "label_id": null,
+          "label_ids": [],
           "reason": "Suggesting branded types is a design preference, not a defect in this code."
         },
         {
@@ -2818,8 +3013,8 @@
           "title": "Runtime input is not validated despite the string type",
           "explanation": "parseCents calls input.trim() directly. If untyped JavaScript or a bad JSON payload passes a non-string value, the function throws a TypeError rather than returning null as its contract promises.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "The function is typed as taking a string, and defending against untyped callers is speculative best-practice advice rather than a real defect."
+          "label_ids": [],
+          "reason": "The parameter is typed string, so defending against non-string input in TypeScript is speculative best-practice advice."
         }
       ],
       "found": [],
@@ -2828,9 +3023,9 @@
       "reviewer_input_tokens": 1748,
       "reviewer_output_tokens": 1902,
       "reviewer_cost": 0.0011258,
-      "judge_input_tokens": 1872,
-      "judge_output_tokens": 416,
-      "judge_cost": 0.007904,
+      "judge_input_tokens": 1925,
+      "judge_output_tokens": 419,
+      "judge_cost": 0.00804,
       "seconds": 14.5,
       "error": null
     },
@@ -2838,6 +3033,8 @@
       "id": "ts-clean-03-todo-list",
       "group": "clean",
       "kind": "clean",
+      "language": "React",
+      "prompt_version": 1,
       "repeat": 1,
       "prompt_hash": "04ccacda7af3",
       "labels": [],
@@ -2850,8 +3047,8 @@
           "title": "crypto.randomUUID may be unavailable in some environments",
           "explanation": "crypto.randomUUID() is only exposed in secure contexts (HTTPS or localhost) and in newer runtimes. On a plain-HTTP page or an older browser or test environment, calling it throws a TypeError inside the submit handler, so adding a to-do fails with no feedback.",
           "verdict": "false_alarm",
-          "label_id": null,
-          "reason": "Speculative environment-compatibility concern. crypto.randomUUID is widely supported in modern browsers and secure contexts, and the file has no defect; the label set is empty. Not a genuine bug a senior reviewer would insist on fixing."
+          "label_ids": [],
+          "reason": "crypto.randomUUID is widely supported in modern browsers and Node. Its secure-context limit is a real but speculative environment concern, and the code is correct for its target platform. Flagging this is a compatibility preference, not a defect."
         }
       ],
       "found": [],
@@ -2860,11 +3057,12 @@
       "reviewer_input_tokens": 1851,
       "reviewer_output_tokens": 650,
       "reviewer_cost": 0.0005101,
-      "judge_input_tokens": 1554,
-      "judge_output_tokens": 121,
-      "judge_cost": 0.004318,
+      "judge_input_tokens": 1607,
+      "judge_output_tokens": 119,
+      "judge_cost": 0.004404,
       "seconds": 9,
       "error": null
     }
-  ]
+  ],
+  "rejudged_at": "2026-10-29T13:09:12.9237437+00:00"
 }

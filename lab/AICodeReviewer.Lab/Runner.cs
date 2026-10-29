@@ -15,10 +15,11 @@ namespace AICodeReviewer.Lab
     }
 
     /// <param name="Prompts">The prompt version each language in the run used</param>
+    /// <param name="RejudgedAt">When the saved reviews were last graded again by the judge, if they were</param>
     public record RunResult(
         string Dataset, string Model, string JudgeModel, IReadOnlyDictionary<string, int> Prompts, int Repeat, int Tolerance,
         DateTimeOffset StartedAt, double Seconds, bool StoppedByBudget, Estimate Estimate, Metrics Summary,
-        IReadOnlyDictionary<string, Metrics> Groups, IReadOnlyList<CaseResult> Cases);
+        IReadOnlyDictionary<string, Metrics> Groups, IReadOnlyList<CaseResult> Cases, DateTimeOffset? RejudgedAt = null);
 
     /// <summary>
     /// Reviews every case of a dataset with one model, has the judge grade each review and adds up the scores,
@@ -67,6 +68,73 @@ namespace AICodeReviewer.Lab
             var judgeIn = (int)((Judge.Instructions.Length + numbered.Length + 250 * c.Labels().Count + 300 * findings) / 3.5);
             var judgeOut = 1500 + 200 * findings;
             return (reviewIn, reviewOut, judgeIn, judgeOut);
+        }
+
+        /// <summary>
+        /// What grading a saved run again would cost: what the same judge cost last time plus a quarter, or an estimate
+        /// from the size of each file and its findings when the judge is another model
+        /// </summary>
+        public decimal EstimateRejudge(RunResult run, string judgeModel)
+        {
+            var model = catalog.Get(judgeModel);
+            var cases = dataset.Cases.ToDictionary(c => c.Info.Id);
+            return run.Cases.Where(c => c.Error is null && c.Findings.Count > 0 && cases.ContainsKey(c.Id)).Sum(c =>
+            {
+                if (run.JudgeModel == judgeModel && c.JudgeCost > 0)
+                {
+                    return c.JudgeCost * 1.25m;
+                }
+                var numbered = Reviewer.NumberLines(cases[c.Id].ForReview().Content);
+                var judgeIn = (int)((Judge.Instructions.Length + numbered.Length + 250 * c.Labels.Count + 300 * c.Findings.Count) / 3.5);
+                return model.CostOf(judgeIn, 1500 + 200 * c.Findings.Count);
+            });
+        }
+
+        /// <summary>
+        /// Grades the reviews saved in a run again with the given judge and the dataset's current labels, without
+        /// asking the reviewer again. Cases that failed or are no longer in the dataset are left as they were
+        /// </summary>
+        public async Task<RunResult> RejudgeAsync(RunResult run, string judgeModel, Action<string>? progress = null, CancellationToken ct = default)
+        {
+            var cases = dataset.Cases.ToDictionary(c => c.Info.Id);
+            var gate = new SemaphoreSlim(4);
+            var rejudged = await Task.WhenAll(run.Cases.Select(async c =>
+            {
+                if (c.Error is not null || !cases.TryGetValue(c.Id, out var datasetCase))
+                {
+                    return c;
+                }
+                await gate.WaitAsync(ct);
+                try
+                {
+                    var labels = datasetCase.Labels();
+                    var findings = c.Findings.Select(f => new Models.Review.Finding
+                    {
+                        Line = f.Line, EndLine = f.EndLine, Category = f.Category, Severity = f.Severity, Title = f.Title, Explanation = f.Explanation
+                    }).ToList();
+                    var judged = await judge.JudgeAsync(judgeModel, datasetCase.ForReview(), labels, findings, ct);
+                    var score = Scoring.Score(labels, findings, judged.Verdicts, run.Tolerance);
+                    progress?.Invoke($"  {c.Id} (run {c.Repeat}): {c.Found.Count} -> {score.Found.Count} of {labels.Count} found");
+                    return c with
+                    {
+                        Labels = labels.Select(l => l.Id).ToList(), Findings = score.Findings, Found = score.Found, Missed = score.Missed,
+                        OutsideWindow = score.OutsideWindow, JudgeInputTokens = judged.InputTokens, JudgeOutputTokens = judged.OutputTokens,
+                        JudgeCost = judged.Cost
+                    };
+                }
+                finally
+                {
+                    gate.Release();
+                }
+            }));
+
+            var ordered = rejudged.ToList();
+            var groups = ordered.GroupBy(r => r.Group).OrderBy(g => g.Key, StringComparer.Ordinal)
+                .ToDictionary(g => g.Key, g => Metrics.Of(g.ToList()));
+            return run with
+            {
+                JudgeModel = judgeModel, Cases = ordered, Summary = Metrics.Of(ordered), Groups = groups, RejudgedAt = DateTimeOffset.UtcNow
+            };
         }
 
         public async Task<RunResult> RunAsync(RunOptions options, Action<string>? progress = null, CancellationToken ct = default)

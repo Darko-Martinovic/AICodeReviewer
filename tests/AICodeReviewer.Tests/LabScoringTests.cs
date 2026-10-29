@@ -17,18 +17,31 @@ public class LabScoringTests
     public void A_match_within_the_window_finds_the_label_and_a_second_match_is_a_duplicate()
     {
         var score = Scoring.Score([Injection, Leak], [At(12), At(9)],
-            [new(0, "match", "c#1", "same"), new(1, "match", "c#1", "same again")], tolerance: 3);
+            [new(0, "match", ["c#1"], "same"), new(1, "match", ["c#1"], "same again")], tolerance: 3);
 
         Assert.Equal(["c#1"], score.Found);
         Assert.Equal(["c#2"], score.Missed);
         Assert.Equal(["match", "duplicate"], score.Findings.Select(f => f.Verdict));
-        Assert.All(score.Findings, f => Assert.Equal("c#1", f.LabelId));
+        Assert.All(score.Findings, f => Assert.Equal(["c#1"], f.LabelIds));
+    }
+
+    [Fact]
+    public void One_finding_can_find_several_labels_but_only_those_within_the_window()
+    {
+        var nearby = new Label("c#3", 13, 13, "Security", "High", "Hardcoded key", "...");
+
+        var score = Scoring.Score([Injection, Leak, nearby], [At(10, 13), At(11)],
+            [new(0, "match", ["c#1", "c#3", "c#2"], "three defects"), new(1, "match", ["c#3", "c#1"], "two of them again")], tolerance: 3);
+
+        Assert.Equal(["c#1", "c#3"], score.Found);
+        Assert.Equal(["c#1", "c#3"], score.Findings[0].LabelIds);
+        Assert.Equal(["match", "duplicate"], score.Findings.Select(f => f.Verdict));
     }
 
     [Fact]
     public void A_match_outside_the_window_counts_as_real_not_found()
     {
-        var score = Scoring.Score([Injection], [At(30)], [new(0, "match", "c#1", "same")], tolerance: 3);
+        var score = Scoring.Score([Injection], [At(30)], [new(0, "match", ["c#1"], "same")], tolerance: 3);
 
         Assert.Empty(score.Found);
         Assert.Equal("real", Assert.Single(score.Findings).Verdict);
@@ -47,7 +60,7 @@ public class LabScoringTests
     public void Unknown_labels_unknown_verdicts_and_missing_verdicts_are_not_counted_as_found()
     {
         var score = Scoring.Score([Injection], [At(10), At(10), At(10)],
-            [new(0, "match", "c#9", "?"), new(1, "maybe", "", "?")], tolerance: 3);
+            [new(0, "match", ["c#9"], "?"), new(1, "maybe", [], "?")], tolerance: 3);
 
         Assert.Empty(score.Found);
         Assert.Equal(["real", "false_alarm", "false_alarm"], score.Findings.Select(f => f.Verdict));
@@ -71,7 +84,7 @@ public class LabScoringTests
         Assert.Equal(0.03m, m.ReviewerCost);
     }
 
-    private static ScoredFinding Scored(string verdict) => new(1, 1, "Bug", "Low", "t", "e", verdict, null, "r");
+    private static ScoredFinding Scored(string verdict) => new(1, 1, "Bug", "Low", "t", "e", verdict, [], "r");
 
     private static CaseResult Case(string kind, string group, string[] labels, string[] found, ScoredFinding[] findings) =>
         new($"{kind}-case", group, kind, "CSharp", 1, 1, "hash", labels, findings, found, labels.Except(found).ToList(), 0,
