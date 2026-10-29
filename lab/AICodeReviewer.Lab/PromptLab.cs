@@ -103,17 +103,23 @@ namespace AICodeReviewer.Lab
             var (before, beforeRuns) = Score(baselinePool);
             var (after, afterRuns) = Score(candidatePool);
 
+            // The reason is saved in prompts.json, so it reads the same whatever the machine's culture
             var reasons = new List<string>();
-            if (after.F1 < before.F1 + margin) reasons.Add($"F1 {before.F1:F2} to {after.F1:F2} is not a rise of at least {margin:F2}");
-            if (after.Precision < before.Precision - margin) reasons.Add($"precision fell from {before.Precision:P0} to {after.Precision:P0}");
-            if (after.Recall < before.Recall - margin) reasons.Add($"recall fell from {before.Recall:P0} to {after.Recall:P0}");
+            if (after.F1 < before.F1 + margin) reasons.Add(Invariant($"F1 {before.F1:F2} to {after.F1:F2} is not a rise of at least {margin:F2}"));
+            if (after.Precision < before.Precision - margin) reasons.Add($"precision fell from {Percent(before.Precision)} to {Percent(after.Precision)}");
+            if (after.Recall < before.Recall - margin) reasons.Add($"recall fell from {Percent(before.Recall)} to {Percent(after.Recall)}");
 
             var keep = reasons.Count == 0;
             var reason = keep
-                ? $"F1 rose from {before.F1:F2} to {after.F1:F2} (precision {before.Precision:P0} to {after.Precision:P0}, recall {before.Recall:P0} to {after.Recall:P0})"
+                ? Invariant($"F1 rose from {before.F1:F2} to {after.F1:F2}") +
+                  $" (precision {Percent(before.Precision)} to {Percent(after.Precision)}, recall {Percent(before.Recall)} to {Percent(after.Recall)})"
                 : string.Join("; ", reasons);
             return new Verdict(keep, reason, before, after, beforeRuns, afterRuns);
         }
+
+        private static string Invariant(FormattableString text) => FormattableString.Invariant(text);
+
+        private static string Percent(double rate) => Invariant($"{Math.Round(rate * 100):0}%");
 
         public static PromptDecision ToDecision(Verdict verdict, DateOnly today) => new(
             verdict.Keep ? "kept" : "rolled_back", today.ToString("yyyy-MM-dd"), verdict.Reason,
