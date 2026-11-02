@@ -1,0 +1,1925 @@
+{
+  "dataset": "v1",
+  "model": "copilot",
+  "judge_model": "claude-sonnet-5-5",
+  "prompts": {},
+  "repeat": 1,
+  "tolerance": 3,
+  "started_at": "2026-11-02T13:29:22.9491959+00:00",
+  "seconds": 124.7,
+  "stopped_by_budget": false,
+  "estimate": {
+    "cases": 28,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "reviewer_cost": 0,
+    "judge_cost": 0,
+    "total": 0
+  },
+  "summary": {
+    "cases": 28,
+    "errors": 0,
+    "labels": 71,
+    "found": 60,
+    "findings": 79,
+    "matched": 58,
+    "duplicates": 0,
+    "real": 14,
+    "false_alarms": 7,
+    "outside_window": 5,
+    "clean_cases": 8,
+    "false_alarms_on_clean": 6,
+    "recall": 0.8451,
+    "precision": 0.9114,
+    "strict_precision": 0.7342,
+    "f1": 0.877,
+    "false_alarms_per_clean_case": 0.75,
+    "reviewer_cost": 0,
+    "judge_cost": 0.217732
+  },
+  "groups": {
+    "clean": {
+      "cases": 8,
+      "errors": 0,
+      "labels": 0,
+      "found": 0,
+      "findings": 9,
+      "matched": 0,
+      "duplicates": 0,
+      "real": 3,
+      "false_alarms": 6,
+      "outside_window": 0,
+      "clean_cases": 8,
+      "false_alarms_on_clean": 6,
+      "recall": 1,
+      "precision": 0.3333,
+      "strict_precision": 0,
+      "f1": 0.5,
+      "false_alarms_per_clean_case": 0.75,
+      "reviewer_cost": 0,
+      "judge_cost": 0.054712
+    },
+    "realistic": {
+      "cases": 18,
+      "errors": 0,
+      "labels": 39,
+      "found": 36,
+      "findings": 39,
+      "matched": 36,
+      "duplicates": 0,
+      "real": 3,
+      "false_alarms": 0,
+      "outside_window": 3,
+      "clean_cases": 0,
+      "false_alarms_on_clean": 0,
+      "recall": 0.9231,
+      "precision": 1,
+      "strict_precision": 0.9231,
+      "f1": 0.96,
+      "false_alarms_per_clean_case": 0,
+      "reviewer_cost": 0,
+      "judge_cost": 0.113312
+    },
+    "seeded-dense": {
+      "cases": 2,
+      "errors": 0,
+      "labels": 32,
+      "found": 24,
+      "findings": 31,
+      "matched": 22,
+      "duplicates": 0,
+      "real": 8,
+      "false_alarms": 1,
+      "outside_window": 2,
+      "clean_cases": 0,
+      "false_alarms_on_clean": 0,
+      "recall": 0.75,
+      "precision": 0.9677,
+      "strict_precision": 0.7097,
+      "f1": 0.8451,
+      "false_alarms_per_clean_case": 0,
+      "reviewer_cost": 0,
+      "judge_cost": 0.049708
+    }
+  },
+  "cases": [
+    {
+      "id": "cs-01-order-pricing",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-01-order-pricing#1",
+        "cs-01-order-pricing#2"
+      ],
+      "findings": [
+        {
+          "line": 45,
+          "end_line": 45,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060items.Count\u0060 is the number of order lines, not the number of units, so a line with quantity 3 returns its full line total instead of the per-item price. This also reintroduces division by zero for an empty order; sum quantities and retain the existing zero guard.",
+          "explanation": "\u0060items.Count\u0060 is the number of order lines, not the number of units, so a line with quantity 3 returns its full line total instead of the per-item price. This also reintroduces division by zero for an empty order; sum quantities and retain the existing zero guard.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-01-order-pricing#2"
+          ],
+          "reason": "Flags line 45 dividing by items.Count (lines, not quantities) and the empty-order division by zero, matching label #2."
+        },
+        {
+          "line": 25,
+          "end_line": 25,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This changes the documented boundary from inclusive to exclusive: a subtotal exactly 500 now misses the extra 5% tier discount, even though the comment and requirement say 500 or more. Keep the inclusive comparison so the threshold behaves as described.",
+          "explanation": "This changes the documented boundary from inclusive to exclusive: a subtotal exactly 500 now misses the extra 5% tier discount, even though the comment and requirement say 500 or more. Keep the inclusive comparison so the threshold behaves as described.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-01-order-pricing#1"
+          ],
+          "reason": "Flags line 25 where a subtotal of exactly 500 misses the extra discount because the check is exclusive despite the \u0027or more\u0027 comment, matching label #1."
+        }
+      ],
+      "found": [
+        "cs-01-order-pricing#2",
+        "cs-01-order-pricing#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2049,
+      "judge_output_tokens": 187,
+      "judge_cost": 0.005968,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-02-invoice-repository",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-02-invoice-repository#1",
+        "cs-02-invoice-repository#2"
+      ],
+      "findings": [
+        {
+          "line": 24,
+          "end_line": 24,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Removing the allowlist check makes \u0060sortBy\u0060 untrusted input flow directly into the interpolated SQL. A caller can inject expressions or terminate the \u0060ORDER BY\u0060 clause, so this endpoint is now SQL-injection-prone. Restore the allowlist validation (and ideally use the matched canonical column name) before constructing the query.",
+          "explanation": "Removing the allowlist check makes \u0060sortBy\u0060 untrusted input flow directly into the interpolated SQL. A caller can inject expressions or terminate the \u0060ORDER BY\u0060 clause, so this endpoint is now SQL-injection-prone. Restore the allowlist validation (and ideally use the matched canonical column name) before constructing the query.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Describes cs-02-invoice-repository#1 but at lines 24-24, outside the window. Identifies SQL injection via unvalidated sortBy interpolated into the ORDER BY clause with the allowlist unused; the line is slightly off (24 vs 28) but it is the same defect."
+        },
+        {
+          "line": 48,
+          "end_line": 48,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The connection is no longer disposed after the command completes. Even though \u0060SqlConnection\u0060 uses pooling, failing to dispose it prevents the connection from being returned to the pool promptly and can exhaust the pool under repeated calls. Keep the \u0060await using\u0060 declaration here.",
+          "explanation": "The connection is no longer disposed after the command completes. Even though \u0060SqlConnection\u0060 uses pooling, failing to dispose it prevents the connection from being returned to the pool promptly and can exhaust the pool under repeated calls. Keep the \u0060await using\u0060 declaration here.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-02-invoice-repository#2"
+          ],
+          "reason": "Identifies the undisposed SqlConnection in DeleteOlderThanAsync, which can exhaust the connection pool."
+        }
+      ],
+      "found": [
+        "cs-02-invoice-repository#2"
+      ],
+      "missed": [
+        "cs-02-invoice-repository#1"
+      ],
+      "outside_window": 1,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2340,
+      "judge_output_tokens": 202,
+      "judge_cost": 0.0067,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-03-password-reset",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-03-password-reset#1",
+        "cs-03-password-reset#2"
+      ],
+      "findings": [
+        {
+          "line": 21,
+          "end_line": 21,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Using \u0060Random\u0060 makes reset tokens predictable and reduces them to only six decimal digits, so an attacker can enumerate guesses or reproduce the generator state. Password-reset credentials need a cryptographically secure random value with substantially more entropy; retain the cryptographic byte generation used previously (or use an equivalent CSPRNG).",
+          "explanation": "Using \u0060Random\u0060 makes reset tokens predictable and reduces them to only six decimal digits, so an attacker can enumerate guesses or reproduce the generator state. Password-reset credentials need a cryptographically secure random value with substantially more entropy; retain the cryptographic byte generation used previously (or use an equivalent CSPRNG).",
+          "verdict": "match",
+          "label_ids": [
+            "cs-03-password-reset#1"
+          ],
+          "reason": "Identifies the use of System.Random and the six-digit space on line 21 as predictable and guessable, and calls for a CSPRNG, matching label #1."
+        },
+        {
+          "line": 29,
+          "end_line": 29,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This comparison rejects every unexpired token (\u0060ExpiresAt\u0060 is normally in the future) and allows expired tokens to continue to the hash check. Reverse the comparison so redemption returns false only when the expiration is before the current time.",
+          "explanation": "This comparison rejects every unexpired token (\u0060ExpiresAt\u0060 is normally in the future) and allows expired tokens to continue to the hash check. Reverse the comparison so redemption returns false only when the expiration is before the current time.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-03-password-reset#2"
+          ],
+          "reason": "Identifies the inverted expiry comparison on line 29, where unexpired tokens are rejected and expired ones accepted, matching label #2."
+        }
+      ],
+      "found": [
+        "cs-03-password-reset#1",
+        "cs-03-password-reset#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2067,
+      "judge_output_tokens": 188,
+      "judge_cost": 0.006014,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-04-document-upload",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-04-document-upload#1",
+        "cs-04-document-upload#2",
+        "cs-04-document-upload#3"
+      ],
+      "findings": [
+        {
+          "line": 29,
+          "end_line": 29,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The stored file name now comes from \u0060file.FileName\u0060, which the client controls. A name such as \u0060../../web.config\u0060 can escape the \u0060uploads\u0060 folder and overwrite files under the content root, and repeated names overwrite earlier documents. Restore the GUID-based \u0060storedName\u0060 so the server controls the file name. This change is required before merge.",
+          "explanation": "The stored file name now comes from \u0060file.FileName\u0060, which the client controls. A name such as \u0060../../web.config\u0060 can escape the \u0060uploads\u0060 folder and overwrite files under the content root, and repeated names overwrite earlier documents. Restore the GUID-based \u0060storedName\u0060 so the server controls the file name. This change is required before merge.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-04-document-upload#1"
+          ],
+          "reason": "Client-controlled file.FileName used as the stored name allows traversal out of the uploads folder and overwrites on duplicate names, which is exactly label #1."
+        },
+        {
+          "line": 43,
+          "end_line": 43,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The path-traversal check was removed from \u0060Download\u0060, so \u0060id\u0060 goes straight into \u0060Path.Combine\u0060. A value such as \u0060../appsettings.json\u0060 can read files outside the \u0060uploads\u0060 folder. Restore the check before building the path. The \u0060Path.GetFileName(id) != id\u0060 test is a stricter guard that also rejects rooted values. This change is required before merge.",
+          "explanation": "The path-traversal check was removed from \u0060Download\u0060, so \u0060id\u0060 goes straight into \u0060Path.Combine\u0060. A value such as \u0060../appsettings.json\u0060 can read files outside the \u0060uploads\u0060 folder. Restore the check before building the path. The \u0060Path.GetFileName(id) != id\u0060 test is a stricter guard that also rejects rooted values. This change is required before merge.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-04-document-upload#3"
+          ],
+          "reason": "Download passes id straight into Path.Combine with no check, allowing traversal or rooted paths, which is label #3."
+        },
+        {
+          "line": 34,
+          "end_line": 34,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The upload now uses the synchronous \u0060CopyTo\u0060 into a \u0060MemoryStream\u0060, then calls \u0060ToArray()\u0060, which makes a second full copy of the file. Large uploads use extra memory and block a thread-pool thread inside an async action, and \u0060ct\u0060 is not honored during the copy. Restore streaming with \u0060CopyToAsync(target, ct)\u0060 to avoid both problems.",
+          "explanation": "The upload now uses the synchronous \u0060CopyTo\u0060 into a \u0060MemoryStream\u0060, then calls \u0060ToArray()\u0060, which makes a second full copy of the file. Large uploads use extra memory and block a thread-pool thread inside an async action, and \u0060ct\u0060 is not honored during the copy. Restore streaming with \u0060CopyToAsync(target, ct)\u0060 to avoid both problems.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-04-document-upload#2"
+          ],
+          "reason": "Synchronous CopyTo into a MemoryStream followed by ToArray() buffers the whole upload in memory and blocks a thread instead of streaming, which is label #2."
+        }
+      ],
+      "found": [
+        "cs-04-document-upload#1",
+        "cs-04-document-upload#3",
+        "cs-04-document-upload#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2599,
+      "judge_output_tokens": 277,
+      "judge_cost": 0.007968,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-05-exchange-rate-cache",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-05-exchange-rate-cache#1",
+        "cs-05-exchange-rate-cache#2"
+      ],
+      "findings": [
+        {
+          "line": 11,
+          "end_line": 11,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Changing this cache to a plain \u0060Dictionary\u0060 makes concurrent calls unsafe: multiple requests can read and write \u0060_rates\u0060 at the same time, and \u0060Dictionary\u0060 does not support concurrent access (potential corruption or exceptions). Keep a thread-safe collection here, or protect every access with a lock.",
+          "explanation": "Changing this cache to a plain \u0060Dictionary\u0060 makes concurrent calls unsafe: multiple requests can read and write \u0060_rates\u0060 at the same time, and \u0060Dictionary\u0060 does not support concurrent access (potential corruption or exceptions). Keep a thread-safe collection here, or protect every access with a lock.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-05-exchange-rate-cache#1"
+          ],
+          "reason": "Identifies the static plain Dictionary being accessed concurrently as unsafe, the same defect as label #1."
+        },
+        {
+          "line": 20,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060ConvertAsync\u0060 is already asynchronous, but \u0060.Result\u0060 blocks its caller while the HTTP operation completes and can deadlock when this library is used under a synchronization context; it also defeats asynchronous scalability. Await the operation and propagate the cancellation/exception normally.",
+          "explanation": "\u0060ConvertAsync\u0060 is already asynchronous, but \u0060.Result\u0060 blocks its caller while the HTTP operation completes and can deadlock when this library is used under a synchronization context; it also defeats asynchronous scalability. Await the operation and propagate the cancellation/exception normally.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-05-exchange-rate-cache#2"
+          ],
+          "reason": "Identifies blocking .Result in async ConvertAsync with deadlock risk and a request to await instead, the same defect as label #2."
+        }
+      ],
+      "found": [
+        "cs-05-exchange-rate-cache#1",
+        "cs-05-exchange-rate-cache#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2132,
+      "judge_output_tokens": 181,
+      "judge_cost": 0.006074,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-06-shipping-client",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-06-shipping-client#1",
+        "cs-06-shipping-client#2"
+      ],
+      "findings": [
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This bound prevents the third and final attempt from ever running. With the current loop, a transient failure on attempt 2 falls through to \u0060Unreachable\u0060 after the delay, and \u0060MaxAttempts == 1\u0060 would make the method perform no request at all. Use an inclusive bound so the configured maximum is actually honored.",
+          "explanation": "This bound prevents the third and final attempt from ever running. With the current loop, a transient failure on attempt 2 falls through to \u0060Unreachable\u0060 after the delay, and \u0060MaxAttempts == 1\u0060 would make the method perform no request at all. Use an inclusive bound so the configured maximum is actually honored.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-06-shipping-client#1"
+          ],
+          "reason": "Identifies the off-by-one loop bound on line 13 that stops the final attempt and falls through to the \u0027Unreachable\u0027 exception."
+        },
+        {
+          "line": 40,
+          "end_line": 40,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This bypasses the configured named \u0060shipping\u0060 client used by the other method, so its BaseAddress, authentication/default headers, handlers, timeouts, and other transport settings are not applied to shipment requests. Creating and disposing a new \u0060HttpClient\u0060 per call also prevents connection reuse under load. Obtain the client from \u0060factory\u0060 instead.",
+          "explanation": "This bypasses the configured named \u0060shipping\u0060 client used by the other method, so its BaseAddress, authentication/default headers, handlers, timeouts, and other transport settings are not applied to shipment requests. Creating and disposing a new \u0060HttpClient\u0060 per call also prevents connection reuse under load. Obtain the client from \u0060factory\u0060 instead.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-06-shipping-client#2"
+          ],
+          "reason": "Identifies the per-call new HttpClient on line 40 that bypasses the factory\u0027s \u0027shipping\u0027 client and prevents connection reuse."
+        }
+      ],
+      "found": [
+        "cs-06-shipping-client#1",
+        "cs-06-shipping-client#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2326,
+      "judge_output_tokens": 183,
+      "judge_cost": 0.006482,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-07-sales-report",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-07-sales-report#1",
+        "cs-07-sales-report#2",
+        "cs-07-sales-report#3"
+      ],
+      "findings": [
+        {
+          "line": 15,
+          "end_line": 15,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060to\u0060 is documented as inclusive, but using midnight at the start of \u0060to\u0060 as the exclusive bound excludes every order placed on the end date (and makes a one-day range empty). Advance the bound by one day so the whole requested final date is included.",
+          "explanation": "\u0060to\u0060 is documented as inclusive, but using midnight at the start of \u0060to\u0060 as the exclusive bound excludes every order placed on the end date (and makes a one-day range empty). Advance the bound by one day so the whole requested final date is included.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-07-sales-report#1"
+          ],
+          "reason": "Same defect: the end bound is midnight at the start of \u0060to\u0060 with an exclusive filter, so the last day is excluded despite the inclusive documentation."
+        },
+        {
+          "line": 24,
+          "end_line": 24,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This adds one \u0060Customers\u0060 query for every distinct customer after the orders query, so report latency and database round trips grow linearly with the number of customers. Project the customer name and aggregate in the original EF query instead of loading groups and querying inside the loop.",
+          "explanation": "This adds one \u0060Customers\u0060 query for every distinct customer after the orders query, so report latency and database round trips grow linearly with the number of customers. Project the customer name and aggregate in the original EF query instead of loading groups and querying inside the loop.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-07-sales-report#2"
+          ],
+          "reason": "Same defect: one Customers query per group inside the loop (N\u002B1). The category is labeled Bug rather than Performance, but the problem is identical."
+        },
+        {
+          "line": 37,
+          "end_line": 37,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "When a customer has no orders, \u0060totals\u0060 is empty and \u0060Average()\u0060 throws \u0060InvalidOperationException\u0060. The previous implementation returned \u00600m\u0060 for this case; keep that empty-result handling unless the API is intentionally changing its contract.",
+          "explanation": "When a customer has no orders, \u0060totals\u0060 is empty and \u0060Average()\u0060 throws \u0060InvalidOperationException\u0060. The previous implementation returned \u00600m\u0060 for this case; keep that empty-result handling unless the API is intentionally changing its contract.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-07-sales-report#3"
+          ],
+          "reason": "Same defect: Average() on an empty sequence throws InvalidOperationException when a customer has no orders. The mention of a \u0027previous implementation\u0027 is extra, but the core issue is the same."
+        }
+      ],
+      "found": [
+        "cs-07-sales-report#1",
+        "cs-07-sales-report#2",
+        "cs-07-sales-report#3"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2205,
+      "judge_output_tokens": 286,
+      "judge_cost": 0.00727,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-08-jwt-setup",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "cs-08-jwt-setup#1",
+        "cs-08-jwt-setup#2",
+        "cs-08-jwt-setup#3"
+      ],
+      "findings": [
+        {
+          "line": 11,
+          "end_line": 11,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Using a predictable fallback signing key means any deployment that omits \u0060Jwt:SigningKey\u0060 will accept tokens signed with this publicly visible value, including in production. This changes the previous fail-fast behavior into an authentication bypass risk; keep the required configuration check (or reject startup when the key is missing) instead of supplying a shared default.",
+          "explanation": "Using a predictable fallback signing key means any deployment that omits \u0060Jwt:SigningKey\u0060 will accept tokens signed with this publicly visible value, including in production. This changes the previous fail-fast behavior into an authentication bypass risk; keep the required configuration check (or reject startup when the key is missing) instead of supplying a shared default.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-08-jwt-setup#2"
+          ],
+          "reason": "Flags the hardcoded fallback signing key on line 11 that lets deployments missing the setting accept tokens signed with a known value."
+        },
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Disabling lifetime validation allows expired tokens and tokens whose \u0060nbf\u0060 is in the future to authenticate. \u0060ClockSkew\u0060 cannot protect this path while \u0060ValidateLifetime\u0060 is false; this should remain enabled for bearer authentication.",
+          "explanation": "Disabling lifetime validation allows expired tokens and tokens whose \u0060nbf\u0060 is in the future to authenticate. \u0060ClockSkew\u0060 cannot protect this path while \u0060ValidateLifetime\u0060 is false; this should remain enabled for bearer authentication.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-08-jwt-setup#1"
+          ],
+          "reason": "Flags ValidateLifetime = false on line 23, which lets expired tokens authenticate."
+        },
+        {
+          "line": 35,
+          "end_line": 35,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060Authorization\u0060 contains the complete bearer credential, so including it in the authentication-failure log writes reusable access tokens to the logging system and any downstream sinks. Log the rejection reason without the header (or a deliberately non-reversible identifier) instead.",
+          "explanation": "\u0060Authorization\u0060 contains the complete bearer credential, so including it in the authentication-failure log writes reusable access tokens to the logging system and any downstream sinks. Log the rejection reason without the header (or a deliberately non-reversible identifier) instead.",
+          "verdict": "match",
+          "label_ids": [
+            "cs-08-jwt-setup#3"
+          ],
+          "reason": "Flags the Authorization header written to the failure log on line 35, which exposes bearer tokens."
+        }
+      ],
+      "found": [
+        "cs-08-jwt-setup#2",
+        "cs-08-jwt-setup#1",
+        "cs-08-jwt-setup#3"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2387,
+      "judge_output_tokens": 243,
+      "judge_cost": 0.007204,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-clean-01-slug",
+      "group": "clean",
+      "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 0,
+      "judge_output_tokens": 0,
+      "judge_cost": 0,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-clean-02-customer-repository",
+      "group": "clean",
+      "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 35,
+          "end_line": 35,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060ExecuteNonQueryAsync\u0060 does not reliably return the number of rows updated here: \u0060SET NOCOUNT ON\u0060 can make it return \u0060-1\u0060, and triggers can alter the reported count. In either case, a successful rename can be reported as \u0060false\u0060 (and a trigger\u0027s row count can make a single-row update fail the \u0060== 1\u0060 check). Return the affected-row count from the SQL batch (for example with \u0060SELECT @@ROWCOUNT\u0060) and read that scalar instead.",
+          "explanation": "\u0060ExecuteNonQueryAsync\u0060 does not reliably return the number of rows updated here: \u0060SET NOCOUNT ON\u0060 can make it return \u0060-1\u0060, and triggers can alter the reported count. In either case, a successful rename can be reported as \u0060false\u0060 (and a trigger\u0027s row count can make a single-row update fail the \u0060== 1\u0060 check). Return the affected-row count from the SQL batch (for example with \u0060SELECT @@ROWCOUNT\u0060) and read that scalar instead.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The SQL is a plain UPDATE with no NOCOUNT or triggers in this code. SET NOCOUNT ON would have to be set by the server or in the batch, and neither is the case here. Triggers are speculative, and the proposed SELECT @@ROWCOUNT workaround is itself affected by triggers. ExecuteNonQueryAsync returning the affected row count is standard, correct behavior for this UPDATE."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1820,
+      "judge_output_tokens": 185,
+      "judge_cost": 0.00549,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "cs-clean-03-order-controller",
+      "group": "clean",
+      "kind": "clean",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 39,
+          "end_line": 39,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "With the default ASP.NET Core JWT bearer claim mapping, a token\u0027s \u0060sub\u0060 claim is exposed as \u0060ClaimTypes.NameIdentifier\u0060, not as a literal \u0060\u0022sub\u0022\u0060 claim. Valid authenticated callers can therefore hit this exception and receive a 500 instead of placing or reading an order. Read the mapped name-identifier claim (and optionally fall back to \u0060\u0022sub\u0022\u0060 if mapping is disabled), or configure claim mapping consistently.",
+          "explanation": "With the default ASP.NET Core JWT bearer claim mapping, a token\u0027s \u0060sub\u0060 claim is exposed as \u0060ClaimTypes.NameIdentifier\u0060, not as a literal \u0060\u0022sub\u0022\u0060 claim. Valid authenticated callers can therefore hit this exception and receive a 500 instead of placing or reading an order. Read the mapped name-identifier claim (and optionally fall back to \u0060\u0022sub\u0022\u0060 if mapping is disabled), or configure claim mapping consistently.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The finding depends on JWT bearer claim-mapping configuration that is not in this file. Many apps disable inbound claim mapping (\u0060MapInboundClaims = false\u0060), and reading the literal \u0060\u0022sub\u0022\u0060 claim is then correct. The file is labelled defect-free, and the claim that valid callers will get a 500 is speculative."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1857,
+      "judge_output_tokens": 749,
+      "judge_cost": 0.011204,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "seed-01-user-data-service",
+      "group": "seeded-dense",
+      "kind": "buggy",
+      "language": "CSharp",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "seed-01-user-data-service#1",
+        "seed-01-user-data-service#2",
+        "seed-01-user-data-service#3",
+        "seed-01-user-data-service#4",
+        "seed-01-user-data-service#5",
+        "seed-01-user-data-service#6",
+        "seed-01-user-data-service#7",
+        "seed-01-user-data-service#8",
+        "seed-01-user-data-service#9",
+        "seed-01-user-data-service#10",
+        "seed-01-user-data-service#11",
+        "seed-01-user-data-service#12",
+        "seed-01-user-data-service#13",
+        "seed-01-user-data-service#14",
+        "seed-01-user-data-service#15",
+        "seed-01-user-data-service#16"
+      ],
+      "findings": [
+        {
+          "line": 26,
+          "end_line": 26,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Both \u0060tableName\u0060 and \u0060userId\u0060 are interpolated into SQL. A caller can inject SQL through either value, and \u0060tableName\u0060 cannot be fixed with a parameter alone; allowlist table names and pass \u0060userId\u0060 as a typed parameter before executing the query.",
+          "explanation": "Both \u0060tableName\u0060 and \u0060userId\u0060 are interpolated into SQL. A caller can inject SQL through either value, and \u0060tableName\u0060 cannot be fixed with a parameter alone; allowlist table names and pass \u0060userId\u0060 as a typed parameter before executing the query.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#4"
+          ],
+          "reason": "SQL injection via interpolated tableName and userId on line 26."
+        },
+        {
+          "line": 45,
+          "end_line": 45,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Sensitive data is encrypted with obsolete DES using a hard-coded, publicly visible key and a fixed IV. This provides no meaningful confidentiality and identical plaintext blocks can produce repeatable ciphertext; use an approved authenticated-encryption scheme such as AES-GCM with a managed key and a fresh nonce per value.",
+          "explanation": "Sensitive data is encrypted with obsolete DES using a hard-coded, publicly visible key and a fixed IV. This provides no meaningful confidentiality and identical plaintext blocks can produce repeatable ciphertext; use an approved authenticated-encryption scheme such as AES-GCM with a managed key and a fresh nonce per value.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#5",
+            "seed-01-user-data-service#6"
+          ],
+          "reason": "Covers both obsolete DES and the hardcoded key/fixed IV."
+        },
+        {
+          "line": 55,
+          "end_line": 55,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060fileName\u0060 is directly appended to the base directory, so values containing \u0060..\\\u0060 or an absolute path can escape \u0060C:\\UserFiles\u0060 and disclose arbitrary readable files. Canonicalize the candidate path and reject anything outside the intended root (and reject rooted paths) before reading.",
+          "explanation": "\u0060fileName\u0060 is directly appended to the base directory, so values containing \u0060..\\\u0060 or an absolute path can escape \u0060C:\\UserFiles\u0060 and disclose arbitrary readable files. Canonicalize the candidate path and reject anything outside the intended root (and reject rooted paths) before reading.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#7"
+          ],
+          "reason": "Path traversal through fileName in the path."
+        },
+        {
+          "line": 69,
+          "end_line": 69,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The method passes an arbitrary caller-supplied string to \u0060cmd.exe\u0060 with \u0060/c\u0060, which is direct command injection and allows execution with the service account\u0027s privileges. Do not invoke a shell with user input; expose a fixed operation/argument allowlist or remove this execution path.",
+          "explanation": "The method passes an arbitrary caller-supplied string to \u0060cmd.exe\u0060 with \u0060/c\u0060, which is direct command injection and allows execution with the service account\u0027s privileges. Do not invoke a shell with user input; expose a fixed operation/argument allowlist or remove this execution path.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#8"
+          ],
+          "reason": "Command injection via cmd.exe /c with caller input."
+        },
+        {
+          "line": 83,
+          "end_line": 83,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The comment is inserted into an HTML response without encoding. A comment containing markup or script will execute when the client renders \u0060message\u0060, creating a stored/reflected XSS path; HTML-encode the value or return the raw comment as data and let the view encode it.",
+          "explanation": "The comment is inserted into an HTML response without encoding. A comment containing markup or script will execute when the client renders \u0060message\u0060, creating a stored/reflected XSS path; HTML-encode the value or return the raw comment as data and let the view encode it.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#9"
+          ],
+          "reason": "XSS from unencoded comment in HTML."
+        },
+        {
+          "line": 100,
+          "end_line": 100,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The authentication query compares the supplied password directly with a database column, so the system must retain a plaintext-equivalent password and sends the raw credential to SQL. Store a salted password hash and verify it in the application using a password-hashing API instead of querying on \u0060Password = @password\u0060.",
+          "explanation": "The authentication query compares the supplied password directly with a database column, so the system must retain a plaintext-equivalent password and sends the raw credential to SQL. Store a salted password hash and verify it in the application using a password-hashing API instead of querying on \u0060Password = @password\u0060.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Describes seed-01-user-data-service#10 but at lines 100-100, outside the window. Plaintext password comparison in query; line is slightly off but same defect."
+        },
+        {
+          "line": 106,
+          "end_line": 106,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "An authentication failure exception includes \u0060ConnectionString\u0060, which contains the database host and credential, in a message that can reach an API caller or be logged externally. Return a generic authentication error and keep connection details only in protected server-side diagnostics.",
+          "explanation": "An authentication failure exception includes \u0060ConnectionString\u0060, which contains the database host and credential, in a message that can reach an API caller or be logged externally. Return a generic authentication error and keep connection details only in protected server-side diagnostics.\n\nThis issue also appears on line 113 of the same file.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#11"
+          ],
+          "reason": "Connection string in the exception on line 106, and the finding also notes line 113 with the same issue."
+        },
+        {
+          "line": 109,
+          "end_line": 109,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This response exposes the service\u0027s hard-coded API key to every caller that authenticates successfully. A server credential must not be returned as user data; remove it from the response and use a separately issued, scoped token only if the client actually needs one.",
+          "explanation": "This response exposes the service\u0027s hard-coded API key to every caller that authenticates successfully. A server credential must not be returned as user data; remove it from the response and use a separately issued, scoped token only if the client actually needs one.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#12"
+          ],
+          "reason": "API key returned to the caller on successful login."
+        },
+        {
+          "line": 133,
+          "end_line": 133,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This loop creates one million files and allocates a \u0060MemoryStream\u0060, \u0060FileStream\u0060, and \u0060HttpClient\u0060 per iteration without disposing any of them. It can exhaust file handles, sockets, and disk, and leaves the generated files behind; process data in bounded batches, reuse clients, dispose streams, and avoid unbounded file creation.",
+          "explanation": "This loop creates one million files and allocates a \u0060MemoryStream\u0060, \u0060FileStream\u0060, and \u0060HttpClient\u0060 per iteration without disposing any of them. It can exhaust file handles, sockets, and disk, and leaves the generated files behind; process data in bounded batches, reuse clients, dispose streams, and avoid unbounded file creation.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#15"
+          ],
+          "reason": "Undisposed MemoryStream, FileStream and HttpClient created in a loop."
+        },
+        {
+          "line": 140,
+          "end_line": 140,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Seeding \u0060Random\u0060 with a constant makes every invocation return the same predictable token. This is not suitable for authentication or session material; fill the byte array with a cryptographic RNG such as \u0060RandomNumberGenerator.Fill\u0060.",
+          "explanation": "Seeding \u0060Random\u0060 with a constant makes every invocation return the same predictable token. This is not suitable for authentication or session material; fill the byte array with a cryptographic RNG such as \u0060RandomNumberGenerator.Fill\u0060.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#16"
+          ],
+          "reason": "Constant-seeded Random used for a security token."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This unused constant is another encryption secret committed to source control, while the encryption method below uses a different hard-coded DES key. Remove unused secret material and obtain any real encryption key from managed secret storage; keeping it here creates exposure without providing protection.",
+          "explanation": "This unused constant is another encryption secret committed to source control, while the encryption method below uses a different hard-coded DES key. Remove unused secret material and obtain any real encryption key from managed secret storage; keeping it here creates exposure without providing protection.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The hardcoded EncryptionKey on line 12 is a real secret committed to source and no label covers it. Label 6 covers only the key and IV on lines 44-45."
+        },
+        {
+          "line": 19,
+          "end_line": 19,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The constructor opens a SqlConnection that the class never closes or disposes. Each service instance therefore retains a database connection until finalization, and repeated construction can exhaust the connection pool; acquire/close a connection per operation or implement deterministic disposal and manage the service lifetime accordingly.",
+          "explanation": "The constructor opens a SqlConnection that the class never closes or disposes. Each service instance therefore retains a database connection until finalization, and repeated construction can exhaust the connection pool; acquire/close a connection per operation or implement deterministic disposal and manage the service lifetime accordingly.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#3"
+          ],
+          "reason": "Connection opened in the constructor and never closed or disposed."
+        },
+        {
+          "line": 67,
+          "end_line": 67,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The Process instance is never disposed. Repeated command requests can retain process-related OS resources; declare it with a \u0060using\u0060 scope so it is disposed even when starting or reading the process fails.",
+          "explanation": "The Process instance is never disposed. Repeated command requests can retain process-related OS resources; declare it with a \u0060using\u0060 scope so it is disposed even when starting or reading the process fails.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Process is not disposed; this is a genuine minor resource leak that no label covers."
+        },
+        {
+          "line": 86,
+          "end_line": 86,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Untrusted comment text is written directly into a log entry, including any newline/control characters, so an attacker can forge additional log records; the missing line terminator also concatenates separate requests. Use structured logging (or sanitize control characters and append a delimiter) rather than interpolating the raw value.",
+          "explanation": "Untrusted comment text is written directly into a log entry, including any newline/control characters, so an attacker can forge additional log records; the missing line terminator also concatenates separate requests. Use structured logging (or sanitize control characters and append a delimiter) rather than interpolating the raw value.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Log forging through unsanitized comment text written to the log is a genuine issue that no label covers."
+        },
+        {
+          "line": 123,
+          "end_line": 123,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The increment and return are not atomic. Concurrent callers can read and overwrite the same value, producing duplicate IDs; replace the increment/sleep sequence with an atomic operation such as \u0060Interlocked.Increment(ref _counter)\u0060.",
+          "explanation": "The increment and return are not atomic. Concurrent callers can read and overwrite the same value, producing duplicate IDs; replace the increment/sleep sequence with an atomic operation such as \u0060Interlocked.Increment(ref _counter)\u0060.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-01-user-data-service#14"
+          ],
+          "reason": "Non-atomic increment of the shared static counter."
+        }
+      ],
+      "found": [
+        "seed-01-user-data-service#4",
+        "seed-01-user-data-service#5",
+        "seed-01-user-data-service#6",
+        "seed-01-user-data-service#7",
+        "seed-01-user-data-service#8",
+        "seed-01-user-data-service#9",
+        "seed-01-user-data-service#11",
+        "seed-01-user-data-service#12",
+        "seed-01-user-data-service#15",
+        "seed-01-user-data-service#16",
+        "seed-01-user-data-service#3",
+        "seed-01-user-data-service#14"
+      ],
+      "missed": [
+        "seed-01-user-data-service#1",
+        "seed-01-user-data-service#2",
+        "seed-01-user-data-service#10",
+        "seed-01-user-data-service#13"
+      ],
+      "outside_window": 1,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 6939,
+      "judge_output_tokens": 961,
+      "judge_cost": 0.023488,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "seed-02-user-dashboard",
+      "group": "seeded-dense",
+      "kind": "buggy",
+      "language": "React",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "seed-02-user-dashboard#1",
+        "seed-02-user-dashboard#2",
+        "seed-02-user-dashboard#3",
+        "seed-02-user-dashboard#4",
+        "seed-02-user-dashboard#5",
+        "seed-02-user-dashboard#6",
+        "seed-02-user-dashboard#7",
+        "seed-02-user-dashboard#8",
+        "seed-02-user-dashboard#9",
+        "seed-02-user-dashboard#10",
+        "seed-02-user-dashboard#11",
+        "seed-02-user-dashboard#12",
+        "seed-02-user-dashboard#13",
+        "seed-02-user-dashboard#14",
+        "seed-02-user-dashboard#15",
+        "seed-02-user-dashboard#16"
+      ],
+      "findings": [
+        {
+          "line": 2,
+          "end_line": 2,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This import references \u0060UserDashboard.module.css\u0060, but that file is not present in the repository snapshot or this change, so module resolution will fail and the component cannot build. Add the stylesheet (and its module declarations if required) or remove the import and class usage.",
+          "explanation": "This import references \u0060UserDashboard.module.css\u0060, but that file is not present in the repository snapshot or this change, so module resolution will fail and the component cannot build. Add the stylesheet (and its module declarations if required) or remove the import and class usage.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The CSS module is a sibling file not included in the snapshot. A missing file in a partial snapshot is not a defect in this code."
+        },
+        {
+          "line": 25,
+          "end_line": 25,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This inserts the user-controlled name as HTML, so a name such as an image with an event handler can execute script in the dashboard. Render the value as React text or sanitize it with a strict, trusted allowlist.",
+          "explanation": "This inserts the user-controlled name as HTML, so a name such as an image with an event handler can execute script in the dashboard. Render the value as React text or sanitize it with a strict, trusted allowlist.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#2"
+          ],
+          "reason": "Describes XSS via dangerouslySetInnerHTML on line 25."
+        },
+        {
+          "line": 38,
+          "end_line": 38,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The browser receives a bearer API key and an admin password and sends them over plain HTTP. Anyone who inspects the bundle or network can impersonate the admin; keep privileged access server-side, use scoped short-lived credentials, and require HTTPS.",
+          "explanation": "The browser receives a bearer API key and an admin password and sends them over plain HTTP. Anyone who inspects the bundle or network can impersonate the admin; keep privileged access server-side, use scoped short-lived credentials, and require HTTPS.\n\nThis issue also appears on line 34 of the same file.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#5"
+          ],
+          "reason": "Covers the hardcoded API key and admin password sent from the browser, plus the plain HTTP transport."
+        },
+        {
+          "line": 54,
+          "end_line": 54,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Passwords and the API key are persisted in \u0060localStorage\u0060, which is readable by any script running in the origin and commonly exposed by XSS or browser extensions. Do not store credentials client-side; use a server-managed session and keep only non-sensitive display data in browser storage.",
+          "explanation": "Passwords and the API key are persisted in \u0060localStorage\u0060, which is readable by any script running in the origin and commonly exposed by XSS or browser extensions. Do not store credentials client-side; use a server-managed session and keep only non-sensitive display data in browser storage.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#6",
+            "seed-02-user-dashboard#7"
+          ],
+          "reason": "Covers passwords and the API key stored in localStorage."
+        },
+        {
+          "line": 81,
+          "end_line": 81,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "If any record lacks a name, \u0060processed\u0060 is never incremented and this loop spins on the browser\u0027s main thread indefinitely. The sample records added below do lack \u0060name\u0060; handle invalid records while still advancing the cursor.",
+          "explanation": "If any record lacks a name, \u0060processed\u0060 is never incremented and this loop spins on the browser\u0027s main thread indefinitely. The sample records added below do lack \u0060name\u0060; handle invalid records while still advancing the cursor.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#9"
+          ],
+          "reason": "Infinite loop when a user has no name, because processed is never incremented."
+        },
+        {
+          "line": 106,
+          "end_line": 106,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "A single click allocates one million objects and builds a roughly multi-gigabyte repeated string for each object. This can freeze or crash the browser and is an unbounded client-side memory spike; cap or paginate sample data and avoid materializing it all at once.",
+          "explanation": "A single click allocates one million objects and builds a roughly multi-gigabyte repeated string for each object. This can freeze or crash the browser and is an unbounded client-side memory spike; cap or paginate sample data and avoid materializing it all at once.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Describes seed-02-user-dashboard#11 but at lines 106-106, outside the window. A million large objects built in one click, causing a freeze and memory exhaustion."
+        },
+        {
+          "line": 111,
+          "end_line": 111,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "These records are appended to \u0060User[]\u0060 even though they have \u0060data\u0060/\u0060metadata\u0060 but no required \u0060name\u0060 or \u0060email\u0060. That either makes the TypeScript update fail or leaves malformed users that later rendering, searching, and refresh logic cannot handle; keep sample records separate or construct valid \u0060User\u0060 objects.",
+          "explanation": "These records are appended to \u0060User[]\u0060 even though they have \u0060data\u0060/\u0060metadata\u0060 but no required \u0060name\u0060 or \u0060email\u0060. That either makes the TypeScript update fail or leaves malformed users that later rendering, searching, and refresh logic cannot handle; keep sample records separate or construct valid \u0060User\u0060 objects.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The sample objects are appended to User[] without name or email, producing malformed users that later code does not handle. This is a genuine type and data defect not covered by any label."
+        },
+        {
+          "line": 116,
+          "end_line": 116,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060eval\u0060 executes arbitrary JavaScript in the page context. The Enter handler passes raw input here, and the greeting path interpolates a user name, allowing code to read \u0060localStorage\u0060 and perform actions as the user; remove \u0060eval\u0060 and implement explicit, non-code behavior instead.",
+          "explanation": "\u0060eval\u0060 executes arbitrary JavaScript in the page context. The Enter handler passes raw input here, and the greeting path interpolates a user name, allowing code to read \u0060localStorage\u0060 and perform actions as the user; remove \u0060eval\u0060 and implement explicit, non-code behavior instead.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#12"
+          ],
+          "reason": "eval of arbitrary script, including the Enter-key input path and the interpolated name."
+        },
+        {
+          "line": 150,
+          "end_line": 150,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This renders passwords and full credit-card values into the DOM. Anyone with dashboard access or DOM access can view the secrets; never render passwords and show only a masked/tokenized card value after enforcing the appropriate authorization.",
+          "explanation": "This renders passwords and full credit-card values into the DOM. Anyone with dashboard access or DOM access can view the secrets; never render passwords and show only a masked/tokenized card value after enforcing the appropriate authorization.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#15"
+          ],
+          "reason": "Passwords and credit card numbers rendered into the DOM."
+        },
+        {
+          "line": 20,
+          "end_line": 20,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The interval is never cleared when the component unmounts. Each mount leaves a timer logging forever, and repeated mounts accumulate timers; return a cleanup function that calls \u0060clearInterval\u0060.",
+          "explanation": "The interval is never cleared when the component unmounts. Each mount leaves a timer logging forever, and repeated mounts accumulate timers; return a cleanup function that calls \u0060clearInterval\u0060.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#1"
+          ],
+          "reason": "The interval is never cleared on unmount."
+        },
+        {
+          "line": 69,
+          "end_line": 69,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This filters the current \u0060users\u0060 state and then replaces it, so each keystroke searches an already-filtered subset and clearing the input cannot restore the original results. Keep the unfiltered collection separately and derive the displayed list from the current term.",
+          "explanation": "This filters the current \u0060users\u0060 state and then replaces it, so each keystroke searches an already-filtered subset and clearing the input cannot restore the original results. Keep the unfiltered collection separately and derive the displayed list from the current term.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#8"
+          ],
+          "reason": "Search overwrites the users state, so results narrow and clearing the input cannot restore the list."
+        },
+        {
+          "line": 90,
+          "end_line": 90,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Because the async function neither awaits nor returns this \u0060Promise.all\u0060, it resolves before any refresh finishes and rejected requests become unhandled promise rejections. Await the batch and handle or propagate its failure so the caller can observe refresh errors.",
+          "explanation": "Because the async function neither awaits nor returns this \u0060Promise.all\u0060, it resolves before any refresh finishes and rejected requests become unhandled promise rejections. Await the batch and handle or propagate its failure so the caller can observe refresh errors.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The Promise.all is neither awaited nor returned, and response.ok is never checked. Rejections go unhandled, which is a genuine defect not covered by a label."
+        },
+        {
+          "line": 97,
+          "end_line": 97,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060index\u0060 is the position of a response, not the position of \u0060userId\u0060 in \u0060users\u0060. Refreshing any user therefore overwrites the first three cards (and can create malformed entries) instead of the selected user; locate the record by \u0060userId\u0060 before updating it.",
+          "explanation": "\u0060index\u0060 is the position of a response, not the position of \u0060userId\u0060 in \u0060users\u0060. Refreshing any user therefore overwrites the first three cards (and can create malformed entries) instead of the selected user; locate the record by \u0060userId\u0060 before updating it.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#10"
+          ],
+          "reason": "The response index is used as the array position, so the wrong users are updated."
+        },
+        {
+          "line": 129,
+          "end_line": 129,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Copying arbitrary keys onto a normal object allows dangerous keys such as \u0060__proto__\u0060 and also includes inherited properties, enabling prototype-pollution behavior when settings are untrusted. Restrict the accepted keys and use own-key iteration with a null-prototype target.",
+          "explanation": "Copying arbitrary keys onto a normal object allows dangerous keys such as \u0060__proto__\u0060 and also includes inherited properties, enabling prototype-pollution behavior when settings are untrusted. Restrict the accepted keys and use own-key iteration with a null-prototype target.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#13"
+          ],
+          "reason": "Prototype pollution from copying arbitrary keys such as __proto__."
+        },
+        {
+          "line": 145,
+          "end_line": 145,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The mapped card has no React \u0060key\u0060, so React falls back to positional reconciliation. Filtering and inserting users can then associate a card\u0027s DOM state and handlers with the wrong record; provide a stable unique key for each user.",
+          "explanation": "The mapped card has no React \u0060key\u0060, so React falls back to positional reconciliation. Filtering and inserting users can then associate a card\u0027s DOM state and handlers with the wrong record; provide a stable unique key for each user.",
+          "verdict": "match",
+          "label_ids": [
+            "seed-02-user-dashboard#14"
+          ],
+          "reason": "The mapped user cards have no key."
+        },
+        {
+          "line": 183,
+          "end_line": 183,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The form creates an object with no \u0060id\u0060 and then casts it to \u0060User\u0060. The new card therefore has an undefined ID, so Refresh requests \u0060/api/users/undefined/...\u0060 and the list cannot use a stable identity; validate/create the record through the API and append the returned typed user.",
+          "explanation": "The form creates an object with no \u0060id\u0060 and then casts it to \u0060User\u0060. The new card therefore has an undefined ID, so Refresh requests \u0060/api/users/undefined/...\u0060 and the list cannot use a stable identity; validate/create the record through the API and append the returned typed user.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The form-created user has no id and is cast to User, so Refresh requests /api/users/undefined. This is a genuine bug not covered by a label."
+        }
+      ],
+      "found": [
+        "seed-02-user-dashboard#2",
+        "seed-02-user-dashboard#5",
+        "seed-02-user-dashboard#6",
+        "seed-02-user-dashboard#7",
+        "seed-02-user-dashboard#9",
+        "seed-02-user-dashboard#12",
+        "seed-02-user-dashboard#15",
+        "seed-02-user-dashboard#1",
+        "seed-02-user-dashboard#8",
+        "seed-02-user-dashboard#10",
+        "seed-02-user-dashboard#13",
+        "seed-02-user-dashboard#14"
+      ],
+      "missed": [
+        "seed-02-user-dashboard#3",
+        "seed-02-user-dashboard#4",
+        "seed-02-user-dashboard#11",
+        "seed-02-user-dashboard#16"
+      ],
+      "outside_window": 1,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 7390,
+      "judge_output_tokens": 1144,
+      "judge_cost": 0.02622,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-01-search-products",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "sql-01-search-products#1"
+      ],
+      "findings": [
+        {
+          "line": 14,
+          "end_line": 14,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Concatenating the caller-controlled \u0060@SortColumn\u0060 directly into the dynamic batch makes this procedure SQL-injectable; a value such as \u0060Name; ...\u0060 can terminate the \u0060ORDER BY\u0060 expression and append statements. \u0060SYSNAME\u0060 only limits length and does not validate SQL syntax. Restore the allowlist and quote the resulting identifier (or map allowed inputs to fixed SQL fragments) before constructing the batch.",
+          "explanation": "Concatenating the caller-controlled \u0060@SortColumn\u0060 directly into the dynamic batch makes this procedure SQL-injectable; a value such as \u0060Name; ...\u0060 can terminate the \u0060ORDER BY\u0060 expression and append statements. \u0060SYSNAME\u0060 only limits length and does not validate SQL syntax. Restore the allowlist and quote the resulting identifier (or map allowed inputs to fixed SQL fragments) before constructing the batch.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-01-search-products#1"
+          ],
+          "reason": "Identifies SQL injection through concatenating @SortColumn into dynamic SQL on line 14 without an allow-list or QUOTENAME, which is the labeled defect."
+        }
+      ],
+      "found": [
+        "sql-01-search-products#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1563,
+      "judge_output_tokens": 108,
+      "judge_cost": 0.004206,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-02-transfer-funds",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "sql-02-transfer-funds#1",
+        "sql-02-transfer-funds#2"
+      ],
+      "findings": [
+        {
+          "line": 7,
+          "end_line": 7,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Removing \u0060SET XACT_ABORT ON\u0060 means a run-time error, such as a failed \u0060INSERT INTO dbo.Transfers\u0060 (line 37) or a failed UPDATE, can fail one statement while the batch continues. The procedure can then reach \u0060COMMIT TRANSACTION\u0060 with only one side of the transfer applied or with no transfer record. Restore \u0060SET XACT_ABORT ON\u0060 so any error rolls back the whole transfer.",
+          "explanation": "Removing \u0060SET XACT_ABORT ON\u0060 means a run-time error, such as a failed \u0060INSERT INTO dbo.Transfers\u0060 (line 37) or a failed UPDATE, can fail one statement while the batch continues. The procedure can then reach \u0060COMMIT TRANSACTION\u0060 with only one side of the transfer applied or with no transfer record. Restore \u0060SET XACT_ABORT ON\u0060 so any error rolls back the whole transfer.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Describes sql-02-transfer-funds#2 but at lines 7-7, outside the window. Reports the missing SET XACT_ABORT ON so a failed UPDATE or INSERT leaves the transaction open and partially applied, which is the same defect as label #2."
+        },
+        {
+          "line": 25,
+          "end_line": 25,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The balance is read with a plain \u0060SELECT\u0060, and the debit writes an absolute value (\u0060@Balance - @Amount\u0060). Two concurrent transfers from the same account can both pass the check and overwrite each other\u0027s debit, which can overdraw the account. Replace the lines with the single conditional \u0060UPDATE ... AND Balance \u003E= @Amount\u0060 and check \u0060@@ROWCOUNT\u0060, so the check and the debit happen in one statement.",
+          "explanation": "The balance is read with a plain \u0060SELECT\u0060, and the debit writes an absolute value (\u0060@Balance - @Amount\u0060). Two concurrent transfers from the same account can both pass the check and overwrite each other\u0027s debit, which can overdraw the account. Replace the lines with the single conditional \u0060UPDATE ... AND Balance \u003E= @Amount\u0060 and check \u0060@@ROWCOUNT\u0060, so the check and the debit happen in one statement.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-02-transfer-funds#1"
+          ],
+          "reason": "Describes the unlocked read followed by an absolute-value write that lets concurrent transfers overdraw the account and lose a debit, which is label #1. The reported line is slightly off but the code is the same."
+        }
+      ],
+      "found": [
+        "sql-02-transfer-funds#1"
+      ],
+      "missed": [
+        "sql-02-transfer-funds#2"
+      ],
+      "outside_window": 1,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2296,
+      "judge_output_tokens": 217,
+      "judge_cost": 0.006762,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-03-customers-without-orders",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "findings": [
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060NOT IN\u0060 is null-sensitive: if any order has a NULL \u0060CustomerId\u0060, the subquery contains NULL and this predicate evaluates to UNKNOWN for every customer, so the procedure returns no rows rather than the customers without orders. Use a correlated \u0060NOT EXISTS\u0060 (as in the previous implementation) so unrelated NULL customer IDs do not affect the result.",
+          "explanation": "\u0060NOT IN\u0060 is null-sensitive: if any order has a NULL \u0060CustomerId\u0060, the subquery contains NULL and this predicate evaluates to UNKNOWN for every customer, so the procedure returns no rows rather than the customers without orders. Use a correlated \u0060NOT EXISTS\u0060 (as in the previous implementation) so unrelated NULL customer IDs do not affect the result.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#1"
+          ],
+          "reason": "Describes the NOT IN NULL-sensitivity problem, where a NULL CustomerId makes the procedure return no rows, and recommends NOT EXISTS. The reported line is slightly off, but the defect is the same."
+        },
+        {
+          "line": 12,
+          "end_line": 12,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Applying \u0060YEAR\u0060 to \u0060o.OrderDate\u0060 makes the predicate non-sargable, so SQL Server cannot efficiently seek an index on \u0060OrderDate\u0060 and may scan the entire Orders table for every execution. Keep the column bare and use an inclusive/exclusive year range, preserving the prior implementation\u0027s index-friendly filtering.",
+          "explanation": "Applying \u0060YEAR\u0060 to \u0060o.OrderDate\u0060 makes the predicate non-sargable, so SQL Server cannot efficiently seek an index on \u0060OrderDate\u0060 and may scan the entire Orders table for every execution. Keep the column bare and use an inclusive/exclusive year range, preserving the prior implementation\u0027s index-friendly filtering.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-03-customers-without-orders#2"
+          ],
+          "reason": "Describes YEAR() on OrderDate making the filter non-sargable and recommends a half-open date range, the same defect as the label on line 12."
+        }
+      ],
+      "found": [
+        "sql-03-customers-without-orders#1",
+        "sql-03-customers-without-orders#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1758,
+      "judge_output_tokens": 217,
+      "judge_cost": 0.005686,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-04-import-price-changes",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "sql-04-import-price-changes#1",
+        "sql-04-import-price-changes#2"
+      ],
+      "findings": [
+        {
+          "line": 28,
+          "end_line": 28,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Switching from \u0060SCOPE_IDENTITY()\u0060 to \u0060@@IDENTITY\u0060 is a regression. \u0060@@IDENTITY\u0060 returns the last identity value generated in the session by any scope, including triggers on \u0060dbo.ImportLog\u0060, so \u0060@LogId\u0060 can point at the wrong log row. Those rows are then used to stamp \u0060staging.PriceChanges.ImportLogId\u0060. \u0060SCOPE_IDENTITY()\u0060 limits the value to the current scope, which is what this code needs. Restore it.",
+          "explanation": "Switching from \u0060SCOPE_IDENTITY()\u0060 to \u0060@@IDENTITY\u0060 is a regression. \u0060@@IDENTITY\u0060 returns the last identity value generated in the session by any scope, including triggers on \u0060dbo.ImportLog\u0060, so \u0060@LogId\u0060 can point at the wrong log row. Those rows are then used to stamp \u0060staging.PriceChanges.ImportLogId\u0060. \u0060SCOPE_IDENTITY()\u0060 limits the value to the current scope, which is what this code needs. Restore it.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#2"
+          ],
+          "reason": "Identifies @@IDENTITY on line 28 returning an identity from another scope (e.g. a trigger) and recommends SCOPE_IDENTITY()."
+        },
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The set-based \u0060UPDATE ... FROM ... JOIN\u0060 was replaced with a row-by-row cursor that runs one UPDATE per staged row. For large batches this adds statement overhead, round trips, and log writes, and it holds locks longer inside the transaction, with no clear gain. Restore the set-based update, which returns the same \u0060@@ROWCOUNT\u0060. If the cursor is required for a documented reason, declare it \u0060LOCAL\u0060 (for example, \u0060DECLARE changes CURSOR LOCAL FAST_FORWARD FOR\u0060) so it is released when the procedure exits; a \u0060GLOBAL\u0060 cursor can stay allocated after an error and cause a \u0022cursor already exists\u0022 error on the next call. This change is mandatory unless the cursor is needed for a documented reason. If duplicate SKUs can appear in a batch, handle them explicitly, because the set-based update applies an arbitrary match in that case.",
+          "explanation": "The set-based \u0060UPDATE ... FROM ... JOIN\u0060 was replaced with a row-by-row cursor that runs one UPDATE per staged row. For large batches this adds statement overhead, round trips, and log writes, and it holds locks longer inside the transaction, with no clear gain. Restore the set-based update, which returns the same \u0060@@ROWCOUNT\u0060. If the cursor is required for a documented reason, declare it \u0060LOCAL\u0060 (for example, \u0060DECLARE changes CURSOR LOCAL FAST_FORWARD FOR\u0060) so it is released when the procedure exits; a \u0060GLOBAL\u0060 cursor can stay allocated after an error and cause a \u0022cursor already exists\u0022 error on the next call. This change is mandatory unless the cursor is needed for a documented reason. If duplicate SKUs can appear in a batch, handle them explicitly, because the set-based update applies an arbitrary match in that case.",
+          "verdict": "match",
+          "label_ids": [
+            "sql-04-import-price-changes#1"
+          ],
+          "reason": "Identifies the row-by-row cursor update inside the transaction as slow and lock-holding, and recommends a set-based UPDATE with a join. The line is at the end of the cursor block, which is close enough."
+        }
+      ],
+      "found": [
+        "sql-04-import-price-changes#2",
+        "sql-04-import-price-changes#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2643,
+      "judge_output_tokens": 216,
+      "judge_cost": 0.007446,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-clean-01-upsert-customer",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 17,
+          "end_line": 17,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060SELECT ... INTO @CustomerId\u0060 does not assign \u0060NULL\u0060 when no row matches; it leaves the output parameter\u0027s incoming value unchanged. If a caller reuses a non-NULL variable, a new email therefore skips the insert and updates that unrelated \u0060CustomerId\u0060 (or returns the stale ID). Reset \u0060@CustomerId\u0060 before this lookup, or use a local variable initialized to \u0060NULL\u0060 for the lookup result.",
+          "explanation": "\u0060SELECT ... INTO @CustomerId\u0060 does not assign \u0060NULL\u0060 when no row matches; it leaves the output parameter\u0027s incoming value unchanged. If a caller reuses a non-NULL variable, a new email therefore skips the insert and updates that unrelated \u0060CustomerId\u0060 (or returns the stale ID). Reset \u0060@CustomerId\u0060 before this lookup, or use a local variable initialized to \u0060NULL\u0060 for the lookup result.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "The bug is genuine. In T-SQL, \u0060SELECT @var = col\u0060 with no matching row leaves the variable unchanged, and an OUTPUT parameter also carries its incoming value. A caller that passes in a non-NULL \u0060@CustomerId\u0060 would skip the insert and update an unrelated customer. The finding\u0027s wording \u0022SELECT ... INTO\u0022 is slightly off, but the defect it describes is correct. No label covers it."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1674,
+      "judge_output_tokens": 326,
+      "judge_cost": 0.006608,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "sql-clean-02-monthly-revenue",
+      "group": "clean",
+      "kind": "clean",
+      "language": "Sql",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 7,
+          "end_line": 7,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060NULL\u0060 bypasses this \u0060NOT BETWEEN\u0060 check because the predicate evaluates to \u0060UNKNOWN\u0060; the procedure then builds a null date range and silently returns no rows instead of rejecting an invalid year. Include an explicit null check in the validation condition.",
+          "explanation": "\u0060NULL\u0060 bypasses this \u0060NOT BETWEEN\u0060 check because the predicate evaluates to \u0060UNKNOWN\u0060; the procedure then builds a null date range and silently returns no rows instead of rejecting an invalid year. Include an explicit null check in the validation condition.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Correct: with @Year NULL, \u0060NULL NOT BETWEEN ...\u0060 is UNKNOWN so THROW is skipped. DATEFROMPARTS(NULL,...) returns NULL, the filters are UNKNOWN and no rows come back, so an invalid NULL year is silently accepted rather than rejected."
+        },
+        {
+          "line": 22,
+          "end_line": 22,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The result only contains months that have at least one non-cancelled order, so a year with no activity in a month returns fewer than 12 rows and does not report that month\u0027s zero revenue. Build a 12-month scaffold and left join the filtered orders so every month in the requested year is represented.",
+          "explanation": "The result only contains months that have at least one non-cancelled order, so a year with no activity in a month returns fewer than 12 rows and does not report that month\u0027s zero revenue. Build a 12-month scaffold and left join the filtered orders so every month in the requested year is represented.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "Omitting months with no orders is a normal design choice for a grouped revenue report. It is not a defect, and the request to build a 12-month scaffold is speculative enhancement advice."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1657,
+      "judge_output_tokens": 238,
+      "judge_cost": 0.005694,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-01-product-search",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-01-product-search#1",
+        "ts-01-product-search#2"
+      ],
+      "findings": [
+        {
+          "line": 37,
+          "end_line": 37,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The effect no longer returns a cleanup function, so \u0060clearTimeout(timer)\u0060 and \u0060controller.abort()\u0060 never run. Pending searches are not cancelled when \u0060query\u0060 changes or the component unmounts, and in-flight requests are not aborted. An older response can then overwrite \u0060results\u0060 with stale data, and state can be set after unmount. The \u0060controller.signal.aborted\u0060 check at line 32 can also never be true. Restore the cleanup function. This change is mandatory.",
+          "explanation": "The effect no longer returns a cleanup function, so \u0060clearTimeout(timer)\u0060 and \u0060controller.abort()\u0060 never run. Pending searches are not cancelled when \u0060query\u0060 changes or the component unmounts, and in-flight requests are not aborted. An older response can then overwrite \u0060results\u0060 with stale data, and state can be set after unmount. The \u0060controller.signal.aborted\u0060 check at line 32 can also never be true. Restore the cleanup function. This change is mandatory.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "Describes ts-01-product-search#1 but at lines 37-37, outside the window. Reports the missing effect cleanup (no clearTimeout/abort), which lets stale responses overwrite newer results; same defect as label 1."
+        },
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The search term is no longer passed through \u0060encodeURIComponent\u0060 in the fetch URL. Reserved characters such as \u0060\u0026\u0060, \u0060#\u0060, \u0060\u002B\u0060, and \u0060=\u0060 change the request: \u0060a\u0026limit=1000\u0060 adds a parameter, \u0060#\u0060 truncates the query, and \u0060\u002B\u0060 is decoded as a space. This can return wrong results and lets users add extra parameters to the API request. Restore \u0060encodeURIComponent(term)\u0060. This change is mandatory.",
+          "explanation": "The search term is no longer passed through \u0060encodeURIComponent\u0060 in the fetch URL. Reserved characters such as \u0060\u0026\u0060, \u0060#\u0060, \u0060\u002B\u0060, and \u0060=\u0060 change the request: \u0060a\u0026limit=1000\u0060 adds a parameter, \u0060#\u0060 truncates the query, and \u0060\u002B\u0060 is decoded as a space. This can return wrong results and lets users add extra parameters to the API request. Restore \u0060encodeURIComponent(term)\u0060. This change is mandatory.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-01-product-search#2"
+          ],
+          "reason": "Reports the unencoded search term in the fetch URL, where reserved characters like \u0026 and # break the query string; same as label 2."
+        }
+      ],
+      "found": [
+        "ts-01-product-search#2"
+      ],
+      "missed": [
+        "ts-01-product-search#1"
+      ],
+      "outside_window": 1,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2055,
+      "judge_output_tokens": 176,
+      "judge_cost": 0.00587,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-02-cart-math",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-02-cart-math#1",
+        "ts-02-cart-math#2"
+      ],
+      "findings": [
+        {
+          "line": 26,
+          "end_line": 26,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Removing \u0060Math.round\u0060 makes \u0060taxCents\u0060 return fractional cents. For example, \u0060taxCents(1001, 21)\u0060 returns \u0060210.21\u0060, but the function is meant to return whole cents, and \u0060applyCoupon\u0060 rounds its discount to whole cents. Restore the rounding so the tax amount stays an integer number of cents.",
+          "explanation": "Removing \u0060Math.round\u0060 makes \u0060taxCents\u0060 return fractional cents. For example, \u0060taxCents(1001, 21)\u0060 returns \u0060210.21\u0060, but the function is meant to return whole cents, and \u0060applyCoupon\u0060 rounds its discount to whole cents. Restore the rounding so the tax amount stays an integer number of cents.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-02-cart-math#1"
+          ],
+          "reason": "Reports that taxCents returns unrounded fractional cents at line 26, the same defect as label #1."
+        },
+        {
+          "line": 31,
+          "end_line": 31,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Removing \u0060Number.isInteger\u0060 lets invalid quantities through. \u0060Number(\u0022abc\u0022)\u0060 is \u0060NaN\u0060, and both \u0060NaN \u003C 1\u0060 and \u0060NaN \u003E 99\u0060 are false, so \u0060parseQuantity(\u0022abc\u0022)\u0060 returns \u0060NaN\u0060 instead of throwing. Fractional input such as \u0060\u00222.5\u0022\u0060 is also accepted, which would give fractional line totals in \u0060subtotalCents\u0060. Restore the \u0060Number.isInteger\u0060 check, which rejects both cases.",
+          "explanation": "Removing \u0060Number.isInteger\u0060 lets invalid quantities through. \u0060Number(\u0022abc\u0022)\u0060 is \u0060NaN\u0060, and both \u0060NaN \u003C 1\u0060 and \u0060NaN \u003E 99\u0060 are false, so \u0060parseQuantity(\u0022abc\u0022)\u0060 returns \u0060NaN\u0060 instead of throwing. Fractional input such as \u0060\u00222.5\u0022\u0060 is also accepted, which would give fractional line totals in \u0060subtotalCents\u0060. Restore the \u0060Number.isInteger\u0060 check, which rejects both cases.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-02-cart-math#2"
+          ],
+          "reason": "Reports that NaN and fractional quantities pass the check at line 31 because NaN fails both comparisons, matching label #2."
+        }
+      ],
+      "found": [
+        "ts-02-cart-math#1",
+        "ts-02-cart-math#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2095,
+      "judge_output_tokens": 166,
+      "judge_cost": 0.00585,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-03-sign-in",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-03-sign-in#1",
+        "ts-03-sign-in#2"
+      ],
+      "findings": [
+        {
+          "line": 19,
+          "end_line": 19,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This logs the caller\u0027s plaintext password to the browser console. Console output can be collected by browser extensions, debugging tooling, or support logs, so credentials may be exposed during every sign-in attempt. Remove this debug statement (or log only a non-sensitive event).",
+          "explanation": "This logs the caller\u0027s plaintext password to the browser console. Console output can be collected by browser extensions, debugging tooling, or support logs, so credentials may be exposed during every sign-in attempt. Remove this debug statement (or log only a non-sensitive event).",
+          "verdict": "match",
+          "label_ids": [
+            "ts-03-sign-in#2"
+          ],
+          "reason": "Identifies the password being logged to the console at line 19, the same defect as the label."
+        },
+        {
+          "line": 35,
+          "end_line": 35,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "Using the raw query value here bypasses the existing \u0060safeReturnUrl\u0060 validation and allows a crafted \u0060returnUrl\u0060 such as \u0060https://attacker.example\u0060 to redirect the user off-site after authentication. Pass the parameter through \u0060safeReturnUrl\u0060 before assigning it.",
+          "explanation": "Using the raw query value here bypasses the existing \u0060safeReturnUrl\u0060 validation and allows a crafted \u0060returnUrl\u0060 such as \u0060https://attacker.example\u0060 to redirect the user off-site after authentication. Pass the parameter through \u0060safeReturnUrl\u0060 before assigning it.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-03-sign-in#1"
+          ],
+          "reason": "Identifies the open redirect from using the raw returnUrl at line 35 and the bypassed safeReturnUrl, matching the label."
+        }
+      ],
+      "found": [
+        "ts-03-sign-in#2",
+        "ts-03-sign-in#1"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1870,
+      "judge_output_tokens": 161,
+      "judge_cost": 0.00535,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-04-profile-tags",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "React",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-04-profile-tags#1",
+        "ts-04-profile-tags#2"
+      ],
+      "findings": [
+        {
+          "line": 27,
+          "end_line": 27,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The effect still loads the profile using \u0060userId\u0060, but the dependency array is now \u0060[]\u0060. If the \u0060userId\u0060 prop changes, the effect does not re-run and the component keeps showing the previous user\u0027s profile and tags. Restore \u0060userId\u0060 in the dependency array (this is a required fix).",
+          "explanation": "The effect still loads the profile using \u0060userId\u0060, but the dependency array is now \u0060[]\u0060. If the \u0060userId\u0060 prop changes, the effect does not re-run and the component keeps showing the previous user\u0027s profile and tags. Restore \u0060userId\u0060 in the dependency array (this is a required fix).",
+          "verdict": "match",
+          "label_ids": [
+            "ts-04-profile-tags#1"
+          ],
+          "reason": "Identifies the empty dependency array on line 27 that stops the profile from reloading when userId changes."
+        },
+        {
+          "line": 37,
+          "end_line": 37,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060addTag\u0060 mutates \u0060profile.tags\u0060 with \u0060push\u0060 and then calls \u0060setProfile(profile)\u0060 with the same object. React sees no change, so the profile update is skipped. The new tag only appears because \u0060setNewTag(\u0022\u0022)\u0060 triggers a re-render, which is fragile and breaks React\u0027s rule to never mutate state. Create a new profile object and tags array instead (this is a required fix).",
+          "explanation": "\u0060addTag\u0060 mutates \u0060profile.tags\u0060 with \u0060push\u0060 and then calls \u0060setProfile(profile)\u0060 with the same object. React sees no change, so the profile update is skipped. The new tag only appears because \u0060setNewTag(\u0022\u0022)\u0060 triggers a re-render, which is fragile and breaks React\u0027s rule to never mutate state. Create a new profile object and tags array instead (this is a required fix).",
+          "verdict": "match",
+          "label_ids": [
+            "ts-04-profile-tags#2"
+          ],
+          "reason": "Identifies the in-place push into profile.tags and the setProfile call with the same object, which is the state mutation defect on lines 36-37."
+        }
+      ],
+      "found": [
+        "ts-04-profile-tags#1",
+        "ts-04-profile-tags#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2088,
+      "judge_output_tokens": 170,
+      "judge_cost": 0.005876,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-05-orders-router",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-05-orders-router#1",
+        "ts-05-orders-router#2",
+        "ts-05-orders-router#3"
+      ],
+      "findings": [
+        {
+          "line": 16,
+          "end_line": 16,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "The new query drops the \u0060customer_id = $2\u0060 predicate, so an authenticated customer can read any order by changing the URL. Preserve the ownership condition (and bind it as a query parameter) so this route remains scoped to the current customer.",
+          "explanation": "The new query drops the \u0060customer_id = $2\u0060 predicate, so an authenticated customer can read any order by changing the URL. Preserve the ownership condition (and bind it as a query parameter) so this route remains scoped to the current customer.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-05-orders-router#2"
+          ],
+          "reason": "Reports the dropped customer_id ownership predicate that lets any user read any order; this is the same defect as label #2, with the line off by one."
+        },
+        {
+          "line": 16,
+          "end_line": 16,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This concatenates the raw route parameter into SQL. The preceding \u0060parseInt\u0060 check does not make the raw string safe\u2014values such as \u00601 OR 1=1\u0060 (or a stacked statement where supported) can still alter the query. Keep the value parameterized and use the validated \u0060id\u0060 instead.",
+          "explanation": "This concatenates the raw route parameter into SQL. The preceding \u0060parseInt\u0060 check does not make the raw string safe\u2014values such as \u00601 OR 1=1\u0060 (or a stacked statement where supported) can still alter the query. Keep the value parameterized and use the validated \u0060id\u0060 instead.\n\nThis issue also appears on line 15 of the same file.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-05-orders-router#1"
+          ],
+          "reason": "Reports the raw req.params.id concatenated into SQL, noting parseInt validation does not protect it; this is the same defect as label #1."
+        },
+        {
+          "line": 40,
+          "end_line": 40,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "This sends \u0060String(err)\u0060 and the stack trace to every client, which can expose SQL details, filesystem paths, credentials embedded in error messages, or other internal information. Log the full error server-side but return the same generic response used previously.",
+          "explanation": "This sends \u0060String(err)\u0060 and the stack trace to every client, which can expose SQL details, filesystem paths, credentials embedded in error messages, or other internal information. Log the full error server-side but return the same generic response used previously.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-05-orders-router#3"
+          ],
+          "reason": "Reports String(err) and the stack trace sent to clients in the 500 response; this is the same defect as label #3."
+        }
+      ],
+      "found": [
+        "ts-05-orders-router#2",
+        "ts-05-orders-router#1",
+        "ts-05-orders-router#3"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2270,
+      "judge_output_tokens": 257,
+      "judge_cost": 0.00711,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-06-calendar-days",
+      "group": "realistic",
+      "kind": "buggy",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [
+        "ts-06-calendar-days#1",
+        "ts-06-calendar-days#2"
+      ],
+      "findings": [
+        {
+          "line": 9,
+          "end_line": 9,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060Date\u0060 uses zero-based month indexes, while \u0060CalendarDay.month\u0060 is documented as 1\u201312. Passing \u0060month\u0060 directly makes every conversion one month late (and month 12 roll over into the next year), so \u0060toDate({ year: 2026, month: 1, day: 1 })\u0060 becomes February 1. Subtract one before passing the month to the constructor.",
+          "explanation": "\u0060Date\u0060 uses zero-based month indexes, while \u0060CalendarDay.month\u0060 is documented as 1\u201312. Passing \u0060month\u0060 directly makes every conversion one month late (and month 12 roll over into the next year), so \u0060toDate({ year: 2026, month: 1, day: 1 })\u0060 becomes February 1. Subtract one before passing the month to the constructor.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-06-calendar-days#1"
+          ],
+          "reason": "Identifies that toDate passes the 1-based month directly to the Date constructor, which expects 0-based months, so every date is one month late."
+        },
+        {
+          "line": 13,
+          "end_line": 13,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060getDay()\u0060 returns the weekday number (0\u20136), not the day of the month. This makes \u0060fromDate\u0060 return values such as \u0060day: 0\u0060 for Sundays, and causes \u0060addDays\u0060 to produce invalid calendar-day results. Use \u0060getDate()\u0060 for the 1\u201331 calendar day.",
+          "explanation": "\u0060getDay()\u0060 returns the weekday number (0\u20136), not the day of the month. This makes \u0060fromDate\u0060 return values such as \u0060day: 0\u0060 for Sundays, and causes \u0060addDays\u0060 to produce invalid calendar-day results. Use \u0060getDate()\u0060 for the 1\u201331 calendar day.",
+          "verdict": "match",
+          "label_ids": [
+            "ts-06-calendar-days#2"
+          ],
+          "reason": "Identifies that fromDate uses getDay() (weekday) instead of getDate() (day of month)."
+        }
+      ],
+      "found": [
+        "ts-06-calendar-days#1",
+        "ts-06-calendar-days#2"
+      ],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1888,
+      "judge_output_tokens": 170,
+      "judge_cost": 0.005476,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-clean-01-use-interval",
+      "group": "clean",
+      "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 0,
+      "judge_output_tokens": 0,
+      "judge_cost": 0,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-clean-02-money",
+      "group": "clean",
+      "kind": "clean",
+      "language": "TypeScript",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 18,
+          "end_line": 18,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060Number.isSafeInteger\u0060 only guarantees that the cent count itself is exact; dividing it by 100 can still round away the cent before \u0060Intl.NumberFormat\u0060 sees it. For example, \u0060formatCents(Number.MAX_SAFE_INTEGER, \u0022USD\u0022, \u0022en-US\u0022)\u0060 formats the same as \u0060formatCents(Number.MAX_SAFE_INTEGER - 1, ...)\u0060 (\u0060$90,071,992,547,409.90\u0060), although the first amount should end in \u0060.91\u0060. Preserve the cent remainder when formatting (or reject values outside a documented precisely representable range) instead of passing \u0060cents / 100\u0060 directly.",
+          "explanation": "\u0060Number.isSafeInteger\u0060 only guarantees that the cent count itself is exact; dividing it by 100 can still round away the cent before \u0060Intl.NumberFormat\u0060 sees it. For example, \u0060formatCents(Number.MAX_SAFE_INTEGER, \u0022USD\u0022, \u0022en-US\u0022)\u0060 formats the same as \u0060formatCents(Number.MAX_SAFE_INTEGER - 1, ...)\u0060 (\u0060$90,071,992,547,409.90\u0060), although the first amount should end in \u0060.91\u0060. Preserve the cent remainder when formatting (or reject values outside a documented precisely representable range) instead of passing \u0060cents / 100\u0060 directly.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The precision loss only appears near 9e13 dollars. The stated example is also wrong: both MAX_SAFE_INTEGER and MAX_SAFE_INTEGER-1 divide to the same double (about .90625), so both format as .91, not .90. It is not a defect worth fixing in practice."
+        },
+        {
+          "line": 23,
+          "end_line": 23,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060Number.isInteger\u0060 is true for values such as \u00601e20\u0060, even though they are not safe integers. Such a \u0060parts\u0060 value passes validation and is then used as the \u0060Array.from\u0060 length, causing an invalid-length/allocation failure instead of the documented input \u0060RangeError\u0060 and potentially creating an avoidable resource issue. Validate \u0060parts\u0060 as a safe integer and apply an appropriate upper bound for the returned array.",
+          "explanation": "\u0060Number.isInteger\u0060 is true for values such as \u00601e20\u0060, even though they are not safe integers. Such a \u0060parts\u0060 value passes validation and is then used as the \u0060Array.from\u0060 length, causing an invalid-length/allocation failure instead of the documented input \u0060RangeError\u0060 and potentially creating an avoidable resource issue. Validate \u0060parts\u0060 as a safe integer and apply an appropriate upper bound for the returned array.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "For a value like 1e20, Array.from with that length still throws a RangeError (invalid array length), so the failure is not unexpected. Large but valid lengths are a caller concern, so the rest is speculative advice."
+        },
+        {
+          "line": 27,
+          "end_line": 27,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060Number.isSafeInteger\u0060 still permits \u0060Number.MAX_SAFE_INTEGER\u0060, but multiplying the floored quotient by \u0060parts\u0060 can leave the safe-integer range for a negative total. For example, \u0060splitCents(-9007199254740991, 3)\u0060 computes \u0060remainder\u0060 as 1 and returns values whose sum is \u0060-9007199254740992\u0060, violating the documented invariant. Compute the remainder with integer remainder arithmetic (or use \u0060BigInt\u0060) rather than reconstructing it via \u0060base * parts\u0060.",
+          "explanation": "\u0060Number.isSafeInteger\u0060 still permits \u0060Number.MAX_SAFE_INTEGER\u0060, but multiplying the floored quotient by \u0060parts\u0060 can leave the safe-integer range for a negative total. For example, \u0060splitCents(-9007199254740991, 3)\u0060 computes \u0060remainder\u0060 as 1 and returns values whose sum is \u0060-9007199254740992\u0060, violating the documented invariant. Compute the remainder with integer remainder arithmetic (or use \u0060BigInt\u0060) rather than reconstructing it via \u0060base * parts\u0060.",
+          "verdict": "real",
+          "label_ids": [],
+          "reason": "For total=-9007199254740991 and parts=3, base*parts is -9007199254740993, which is not a safe integer and rounds to -9007199254740992. The remainder comes out as 1 instead of 2, so the parts do not sum to the total and the documented invariant breaks. The validation lets this input through, so it is a genuine edge-case bug."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 2464,
+      "judge_output_tokens": 1592,
+      "judge_cost": 0.020848,
+      "seconds": 0,
+      "error": null
+    },
+    {
+      "id": "ts-clean-03-todo-list",
+      "group": "clean",
+      "kind": "clean",
+      "language": "React",
+      "prompt_version": 0,
+      "repeat": 1,
+      "prompt_hash": "",
+      "labels": [],
+      "findings": [
+        {
+          "line": 17,
+          "end_line": 17,
+          "category": "Bug",
+          "severity": "Medium",
+          "title": "\u0060crypto.randomUUID()\u0060 is not available in every runtime this component can execute in (notably non-secure browser contexts and many SSR/test environments). In those environments submitting the form throws before \u0060setTodos\u0060, so the advertised add action is completely broken. Use an ID generator supported by the application\u0027s runtime or a guarded fallback instead of calling this API unconditionally.",
+          "explanation": "\u0060crypto.randomUUID()\u0060 is not available in every runtime this component can execute in (notably non-secure browser contexts and many SSR/test environments). In those environments submitting the form throws before \u0060setTodos\u0060, so the advertised add action is completely broken. Use an ID generator supported by the application\u0027s runtime or a guarded fallback instead of calling this API unconditionally.",
+          "verdict": "false_alarm",
+          "label_ids": [],
+          "reason": "The code calls crypto.randomUUID() inside an event handler, so it never runs during SSR. It is supported in all modern browsers and in current Node and jsdom. It only fails in non-secure contexts or very old runtimes, so the claim that add is broken is speculative. It is not a defect in this code."
+        }
+      ],
+      "found": [],
+      "missed": [],
+      "outside_window": 0,
+      "reviewer_input_tokens": 0,
+      "reviewer_output_tokens": 0,
+      "reviewer_cost": 0,
+      "judge_input_tokens": 1729,
+      "judge_output_tokens": 141,
+      "judge_cost": 0.004868,
+      "seconds": 0,
+      "error": null
+    }
+  ],
+  "rejudged_at": null,
+  "mode": "diff"
+}
