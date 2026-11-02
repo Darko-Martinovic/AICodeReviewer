@@ -88,7 +88,7 @@ Two cautions. The prompts are tuned and measured on the same 28 files, so a vers
 
 ## The sandbox: scoring reviewers that comment on GitHub
 
-A reviewer that only works on GitHub, such as Copilot code review, is scored through a sandbox: a private repository with one pull request per case. Each pull request's base branch holds the case's `before` version (or nothing, for a new file) and the pull request brings the reviewed version, under neutral branch names (`change-01`, `change-02`, ...). `lab/sandbox/v1.json` records which pull request holds which case.
+A reviewer that only works on GitHub, such as Copilot code review, is scored through a sandbox: a repository with one pull request per case. Each pull request's base branch holds the case's `before` version (or nothing, for a new file) and the pull request brings the reviewed version, under neutral branch names (`change-01`, `change-02`, ...). `lab/sandbox/v1.json` records which pull request holds which case.
 
 ```bash
 dotnet run --project lab/AICodeReviewer.Lab -- sandbox push --repo owner/empty-repo          # once
@@ -99,7 +99,7 @@ dotnet run --project lab/AICodeReviewer.Lab -- import --author Copilot --name co
 
 `import` reads one author's line comments from every pull request, turns each into a finding (its first line is the title), has the judge grade them against the labels and saves the result as a run, which the scoreboard and the Lab tab show under the reviewer's name. Only line comments count: GitHub accepts them only on lines in the diff, so a defect on an unchanged line far from the change can only go in a review's summary, which `import` does not read. That limit is the same for every reviewer scored this way.
 
-The sandbox for v1 is `Darko-Martinovic/AICodeReviewer-lab-sandbox` (private). Our reviewer (Claude Haiku 5.5, active prompts) posted its reviews there on 2026-10-29 for $0.02, and grading its line comments cost $0.20: recall 85%, precision 89%, F1 0.87, against 99% recall for the same kind of review in the lab, where findings on unchanged lines count too.
+The sandbox for v1 is [`Darko-Martinovic/AICodeReviewer-lab-sandbox`](https://github.com/Darko-Martinovic/AICodeReviewer-lab-sandbox) (public, so every comment behind the numbers below can be read on its pull request). Our reviewer (Claude Haiku 5.5, active prompts) posted its reviews there on 2026-10-29 for $0.02, and grading its line comments cost $0.20: recall 85%, precision 89%, F1 0.87, against 99% recall for the same kind of review in the lab, where findings on unchanged lines count too.
 
 Copilot code review was asked to review the same 28 pull requests on 2026-11-02. It left 79 line comments, and grading them with the same judge (Claude Sonnet 5.5) cost $0.22. Its comments are authored by `Copilot`, which is `import`'s default `--author`.
 
